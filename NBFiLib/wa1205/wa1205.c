@@ -1,4 +1,5 @@
 #include "wa1205.h"
+#include "wa1205dem.h"
 #include "adf4350.h"
 void (*__wa1205_enable_global_irq)(void) = 0;
 void (*__wa1205_disable_global_irq)(void) = 0;
@@ -55,16 +56,66 @@ void wa1205_reg_func(uint8_t name, void*  fn)
 	}
 }
 
+void wa1205_spi_write(uint16_t address, uint8_t *data, uint8_t length)
+{
+  if(__spi_tx && __spi_cs_set)
+  {
+    __spi_cs_set(0);
+    address |= 0x8000;
+    __spi_tx(((uint8_t*)(&address)) + 1, 1);
+    __spi_tx(((uint8_t*)(&address)), 1);
+    __spi_tx(data, length);
+    __spi_cs_set(1);
+  }
+}
+
+void wa1205_spi_read(uint16_t address, uint8_t *data, uint8_t length)
+{
+  if(__spi_tx && __spi_rx && __spi_cs_set)
+  {
+    __spi_cs_set(0);
+    address &= 0x7fff;
+    __spi_tx(((uint8_t*)(&address)) + 1, 1);
+    __spi_tx(((uint8_t*)(&address)), 1);
+    __spi_rx(data, 1);
+    __spi_rx(data, length);
+    __spi_cs_set(1);
+  }
+}
+
+
+void wa1205_spi_write8(uint16_t address, uint8_t data)
+{
+  wa1205_spi_write(address, &data, 1);
+}
+
+void wa1205_init()
+{
+  wa1205_spi_write8(DEM_RESET, 1);
+  wa1205_spi_write8(DEM_RESET, 0);
+  
+  wa1205dem_init();
+  
+}
 
 void wa1205_isr()
 {
-  wa1205dem_irs();
+  wa1205dem_isr();
 }
 
 _Bool wa1205_cansleep()
 {
   return 1;
 }
+
+//uint8_t mas[32];
+/*
+void wa1205_test()
+{
+  uint32_t hop_table = 0x33333333;
+  wa1205_spi_write(0x32, ((uint8_t*)&hop_table), 4);
+  wa1205_spi_read(0x20, mas, 32);
+}*/
 
 void wa1205_set_freq(uint32_t freq)
 {
@@ -80,10 +131,12 @@ void wa1205_set_freq(uint32_t freq)
 
 	for(int i = 0; i != 6; i++)
 	{
-		//BS3_SYNT_CONFIG = koeff[i]&0xffff;
-		//BS3_SYNT_CONFIG = koeff[i]>>16;
+          wa1205_spi_write(DEM_BS3_FREQ + i*4, ((uint8_t*)&koeff[i]), 4);
 	}
+        
+        wa1205_spi_write8(DEM_BS3_FREQ_APPLY, 1);
 
+        
 }
 
 void wa1205_tcxo_set_reset(uint8_t set)

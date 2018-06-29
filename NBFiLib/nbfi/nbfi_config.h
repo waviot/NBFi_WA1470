@@ -84,6 +84,8 @@ extern nbfi_dev_info_t dev_info;
 #define UL863175_DL446000            7
 #define UL864000_DL875000            8
 
+#define UL868800_DL868000            99
+
 typedef enum
 {
     DOWN = 0,     // data rate change down direction

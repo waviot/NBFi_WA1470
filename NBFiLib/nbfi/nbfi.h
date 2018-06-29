@@ -42,6 +42,7 @@ typedef enum
         DL_DBPSK_400_PROT_E	= 15,
         DL_DBPSK_3200_PROT_E	= 16,
         DL_DBPSK_25600_PROT_E	= 17,
+        DL_DBPSK_100H_PROT_D    = 18,
         UL_DBPSK_50_PROT_C      = 20,
         UL_DBPSK_50_PROT_D      = 21,
         UL_PSK_200              = 22,
@@ -56,6 +57,7 @@ typedef enum
         UL_DBPSK_400_PROT_E	= 31,
 	UL_DBPSK_3200_PROT_E	= 32,
 	UL_DBPSK_25600_PROT_E	= 33,
+        UL_DBPSK_100H_PROT_D    = 34,
         UL_CARRIER              = 50,
         OSC_CAL                 = 51
 }nbfi_phy_channel_t;

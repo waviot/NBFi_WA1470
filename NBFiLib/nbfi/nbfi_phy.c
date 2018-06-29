@@ -117,11 +117,11 @@ nbfi_status_t NBFi_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 
     if((nbfi.tx_phy_channel < UL_DBPSK_3200_PROT_D) && !downlink)
     {
-                ZCODE_Append(&ul_buf[4], &ul_buf[len], parity);
+      ZCODE_Append(&ul_buf[4], &ul_buf[len], parity);
     }
     else
-    {
-                ZCODE_Append(&ul_buf[4], &ul_buf[len], 1);
+    {          
+      ZCODE_Append(&ul_buf[4], &ul_buf[len], 1);
     }
 
     if(!nbfi.tx_freq) parity = !parity;

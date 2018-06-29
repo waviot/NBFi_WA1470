@@ -7,7 +7,6 @@
 _Bool rf_busy = 0;
 _Bool transmit = 0;
 
-//struct axradio_address rf_destination;
 
 nbfi_rf_state_s rf_state = STATE_OFF;
 
@@ -18,17 +17,12 @@ uint8_t PSK_BAND;
 NBFi_wa1205_pins_s  nbfi_wa1205_pins;
 
 void    NBFi_TX_Finished();
-void    NBFi_ParseReceivedPacket(struct axradio_status *st);
 void    wa1205_set_constants(void);
 
 
 const uint16_t AX5043_power[26] = {0x00aa, 0x00bf, 0x00d1, 0x00ec, 0x010f, 0x0132, 0x0156, 0x017f, 0x01af, 0x1e0, 0x207, 0x244, 0x290, 0x2eb, 0x35e, 0x3d6, 0x406, 0x4a9, 0x57c, 0x600, 0x700, 0x800, 0x9d4, 0xc00, 0xf00, 0xfff};
 
-/*
-struct axradio_address  fastdladdress = {
-	{ 0x6f, 0x6f, 0x6f, 0x6f}
-};
-*/
+
 extern void (* __nbfi_before_tx)(NBFi_wa1205_pins_s *);
 extern void (* __nbfi_before_rx)(NBFi_wa1205_pins_s *);
 extern void (* __nbfi_before_off)(NBFi_wa1205_pins_s *);

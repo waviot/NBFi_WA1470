@@ -103,10 +103,9 @@ void SysTick_Handler(void)
 */
 void EXTI0_1_IRQHandler(void)
 {
+  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
   
   wa1205_isr();
-
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
 
 }
 

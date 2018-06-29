@@ -1,4 +1,5 @@
 #include "nbfi.h"
+#include "wa1205.h"
 #include "nbfi_phy.h"
 #include "nbfi_config.h"
 #include "nbfi_misc.h"
@@ -919,9 +920,12 @@ void NBFi_Go_To_Sleep(_Bool sleep)
 nbfi_status_t NBFI_Init()
 {
     
+
     wa1205_reg_func(WARADIO_DATA_RECEIVED, (void*)NBFi_ParseReceivedPacket);
     wa1205_reg_func(WARADIO_TX_FINISHED, (void*)NBFi_TX_Finished);
-
+    
+    wa1205_init();
+    
     NBFi_Config_Set_Default();
     for(uint8_t i = 0; i < NBFI_TX_PKTBUF_SIZE; i++) nbfi_TX_pktBuf[i] = 0;
     for(uint8_t i = 0; i < NBFI_RX_PKTBUF_SIZE; i++) nbfi_RX_pktBuf[i] = 0;

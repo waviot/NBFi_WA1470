@@ -51,57 +51,46 @@ typedef struct {
 	uint8_t	num_of_zigzag;
 } dem_packet_info_st;
 
+
 typedef enum
 {
 	DBPSK_50_PROT_D		= 10,
 	DBPSK_400_PROT_D	= 11,
 	DBPSK_3200_PROT_D	= 12,
-	DBPSK_25600_PROT_D	= 13
+	DBPSK_25600_PROT_D	= 13,
+        DBPSK_100H_PROT_D       = 18
 }dem_bitrate_s;
 
-/*
-#define dem_ack        (*((volatile uint16_t *)AXI_RX_FD_ADDR))
-#define test_ack       (*((volatile uint16_t *)AXI_RD_ADDR))
-#define dem_packet       ((volatile dem_packet_st *) (AXI_RX_FD_ADDR))
-#define test (uint16_t*)(0x1000)
+
 
 //----------------------------------------------------------
 // DEMODULATOR REGs
 //----------------------------------------------------------
-#define  DEM_RESET             (*(volatile unsigned char *) 0x01A0) //1 - reset
-#define  DEM_CHAN_NUM_POW      (*(volatile unsigned char *) 0x01A1)
-#define  DEM_SOFT_SYNC_THR     (*(volatile unsigned int  *) 0x01A2)
-#define  DEM_ALPHA_DECIM_F     (*(volatile unsigned char *) 0x01A4)
-#define  DEM_ALPHA_SHIFT       (*(volatile unsigned char *) 0x01A5)
-#define  DEM_SUB_SAMPLE_DLY    (*(volatile unsigned int  *) 0x01A6)
-#define  DEM_SHIFT_GEN_DDS_INC (*(volatile unsigned char *) 0x01A8)
-#define  DEM_NOISE_RD_CHAN     (*(volatile unsigned char *) 0x01A9)
-#define  DEM_NOISE_DATA_LO     (*(volatile unsigned char *) 0x01AA)
-#define  DEM_NOISE_DATA_MI     (*(volatile unsigned char *) 0x01AB)
-#define  DEM_NOISE_DATA_HI     (*(volatile unsigned char *) 0x01AC)
+#define  DEM_RECEIVED_MES_BUF   0
+#define  DEM_RESET              0x20
+#define  DEM_RX_MODE            0x21
+#define  DEM_DET_TRESHOLD       0x22
+#define  DEM_ALPHA_DECIM_F      0x24
+#define  DEM_ALPHA_SHIFT        0x25
+#define  DEM_HOP_LENGTH         0x26
+#define  DEM_NOISE_RD_CHAN      0x27
+#define  DEM_NOISE_VALUE        0x28
+#define  DEM_FFT_READY          0x2B
+#define  DEM_FFT_MSB            0x2C
+#define  DEM_PREAMBLE_ID        0x2D
+#define  DEM_CRC_POLY           0x2E
+#define  DEM_HOP_TABLE          0x32
+#define  DEM_FFT_REAF_BUF       0x80
 
-#define  DEM_NOISE_DATA_LO16   (*(volatile unsigned int  *) 0x01AA)
-
-
-
-
-#define FREQ_SHIFT_NUM	3
-
-
-//----------------------------------------------------------
-// BS3 synthesizer config
-//----------------------------------------------------------
-#define  BS3_SYNT_CONFIG   (*(volatile unsigned int *) 0x01B0)
+#define  DEM_BS3_FREQ           0x64
+#define  DEM_BS3_FREQ_APPLY     0x7C
 
 
 
-typedef void(*Dem_CALLBACK)(dem_packet_st*);
-void omsp_dem_reset();
-void omsp_dem_init(Dem_CALLBACK cb);
-void omsp_dem_set_bitrate(dem_bitrate_s bitrate);
-void omsp_dem_set_alpha(uint8_t decim, uint8_t shift);
-uint32_t omsp_dem_read_noise(uint8_t chan);
+void wa1205dem_init();
+void wa1205dem_isr(void);
+void wa1205dem_set_bitrate(dem_bitrate_s bitrate);
+void wa1205dem_set_alpha(uint8_t decim, uint8_t shift);
+void wa1205dem_set_hop_table(uint32_t hop_table);
 
-*/
-void wa1205dem_irs(void);
 #endif

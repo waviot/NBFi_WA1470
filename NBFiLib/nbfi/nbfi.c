@@ -1,4 +1,5 @@
 #include "nbfi.h"
+#include "wa1205.h"
 #include "nbfi_phy.h"
 #include "nbfi_config.h"
 #include "nbfi_misc.h"
@@ -346,7 +347,7 @@ static void NBFi_ParseReceivedPacket(dem_packet_st *packet, dem_packet_info_st* 
      }
 
     nbfi_state.DL_total++;
-    if(++noise_min_cntr > NBFI_NOISE_DINAMIC[nbfi.rx_phy_channel]) noise_min_cntr =   NBFI_NOISE_DINAMIC[nbfi.rx_phy_channel];
+    if(++noise_min_cntr > NBFI_NOISE_DINAMIC[nbfi.rx_phy_channel - 10]) noise_min_cntr =   NBFI_NOISE_DINAMIC[nbfi.rx_phy_channel - 10];
     
     
     /*uint8_t snr;
@@ -364,12 +365,12 @@ static void NBFi_ParseReceivedPacket(dem_packet_st *packet, dem_packet_info_st* 
     rssi64 <<= 32;
     rssi64 += packet->rssi;
     int16_t rssi = -130;//log10f(rssi64)*20 - 48 - LOGOFFSET;//fxlog(packet->rssi);
-    static uint32_t noise32;
+   /* static uint32_t noise32;
     noise32 = packet->noise0;
     noise32 <<= 8;
     noise32 += packet->noise1;
     noise32 <<= 8;
-    noise32 += packet->noise2;
+    noise32 += packet->noise2;*/
     int16_t noise = -150;//log10f(noise32)*20 - LOGOFFSET;//fxlog(noise);
     int8_t snr = 0;
     if(rssi > noise) snr = rssi - noise;
@@ -533,7 +534,7 @@ place_to_stack:
         //wait for extra packets
         nbfi_active_pkt_old_state = nbfi_active_pkt->state;
         nbfi_active_pkt->state = PACKET_WAIT_FOR_EXTRA_PACKETS;
-        ScheduleTask(&wait_for_extra_desc, NBFi_Wait_Extra_Handler, RELATIVE, NBFI_DL_LISTEN_TIME[nbfi.rx_phy_channel]);
+        ScheduleTask(&wait_for_extra_desc, NBFi_Wait_Extra_Handler, RELATIVE, NBFI_DL_LISTEN_TIME[nbfi.rx_phy_channel - 10]);
         wait_Extra = 1;
     }
     else
@@ -575,14 +576,14 @@ static void NBFi_ProcessTasks(struct wtimer_desc *desc)
         case PACKET_WAIT_ACK:
             if(!wait_Receive)
             {
-                ScheduleTask(&dl_receive_desc, NBFi_Receive_Timeout_cb, RELATIVE, NBFI_DL_DELAY[nbfi.tx_phy_channel - 20] + NBFI_DL_LISTEN_TIME[nbfi.rx_phy_channel] + rand()%(NBFI_DL_ADD_RND_LISTEN_TIME[nbfi.rx_phy_channel]));
+                ScheduleTask(&dl_receive_desc, NBFi_Receive_Timeout_cb, RELATIVE, NBFI_DL_DELAY[nbfi.tx_phy_channel - 20] + NBFI_DL_LISTEN_TIME[nbfi.rx_phy_channel - 10] + rand()%(NBFI_DL_ADD_RND_LISTEN_TIME[nbfi.rx_phy_channel - 10]));
                 wait_Receive = 1;
             }
             break;
         case PACKET_WAIT_FOR_EXTRA_PACKETS:
             if(!wait_Extra)
             {
-                ScheduleTask(&wait_for_extra_desc, NBFi_Wait_Extra_Handler, RELATIVE, NBFI_DL_LISTEN_TIME[nbfi.rx_phy_channel]);
+                ScheduleTask(&wait_for_extra_desc, NBFi_Wait_Extra_Handler, RELATIVE, NBFI_DL_LISTEN_TIME[nbfi.rx_phy_channel - 10]);
                 wait_Extra = 1;
             }
             break;
@@ -600,7 +601,7 @@ static void NBFi_ProcessTasks(struct wtimer_desc *desc)
                         case DRX:
                         case CRX:
                             pkt->state = PACKET_WAIT_ACK;
-                            ScheduleTask(&dl_receive_desc, NBFi_Receive_Timeout_cb, RELATIVE, NBFI_DL_DELAY[nbfi.tx_phy_channel - 20] + NBFI_DL_LISTEN_TIME[nbfi.rx_phy_channel] + rand()%(NBFI_DL_ADD_RND_LISTEN_TIME[nbfi.rx_phy_channel]));
+                            ScheduleTask(&dl_receive_desc, NBFi_Receive_Timeout_cb, RELATIVE, NBFI_DL_DELAY[nbfi.tx_phy_channel - 20] + NBFI_DL_LISTEN_TIME[nbfi.rx_phy_channel - 10] + rand()%(NBFI_DL_ADD_RND_LISTEN_TIME[nbfi.rx_phy_channel - 10]));                           
                             wait_Receive = 1;
                             break;
                         case NRX:
@@ -622,6 +623,8 @@ static void NBFi_ProcessTasks(struct wtimer_desc *desc)
 
                 if(wait_RxEnd) {wait_RxEnd = 0; wtimer0_remove(&dl_drx_desc);}
                 NBFi_TX(pkt);
+                
+                //NBFi_RX_Controller();
 
                 if(pkt->state == PACKET_SENT)
                 {
@@ -644,7 +647,8 @@ static void NBFi_ProcessTasks(struct wtimer_desc *desc)
 
     if(rf_state == STATE_RX)
     {
-        if(noise_cntr >= 10)
+        wa1205dem_update_noise();
+        /*if(noise_cntr >= 10)
         {
             int16_t n = noise_summ/noise_cntr;
             noise_summ = 0;
@@ -665,7 +669,7 @@ static void NBFi_ProcessTasks(struct wtimer_desc *desc)
             //noise_summ += r - (int16_t)axradio_phy_rssioffset;
             noise_cntr++;
 
-        }
+        }*/
     }
     if(nbfi.mode <= DRX && !NBFi_GetQueuedTXPkt() && (rf_busy == 0) && (transmit == 0) )
     {
@@ -679,6 +683,7 @@ static void NBFi_ProcessTasks(struct wtimer_desc *desc)
 
 void NBFi_TX_Finished()
 {
+    transmit = 0;
     if(!nbfi_active_pkt->phy_data.ACK && NBFi_GetQueuedTXPkt())
     {
         NBFi_Force_process();
@@ -706,7 +711,7 @@ static void NBFi_Receive_Timeout_cb(struct wtimer_desc *desc)
 {
     if(rf_busy)
     {
-        ScheduleTask(desc, NBFi_Receive_Timeout_cb, RELATIVE, NBFI_DL_LISTEN_TIME[nbfi.rx_phy_channel]);
+        ScheduleTask(desc, NBFi_Receive_Timeout_cb, RELATIVE, NBFI_DL_LISTEN_TIME[nbfi.rx_phy_channel - 10]);
         return;
     }
     wtimer0_remove(&dl_receive_desc);
@@ -919,9 +924,12 @@ void NBFi_Go_To_Sleep(_Bool sleep)
 nbfi_status_t NBFI_Init()
 {
     
+
     wa1205_reg_func(WARADIO_DATA_RECEIVED, (void*)NBFi_ParseReceivedPacket);
     wa1205_reg_func(WARADIO_TX_FINISHED, (void*)NBFi_TX_Finished);
-
+    
+    wa1205_init();
+    
     NBFi_Config_Set_Default();
     for(uint8_t i = 0; i < NBFI_TX_PKTBUF_SIZE; i++) nbfi_TX_pktBuf[i] = 0;
     for(uint8_t i = 0; i < NBFI_RX_PKTBUF_SIZE; i++) nbfi_RX_pktBuf[i] = 0;
@@ -929,7 +937,7 @@ nbfi_status_t NBFI_Init()
 
     info_timer = dev_info.send_info_interval - 300 - rand()%600;
 
-    RF_Init(nbfi.tx_phy_channel, (rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, nbfi.dl_freq_base);
+    RF_Init(nbfi.rx_phy_channel, (rf_antenna_t)nbfi.rx_antenna, nbfi.tx_pwr, nbfi.dl_freq_base);
 
     if(nbfi.additional_flags&NBFI_OFF_MODE_ON_INIT)
     {

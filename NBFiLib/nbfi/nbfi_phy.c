@@ -117,11 +117,11 @@ nbfi_status_t NBFi_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 
     if((nbfi.tx_phy_channel < UL_DBPSK_3200_PROT_D) && !downlink)
     {
-                ZCODE_Append(&ul_buf[4], &ul_buf[len], parity);
+      ZCODE_Append(&ul_buf[4], &ul_buf[len], parity);
     }
     else
-    {
-                ZCODE_Append(&ul_buf[4], &ul_buf[len], 1);
+    {          
+      ZCODE_Append(&ul_buf[4], &ul_buf[len], 1);
     }
 
     if(!nbfi.tx_freq) parity = !parity;
@@ -131,7 +131,7 @@ nbfi_status_t NBFi_TX_ProtocolD(nbfi_transport_packet_t* pkt)
       
       RF_Init(nbfi.tx_phy_channel, (rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
       
-      RF_Transmit(ul_buf, len + ZCODE_LEN, PADDING_4TO1, BLOCKING);
+      RF_Transmit(ul_buf, len + ZCODE_LEN, nbfi.tx_phy_channel, BLOCKING);
       
       nbfi_state.UL_total++;
       
@@ -140,7 +140,7 @@ nbfi_status_t NBFi_TX_ProtocolD(nbfi_transport_packet_t* pkt)
     
     RF_Init(nbfi.tx_phy_channel, (rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
 
-    RF_Transmit(ul_buf, len + ZCODE_LEN, PADDING_4TO1, NONBLOCKING);
+    RF_Transmit(ul_buf, len + ZCODE_LEN, nbfi.tx_phy_channel, NONBLOCKING);
 
     nbfi_state.UL_total++;
 
@@ -162,8 +162,7 @@ _Bool NBFi_Match_ID(uint8_t * addr)
 
 nbfi_status_t NBFi_TX(nbfi_transport_packet_t* pkt)
 {
-    nbfi_status_t result;
-
+    
     if((pkt->phy_data_length==0)&&(pkt->phy_data_length>240)) return ERR; // len check
     switch(nbfi.tx_phy_channel)
     {
@@ -180,37 +179,6 @@ nbfi_status_t NBFi_TX(nbfi_transport_packet_t* pkt)
     case UL_PSK_200:
     case UL_PSK_500:
     case UL_PSK_5000:
-
-        if(nbfi.tx_freq == 0) tx_freq = nbfi.dl_freq_base;
-        else tx_freq = nbfi.tx_freq;
-
-        if(nbfi.tx_phy_channel == UL_PSK_FASTDL)
-        {
-            tx_freq += 1000000;
-        }
-
-       // RF_SetDstAddress((uint8_t *)&fastdladdress);
-
-        if((result = RF_Init(nbfi.tx_phy_channel, (rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq)) != OK) return result;
-
-        uint8_t* buf = (uint8_t*) malloc(pkt->phy_data_length + 1 + 3);
-        if(!buf) return ERR_BUFFER_FULL;
-        if(nbfi.dl_ID[0] == 0)
-        {
-            for(uint8_t i = 0; i != 2; i++) buf[i] = nbfi.dl_ID[i + 1];
-            memcpy_xdata(buf + 2, (const void *)&pkt->phy_data.header, pkt->phy_data_length + 1);
-            result = RF_Transmit(buf, pkt->phy_data_length + 1 + 2, NO_PADDING, NONBLOCKING);
-        }
-        else
-        {
-            for(uint8_t i = 0; i != 3; i++) buf[i] = nbfi.dl_ID[i];
-            memcpy_xdata(buf + 3, (const void *)&pkt->phy_data.header, pkt->phy_data_length + 1);
-            result = RF_Transmit(buf, pkt->phy_data_length + 1 + 3, NO_PADDING, NONBLOCKING);
-        }
-
-        free(buf);
-        if(result != OK) return result;
-        nbfi_state.UL_total++;
         break;
 
     }
@@ -252,17 +220,9 @@ nbfi_status_t NBFi_RX_Controller()
 nbfi_status_t NBFi_RX()
 {
     nbfi_status_t result;
-    switch(nbfi.rx_phy_channel)
-    {
-        case DL_PSK_200:
-        case DL_PSK_500:
-        case DL_PSK_5000:
-        case DL_PSK_FASTDL:
-             if(nbfi.rx_freq == 0) rx_freq = nbfi.dl_freq_base + ((*((const uint32_t*)FULL_ID)%276)*363);
-             else rx_freq = nbfi.rx_freq;
-             if(nbfi.rx_phy_channel == DL_PSK_FASTDL) rx_freq += 1000000;
-             break;
-    }
+    if(nbfi.rx_freq == 0) rx_freq = nbfi.dl_freq_base + ((*((const uint32_t*)FULL_ID)%276)*363);
+    else rx_freq = nbfi.rx_freq;
+
     result = RF_Init(nbfi.rx_phy_channel, (rf_antenna_t)nbfi.rx_antenna, 0, rx_freq);
     return result;
 }

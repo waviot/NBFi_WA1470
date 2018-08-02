@@ -7,7 +7,6 @@
 _Bool rf_busy = 0;
 _Bool transmit = 0;
 
-//struct axradio_address rf_destination;
 
 nbfi_rf_state_s rf_state = STATE_OFF;
 
@@ -18,17 +17,12 @@ uint8_t PSK_BAND;
 NBFi_wa1205_pins_s  nbfi_wa1205_pins;
 
 void    NBFi_TX_Finished();
-void    NBFi_ParseReceivedPacket(struct axradio_status *st);
 void    wa1205_set_constants(void);
 
 
 const uint16_t AX5043_power[26] = {0x00aa, 0x00bf, 0x00d1, 0x00ec, 0x010f, 0x0132, 0x0156, 0x017f, 0x01af, 0x1e0, 0x207, 0x244, 0x290, 0x2eb, 0x35e, 0x3d6, 0x406, 0x4a9, 0x57c, 0x600, 0x700, 0x800, 0x9d4, 0xc00, 0xf00, 0xfff};
 
-/*
-struct axradio_address  fastdladdress = {
-	{ 0x6f, 0x6f, 0x6f, 0x6f}
-};
-*/
+
 extern void (* __nbfi_before_tx)(NBFi_wa1205_pins_s *);
 extern void (* __nbfi_before_rx)(NBFi_wa1205_pins_s *);
 extern void (* __nbfi_before_off)(NBFi_wa1205_pins_s *);
@@ -65,7 +59,6 @@ nbfi_status_t RF_Init(  nbfi_phy_channel_t  phy_channel,
 
     RF_SetModeAndPower(power, RX, antenna);
     
-    wa1205_set_freq(freq);   
 
     wa1205_tcxo_set_reset(1);
 
@@ -80,9 +73,7 @@ nbfi_status_t RF_Init(  nbfi_phy_channel_t  phy_channel,
  
         RF_SetModeAndPower(power, TX, antenna);
         
-        wa1205_set_freq(freq);
-        
-       // er = axradio_init();    // Init radio registers
+        wa1205mod_set_freq(freq);        
    
         rf_busy = 0;
         rf_state = STATE_TX;
@@ -95,11 +86,7 @@ nbfi_status_t RF_Init(  nbfi_phy_channel_t  phy_channel,
   
         RF_SetModeAndPower(power, RX, antenna);
 
-       // RF_SetLocalAddress((uint8_t *)&fastdladdress);
-
-        wa1205_set_freq(freq);
-
-        //er = axradio_init();    // Init radio registers
+        wa1205dem_set_freq(freq);
 
         rf_busy = 0;
         rf_state = STATE_RX;
@@ -128,18 +115,18 @@ nbfi_status_t RF_Deinit()
 }
 
 
-nbfi_status_t RF_Transmit(uint8_t* pkt, uint8_t len,  rf_padding_t padding, rf_blocking_t blocking)
+nbfi_status_t RF_Transmit(uint8_t* pkt, uint8_t len, nbfi_phy_channel_t  phy_channel, rf_blocking_t blocking)
 {
     if(rf_busy) return ERR_RF_BUSY;
 
     rf_busy = 1;
 
-   // axradio_transmit(&rf_destination, pkt, len, padding);
+    wa1205mod_send(pkt, (mod_bitrate_s) phy_channel);
     
     rf_busy = 0;
     
     transmit = 1;
-    
+      
     if(blocking == BLOCKING)
     {
 

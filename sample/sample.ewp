@@ -242,7 +242,7 @@
         <option>
           <name>CCAllowList</name>
           <version>1</version>
-          <state>11111110</state>
+          <state>00000000</state>
         </option>
         <option>
           <name>CCDebugInfo</name>
@@ -338,7 +338,7 @@
         </option>
         <option>
           <name>CCOptLevel</name>
-          <state>3</state>
+          <state>0</state>
         </option>
         <option>
           <name>CCOptStrategy</name>
@@ -347,7 +347,7 @@
         </option>
         <option>
           <name>CCOptLevelSlave</name>
-          <state>3</state>
+          <state>0</state>
         </option>
         <option>
           <name>CompilerMisraRules98</name>
@@ -733,7 +733,7 @@
         </option>
         <option>
           <name>IlinkIcfFile</name>
-          <state>C:\ITS\AMR\Software\STM\NBFi_AX5043\sample\Src\stm32l071xx_flash.icf</state>
+          <state>$PROJ_DIR$\Src\stm32l071xx_flash.icf</state>
         </option>
         <option>
           <name>IlinkIcfFileSlave</name>
@@ -2083,6 +2083,18 @@
         <file>
           <name>$PROJ_DIR$\Drivers\STM32L0xx_HAL_Driver\Inc\stm32l0xx_hal_tim_ex.h</name>
         </file>
+        <file>
+          <name>$PROJ_DIR$\Drivers\STM32L0xx_HAL_Driver\Inc\stm32l0xx_hal_uart.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\Drivers\STM32L0xx_HAL_Driver\Inc\stm32l0xx_hal_uart_ex.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\Drivers\STM32L0xx_HAL_Driver\Inc\stm32l0xx_hal_usart.h</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\Drivers\STM32L0xx_HAL_Driver\Inc\stm32l0xx_hal_usart_ex.h</name>
+        </file>
       </group>
       <group>
         <name>src</name>
@@ -2137,6 +2149,15 @@
         <file>
           <name>$PROJ_DIR$\Drivers\STM32L0xx_HAL_Driver\Src\stm32l0xx_hal_tim_ex.c</name>
         </file>
+        <file>
+          <name>$PROJ_DIR$\Drivers\STM32L0xx_HAL_Driver\Src\stm32l0xx_hal_uart.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\Drivers\STM32L0xx_HAL_Driver\Src\stm32l0xx_hal_uart_ex.c</name>
+        </file>
+        <file>
+          <name>$PROJ_DIR$\Drivers\STM32L0xx_HAL_Driver\Src\stm32l0xx_hal_usart.c</name>
+        </file>
       </group>
     </group>
   </group>
@@ -2149,6 +2170,9 @@
       <name>$PROJ_DIR$\Inc\radio.h</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\Inc\rs485_uart.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\Inc\stm32_init.h</name>
     </file>
     <file>
@@ -2156,6 +2180,9 @@
     </file>
     <file>
       <name>$PROJ_DIR$\Inc\stm32l0xx_it.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Inc\xbuf.h</name>
     </file>
   </group>
   <group>
@@ -2177,6 +2204,12 @@
     </group>
     <group>
       <name>misc</name>
+      <file>
+        <name>$PROJ_DIR$\..\NBFiLib\misc\log.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\NBFiLib\misc\log.h</name>
+      </file>
       <file>
         <name>$PROJ_DIR$\..\NBFiLib\misc\XTEA.c</name>
       </file>
@@ -2263,6 +2296,9 @@
       <name>$PROJ_DIR$\Src\radio.c</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\Src\rs485_uart.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\Src\stm32_init.c</name>
     </file>
     <file>
@@ -2273,6 +2309,9 @@
     </file>
     <file>
       <name>$PROJ_DIR$\Src\system_stm32l0xx.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Src\xbuf.c</name>
     </file>
   </group>
   <group>

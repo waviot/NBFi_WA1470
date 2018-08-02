@@ -1,5 +1,5 @@
 #include "main.h"
-#include "wa1205.h"
+#include "radio.h"
 #include "radio.h"
 #include "wtimer.h"
 #include "string.h"
@@ -7,6 +7,7 @@
 #include "rf.h"
 #include "nbfi_config.h"
 #include "stm32l0xx_hal_conf.h"
+
 
 #define MODEM_ID  *((const uint32_t*)0x0801ff80)  
 #define KEY  ((const uint32_t*)0x0801ff84)            
@@ -16,7 +17,8 @@
 #define TX_MAX_POWER 15
 #define TX_MIN_POWER 0
 #define SEND_INFO_PERIOD	2592000  //one time per month
-#define BAND         UL868800_DL864000
+#define BAND         UL868800_DL864000//UL868800_DL864000
+
 
 
 #if BAND == UL868800_DL446000
@@ -46,6 +48,9 @@
 #elif BAND == UL864000_DL875000
 #define NBFI_UL_FREQ_BASE       (864000000 - 25000)
 #define NBFI_DL_FREQ_BASE       875000000
+#elif BAND == UL868800_DL868000
+#define NBFI_UL_FREQ_BASE       (868800000 - 25000)
+#define NBFI_DL_FREQ_BASE       0//(868800000 - 25000 + 90000)
 #endif 
 
 
@@ -53,7 +58,7 @@ const nbfi_settings_t nbfi_set_default =
 {
     CRX,//mode;
     UL_DBPSK_50_PROT_D, // tx_phy_channel;
-    DL_PSK_200,         // rx_phy_channel;
+    DL_DBPSK_50_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
     MACK_1,             //mack_mode
     2,                  //num_of_retries;
@@ -62,14 +67,14 @@ const nbfi_settings_t nbfi_set_default =
     {0},                //temp_ID[3];
     {0xFF,0,0},         //broadcast_ID[3];
     {0},                //full_ID[6];
-    0,                  //tx_freq;
-    0,                  //rx_freq;
+    0,//868800000,                  //tx_freq;
+    868790000, //868785000,//868710000,//868800000,                  //rx_freq;
     PCB,                //tx_antenna;
     PCB,                //rx_antenna;
     TX_MAX_POWER,       //tx_pwr;
     3600*6,             //heartbeat_interval
     255,                //heartbeat_num
-    0,                  //additional_flags
+    NBFI_FLG_NO_SENDINFO,                  //additional_flags
     NBFI_UL_FREQ_BASE,
     NBFI_DL_FREQ_BASE
 };
@@ -81,44 +86,103 @@ static LPTIM_HandleTypeDef hlptim;
 
 #define SPI_TIMEOUT	1000
 
+
+
+#define	AX_LPTIM			LPTIM1
+#define AX_LPTIM_IRQn			LPTIM1_IRQn
+#define	AX_LPTIM_RCC_ENABLE 	        __HAL_RCC_LPTIM1_CLK_ENABLE
+#define	AX_LPTIM_RCC_DISABLE 	        __HAL_RCC_LPTIM1_CLK_DISABLE
+#define AX_SPI				SPI1
+#define AX_SPI_RCC_ENABLE		__HAL_RCC_SPI1_CLK_ENABLE
+#define	AX_SPI_RCC_DISABLE	 	__HAL_RCC_SPI1_CLK_DISABLE
+#define AX_SPI_MOSI_Port		GPIOA
+#define AX_SPI_MOSI_Pin			GPIO_PIN_7
+#define AX_SPI_MOSI_AF			GPIO_AF0_SPI1
+#define AX_SPI_MISO_Port		GPIOA
+#define AX_SPI_MISO_Pin			GPIO_PIN_6
+#define AX_SPI_MISO_AF			GPIO_AF0_SPI1
+#define AX_SPI_SCK_Port			GPIOA
+#define AX_SPI_SCK_Pin			GPIO_PIN_5
+#define AX_SPI_SCK_AF			GPIO_AF0_SPI1
+#define AX_IRQ_GPIO_Port 		GPIOB
+#define AX_IRQ_Pin 			GPIO_PIN_0
+#define AX_IRQ_EXTI_IRQn 		EXTI0_1_IRQn
+#define AX_CS_GPIO_Port 		GPIOB
+#define AX_CS_Pin 			GPIO_PIN_1
+
+
+
 void RADIO_SPI_Init(void)
 {
+    GPIO_InitTypeDef GPIO_InitStruct;
 
-  hspi.Instance = SPI2;
-  hspi.Init.Mode = SPI_MODE_MASTER;
-  hspi.Init.Direction = SPI_DIRECTION_2LINES;
-  hspi.Init.DataSize = SPI_DATASIZE_8BIT;
-  hspi.Init.CLKPolarity = SPI_POLARITY_LOW;
-  hspi.Init.CLKPhase = SPI_PHASE_1EDGE;
-  hspi.Init.NSS = SPI_NSS_SOFT;
-  hspi.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
-  hspi.Init.FirstBit = SPI_FIRSTBIT_MSB;
-  hspi.Init.TIMode = SPI_TIMODE_DISABLE;
-  hspi.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
-  hspi.Init.CRCPolynomial = 7;
-  if (HAL_SPI_Init(&hspi) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
-  __HAL_SPI_ENABLE(&hspi);
+    AX_SPI_RCC_ENABLE();
+
+    hspi.Instance = AX_SPI;
+    hspi.Init.Mode = SPI_MODE_MASTER;
+    hspi.Init.Direction = SPI_DIRECTION_2LINES;
+    hspi.Init.DataSize = SPI_DATASIZE_8BIT;
+    hspi.Init.CLKPolarity = SPI_POLARITY_LOW;
+    hspi.Init.CLKPhase = SPI_PHASE_1EDGE;
+    hspi.Init.NSS = SPI_NSS_SOFT;
+    hspi.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_8;
+    hspi.Init.FirstBit = SPI_FIRSTBIT_MSB;
+    hspi.Init.TIMode = SPI_TIMODE_DISABLE;
+    hspi.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+    hspi.Init.CRCPolynomial = 7;
+    HAL_SPI_Init(&hspi);
+    __HAL_SPI_ENABLE(&hspi);	
+    
+    
+    GPIO_InitStruct.Pin = AX_SPI_MOSI_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+    GPIO_InitStruct.Alternate = AX_SPI_MOSI_AF;
+    HAL_GPIO_Init(AX_SPI_MOSI_Port, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = AX_SPI_MISO_Pin;
+    GPIO_InitStruct.Alternate = AX_SPI_MISO_AF;
+    HAL_GPIO_Init(AX_SPI_MISO_Port, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = AX_SPI_SCK_Pin;
+    GPIO_InitStruct.Alternate = AX_SPI_SCK_AF;
+    HAL_GPIO_Init(AX_SPI_SCK_Port, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = AX_CS_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    HAL_GPIO_Init(AX_CS_GPIO_Port, &GPIO_InitStruct);
+
+    GPIO_InitStruct.Pin = AX_IRQ_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+    GPIO_InitStruct.Pull = GPIO_NOPULL;
+    HAL_GPIO_Init(AX_IRQ_GPIO_Port, &GPIO_InitStruct);
+
+    HAL_NVIC_SetPriority(AX_IRQ_EXTI_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(AX_IRQ_EXTI_IRQn);
+   
+    HAL_GPIO_WritePin(AX_CS_GPIO_Port, AX_CS_Pin, GPIO_PIN_SET);
+
+    
 
 }
 
 void RADIO_LPTIM_Init(void)
 {
 
-  hlptim.Instance = LPTIM1;
-  hlptim.Init.Clock.Source = LPTIM_CLOCKSOURCE_APBCLOCK_LPOSC;
-  hlptim.Init.Clock.Prescaler = LPTIM_PRESCALER_DIV32;
-  hlptim.Init.Trigger.Source = LPTIM_TRIGSOURCE_SOFTWARE;
-  hlptim.Init.OutputPolarity = LPTIM_OUTPUTPOLARITY_HIGH;
-  hlptim.Init.UpdateMode = LPTIM_UPDATE_IMMEDIATE;
-  hlptim.Init.CounterSource = LPTIM_COUNTERSOURCE_INTERNAL;
-  
-  if (HAL_LPTIM_Init(&hlptim) != HAL_OK)
-  {
-    _Error_Handler(__FILE__, __LINE__);
-  }
+    AX_LPTIM_RCC_ENABLE();
+
+    hlptim.Instance = LPTIM1;
+    hlptim.Init.Clock.Source = LPTIM_CLOCKSOURCE_APBCLOCK_LPOSC;
+    hlptim.Init.Clock.Prescaler = LPTIM_PRESCALER_DIV32;
+    hlptim.Init.Trigger.Source = LPTIM_TRIGSOURCE_SOFTWARE;
+    hlptim.Init.OutputPolarity = LPTIM_OUTPUTPOLARITY_HIGH;
+    hlptim.Init.UpdateMode = LPTIM_UPDATE_IMMEDIATE;
+    hlptim.Init.CounterSource = LPTIM_COUNTERSOURCE_INTERNAL;
+    HAL_LPTIM_Init(&hlptim);
+    
+    HAL_NVIC_SetPriority(AX_LPTIM_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(AX_LPTIM_IRQn);
 
 }
 
@@ -173,53 +237,56 @@ void SPI_RX_TX(uint8_t *byteTx, uint8_t *byteRx, uint16_t len) {
 	}
 }
 
-void wa1205_enable_global_irq(void)
+void radio_enable_global_irq(void)
 {
   __enable_irq();
 }
 
-void wa1205_disable_global_irq(void)
+void radio_disable_global_irq(void)
 {
   __disable_irq();
 }
 
-void wa1205_enable_pin_irq(void)
+void radio_enable_pin_irq(void)
 {
   HAL_NVIC_EnableIRQ(EXTI0_1_IRQn);
 }
 
-void wa1205_disable_pin_irq(void)
+void radio_disable_pin_irq(void)
 {
   HAL_NVIC_DisableIRQ(EXTI0_1_IRQn);
 }
 
-uint8_t wa1205_get_irq_pin_state(void)
+uint8_t radio_get_irq_pin_state(void)
 {
-  return HAL_GPIO_ReadPin(WA_IRQ_PORT, WA_IRQ_PIN);
+  return HAL_GPIO_ReadPin(AX_IRQ_GPIO_Port, AX_IRQ_Pin);
+
 }
 
-void wa1205_spi_rx(uint8_t *pData, uint16_t Size)
+void radio_spi_rx(uint8_t *pData, uint16_t Size)
 {
   SPI_RX(pData, Size);
   
 }
 
-void wa1205_spi_tx(uint8_t *pData, uint16_t Size)
+void radio_spi_tx(uint8_t *pData, uint16_t Size)
 {
   SPI_TX(pData, Size);
 }
 
-void wa1205_spi_tx_rx(uint8_t *pTxData, uint8_t *pRxData, uint16_t Size)
+void radio_spi_tx_rx(uint8_t *pTxData, uint8_t *pRxData, uint16_t Size)
 {
   SPI_RX_TX(pTxData, pRxData, Size);
 }
 
-void wa1205_spi_write_cs(uint8_t state)
+
+
+void radio_spi_write_cs(uint8_t state)
 {
   if (state)
-	HAL_GPIO_WritePin(SPI2_CS_PORT, SPI2_CS_PIN, GPIO_PIN_SET);
+	HAL_GPIO_WritePin(AX_CS_GPIO_Port, AX_CS_Pin, GPIO_PIN_SET);
   else
-	HAL_GPIO_WritePin(SPI2_CS_PORT, SPI2_CS_PIN, GPIO_PIN_RESET);
+	HAL_GPIO_WritePin(AX_CS_GPIO_Port, AX_CS_Pin, GPIO_PIN_RESET);
 }
 
 void wtimer_cc_irq_enable(uint8_t chan)
@@ -239,8 +306,15 @@ void wtimer_cc_set(uint8_t chan, uint16_t data)
 
 uint16_t wtimer_cc_get(uint8_t chan)
 {
-  return (uint16_t) hlptim.Instance->CMP;
+	return (uint16_t) hlptim.Instance->CMP;
 }
+
+
+uint8_t wtimer_check_cc_irq(uint8_t chan)
+{
+	return __HAL_LPTIM_GET_FLAG(&hlptim, LPTIM_IT_CMPM);
+}
+
 
 uint16_t wtimer_cnt_get(uint8_t chan)
 {
@@ -254,10 +328,7 @@ uint16_t wtimer_cnt_get(uint8_t chan)
   return timer;
 }
 
-uint8_t wtimer_check_cc_irq(uint8_t chan)
-{
-	return __HAL_LPTIM_GET_FLAG(&hlptim, LPTIM_IT_CMPM);
-}
+
 
 
 void nbfi_before_tx(NBFi_wa1205_pins_s * pins)
@@ -338,28 +409,29 @@ void nbfi_lock_unlock_nbfi_irq(uint8_t lock)
     nbfi_lock = lock;
 }
 
-void wa1205_init(void)
+void radio_init(void)
 {
+
         RADIO_LPTIM_Init();       
         
         HAL_LPTIM_Counter_Start(&hlptim, 0xffff);
         
         RADIO_SPI_Init();
         
-	wa1205_reg_func(WARADIO_ENABLE_GLOBAL_IRQ, (void*)wa1205_enable_global_irq);
-	wa1205_reg_func(WARADIO_DISABLE_GLOBAL_IRQ, (void*)wa1205_disable_global_irq);
-	wa1205_reg_func(WARADIO_ENABLE_IRQ_PIN, (void*)wa1205_enable_pin_irq);
-	wa1205_reg_func(WARADIO_DISABLE_IRQ_PIN, (void*)wa1205_disable_pin_irq);
-	wa1205_reg_func(WARADIO_GET_IRQ_PIN, (void*)wa1205_get_irq_pin_state);
-	wa1205_reg_func(WARADIO_SPI_RX, (void*)wa1205_spi_rx);
-	wa1205_reg_func(WARADIO_SPI_TX, (void*)wa1205_spi_tx);
-	wa1205_reg_func(WARADIO_SPI_TX_RX, (void*)wa1205_spi_tx_rx);
-	wa1205_reg_func(WARADIO_SPI_CS_WRITE, (void*)wa1205_spi_write_cs);
+	wa1205_reg_func(WARADIO_ENABLE_GLOBAL_IRQ, (void*)radio_enable_global_irq);
+	wa1205_reg_func(WARADIO_DISABLE_GLOBAL_IRQ, (void*)radio_disable_global_irq);
+	wa1205_reg_func(WARADIO_ENABLE_IRQ_PIN, (void*)radio_enable_pin_irq);
+	wa1205_reg_func(WARADIO_DISABLE_IRQ_PIN, (void*)radio_disable_pin_irq);
+	wa1205_reg_func(WARADIO_GET_IRQ_PIN, (void*)radio_get_irq_pin_state);
+	wa1205_reg_func(WARADIO_SPI_RX, (void*)radio_spi_rx);
+	wa1205_reg_func(WARADIO_SPI_TX, (void*)radio_spi_tx);
+	wa1205_reg_func(WARADIO_SPI_TX_RX, (void*)radio_spi_tx_rx);
+	wa1205_reg_func(WARADIO_SPI_CS_WRITE, (void*)radio_spi_write_cs);
 
-	HAL_GPIO_WritePin(SPI2_CS_PORT, SPI2_CS_PIN, GPIO_PIN_SET);
+	
 
-	wtimer_reg_func(WTIMER_GLOBAL_IRQ_ENABLE, (void*)wa1205_enable_global_irq);
-	wtimer_reg_func(WTIMER_GLOBAL_IRQ_DISABLE, (void*)wa1205_disable_global_irq);
+	wtimer_reg_func(WTIMER_GLOBAL_IRQ_ENABLE, (void*)radio_enable_global_irq);
+	wtimer_reg_func(WTIMER_GLOBAL_IRQ_DISABLE, (void*)radio_disable_global_irq);
 	wtimer_reg_func(WTIMER_CC_IRQ_ENABLE, (void*)wtimer_cc_irq_enable);
 	wtimer_reg_func(WTIMER_CC_IRQ_DISABLE, (void*)wtimer_cc_irq_disable);
 	wtimer_reg_func(WTIMER_SET_CC, (void*)wtimer_cc_set);
@@ -385,8 +457,10 @@ void wa1205_init(void)
 	nbfi_dev_info_t info = {MODEM_ID, (uint32_t*)KEY, TX_MIN_POWER, TX_MAX_POWER, HW_ID, HW_REV, BAND, SEND_INFO_PERIOD};
 
 	NBFi_Config_Set_Device_Info(&info);
+        
         //NBFi_Clear_Saved_Configuration(); //if you need to clear previously saved nbfi configuration in EEPROM
-	NBFI_Init(0);
+	//wa1205_set_freq(868800000);
+        NBFI_Init(0);
   
 }
 

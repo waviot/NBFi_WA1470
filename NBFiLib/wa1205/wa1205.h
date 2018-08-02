@@ -20,8 +20,13 @@ enum wa1205_func_name_t
 };
 
 void wa1205_reg_func(uint8_t name, void * fn);
+void wa1205_init();
+void wa1205_spi_write(uint16_t address, uint8_t *data, uint8_t length);
+void wa1205_spi_read(uint16_t address, uint8_t *data, uint8_t length);
+void wa1205_spi_write8(uint16_t address, uint8_t data);
 void wa1205_isr();
 _Bool wa1205_cansleep();
 void wa1205_tcxo_set_reset(uint8_t set);
 void wa1205_set_freq(uint32_t freq);
+void wa1205_test();
 #endif

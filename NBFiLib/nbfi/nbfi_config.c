@@ -76,8 +76,8 @@ _Bool nbfi_settings_changed = 0;
 
 nbfi_phy_channel_t TxRateTable[NUM_OF_TX_RATES] = {UL_DBPSK_50_PROT_D, UL_DBPSK_400_PROT_D, UL_DBPSK_3200_PROT_D};
 const uint8_t TxSNRDegradationTable[NUM_OF_TX_RATES] = {0,9,18};
-nbfi_phy_channel_t RxRateTable[NUM_OF_RX_RATES] = {DL_PSK_200, DL_PSK_500, DL_PSK_5000, DL_PSK_FASTDL};
-const uint8_t RxSNRDegradationTable[NUM_OF_RX_RATES] = {0,4,14,25};
+nbfi_phy_channel_t RxRateTable[NUM_OF_RX_RATES] = {DL_DBPSK_50_PROT_D, DL_DBPSK_400_PROT_D, DL_DBPSK_3200_PROT_D, DL_DBPSK_25600_PROT_D};
+const uint8_t RxSNRDegradationTable[NUM_OF_RX_RATES] = {0,9,18,24};
 
 #define TX_SNRLEVEL_FOR_UP          15//22
 #define TX_SNRLEVEL_FOR_DOWN        10

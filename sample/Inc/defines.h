@@ -1,0 +1,15 @@
+#ifndef _DEFINES_H
+#define _DEFINES_H
+//			STM defines
+#define RS485_USART	 			USART2
+#define RS485_USART_IRQ 		USART2_IRQn
+#define RS485_RCC_ENABLE		__HAL_RCC_USART2_CLK_ENABLE
+#define RS485_RCC_DISABLE		__HAL_RCC_USART2_CLK_DISABLE
+#define RS485_TX_GPIO_Port		GPIOA
+#define RS485_TX_Pin 			GPIO_PIN_2
+#define RS485_TX_AF				GPIO_AF4_USART2
+#define RS485_RX_GPIO_Port 		GPIOA
+#define RS485_RX_Pin 			GPIO_PIN_3
+#define RS485_RX_AF				GPIO_AF4_USART2
+
+#endif

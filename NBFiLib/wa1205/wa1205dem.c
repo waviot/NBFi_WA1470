@@ -33,7 +33,7 @@ dem_packet_st tmp_dem_mas[DEM_MAS_SIZE];
 dem_packet_info_st tmp_dem_info_mas[DEM_MAS_SIZE];
 uint8_t	tmp_dem_mess_received;
 
-dem_bitrate_s current_rx_phy;
+dem_bitrate_s current_rx_phy = DBPSK_100H_PROT_D;
 
 extern uint8_t (*__wa1205_get_irq_pin_state)(void);
 
@@ -51,7 +51,7 @@ void wa1205dem_init()
     wa1205_spi_read(0x20, mas, 128);
     //wa1205dem_set_hop_table(0);
     wa1205dem_set_bitrate(DBPSK_50_PROT_D);
-    wa1205dem_set_gain(21);
+    wa1205dem_set_gain(23);
     wa1205_spi_write8(DEM_FFT_MSB, 0x80);
     wa1205dem_reset();
     wa1205_spi_read(0x20, mas, 128);
@@ -96,11 +96,17 @@ static void  wa1205dem_process_messages(struct wtimer_desc *desc)
                   //int16_t rssi = 0;//omsplog10(rssi64);// - 52 - 192;//log10f(rssi64)*20 - 48 - 192;//fxlog(packet->rssi);
                   float rssi = log10f(rssi64)*20 - 48 - 192;
                   float dsnr = log10f(((float)rssi64)/tmp_dem_mas[i].noise/4)*20;
+                  tmp_dem_info_mas[i].rssi = (int16_t)rssi;
+                  float snr = rssi - dem_noise[tmp_dem_mas[i].freq&0x1f];
+                  if(snr < 0) snr = 0;
+                  tmp_dem_info_mas[i].snr = (uint8_t)snr;
+                  
+                  
                   
                   //sprintf(log_string + strlen(log_string), " RSSI39_32=%d", tmp_dem_mas[i].rssi_39_32);
                   sprintf(log_string + strlen(log_string), " RSSI=%ld", tmp_dem_mas[i].rssi);
                   sprintf(log_string + strlen(log_string), " LRSSI=%f", rssi);
-                  sprintf(log_string + strlen(log_string), " SNR=%f", rssi - dem_noise[tmp_dem_mas[i].freq&0x1f]);
+                  sprintf(log_string + strlen(log_string), " SNR=%f", rssi - dem_noise[tmp_dem_mas[i].freq&0x1f] + (float)((current_rx_phy == DBPSK_25600_PROT_D)?24:0));
                   sprintf(log_string + strlen(log_string), " DSNR=%f", dsnr);
                  
                   
@@ -117,6 +123,7 @@ static void  wa1205dem_process_messages(struct wtimer_desc *desc)
                     break;
                   case DBPSK_25600_PROT_D:
                     sprintf(log_string + strlen(log_string), " 25600BPS");
+                    tmp_dem_info_mas[i].snr += 24;
                     break;
                   case DBPSK_100H_PROT_D:
                     sprintf(log_string + strlen(log_string), " 100HBPS");
@@ -199,26 +206,32 @@ void wa1205dem_isr(void)
 
 void wa1205dem_set_bitrate(dem_bitrate_s bitrate)
 {
+       // if(current_rx_phy == bitrate) return;
         if(__wa1205_disable_pin_irq) __wa1205_disable_pin_irq();
+
 	switch(bitrate)
 	{
 	case DBPSK_50_PROT_D:
                 wa1205_spi_write8(DEM_RX_MODE, 0);
+                wa1205dem_set_gain(23);
                 wa1205dem_set_alpha(128, 5);
                 log_send_str_len("Switched to DBPSK_50_PROT_D\n\r", sizeof("Switched to DBPSK_50_PROT_D\n\r"));
 		break;
 	case DBPSK_400_PROT_D:
                 wa1205_spi_write8(DEM_RX_MODE, 1);
+                wa1205dem_set_gain(23);
                 wa1205dem_set_alpha(128, 5);
                 log_send_str_len("Switched to DBPSK_400_PROT_D\n\r", sizeof("Switched to DBPSK_400_PROT_D\n\r"));
 		break;
 	case DBPSK_3200_PROT_D:
                 wa1205_spi_write8(DEM_RX_MODE, 2);
+                wa1205dem_set_gain(23);
                 wa1205dem_set_alpha(128, 5);
                 log_send_str_len("Switched to DBPSK_3200_PROT_D\n\r", sizeof("Switched to DBPSK_3200_PROT_D\n\r"));
 		break;
 	case DBPSK_25600_PROT_D:
                 wa1205_spi_write8(DEM_RX_MODE, 3);
+                wa1205dem_set_gain(15);
                 wa1205dem_set_alpha(128, 5);
                 log_send_str_len("Switched to DBPSK_25600_PROT_D\n\r", sizeof("Switched to DBPSK_25600_PROT_D\n\r"));               
 		break;
@@ -263,17 +276,25 @@ void wa1205dem_set_hop_table(uint32_t hop_table)
 void wa1205dem_set_freq(uint32_t freq)
 {
   sprintf(log_string, "dem_set_freq to %ld", freq);
-  log_send_str(log_string);    
-  if(current_rx_phy == DBPSK_100H_PROT_D)  
+  log_send_str(log_string); 
+  switch(current_rx_phy)
   {
-    wa1205_set_freq(freq + 137500000);
-    wa1205_set_freq(freq + 137500000);
+    case  DBPSK_50_PROT_D:
+    case  DBPSK_400_PROT_D:
+    case  DBPSK_25600_PROT_D:
+      wa1205_set_freq(freq + 90000 + 137500000);
+      wa1205_set_freq(freq + 90000 + 137500000); 
+      break;
+    case DBPSK_3200_PROT_D:
+      wa1205_set_freq(freq + 90000 + 137500000);
+      wa1205_set_freq(freq + 90000 + 137500000);
+      break;
+    case DBPSK_100H_PROT_D:
+      wa1205_set_freq(freq + 137500000);
+      wa1205_set_freq(freq + 137500000);
+      break;
   }
-  else 
-  {
-    wa1205_set_freq(freq + 90000 + 137500000);
-    wa1205_set_freq(freq + 90000 + 137500000); 
-  }
+
 }
  /* struct fft_point
   {

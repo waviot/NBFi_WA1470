@@ -28,6 +28,7 @@ void log_send_str_len(const char *str, uint16_t len)
 	while(ptr != len) RS485_UART_send(str[ptr++]);
 }
 
+/*
 void log_send_to_sfmonitor(uint32_t *mas, uint16_t len)
 {
   RS485_UART_send(0x12);
@@ -41,4 +42,4 @@ void log_send_to_sfmonitor(uint32_t *mas, uint16_t len)
     RS485_UART_send(0x10);
   }
   RS485_UART_send(0x13);
-}
+}*/

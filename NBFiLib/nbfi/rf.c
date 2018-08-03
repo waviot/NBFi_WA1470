@@ -72,7 +72,7 @@ nbfi_status_t RF_Init(  nbfi_phy_channel_t  phy_channel,
     case UL_DBPSK_25600_PROT_D:
  
         RF_SetModeAndPower(power, TX, antenna);
-        
+        wa1205mod_set_bitrate((mod_bitrate_s)phy_channel);
         wa1205mod_set_freq(freq);        
    
         rf_busy = 0;
@@ -85,7 +85,7 @@ nbfi_status_t RF_Init(  nbfi_phy_channel_t  phy_channel,
     case DL_DBPSK_25600_PROT_D:
   
         RF_SetModeAndPower(power, RX, antenna);
-
+        wa1205dem_set_bitrate((dem_bitrate_s)phy_channel);
         wa1205dem_set_freq(freq);
 
         rf_busy = 0;

@@ -163,7 +163,7 @@ _Bool NBFi_Match_ID(uint8_t * addr)
 nbfi_status_t NBFi_TX(nbfi_transport_packet_t* pkt)
 {
     
-    if((pkt->phy_data_length==0)&&(pkt->phy_data_length>240)) return ERR; // len check
+    //if((pkt->phy_data_length==0)&&(pkt->phy_data_length>240)) return ERR; // len check
     switch(nbfi.tx_phy_channel)
     {
     case UL_DBPSK_50_PROT_D:

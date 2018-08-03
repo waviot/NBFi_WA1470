@@ -31,7 +31,7 @@ const uint32_t NBFI_DL_ADD_RND_LISTEN_TIME[4] = {20000, 20000, 20000, 20000};
 
 #define WAITALITTLEBIT  3000
 
-const uint8_t NBFI_NOISE_DINAMIC[4] = {20, 8, 5, 5};
+//const uint8_t NBFI_NOISE_DINAMIC[4] = {20, 8, 5, 5};
 
 nbfi_transport_packet_t idle_pkt = {PACKET_FREE, HANDSHAKE_NONE, 0, 0, 0, {0,0} };
 nbfi_transport_packet_t* nbfi_active_pkt = &idle_pkt;
@@ -43,8 +43,8 @@ struct wtimer_desc dl_drx_desc;
 struct wtimer_desc wait_for_extra_desc;
 struct wtimer_desc nbfi_heartbeat_desc;
 
-int16_t rssi = 0;
-int16_t offset = 0;
+//int16_t rssi = 0;
+//int16_t offset = 0;
 
 rx_handler_t  rx_handler = 0;
 
@@ -55,10 +55,10 @@ uint8_t aver_rx_snr = 0;
 int16_t noise = -150;
 uint8_t nbfi_last_snr = 0;
 
-int16_t noise_summ = 0;
-uint8_t noise_cntr = 0;
-int16_t noise_min = -150;
-uint8_t noise_min_cntr = 2;
+//int16_t noise_summ = 0;
+//uint8_t noise_cntr = 0;
+//int16_t noise_min = -150;
+//uint8_t noise_min_cntr = 2;
 
 _Bool wait_Receive = 0;
 _Bool wait_Extra = 0;
@@ -347,7 +347,8 @@ static void NBFi_ParseReceivedPacket(dem_packet_st *packet, dem_packet_info_st* 
      }
 
     nbfi_state.DL_total++;
-    if(++noise_min_cntr > NBFI_NOISE_DINAMIC[nbfi.rx_phy_channel - 10]) noise_min_cntr =   NBFI_NOISE_DINAMIC[nbfi.rx_phy_channel - 10];
+    
+    //if(++noise_min_cntr > NBFI_NOISE_DINAMIC[nbfi.rx_phy_channel - 10]) noise_min_cntr =   NBFI_NOISE_DINAMIC[nbfi.rx_phy_channel - 10];
     
     
     /*uint8_t snr;
@@ -361,23 +362,17 @@ static void NBFi_ParseReceivedPacket(dem_packet_st *packet, dem_packet_info_st* 
 
     nbfi_transport_packet_t* pkt = 0;*/
     
-    uint64_t rssi64 = packet->rssi_39_32;
+   /* uint64_t rssi64 = packet->rssi_39_32;
     rssi64 <<= 32;
     rssi64 += packet->rssi;
     int16_t rssi = -130;//log10f(rssi64)*20 - 48 - LOGOFFSET;//fxlog(packet->rssi);
-   /* static uint32_t noise32;
-    noise32 = packet->noise0;
-    noise32 <<= 8;
-    noise32 += packet->noise1;
-    noise32 <<= 8;
-    noise32 += packet->noise2;*/
     int16_t noise = -150;//log10f(noise32)*20 - LOGOFFSET;//fxlog(noise);
     int8_t snr = 0;
-    if(rssi > noise) snr = rssi - noise;
+    if(rssi > noise) snr = rssi - noise;*/
 
-    nbfi_state.aver_rx_snr = (((uint16_t)nbfi_state.aver_rx_snr)*3 + snr)>>2;
-      
-      
+    nbfi_state.aver_rx_snr = (((uint16_t)nbfi_state.aver_rx_snr)*3 + info->snr)>>2;
+    nbfi_last_snr = info->snr;  
+    noise = info->rssi - info->snr;  
     nbfi_transport_packet_t* pkt = 0;
 
     if(nbfi.mode == TRANSPARENT)
@@ -480,7 +475,7 @@ static void NBFi_ParseReceivedPacket(dem_packet_st *packet, dem_packet_info_st* 
                         ack_pkt->phy_data.payload[2] = 0;
                         ack_pkt->phy_data.payload[3] = 0;
                         ack_pkt->phy_data.payload[4] = 0;
-                        ack_pkt->phy_data.payload[5] = snr;
+                        ack_pkt->phy_data.payload[5] = info->snr;
                         ack_pkt->phy_data.payload[6] = (uint8_t)(noise + 150);
                         ack_pkt->phy_data.payload[7] = you_should_dl_power_step_down + you_should_dl_power_step_up + (nbfi.tx_pwr & 0x3f); 
                         ack_pkt->phy_data.ITER = phy_pkt->ITER;
@@ -515,7 +510,7 @@ place_to_stack:
                 ack_pkt->phy_data.payload[2] = (mask >> 16)&0xff;
                 ack_pkt->phy_data.payload[3] = (mask >> 8)&0xff;
                 ack_pkt->phy_data.payload[4] = (mask >> 0)&0xff;
-                ack_pkt->phy_data.payload[5] = snr;
+                ack_pkt->phy_data.payload[5] = info->snr;
                 ack_pkt->phy_data.payload[6] = (uint8_t)(noise + 150);
                 ack_pkt->phy_data.payload[7] = you_should_dl_power_step_down + you_should_dl_power_step_up + (nbfi.tx_pwr & 0x3f); 
                 ack_pkt->phy_data.ITER = nbfi_state.DL_iter&0x1f;

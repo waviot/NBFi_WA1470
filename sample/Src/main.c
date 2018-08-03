@@ -17,8 +17,8 @@ extern void (*__wa1205_disable_pin_irq)(void);
 
 void send_data(struct wtimer_desc *desc) {
 
-  //if(!NBFi_Packets_To_Send())
-  //    NBFi_Send("Hello everybody!", sizeof("Hello everybody!"));
+  if(!NBFi_Packets_To_Send())
+     NBFi_Send("Hello everybody!", sizeof("Hello everybody!"));
  
   
   extern dem_bitrate_s current_rx_phy;
@@ -43,7 +43,7 @@ void send_data(struct wtimer_desc *desc) {
     led_state = 1;
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_RESET);
   }
-  ScheduleTask(desc, 0, RELATIVE, SECONDS(1));
+  ScheduleTask(desc, 0, RELATIVE, SECONDS(60));
 
 }
 

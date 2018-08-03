@@ -16,7 +16,7 @@ void init_config(adf4350_state *st,
     st->pdata = pdata;
 
     st->clkin = 40000000; // 40 MHz
-    st->chspc = 1000; // 100 KHz
+    st->chspc = 100; // 100 KHz
     st->fpfd = 20000000; // 20 MHz
 }
 

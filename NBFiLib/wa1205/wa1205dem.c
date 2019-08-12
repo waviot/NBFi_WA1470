@@ -53,6 +53,8 @@ void wa1205dem_init()
     wa1205dem_set_bitrate(DBPSK_50_PROT_D);
     wa1205dem_set_gain(23);
     wa1205_spi_write8(DEM_FFT_MSB, 0x80);
+    wa1205_spi_write8(DEM_DET_TRESHOLD, 0x58); // wtite 600 to DEM_DET_TRESHOLD
+    wa1205_spi_write8(DEM_DET_TRESHOLD + 1, 0x02);
     wa1205dem_reset();
     wa1205_spi_read(0x20, mas, 128);
     memset(dem_noise_table_temp, 0xff, sizeof(dem_noise_table_temp));

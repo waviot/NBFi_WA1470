@@ -260,7 +260,7 @@ void NBFi_ProcessRxPackets(_Bool external)
     uint8_t data[256];
     uint8_t groupe;
     uint16_t total_length;
-    
+    _Bool group_with_crc = 0;
     process_rx_external = external;
     
     while(1)
@@ -277,37 +277,54 @@ void NBFi_ProcessRxPackets(_Bool external)
         }
 
         
-        //data = malloc(total_length);
-        //if(!data)   return;
         if((pkt->phy_data.SYS) && (pkt->phy_data.payload[0] & 0x80))
         {
             total_length = pkt->phy_data.payload[0] & 0x7f;
+            total_length = total_length%nbfi.max_payload_len;
             memcpy_xdata(data, (void const*)(&pkt->phy_data.payload[1]), total_length);
             if(nbfi.mack_mode < MACK_2) NBFi_RxPacket_Free(pkt);
         }
         else
         {
             uint8_t iter = pkt->phy_data.ITER;
+            group_with_crc = ((pkt->phy_data.SYS) && (nbfi_RX_pktBuf[(iter)&0x1f]->phy_data.payload[0] == 0x02));
             uint16_t memcpy_len = total_length;
             for(uint8_t i = 0; i != groupe; i++)
             {
                 uint8_t len;
                 uint8_t first = 0;
-                if((i == 0)&&(groupe > 1)) {len = 6; first = 2;}
+                if((i == 0)&&(groupe > 1)) {len = nbfi.max_payload_len - 2; first = 2;}
                 else len = (memcpy_len>=nbfi.max_payload_len)?nbfi.max_payload_len:memcpy_len%nbfi.max_payload_len;
                 memcpy_xdata(data + i*nbfi.max_payload_len - 2*(i != 0), (void const*)(&nbfi_RX_pktBuf[(iter + i)&0x1f]->phy_data.payload[first]), len);
                 memcpy_len -= len;
                 if(nbfi_RX_pktBuf[(iter + i)&0x1f]->phy_data.ACK) nbfi_RX_pktBuf[(iter + i)&0x1f]->state = PACKET_CLEARED;
                 else nbfi_RX_pktBuf[(iter + i)&0x1f]->state = PACKET_PROCESSED;
 
-                if((nbfi.mack_mode < MACK_2) && (groupe == 1)) NBFi_RxPacket_Free(nbfi_RX_pktBuf[(iter + i)&0x1f]);
+                if((nbfi.mack_mode < MACK_2) && (groupe == 1)) 
+                {
+                  //NBFi_RxPacket_Free(nbfi_RX_pktBuf[(iter + i)&0x1f]);
+                  nbfi_RX_pktBuf[(iter + i)&0x1f]->state = PACKET_PROCESSED;
+                }
+
 
             }
         }
         
         if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
         
-        if(rx_handler) rx_handler((uint8_t *)data, total_length);
+        uint8_t *data_ptr;
+        if(group_with_crc)
+        {
+            total_length--;
+            if(CRC8((unsigned char*)(&data[1]), (unsigned char)(total_length)) != data[0]) return;
+            data_ptr = &data[1];
+        }
+        else data_ptr = &data[0];
+        
+        if(groupe > 1) NBFi_Wait_Extra_Handler(0);
+        
+        if(rx_handler) rx_handler(data_ptr, total_length);
+
         
         //free(data);
     }
@@ -444,7 +461,8 @@ static void NBFi_ParseReceivedPacket(dem_packet_st *packet, dem_packet_info_st* 
             case 0x04:  //clear RX buffer message received
                 NBFi_Clear_RX_Buffer();
                 break;
-            case 0x05:  //start packet of the groupe
+            case 0x02:  //start packet of the groupe
+            case 0x05:  
                 goto place_to_stack;
             case 0x06:  //nbfi configure
 
@@ -522,14 +540,16 @@ place_to_stack:
         }
     }
 
-    if(process_rx_external == 0) NBFi_ProcessRxPackets(0);
 
     if(phy_pkt->MULTI && !phy_pkt->ACK)
     {
         //wait for extra packets
-        nbfi_active_pkt_old_state = nbfi_active_pkt->state;
-        nbfi_active_pkt->state = PACKET_WAIT_FOR_EXTRA_PACKETS;
-        ScheduleTask(&wait_for_extra_desc, NBFi_Wait_Extra_Handler, RELATIVE, NBFI_DL_LISTEN_TIME[nbfi.rx_phy_channel - 10]);
+        if(nbfi_active_pkt->state != PACKET_WAIT_FOR_EXTRA_PACKETS)
+        {
+          nbfi_active_pkt_old_state = nbfi_active_pkt->state;
+          nbfi_active_pkt->state = PACKET_WAIT_FOR_EXTRA_PACKETS;
+        }
+        ScheduleTask(&wait_for_extra_desc, NBFi_Wait_Extra_Handler, RELATIVE, NBFI_DL_LISTEN_TIME[nbfi.rx_phy_channel]);
         wait_Extra = 1;
     }
     else
@@ -537,7 +557,7 @@ place_to_stack:
         if(nbfi_active_pkt->state == PACKET_WAIT_FOR_EXTRA_PACKETS) nbfi_active_pkt->state = nbfi_active_pkt_old_state;
 
     }
-
+    if(process_rx_external == 0) NBFi_ProcessRxPackets(0);
     if(!phy_pkt->ACK) NBFI_Config_Check_State();
     if(NBFi_GetQueuedTXPkt()) NBFi_Force_process();
     else
@@ -619,7 +639,6 @@ static void NBFi_ProcessTasks(struct wtimer_desc *desc)
                 if(wait_RxEnd) {wait_RxEnd = 0; wtimer0_remove(&dl_drx_desc);}
                 NBFi_TX(pkt);
                 
-                //NBFi_RX_Controller();
 
                 if(pkt->state == PACKET_SENT)
                 {
@@ -637,7 +656,8 @@ static void NBFi_ProcessTasks(struct wtimer_desc *desc)
     else
     {
           uint32_t t = __nbfi_measure_voltage_or_temperature(1);
-          if(t < MinVoltage) MinVoltage = t;
+          if(t < MinVoltage || !MinVoltage) MinVoltage = t;
+
     }
 
     if(rf_state == STATE_RX)
@@ -841,7 +861,7 @@ static void NBFi_SendHeartBeats(struct wtimer_desc *desc)
         if(!ack_pkt)   return;
         ack_pkt->phy_data.payload[0] = 0x01;
         ack_pkt->phy_data.payload[1] = 0;                      //heart beat type
-        ack_pkt->phy_data.payload[2] = (MinVoltage>=300)?0x80:0 + (MinVoltage%100);         //min supply voltage since last heartbeat
+        ack_pkt->phy_data.payload[2] = (MinVoltage >= 300 ? 0x80 : 0) + MinVoltage % 100;         //min supply voltage since last heartbeat
         MinVoltage = 0; //reset min voltage detection
         ack_pkt->phy_data.payload[3] = __nbfi_measure_voltage_or_temperature(0);    //temperature
         ack_pkt->phy_data.payload[4] = nbfi_state.aver_rx_snr; // DL average snr

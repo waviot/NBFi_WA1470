@@ -109,7 +109,6 @@ nbfi_transport_packet_t* NBFi_GetQueuedTXPkt()
         if(nbfi_TX_pktBuf[ptr] == 0) continue;
         switch(nbfi_TX_pktBuf[ptr]->state )
         {
-        case PACKET_QUEUED_AGAIN:
         case PACKET_NEED_TO_SEND_RIGHT_NOW:
             return nbfi_TX_pktBuf[ptr];
         }
@@ -121,16 +120,28 @@ nbfi_transport_packet_t* NBFi_GetQueuedTXPkt()
         if(nbfi_TX_pktBuf[ptr] == 0) continue;
         switch(nbfi_TX_pktBuf[ptr]->state )
         {
+        case PACKET_QUEUED_AGAIN:
+            return nbfi_TX_pktBuf[ptr];
+        }
+    }
+    
+    for(uint8_t i = nbfi_TXbuf_head - NBFI_TX_PKTBUF_SIZE; i != nbfi_TXbuf_head; i++)
+    {
+        uint8_t ptr = i%NBFI_TX_PKTBUF_SIZE;
+        if(nbfi_TX_pktBuf[ptr] == 0) continue;
+        switch(nbfi_TX_pktBuf[ptr]->state )
+        {
         case PACKET_WAIT_ACK:
             if(nbfi_TX_pktBuf[ptr] == nbfi_active_pkt) continue;
              nbfi_TX_pktBuf[ptr]->state = PACKET_QUEUED_AGAIN;
         case PACKET_QUEUED:
-        case PACKET_QUEUED_AGAIN:
+
             return nbfi_TX_pktBuf[ptr];
         }
     }
     return 0;
 }
+
 
 void NBFi_TxPacket_Free(nbfi_transport_packet_t* pkt)
 {
@@ -157,7 +168,6 @@ void NBFi_RxPacket_Free(nbfi_transport_packet_t* pkt)
 
 uint8_t NBFi_Packets_To_Send()
 {
-    //return 0;
     uint8_t packets_free = 0;
 
     for(uint16_t i = nbfi_TXbuf_head; i != (nbfi_TXbuf_head + NBFI_TX_PKTBUF_SIZE); i++)
@@ -451,7 +461,7 @@ void NBFi_Resend_Pkt(nbfi_transport_packet_t* act_pkt, uint32_t mask)
         if(act_pkt->phy_data.ITER < last_resending_pkt->phy_data.ITER) last_resending_pkt->mack_num += 32;
         last_resending_pkt->mack_num |= 0x80;
     }
-    else if((act_pkt->mack_num > 1) && (mask == 0))  //all packets delivered, send message to clear receiver's input buffer
+    else if(/*(act_pkt->mack_num > 1) && */(mask == 0))  //all packets delivered, send message to clear receiver's input buffer
     {
          NBFi_Send_Clear_Cmd(nbfi_active_pkt->phy_data.ITER);
     }

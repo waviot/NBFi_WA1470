@@ -68,7 +68,7 @@ const nbfi_settings_t nbfi_set_default =
     {0xFF,0,0},         //broadcast_ID[3];
     {0},                //full_ID[6];
     0,//868800000,                  //tx_freq;
-    0,//868735500,//868710000,//868800000,                  //rx_freq;
+    0,//868790000,//0,//868735500,//868710000,//868800000,                  //rx_freq;
     PCB,                //tx_antenna;
     PCB,                //rx_antenna;
     TX_MAX_POWER,       //tx_pwr;

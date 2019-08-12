@@ -36,38 +36,39 @@ void RS485_UART_IRQ(void) {
 }
 
 void RS485_UART_init(void) {
-  	GPIO_InitTypeDef GPIO_InitStruct;  
+  	
+  GPIO_InitTypeDef GPIO_InitStruct;  
 
-	RS485_RCC_ENABLE();
+  RS485_RCC_ENABLE();
 
-	huart.Instance = RS485_USART;
-	huart.Init.BaudRate = 115200;
-	huart.Init.WordLength = UART_WORDLENGTH_8B;
-	huart.Init.StopBits = UART_STOPBITS_1;
-	huart.Init.Parity = UART_PARITY_NONE;
-	huart.Init.Mode = UART_MODE_TX_RX;
-	huart.Init.HwFlowCtl = UART_HWCONTROL_NONE;
-	huart.Init.OverSampling = UART_OVERSAMPLING_16;
-	huart.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
-	huart.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-	HAL_UART_Init(&huart);	
+  huart.Instance = RS485_USART;
+  huart.Init.BaudRate = 115200;
+  huart.Init.WordLength = UART_WORDLENGTH_8B;
+  huart.Init.StopBits = UART_STOPBITS_1;
+  huart.Init.Parity = UART_PARITY_NONE;
+  huart.Init.Mode = UART_MODE_TX_RX;
+  huart.Init.HwFlowCtl = UART_HWCONTROL_NONE;
+  huart.Init.OverSampling = UART_OVERSAMPLING_16;
+  huart.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
+  huart.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
+  HAL_UART_Init(&huart);	
   
-    GPIO_InitStruct.Pin = RS485_TX_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = RS485_TX_AF;
-    HAL_GPIO_Init(RS485_TX_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Pin = RS485_TX_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  GPIO_InitStruct.Alternate = RS485_TX_AF;
+  HAL_GPIO_Init(RS485_TX_GPIO_Port, &GPIO_InitStruct);
 	
-    GPIO_InitStruct.Pin = RS485_RX_Pin;
-    GPIO_InitStruct.Alternate = RS485_RX_AF;
-    HAL_GPIO_Init(RS485_RX_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Pin = RS485_RX_Pin;
+  GPIO_InitStruct.Alternate = RS485_RX_AF;
+  HAL_GPIO_Init(RS485_RX_GPIO_Port, &GPIO_InitStruct);
 	
-	__HAL_UART_ENABLE_IT(&huart, UART_IT_RXNE);
-	__HAL_UART_ENABLE_IT(&huart, UART_IT_TXE);
+  __HAL_UART_ENABLE_IT(&huart, UART_IT_RXNE);
+  __HAL_UART_ENABLE_IT(&huart, UART_IT_TXE);
 	
-	HAL_NVIC_SetPriority(RS485_USART_IRQ, 0, 0);
-	HAL_NVIC_EnableIRQ(RS485_USART_IRQ);
+  HAL_NVIC_SetPriority(RS485_USART_IRQ, 0, 0);
+  HAL_NVIC_EnableIRQ(RS485_USART_IRQ);
 }
 
 void RS485_UART_deinit(void) {

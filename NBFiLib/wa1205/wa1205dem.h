@@ -72,7 +72,7 @@ typedef enum
 #define  DEM_RECEIVED_MES_BUF   0
 #define  DEM_CONTROL            0x20
 #define  DEM_RX_MODE            0x21
-#define  DEM_DET_TRESHOLD       0x22
+#define  DEM_DET_TRESHOLD       0x22 //600
 #define  DEM_NOSE_START_BIT     0x24
 #define  DEM_ALPHA_SHIFT        0x25
 #define  DEM_HOP_LENGTH         0x26

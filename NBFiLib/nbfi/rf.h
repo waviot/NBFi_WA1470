@@ -36,7 +36,7 @@ typedef struct
   uint8_t antsel;
   uint8_t cfga;
   uint16_t txpwr;
-} NBFi_wa1205_pins_s;
+} NBFi_wa1470_pins_s;
 
 extern  struct axradio_address fastdladdress;
 extern _Bool send_auto_corr;
@@ -48,7 +48,7 @@ extern _Bool transmit;
 
 //void axradio_statuschange(struct axradio_status  *st);
 
-void            RF_SetModeAndPower(int8_t dBm, rf_direction_t mode, rf_antenna_t ant);
+//void            RF_SetModeAndPower(int8_t dBm, rf_direction_t mode, rf_antenna_t ant);
 void            RF_SetDstAddress(uint8_t * addr);
 void            RF_SetLocalAddress(uint8_t * addr);
 nbfi_status_t   RF_Init(nbfi_phy_channel_t  phy_channel,

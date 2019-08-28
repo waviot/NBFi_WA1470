@@ -14,7 +14,7 @@
 
 #define HW_ID     255
 #define HW_REV    0
-#define TX_MAX_POWER 15
+#define TX_MAX_POWER 16
 #define TX_MIN_POWER 0
 #define SEND_INFO_PERIOD	2592000  //one time per month
 #define BAND         UL868800_DL864000//UL868800_DL864000
@@ -50,7 +50,7 @@
 #define NBFI_DL_FREQ_BASE       875000000
 #elif BAND == UL868800_DL868000
 #define NBFI_UL_FREQ_BASE       (868800000 - 25000)
-#define NBFI_DL_FREQ_BASE       0//(868800000 - 25000 + 90000)
+#define NBFI_DL_FREQ_BASE       868800000
 #endif 
 
 
@@ -67,8 +67,8 @@ const nbfi_settings_t nbfi_set_default =
     {0},                //temp_ID[3];
     {0xFF,0,0},         //broadcast_ID[3];
     {0},                //full_ID[6];
-    0,//868800000,                  //tx_freq;
-    0,//868790000,//0,//868735500,//868710000,//868800000,                  //rx_freq;
+    0,//0,//868800000,                  //tx_freq;
+    0,//868791000,//0,//868790000,//0,//868735500,//868710000,//868800000,                  //rx_freq;
     PCB,                //tx_antenna;
     PCB,                //rx_antenna;
     TX_MAX_POWER,       //tx_pwr;
@@ -85,8 +85,6 @@ static SPI_HandleTypeDef hspi;
 static LPTIM_HandleTypeDef hlptim;
 
 #define SPI_TIMEOUT	1000
-
-
 
 #define	AX_LPTIM			LPTIM1
 #define AX_LPTIM_IRQn			LPTIM1_IRQn
@@ -109,8 +107,46 @@ static LPTIM_HandleTypeDef hlptim;
 #define AX_IRQ_EXTI_IRQn 		EXTI0_1_IRQn
 #define AX_CS_GPIO_Port 		GPIOB
 #define AX_CS_Pin 			GPIO_PIN_1
+#define AX_TCXO_GPIO_Port 		GPIOA
+#define AX_TCXO_Pin 			GPIO_PIN_8
+#define AX_CHIP_EN_GPIO_Port 		GPIOB
+#define AX_CHIP_EN_Pin 			GPIO_PIN_13
+#define AX_DFT_EN_GPIO_Port 		GPIOB
+#define AX_DFT_EN_Pin 			GPIO_PIN_11
 
 
+void RADIO_GPIO_Init()
+{
+  GPIO_InitTypeDef GPIO_InitStruct;
+  
+  GPIO_InitStruct.Pin = AX_TCXO_Pin;    
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(AX_TCXO_GPIO_Port, &GPIO_InitStruct);
+  
+  GPIO_InitStruct.Pin = AX_CHIP_EN_Pin;    
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(AX_CHIP_EN_GPIO_Port, &GPIO_InitStruct);
+  
+  GPIO_InitStruct.Pin = AX_DFT_EN_Pin;    
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(AX_DFT_EN_GPIO_Port, &GPIO_InitStruct);
+  
+  GPIO_InitStruct.Pin = AX_IRQ_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  HAL_GPIO_Init(AX_IRQ_GPIO_Port, &GPIO_InitStruct);
+
+  HAL_NVIC_SetPriority(AX_IRQ_EXTI_IRQn, 1, 0);
+  HAL_NVIC_EnableIRQ(AX_IRQ_EXTI_IRQn);
+  
+
+}
 
 void RADIO_SPI_Init(void)
 {
@@ -152,15 +188,7 @@ void RADIO_SPI_Init(void)
     GPIO_InitStruct.Pin = AX_CS_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
     HAL_GPIO_Init(AX_CS_GPIO_Port, &GPIO_InitStruct);
-
-    GPIO_InitStruct.Pin = AX_IRQ_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    HAL_GPIO_Init(AX_IRQ_GPIO_Port, &GPIO_InitStruct);
-
-    HAL_NVIC_SetPriority(AX_IRQ_EXTI_IRQn, 0, 0);
-    HAL_NVIC_EnableIRQ(AX_IRQ_EXTI_IRQn);
-   
+  
     HAL_GPIO_WritePin(AX_CS_GPIO_Port, AX_CS_Pin, GPIO_PIN_SET);
 
     
@@ -181,7 +209,7 @@ void RADIO_LPTIM_Init(void)
     hlptim.Init.CounterSource = LPTIM_COUNTERSOURCE_INTERNAL;
     HAL_LPTIM_Init(&hlptim);
     
-    HAL_NVIC_SetPriority(AX_LPTIM_IRQn, 0, 0);
+    HAL_NVIC_SetPriority(AX_LPTIM_IRQn, 1, 0);
     HAL_NVIC_EnableIRQ(AX_LPTIM_IRQn);
 
 }
@@ -257,6 +285,20 @@ void radio_disable_pin_irq(void)
   HAL_NVIC_DisableIRQ(EXTI0_1_IRQn);
 }
 
+void radio_chip_enable(void)
+{
+  HAL_GPIO_WritePin(AX_TCXO_GPIO_Port, AX_TCXO_Pin,  GPIO_PIN_SET);
+  HAL_GPIO_WritePin(AX_DFT_EN_GPIO_Port, AX_DFT_EN_Pin,  GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(AX_CHIP_EN_GPIO_Port, AX_CHIP_EN_Pin,  GPIO_PIN_SET);
+}
+
+void radio_chip_disable(void)
+{
+  HAL_GPIO_WritePin(AX_CHIP_EN_GPIO_Port, AX_CHIP_EN_Pin,  GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(AX_DFT_EN_GPIO_Port, AX_DFT_EN_Pin,  GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(AX_TCXO_GPIO_Port, AX_TCXO_Pin,  GPIO_PIN_RESET);	
+}
+
 uint8_t radio_get_irq_pin_state(void)
 {
   return HAL_GPIO_ReadPin(AX_IRQ_GPIO_Port, AX_IRQ_Pin);
@@ -280,13 +322,25 @@ void radio_spi_tx_rx(uint8_t *pTxData, uint8_t *pRxData, uint16_t Size)
 }
 
 
-
 void radio_spi_write_cs(uint8_t state)
 {
   if (state)
 	HAL_GPIO_WritePin(AX_CS_GPIO_Port, AX_CS_Pin, GPIO_PIN_SET);
   else
 	HAL_GPIO_WritePin(AX_CS_GPIO_Port, AX_CS_Pin, GPIO_PIN_RESET);
+}
+
+#define NOP_DELAY_MS_TICK		1600
+void NOP_Delay(uint32_t i)
+{
+	while (i--)
+		asm volatile("nop");
+}
+
+void NOP_Delay_ms(uint32_t val)
+{
+	while (val--)
+		NOP_Delay(NOP_DELAY_MS_TICK);
 }
 
 void wtimer_cc_irq_enable(uint8_t chan)
@@ -331,20 +385,19 @@ uint16_t wtimer_cnt_get(uint8_t chan)
 
 
 
-void nbfi_before_tx(NBFi_wa1205_pins_s * pins)
+void nbfi_before_tx()
 {
-    pins->sysclk = 1; // TX Led ON
+
 }
 
-void nbfi_before_rx(NBFi_wa1205_pins_s * pins)
+void nbfi_before_rx()
 {
-    pins->sysclk = 0; // TX Led OFF
     
 }
 
-void nbfi_before_off(NBFi_wa1205_pins_s * pins)
+void nbfi_before_off()
 {
-    pins->sysclk = 0; // TX Led OFF
+
 }
 
 
@@ -398,11 +451,11 @@ void nbfi_rtc_synchronized(uint32_t time)
 void nbfi_receive_complete(uint8_t * data, uint16_t length)
 {
 
- // NBFi_Send(data, length); //loopback
+  NBFi_Send(data, length); //loopback
   
 }
 
-uint8_t nbfi_lock = 0;
+uint8_t nbfi_lock = 1;
 
 void nbfi_lock_unlock_nbfi_irq(uint8_t lock)
 {
@@ -412,24 +465,26 @@ void nbfi_lock_unlock_nbfi_irq(uint8_t lock)
 void radio_init(void)
 {
 
+        RADIO_GPIO_Init();
+        
         RADIO_LPTIM_Init();       
         
         HAL_LPTIM_Counter_Start(&hlptim, 0xffff);
         
         RADIO_SPI_Init();
         
-	wa1205_reg_func(WARADIO_ENABLE_GLOBAL_IRQ, (void*)radio_enable_global_irq);
-	wa1205_reg_func(WARADIO_DISABLE_GLOBAL_IRQ, (void*)radio_disable_global_irq);
-	wa1205_reg_func(WARADIO_ENABLE_IRQ_PIN, (void*)radio_enable_pin_irq);
-	wa1205_reg_func(WARADIO_DISABLE_IRQ_PIN, (void*)radio_disable_pin_irq);
-	wa1205_reg_func(WARADIO_GET_IRQ_PIN, (void*)radio_get_irq_pin_state);
-	wa1205_reg_func(WARADIO_SPI_RX, (void*)radio_spi_rx);
-	wa1205_reg_func(WARADIO_SPI_TX, (void*)radio_spi_tx);
-	wa1205_reg_func(WARADIO_SPI_TX_RX, (void*)radio_spi_tx_rx);
-	wa1205_reg_func(WARADIO_SPI_CS_WRITE, (void*)radio_spi_write_cs);
-
-	
-
+	wa1470_reg_func(WARADIO_ENABLE_GLOBAL_IRQ, (void*)radio_enable_global_irq);
+	wa1470_reg_func(WARADIO_DISABLE_GLOBAL_IRQ, (void*)radio_disable_global_irq);
+	wa1470_reg_func(WARADIO_ENABLE_IRQ_PIN, (void*)radio_enable_pin_irq);
+	wa1470_reg_func(WARADIO_DISABLE_IRQ_PIN, (void*)radio_disable_pin_irq);
+        wa1470_reg_func(WARADIO_CHIP_ENABLE, (void*)radio_chip_enable);
+	wa1470_reg_func(WARADIO_CHIP_DISABLE, (void*)radio_chip_disable);
+	wa1470_reg_func(WARADIO_GET_IRQ_PIN, (void*)radio_get_irq_pin_state);
+	wa1470_reg_func(WARADIO_SPI_RX, (void*)radio_spi_rx);
+	wa1470_reg_func(WARADIO_SPI_TX, (void*)radio_spi_tx);
+	wa1470_reg_func(WARADIO_SPI_TX_RX, (void*)radio_spi_tx_rx);
+	wa1470_reg_func(WARADIO_SPI_CS_WRITE, (void*)radio_spi_write_cs);
+        wa1470_reg_func(WARADIO_NOP_DELAY_MS, (void*)NOP_Delay_ms);
 	wtimer_reg_func(WTIMER_GLOBAL_IRQ_ENABLE, (void*)radio_enable_global_irq);
 	wtimer_reg_func(WTIMER_GLOBAL_IRQ_DISABLE, (void*)radio_disable_global_irq);
 	wtimer_reg_func(WTIMER_CC_IRQ_ENABLE, (void*)wtimer_cc_irq_enable);
@@ -440,7 +495,8 @@ void radio_init(void)
 	wtimer_reg_func(WTIMER_CHECK_CC_IRQ, (void*)wtimer_check_cc_irq);
 
 	wtimer_init();
-
+        nbfi_lock = 0;
+        
 	NBFI_reg_func(NBFI_BEFORE_TX, (void*)nbfi_before_tx);
 	NBFI_reg_func(NBFI_BEFORE_RX, (void*)nbfi_before_rx);
         NBFI_reg_func(NBFI_BEFORE_OFF, (void*)nbfi_before_off);
@@ -459,7 +515,7 @@ void radio_init(void)
 	NBFi_Config_Set_Device_Info(&info);
         
         //NBFi_Clear_Saved_Configuration(); //if you need to clear previously saved nbfi configuration in EEPROM
-	//wa1205_set_freq(868800000);
+	//wa1470_set_freq(868800000);
         NBFI_Init(0);
   
 }

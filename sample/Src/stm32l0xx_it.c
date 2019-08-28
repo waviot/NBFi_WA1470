@@ -34,10 +34,9 @@
 #include "stm32l0xx_hal.h"
 #include "stm32l0xx.h"
 #include "stm32l0xx_it.h"
-     
 #include "wtimer.h"    
 #include "rs485_uart.h"    
-
+#include "wa1470.h"
 /* External variables --------------------------------------------------------*/
 extern LPTIM_HandleTypeDef hlptim1;
 
@@ -105,13 +104,13 @@ void EXTI0_1_IRQHandler(void)
 {
   HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
   
-  wa1205_isr();
+  wa1470_isr();
 
 }
 
 void USART2_IRQHandler(void)
 {
-	RS485_UART_IRQ();
+  RS485_UART_IRQ();
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -314,7 +314,7 @@
           <state>$PROJ_DIR$\Drivers\STM32L0xx_HAL_Driver\Inc</state>
           <state>$PROJ_DIR$\Drivers\CMSIS\Device\ST\STM32L0xx\Include</state>
           <state>$PROJ_DIR$\Drivers\CMSIS\Include</state>
-          <state>$PROJ_DIR$\..\NBFiLib\wa1205</state>
+          <state>$PROJ_DIR$\..\NBFiLib\wa1470</state>
           <state>$PROJ_DIR$\..\NBFiLib\libmf</state>
           <state>$PROJ_DIR$\..\NBFiLib\misc</state>
           <state>$PROJ_DIR$\..\NBFiLib\nbfi</state>
@@ -2260,30 +2260,30 @@
       </file>
     </group>
     <group>
-      <name>wa1205</name>
+      <name>wa1470</name>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\wa1205\adf4350.c</name>
+        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\wa1205\adf4350.h</name>
+        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\wa1205\wa1205.c</name>
+        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470dem.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\wa1205\wa1205.h</name>
+        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470dem.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\wa1205\wa1205dem.c</name>
+        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470mod.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\wa1205\wa1205dem.h</name>
+        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470mod.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\wa1205\wa1205mod.c</name>
+        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470rfe.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\wa1205\wa1205mod.h</name>
+        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470rfe.h</name>
       </file>
     </group>
   </group>

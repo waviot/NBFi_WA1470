@@ -1,5 +1,5 @@
 #include "nbfi.h"
-#include "wa1205.h"
+#include "wa1470.h"
 #include "nbfi_phy.h"
 #include "nbfi_config.h"
 #include "nbfi_misc.h"
@@ -10,10 +10,6 @@
 #include <wtimer.h>
 #include <string.h>
 
-#define memset_xdata memset
-#define memcpy_xdata memcpy
-#define memcpy_xdatageneric memcpy
-#define memcpy_genericxdata memcpy
 
 extern nbfi_transport_packet_t * nbfi_TX_pktBuf[NBFI_TX_PKTBUF_SIZE];
 extern nbfi_transport_packet_t* nbfi_RX_pktBuf[NBFI_RX_PKTBUF_SIZE];
@@ -99,9 +95,9 @@ extern uint8_t current_tx_rate;
 extern uint8_t current_rx_rate;
 
 
-void (* __nbfi_before_tx)(NBFi_wa1205_pins_s *) = 0;
-void (* __nbfi_before_rx)(NBFi_wa1205_pins_s *) = 0;
-void (* __nbfi_before_off)(NBFi_wa1205_pins_s *) = 0;
+void (* __nbfi_before_tx)() = 0;
+void (* __nbfi_before_rx)() = 0;
+void (* __nbfi_before_off)() = 0;
 void (* __nbfi_read_default_settings)(nbfi_settings_t*) = 0;
 void (* __nbfi_read_flash_settings)(nbfi_settings_t*)  = 0;
 void (* __nbfi_write_flash_settings)(nbfi_settings_t*) = 0;
@@ -117,13 +113,13 @@ void NBFI_reg_func(uint8_t name, void* fn)
 	switch(name)
 	{
 	case NBFI_BEFORE_TX:
-		__nbfi_before_tx = (void(*)(NBFi_wa1205_pins_s*))fn;
+		__nbfi_before_tx = (void(*)(void))fn;
 		break;
 	case NBFI_BEFORE_RX:
-		__nbfi_before_rx = (void(*)(NBFi_wa1205_pins_s*))fn;
+		__nbfi_before_rx = (void(*)(void))fn;
 		break;
         case NBFI_BEFORE_OFF:
-		__nbfi_before_off = (void(*)(NBFi_wa1205_pins_s*))fn;
+		__nbfi_before_off = (void(*)(void))fn;
 		break;
 	case NBFI_RECEIVE_COMLETE:
 		rx_handler = (rx_handler_t)fn;
@@ -172,7 +168,7 @@ nbfi_status_t NBFi_Send(uint8_t* payload, uint8_t length)
         }
         packet->phy_data.SYS = 1;
         packet->phy_data.payload[0] = 0x80 + (length & 0x7f);
-        memcpy_xdata(&packet->phy_data.payload[1], (void const*)payload, length);
+        memcpy(&packet->phy_data.payload[1], (void const*)payload, length);
         packet->state = PACKET_QUEUED;
         packet->handshake = nbfi.handshake_mode;
         packet->phy_data.ITER = nbfi_state.UL_iter++ & 0x1f;
@@ -203,7 +199,7 @@ nbfi_status_t NBFi_Send(uint8_t* payload, uint8_t length)
         {
             return ERR_BUFFER_FULL;
         }
-        memcpy_xdata(packet->phy_data.payload + first, (void const*)&payload[groupe * nbfi.max_payload_len - 3*(groupe != 0)], l);
+        memcpy(packet->phy_data.payload + first, (void const*)&payload[groupe * nbfi.max_payload_len - 3*(groupe != 0)], l);
         packet->state = PACKET_QUEUED;
         packet->handshake = nbfi.handshake_mode;
         packet->phy_data.ITER = nbfi_state.UL_iter++ & 0x1f;
@@ -281,7 +277,7 @@ void NBFi_ProcessRxPackets(_Bool external)
         {
             total_length = pkt->phy_data.payload[0] & 0x7f;
             total_length = total_length%nbfi.max_payload_len;
-            memcpy_xdata(data, (void const*)(&pkt->phy_data.payload[1]), total_length);
+            memcpy(data, (void const*)(&pkt->phy_data.payload[1]), total_length);
             if(nbfi.mack_mode < MACK_2) NBFi_RxPacket_Free(pkt);
         }
         else
@@ -295,7 +291,7 @@ void NBFi_ProcessRxPackets(_Bool external)
                 uint8_t first = 0;
                 if((i == 0)&&(groupe > 1)) {len = nbfi.max_payload_len - 2; first = 2;}
                 else len = (memcpy_len>=nbfi.max_payload_len)?nbfi.max_payload_len:memcpy_len%nbfi.max_payload_len;
-                memcpy_xdata(data + i*nbfi.max_payload_len - 2*(i != 0), (void const*)(&nbfi_RX_pktBuf[(iter + i)&0x1f]->phy_data.payload[first]), len);
+                memcpy(data + i*nbfi.max_payload_len - 2*(i != 0), (void const*)(&nbfi_RX_pktBuf[(iter + i)&0x1f]->phy_data.payload[first]), len);
                 memcpy_len -= len;
                 if(nbfi_RX_pktBuf[(iter + i)&0x1f]->phy_data.ACK) nbfi_RX_pktBuf[(iter + i)&0x1f]->state = PACKET_CLEARED;
                 else nbfi_RX_pktBuf[(iter + i)&0x1f]->state = PACKET_PROCESSED;
@@ -330,8 +326,6 @@ void NBFi_ProcessRxPackets(_Bool external)
     }
 
 }
-
-
 
 
 static void NBFi_ParseReceivedPacket(dem_packet_st *packet, dem_packet_info_st* info)
@@ -471,7 +465,7 @@ static void NBFi_ParseReceivedPacket(dem_packet_st *packet, dem_packet_info_st* 
                     nbfi_transport_packet_t* ack_pkt =  NBFi_AllocateTxPkt(8);
                     if(!ack_pkt) break;
                     ack_pkt->phy_data.payload[0] = 0x06;
-                    memcpy_xdata(&ack_pkt->phy_data.payload[1], &phy_pkt->payload[1], 7);
+                    memcpy(&ack_pkt->phy_data.payload[1], &phy_pkt->payload[1], 7);
                     ack_pkt->phy_data.ITER = phy_pkt->ITER;
                     ack_pkt->phy_data.header |= SYS_FLAG;
                     ack_pkt->state = PACKET_NEED_TO_SEND_RIGHT_NOW;
@@ -662,7 +656,7 @@ static void NBFi_ProcessTasks(struct wtimer_desc *desc)
 
     if(rf_state == STATE_RX)
     {
-        wa1205dem_update_noise();
+        wa1470dem_update_noise();
         /*if(noise_cntr >= 10)
         {
             int16_t n = noise_summ/noise_cntr;
@@ -680,7 +674,7 @@ static void NBFi_ProcessTasks(struct wtimer_desc *desc)
         }
         else
         {
-            //int8_t r = wa1205_spi_read(AX5043_RSSI);
+            //int8_t r = wa1470_spi_read(AX5043_RSSI);
             //noise_summ += r - (int16_t)axradio_phy_rssioffset;
             noise_cntr++;
 
@@ -939,11 +933,10 @@ void NBFi_Go_To_Sleep(_Bool sleep)
 nbfi_status_t NBFI_Init()
 {
     
-
-    wa1205_reg_func(WARADIO_DATA_RECEIVED, (void*)NBFi_ParseReceivedPacket);
-    wa1205_reg_func(WARADIO_TX_FINISHED, (void*)NBFi_TX_Finished);
+    wa1470_reg_func(WARADIO_DATA_RECEIVED, (void*)NBFi_ParseReceivedPacket);
+    wa1470_reg_func(WARADIO_TX_FINISHED, (void*)NBFi_TX_Finished);
     
-    wa1205_init();
+    wa1470_init();
     
     NBFi_Config_Set_Default();
     for(uint8_t i = 0; i < NBFI_TX_PKTBUF_SIZE; i++) nbfi_TX_pktBuf[i] = 0;
@@ -952,7 +945,7 @@ nbfi_status_t NBFI_Init()
 
     info_timer = dev_info.send_info_interval - 300 - rand()%600;
 
-    RF_Init(nbfi.rx_phy_channel, (rf_antenna_t)nbfi.rx_antenna, nbfi.tx_pwr, nbfi.dl_freq_base);
+    //RF_Init(nbfi.rx_phy_channel, (rf_antenna_t)nbfi.rx_antenna, nbfi.tx_pwr, nbfi.dl_freq_base);
 
     if(nbfi.additional_flags&NBFI_OFF_MODE_ON_INIT)
     {

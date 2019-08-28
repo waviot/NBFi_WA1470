@@ -12,8 +12,8 @@ struct wtimer_desc test_desc;
 //uint32_t noise_tbl[32];
 
 
-extern void (*__wa1205_enable_pin_irq)(void);
-extern void (*__wa1205_disable_pin_irq)(void);
+extern void (*__wa1470_enable_pin_irq)(void);
+extern void (*__wa1470_disable_pin_irq)(void);
 
 void send_data(struct wtimer_desc *desc) {
 
@@ -21,13 +21,13 @@ void send_data(struct wtimer_desc *desc) {
     NBFi_Send("Hello everybody!", sizeof("Hello everybody!"));
  
   
-  extern dem_bitrate_s current_rx_phy;
+  /*extern dem_bitrate_s current_rx_phy;
   
   if(HAL_GPIO_ReadPin(GPIOC, GPIO_PIN_13) == GPIO_PIN_RESET)
   {
-    if(++current_rx_phy == 14) current_rx_phy = 10;
+    if(++current_rx_phy == 14) current_rx_phy = (dem_bitrate_s)10;
     dem_bitrate_s tmp_phy = current_rx_phy;
-    wa1205dem_set_bitrate(tmp_phy);
+    wa1470dem_set_bitrate(tmp_phy);
   }
 
     
@@ -43,6 +43,7 @@ void send_data(struct wtimer_desc *desc) {
     led_state = 1;
     HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_RESET);
   }
+  */
   ScheduleTask(desc, 0, RELATIVE, SECONDS(10));
 
 }
@@ -61,7 +62,7 @@ int main(void)
   SystemClock_Config();
   
   MX_GPIO_Init();
-   
+  
   radio_init();
 
   log_init();
@@ -69,16 +70,16 @@ int main(void)
   ScheduleTask(&test_desc, send_data, RELATIVE, SECONDS(1));
   
   
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, GPIO_PIN_RESET);
+  //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
+  //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, GPIO_PIN_RESET);
   
   while (1) 
   {     
       NBFi_ProcessRxPackets(1);
       
-      //wa1205_test();
+      //wa1470_test();
       
-      if (wa1205_cansleep()&& NBFi_can_sleep()) 
+      if (wa1470_cansleep()&& NBFi_can_sleep()) 
       {
           //HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_SLEEPENTRY_WFI);
       }

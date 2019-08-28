@@ -1,5 +1,5 @@
-#ifndef _WA1205DEM_H
-#define _WA1205DEM_H
+#ifndef _wa1470DEM_H
+#define _wa1470DEM_H
 
 #include <stdint.h>
 
@@ -12,6 +12,19 @@
 #define AXI_LENGTH        16*2
 #define AXI_RX_FD_ADDR (AXI_START_ADDR+AXI_WR_SIZE+AXI_LENGTH)
 */
+
+
+typedef enum
+{
+        DEM_MINUS90000          = 7,
+	DEM_MINUS65000      	= 6,
+        DEM_MINUS40000      	= 5,
+        DEM_MINUS15000          = 4,
+        DEM_PLUS15000           = 3,
+        DEM_PLUS40000           = 2,
+        DEM_PLUS65000       	= 1,
+        DEM_PLUS90000           = 0
+}dem_hop_channels_t;
 
 typedef enum {
 	DEMOD_CRC = 0,
@@ -84,9 +97,9 @@ typedef enum
 #define  DEM_CRC_POLY           0x2E
 #define  DEM_HOP_TABLE          0x32
 #define  DEM_FFT_READ_BUF       0x80
-#define  DEM_GAIN               0x88
-#define  DEM_BS3_FREQ           0x6C
-#define  DEM_BS3_FREQ_APPLY     0x84
+//#define  DEM_GAIN               0x88
+//#define  DEM_BS3_FREQ           0x6C
+//#define  DEM_BS3_FREQ_APPLY     0x84
 
 #define DEM_CONTROL_RESET       0x01
 #define DEM_CONTROL_FFT_READY   0x40
@@ -95,14 +108,19 @@ typedef enum
 
 
 
-void wa1205dem_init();
-void wa1205dem_isr(void);
-void wa1205dem_reset(void);
-void wa1205dem_set_bitrate(dem_bitrate_s bitrate);
-void wa1205dem_set_alpha(uint8_t noise_start_bit, uint8_t shift);
-void wa1205dem_set_hop_table(uint32_t hop_table);
-void wa1205dem_update_noise();
-void wa1205dem_set_gain(uint8_t gain);
-void wa1205dem_set_freq(uint32_t freq);
+void wa1470dem_init();
+void wa1470dem_isr(void);
+void wa1470dem_reset(void);
+void wa1470dem_set_bitrate(dem_bitrate_s bitrate);
+void wa1470dem_set_alpha(uint8_t noise_start_bit, uint8_t shift);
+void wa1470dem_set_hop_table(uint8_t* hop);
+//void wa1470dem_set_hop_table(uint32_t hop_table);
+void wa1470dem_set_hop_len(uint8_t hop_len);
+void wa1470dem_set_crc_poly(uint8_t* crc);
+void wa1470dem_set_preambule(uint8_t* preambule);
+void wa1470dem_update_noise();
+void wa1470dem_set_threshold(uint16_t SOFT_DETECT_THR);
+//void wa1470dem_set_gain(uint8_t gain);
+void wa1470dem_set_freq(uint32_t freq);
 
 #endif

@@ -1,6 +1,10 @@
-#ifndef _WA1205MOD_H
-#define _WA1205MOD_H
+#ifndef _wa1470MOD_H
+#define _wa1470MOD_H
 
+
+//----------------------------------------------------------
+// MODULATOR REGs
+//----------------------------------------------------------
 #define MOD_SPI_OFFSET                  0x38
 
 //Write registers definitions
@@ -34,38 +38,38 @@
 
 typedef enum
 {
-        MINUS97000              = 0,
-        MINUS89000              = 1,
-        MINUS83000              = 2,
-        MINUS90000              = 3,
-	MINUS79000              = 4,
-	MINUS73000              = 5,
-	MINUS59000      	= 6,
-	MINUS65000      	= 7,
-        MINUS53000      	= 8,
-        MINUS47000      	= 9,
-        MINUS37000      	= 10,
-        MINUS40000      	= 11,
-        MINUS29000              = 12,
-        MINUS19000              = 13,
-        MINUS11000              = 14,
-        MINUS15000              = 15,
-        PLUS15000               = 16,
-        PLUS11000               = 17,
-        PLUS19000               = 18,
-        PLUS29000               = 19,
-        PLUS40000               = 20,
-        PLUS37000               = 21,
-        PLUS47000               = 22,
-        PLUS53000       	= 23,
-        PLUS65000       	= 24,
-	PLUS59000       	= 25,
-	PLUS73000       	= 26,
-        PLUS79000               = 27,
-        PLUS90000               = 28,
-        PLUS83000               = 29,
-        PLUS89000               = 30,
-        PLUS97000               = 31 
+        MOD_MINUS97000          = 0,
+        MOD_MINUS89000          = 1,
+        MOD_MINUS83000          = 2,
+        MOD_MINUS90000          = 3,
+	MOD_MINUS79000          = 4,
+	MOD_MINUS73000          = 5,
+	MOD_MINUS59000      	= 6,
+	MOD_MINUS65000      	= 7,
+        MOD_MINUS53000      	= 8,
+        MOD_MINUS47000      	= 9,
+        MOD_MINUS37000      	= 10,
+        MOD_MINUS40000      	= 11,
+        MOD_MINUS29000          = 12,
+        MOD_MINUS19000          = 13,
+        MOD_MINUS11000          = 14,
+        MOD_MINUS15000          = 15,
+        MOD_PLUS15000           = 16,
+        MOD_PLUS11000           = 17,
+        MOD_PLUS19000           = 18,
+        MOD_PLUS29000           = 19,
+        MOD_PLUS40000           = 20,
+        MOD_PLUS37000           = 21,
+        MOD_PLUS47000           = 22,
+        MOD_PLUS53000       	= 23,
+        MOD_PLUS65000       	= 24,
+	MOD_PLUS59000       	= 25,
+	MOD_PLUS73000       	= 26,
+        MOD_PLUS79000           = 27,
+        MOD_PLUS90000           = 28,
+        MOD_PLUS83000           = 29,
+        MOD_PLUS89000           = 30,
+        MOD_PLUS97000           = 31 
 }mod_hop_channels_t;
 
 typedef enum
@@ -82,13 +86,13 @@ typedef enum
         MOD_DBPSK_100H_PROT_E       = 35,
 }mod_bitrate_s;
 
-void wa1205mod_init();
-void wa1205mod_isr(void);
-void wa1205mod_set_hop_table(mod_hop_channels_t *hop_table);
-void wa1205mod_set_bitrate(mod_bitrate_s bitrate);
-void wa1205mod_send(uint8_t* data, mod_bitrate_s bitrate);
-void wa1205mod_set_freq(uint32_t freq);
-//void wa1205mod_PROTE_send(uint8_t* data, mod_bitrate_s bitrate);
+void wa1470mod_init();
+void wa1470mod_isr(void);
+void wa1470mod_set_hop_table(mod_hop_channels_t *hop_table);
+void wa1470mod_set_bitrate(mod_bitrate_s bitrate);
+void wa1470mod_send(uint8_t* data, mod_bitrate_s bitrate);
+void wa1470mod_set_freq(uint32_t freq);
+//void wa1470mod_PROTE_send(uint8_t* data, mod_bitrate_s bitrate);
 
 
 

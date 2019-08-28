@@ -1,7 +1,7 @@
 #ifndef NBFI_PHY_H
 #define NBFI_PHY_H
 #include "nbfi_misc.h"
-#include "wa1205.h"
+#include "wa1470.h"
 
 _Bool            NBFi_Match_ID(uint8_t * addr);
 nbfi_status_t   NBFi_TX_ProtocolE(nbfi_transport_packet_t* pkt);

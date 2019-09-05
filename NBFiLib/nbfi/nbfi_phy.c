@@ -164,6 +164,7 @@ nbfi_status_t NBFi_TX(nbfi_transport_packet_t* pkt)
 {
     
     //if((pkt->phy_data_length==0)&&(pkt->phy_data_length>240)) return ERR; // len check
+    wa1470dem_rx_enable(0);
     switch(nbfi.tx_phy_channel)
     {
     case UL_DBPSK_50_PROT_D:
@@ -222,7 +223,7 @@ nbfi_status_t NBFi_RX()
     nbfi_status_t result;
     if(nbfi.rx_freq == 0) rx_freq = nbfi.dl_freq_base + ((*((const uint32_t*)FULL_ID)%276)*363);
     else rx_freq = nbfi.rx_freq;
-
+    wa1470dem_rx_enable(1);
     result = RF_Init(nbfi.rx_phy_channel, (rf_antenna_t)nbfi.rx_antenna, 0, rx_freq);
     return result;
 }

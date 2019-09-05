@@ -9,6 +9,7 @@ void RS485_UART_IRQ(void);
 
 void RS485_UART_send(uint8_t data);
 uint8_t RS485_UART_is_empty(void);
+uint8_t RS485_UART_TX_is_empty(void);
 uint8_t RS485_UART_get(void);
 
 void set_baud_opto_uart(uint8_t speed_byte);

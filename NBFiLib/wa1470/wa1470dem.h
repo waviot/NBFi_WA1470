@@ -3,16 +3,7 @@
 
 #include <stdint.h>
 
-/*
-#define PER_SIZE          512
-#define AXI_WR_SIZE       16*2
-#define AXI_START_ADDR (DMEM_SIZE/2 + PER_SIZE)
-#define AXI_RW_ADDR AXI_START_ADDR
-#define AXI_RD_ADDR (AXI_START_ADDR+AXI_WR_SIZE)
-#define AXI_LENGTH        16*2
-#define AXI_RX_FD_ADDR (AXI_START_ADDR+AXI_WR_SIZE+AXI_LENGTH)
-*/
-
+#define DEM_CALC_SPECTRUM
 
 typedef enum
 {
@@ -109,6 +100,7 @@ typedef enum
 
 
 void wa1470dem_init();
+void wa1470dem_rx_enable(_Bool en);
 void wa1470dem_isr(void);
 void wa1470dem_reset(void);
 void wa1470dem_set_bitrate(dem_bitrate_s bitrate);
@@ -118,9 +110,11 @@ void wa1470dem_set_hop_table(uint8_t* hop);
 void wa1470dem_set_hop_len(uint8_t hop_len);
 void wa1470dem_set_crc_poly(uint8_t* crc);
 void wa1470dem_set_preambule(uint8_t* preambule);
-void wa1470dem_update_noise();
+//void wa1470dem_update_noise();
 void wa1470dem_set_threshold(uint16_t SOFT_DETECT_THR);
 //void wa1470dem_set_gain(uint8_t gain);
 void wa1470dem_set_freq(uint32_t freq);
-
+float wa1470dem_get_rssi();
+float wa1470dem_get_noise();
+void wa1470dem_get_spectrum(uint8_t size, float* data);
 #endif

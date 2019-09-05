@@ -1,10 +1,12 @@
 #include "wa1470rfe.h"
 #include "wa1470.h"
 
-#define RFE_LOGOFFSET_LONF      247
-#define RFE_LOGOFFSET_LOCUR     225
+//#define RFE_RSSI_OFFSET                 247
 
-uint32_t rfe_logoffset = RFE_LOGOFFSET_LONF;
+//uint16_t rfe_rssi_offset = RFE_RSSI_OFFSET;
+
+uint16_t rfe_rx_total_vga_gain;
+
 
 extern void (*__wa1470_chip_enable)(void);
 extern void (*__wa1470_chip_disable)(void);
@@ -43,7 +45,7 @@ void wa1470rfe_init()
   
   wa1470rfe_set_mode(RFE_MODE_IDLE);
 
-  wa1470_spi_write8(RFE_RX_LNA, 254); //254//174
+  //wa1470_spi_write8(RFE_RX_LNA, 134); //158//254//174
   wa1470_spi_write8(RFE_RX_MX_CTRL, 87);
   wa1470_spi_write8(RFE_ADC_REF, 222);
   wa1470_spi_write8(RFE_BYPASS, 218);
@@ -77,7 +79,7 @@ void wa1470rfe_init()
 #endif
   
   wa1470rfe_set_rx_mode(RFE_RX_MODE_LONF);
-  
+  wa1470rfe_set_rx_gain(RFE_DEFAULT_VGA_GAIN);
   //wa1470rfe_set_mode(RFE_MODE_TX);
   //wa1470rfe_set_freq(864055540);
   ///////////Kostyl???/////////
@@ -90,85 +92,8 @@ void wa1470rfe_deinit()
   if(__wa1470_chip_disable) __wa1470_chip_disable();  
 }
 
-
-/*
-void wa1470rfe_init_int()
-{
-
- 
-  wa1470rfe_reset();
-
-  
-  
-  //uint8_t data_r[1];
- //__wa1470_nop_dalay_ms(1000); 
-      ///////////Kostyl/////////
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14,  GPIO_PIN_SET);
-  GPIO_InitTypeDef GPIO_InitStruct;
-  GPIO_InitStruct.Pin = GPIO_PIN_14;    
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-  /////////////////////////
-  
-  __wa1470_nop_dalay_ms(10); 
-  
-  wa1470rfe_set_mode(RFE_MODE_IDLE);
-
-  wa1470_spi_write8(RFE_RX_LNA, 254); //254//174
-  wa1470_spi_write8(RFE_RX_MX_CTRL, 87);
-  wa1470_spi_write8(RFE_ADC_REF, 222);
-  wa1470_spi_write8(RFE_BYPASS, 218);
-  wa1470_spi_write8(RFE_ADC_COMPVALID, 23);
-  wa1470_spi_write8(RFE_GP_ADC_SETTING, 115);
-  wa1470_spi_write8(RFE_GP_ADC_DELAY, 120);
-  wa1470_spi_write8(RFE_LPF_TUNE, 136);
-  wa1470_spi_write8(RFE_CLKGEN_SETTING_0, 70);
-  wa1470_spi_write8(RFE_LNA_TUNE, 102);
-  wa1470_spi_write8(RFE_CLKGEN_SETTING_1, 24);
-  wa1470_spi_write8(RFE_CLKGEN_SETTING_2, 100);
-  wa1470_spi_write8(RFE_ADC_Q_SETTINGS, 1);
-  wa1470_spi_write8(RFE_TX_DAC_CLK, 107);
-  wa1470_spi_write8(RFE_LOW_POWER, 16);
-  wa1470_spi_write8(RFE_BB_TUNER, 127);
-  wa1470_spi_write8(RFE_POWER_CONTROL, 0x40);
-  wa1470_spi_write8(RFE_CLOSE_PLL_LOOP, 226);
-      
-  ///////////Kostyl/////////
-  //wa1470_spi_write8( ADDR_1_8_V_FRACTIONAL_PLL_MODE, 72);// wa1470_spi_read( ADDR_1_8_V_FRACTIONAL_PLL_MODE		,data_r,1);
- /////////////////////
-  //wa1470_spi_write8( ADDR_1_8_V_FRACTIONAL_PLL_MODE, 0x8C);
-  //__wa1470_nop_dalay_ms(1000); 
-  
- wa1470rfe_set_pll_mode(RFE_PLL_MODE_INTEGER);
-  
-#ifdef TX_BPSK_PIN_MODE
-  wa1470rfe_set_tx_mode(RFE_TX_MODE_BPSK);
-#else
-  wa1470rfe_set_tx_mode(RFE_TX_MODE_I_Q);
-#endif
-  
-  wa1470rfe_set_rx_mode(RFE_RX_MODE_LONF);
-  
-  
-}
-
-*/
-/*
-void wa1470rfe_reset()
-{
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_12,  GPIO_PIN_RESET);
-  if(__wa1470_chip_disable) __wa1470_chip_disable();  
-  __wa1470_nop_dalay_ms(1);
-  if(__wa1470_chip_enable) __wa1470_chip_enable();
-  wa1470_spi_wait_for(RFE_INIT_DONE, 1, 0x01);
-}
-*/
 void wa1470rfe_set_mode(rfe_mode_s mode)
 {
-  //if(__wa1470_chip_enable) __wa1470_chip_enable();
-  //__wa1470_nop_dalay_ms(2);
   if(mode == RFE_MODE_RX)
   {
     wa1470_spi_write8(RFE_MODE, (uint8_t)RFE_MODE_DEEP_SLEEP);
@@ -176,17 +101,39 @@ void wa1470rfe_set_mode(rfe_mode_s mode)
   }
   wa1470_spi_write8(RFE_MODE, (uint8_t)mode);
   wa1470_spi_wait_for(RFE_SET_MODE_BUSY, 0, 0x01);
-  //if(__wa1470_chip_disable && (mode == RFE_MODE_DEEP_SLEEP)) __wa1470_chip_disable();
 }
 
-static void wa1470rfe_set_rx_gain(uint8_t LNA_GAIN, uint8_t VGA2_GAIN, uint8_t VGA1_GAIN)
+static void wa1470rfe_set_lna_current(uint8_t curr)
+{
+  wa1470_spi_write8(RFE_RX_LNA, (wa1470_spi_read8(RFE_RX_LNA)&0x87)+((curr&0x0f)<<3));
+}
+
+static void wa1470rfe_set_rx_gain_custom(uint8_t LNA_GAIN, uint8_t MIXER_GAIN, uint8_t VGA1_GAIN, uint8_t VGA2_GAIN)
 {
   uint8_t data_r[1];
   wa1470_spi_read(RFE_RX_LNA, data_r, 1);
   wa1470_spi_write8(RFE_RX_LNA, (data_r[0]&(256-8)) + (LNA_GAIN<<1) +  (data_r[0]&1) );
-  //wa1470_spi_read(RFE_RX_MX_CTRL, data_r, 1);
-  //wa1470_spi_write8(RFE_RX_MX_CTRL, (data_r[0] & (256-64)) + (RX_MX_GAIN<<2) + (data_r[0]&3) );
-  wa1470_spi_write8(RFE_RX_VGA_CTRL, (VGA1_GAIN<<4) + VGA2_GAIN);  
+  wa1470_spi_write8(RFE_RX_MX_CTRL, (wa1470_spi_read8(RFE_RX_MX_CTRL)&0xc3) + (MIXER_GAIN << 2));
+  wa1470_spi_write8(RFE_RX_VGA_CTRL, ((8 - VGA1_GAIN)<<4) + (8 - VGA2_GAIN)); 
+  rfe_rx_total_vga_gain = (VGA1_GAIN + VGA2_GAIN)*3;
+}
+
+void  wa1470rfe_set_rx_gain(uint8_t gain)
+{
+  uint8_t vga1, vga2;
+  if(gain > 48) gain = 48;
+  gain = gain/3;
+  if(gain <= 8)
+  {
+    vga1 = gain;
+    vga2 = 0;
+  }
+  else
+  {
+    vga1 = 8;
+    vga2 = gain - 8;
+  }
+  wa1470rfe_set_rx_gain_custom(3,5,vga1,vga2);
 }
 
 void wa1470rfe_set_pll_mode(rfe_pll_mode_s mode)
@@ -205,15 +152,17 @@ void wa1470rfe_set_rx_mode(rfe_rx_mode_s mode)
   switch(mode)
   {
     case RFE_RX_MODE_LONF:
-    default:     
-      wa1470rfe_set_rx_gain(3,2,2);
-      rfe_logoffset = RFE_LOGOFFSET_LONF;
+      wa1470rfe_set_lna_current(15);
       break;
     case RFE_BAND_LOCUR:
-      wa1470rfe_set_rx_gain(1,5,2);
-      rfe_logoffset = RFE_LOGOFFSET_LOCUR;
+      wa1470rfe_set_lna_current(2);
+      break;
+    default:
+      wa1470rfe_set_lna_current(7);
       break;
   }
+ 
+  //rfe_logoffset = RFE_LOGOFFSET_LONF;
 }
 
 
@@ -229,12 +178,12 @@ void wa1470rfe_set_band(rfe_band_s band)
   if(band == RFE_BAND_450)
   {
     wa1470_spi_write8(RFE_RX_LNA, wa1470_spi_read8(RFE_RX_LNA)&0x7f);
-    wa1470_spi_write8(RFE_RX_MX_CTRL, (wa1470_spi_read8(RFE_RX_MX_CTRL)&0xc3)+0x1c);
+    //wa1470_spi_write8(RFE_RX_MX_CTRL, (wa1470_spi_read8(RFE_RX_MX_CTRL)&0xc3)+0x1c);
   }
   else
   {
     wa1470_spi_write8(RFE_RX_LNA, wa1470_spi_read8(RFE_RX_LNA)|0x80);
-    wa1470_spi_write8(RFE_RX_MX_CTRL, (wa1470_spi_read8(RFE_RX_MX_CTRL)&0xc3)+0x14);    
+    //wa1470_spi_write8(RFE_RX_MX_CTRL, (wa1470_spi_read8(RFE_RX_MX_CTRL)&0xc3)+0x14);    
   }
 }
 

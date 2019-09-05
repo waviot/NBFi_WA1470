@@ -3,6 +3,7 @@
 
 
 #define FREF    26000000
+#define RFE_DEFAULT_VGA_GAIN    24
 
 //----------------------------------------------------------
 // RADIO FRONT-END REGs
@@ -82,6 +83,7 @@ typedef enum
 
 typedef enum
 {
+        RFE_RX_MODE_NORMAL          = 0,
         RFE_RX_MODE_LONF            = 1,
         RFE_BAND_LOCUR              = 2
 }rfe_rx_mode_s;
@@ -99,6 +101,8 @@ void wa1470rfe_set_tx_power(uint8_t power);
 void wa1470rfe_set_band(rfe_band_s band);
 _Bool wa1470rfe_set_freq(uint32_t freq);
 
-extern uint32_t rfe_logoffset;
+void  wa1470rfe_set_rx_gain(uint8_t gain);
+extern uint16_t rfe_rx_total_vga_gain;
+//extern uint32_t rfe_logoffset;
 
 #endif

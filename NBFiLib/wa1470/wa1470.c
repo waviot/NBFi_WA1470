@@ -5,7 +5,6 @@
 
 #define SPI_WAIT_TIMEOUT    100000
 
-
 void (*__wa1470_enable_global_irq)(void) = 0;
 void (*__wa1470_disable_global_irq)(void) = 0;
 void (*__wa1470_enable_pin_irq)(void) = 0;

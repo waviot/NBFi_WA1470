@@ -17,6 +17,10 @@ uint8_t RS485_UART_is_empty(void){
 	return xbuf_is_empty(&RS485_UART_rx);
 }
 
+uint8_t RS485_UART_TX_is_empty(void){
+	return xbuf_is_empty(&RS485_UART_tx);
+}
+
 uint8_t RS485_UART_get(void){
 	return xbuf_get(&RS485_UART_rx);
 }

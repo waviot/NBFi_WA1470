@@ -17,7 +17,7 @@
 #define TX_MAX_POWER 16
 #define TX_MIN_POWER 0
 #define SEND_INFO_PERIOD	2592000  //one time per month
-#define BAND         UL868800_DL864000//UL868800_DL864000
+#define BAND         UL868800_DL869100//UL868800_DL864000
 
 
 
@@ -51,6 +51,9 @@
 #elif BAND == UL868800_DL868000
 #define NBFI_UL_FREQ_BASE       (868800000 - 25000)
 #define NBFI_DL_FREQ_BASE       868800000
+#elif BAND == UL868800_DL869100
+#define NBFI_UL_FREQ_BASE       (868800000 - 25000)
+#define NBFI_DL_FREQ_BASE       869100000
 #endif 
 
 
@@ -68,7 +71,7 @@ const nbfi_settings_t nbfi_set_default =
     {0xFF,0,0},         //broadcast_ID[3];
     {0},                //full_ID[6];
     0,//0,//868800000,                  //tx_freq;
-    858090000,//868791000,//0,//868790000,//0,//868735500,//868710000,//868800000,                  //rx_freq;
+    0,//858090000,//868791000,//0,//868790000,//0,//868735500,//868710000,//868800000,                  //rx_freq;
     PCB,                //tx_antenna;
     PCB,                //rx_antenna;
     TX_MAX_POWER,       //tx_pwr;

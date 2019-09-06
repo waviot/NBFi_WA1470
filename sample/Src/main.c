@@ -50,7 +50,7 @@ int main(void)
 
   log_init();
   
-  //ScheduleTask(&test_desc, send_data, RELATIVE, SECONDS(1));
+  ScheduleTask(&test_desc, send_data, RELATIVE, SECONDS(1));
   
   
   //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);

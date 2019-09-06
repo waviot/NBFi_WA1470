@@ -956,7 +956,7 @@ nbfi_status_t NBFI_Init()
     else
     {
       NBFi_RX_Controller();
-      //NBFi_Config_Send_Current_Mode(0);
+      NBFi_Config_Send_Current_Mode(0);
       NBFi_Force_process();
       __nbfi_measure_voltage_or_temperature(1);
       ScheduleTask(&nbfi_heartbeat_desc, NBFi_SendHeartBeats, RELATIVE, SECONDS(1));

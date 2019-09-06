@@ -117,4 +117,5 @@ void wa1470dem_set_freq(uint32_t freq);
 float wa1470dem_get_rssi();
 float wa1470dem_get_noise();
 void wa1470dem_get_spectrum(uint8_t size, float* data);
+int16_t wa1470dem_get_bitrate_sensitivity(dem_bitrate_s bitrate);
 #endif

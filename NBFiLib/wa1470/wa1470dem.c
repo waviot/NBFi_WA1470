@@ -39,6 +39,7 @@ uint8_t current_hop_table[8] = {DEM_PLUS90000,DEM_PLUS90000,DEM_PLUS40000,DEM_PL
 
 const int32_t DEM_FREQ_OFFSETS[8] = {90000,65000,40000,15000,-15000,-40000,-65000,-90000};
 
+
 //uint8_t mas[128];
 /*
 uint32_t dem_noise_sum[32];
@@ -51,7 +52,8 @@ uint32_t aver_rssi_mas[32];
 */
 
 struct wtimer_desc dem_update_noise_desc;
-float dem_noise;
+float dem_noise = -150;
+static void wa1470dem_update_noise(struct wtimer_desc *desc);
 
 #ifdef DEM_CALC_SPECTRUM
 uint32_t dem_spectrum_mas[32];
@@ -98,7 +100,7 @@ static uint8_t wa1470dem_get_bitrate_gain(dem_bitrate_s bitrate)
   {
     case DBPSK_50_PROT_D: return 0;
     case DBPSK_400_PROT_D: return 18;
-    case DBPSK_3200_PROT_D: return 54;
+    case DBPSK_3200_PROT_D: return 56;
     case DBPSK_25600_PROT_D: return 112;
     case DBPSK_100H_PROT_D: return 6;
     
@@ -146,13 +148,10 @@ static void  wa1470dem_process_messages(struct wtimer_desc *desc)
                   float snr = rssi - dem_noise;//[tmp_dem_mas[i].freq&0x1f];
                   if(snr < 0) snr = 0;
                   tmp_dem_info_mas[i].snr = (uint8_t)snr;
-                  
-                  
-                  
-                  //sprintf(log_string + strlen(log_string), " RSSI39_32=%d", tmp_dem_mas[i].rssi_39_32);
+                                    
                   sprintf(log_string + strlen(log_string), " RSSI=%ld", tmp_dem_mas[i].rssi);
                   sprintf(log_string + strlen(log_string), " LRSSI=%f", rssi);
-                  sprintf(log_string + strlen(log_string), " SNR=%f", rssi - dem_noise/*dem_noise[tmp_dem_mas[i].freq&0x1f]*/ + (float)((current_rx_phy == DBPSK_25600_PROT_D)?24:0));
+                  sprintf(log_string + strlen(log_string), " SNR=%f", rssi - dem_noise);
                   sprintf(log_string + strlen(log_string), " DSNR=%f", dsnr);
                  
                   
@@ -169,7 +168,6 @@ static void  wa1470dem_process_messages(struct wtimer_desc *desc)
                     break;
                   case DBPSK_25600_PROT_D:
                     sprintf(log_string + strlen(log_string), " 25600BPS");
-                    tmp_dem_info_mas[i].snr += 24;
                     break;
                   case DBPSK_100H_PROT_D:
                     sprintf(log_string + strlen(log_string), " 100HBPS");
@@ -248,6 +246,22 @@ void wa1470dem_isr(void)
 
 }
 
+int16_t wa1470dem_get_bitrate_sensitivity(dem_bitrate_s bitrate)
+{
+	switch(bitrate)
+	{
+          case DBPSK_50_PROT_D: return -148;
+          case DBPSK_400_PROT_D: return -139;
+          case DBPSK_3200_PROT_D: return -130;
+          case DBPSK_25600_PROT_D: return -118;
+          case DBPSK_100H_PROT_D: return -145;
+	}  
+}
+
+static int8_t wa1470dem_get_sensitivity_diff(dem_bitrate_s bitrate_1, dem_bitrate_s bitrate_2)
+{
+  return wa1470dem_get_bitrate_sensitivity(bitrate_1) - wa1470dem_get_bitrate_sensitivity(bitrate_2);
+}
 
 void wa1470dem_set_bitrate(dem_bitrate_s bitrate)
 {
@@ -277,6 +291,8 @@ void wa1470dem_set_bitrate(dem_bitrate_s bitrate)
                 wa1470rfe_set_rx_gain(RFE_DEFAULT_VGA_GAIN);
  		break;
 	}
+        dem_noise -= wa1470dem_get_sensitivity_diff(current_rx_phy, bitrate);
+        wa1470dem_update_noise(0); //reinit noise engine
         current_rx_phy = bitrate;    
         wa1470dem_reset();
         if(__wa1470_enable_pin_irq) __wa1470_enable_pin_irq();      
@@ -343,13 +359,9 @@ void wa1470dem_set_freq(uint32_t freq)
     case  DBPSK_400_PROT_D:
     case  DBPSK_3200_PROT_D:
       wa1470rfe_set_freq(freq - DEM_FREQ_OFFSETS[current_hop_table[0]]);     
-      //wa1470rfe_set_freq(858000000);
-      //wa1470rfe_set_freq(864055540 - 15000);//wa1470rfe_set_freq(freq + 90000 + 137500000); 
-      //wa1470rfe_set_freq(868000000);
       break;
     case  DBPSK_25600_PROT_D:
       wa1470rfe_set_freq(freq - DEM_FREQ_OFFSETS[current_hop_table[1]]);   
-      //wa1470rfe_set_freq(freq + 90000 + 137500000);
       break;
     case DBPSK_100H_PROT_D:
       wa1470rfe_set_freq(freq);
@@ -369,23 +381,19 @@ static uint32_t wa1470dem_get_rssi_int(_Bool aver_or_max)
   switch(current_rx_phy)
   {
     case DBPSK_50_PROT_D:
-   //   gain = 1;
       size = 32;
       break;
     case DBPSK_400_PROT_D:
-     // gain = 8;
       size = 4;
       break;
     case DBPSK_3200_PROT_D:
       size = 1;
-     // gain = 8*8*8;
       break;
     case DBPSK_25600_PROT_D:
       size = 1;
       gain = 64;
       break;  
     case DBPSK_100H_PROT_D:
-     // gain = 2;
       size = 16;
       break;
   }
@@ -399,7 +407,7 @@ static uint32_t wa1470dem_get_rssi_int(_Bool aver_or_max)
     rssi += data[i];
     if(data[i] > max) max = data[i];
     #ifdef DEM_CALC_SPECTRUM
-    dem_spectrum_mas[i] = ((dem_spectrum_mas[i]*15 + data[i] + 1/**gain*/)>>4);
+    dem_spectrum_mas[i] = ((dem_spectrum_mas[i]*15 + data[i] + 1)>>4);
     #endif
   }
   return (aver_or_max?rssi/size:max);//*gain;  
@@ -422,94 +430,57 @@ void wa1470dem_get_spectrum(uint8_t size, float* data)
     data[i] = 20*log10f(dem_spectrum_mas[i]) - wa1470dem_get_rssi_logoffset();
 }
 #endif
-/* 
-static void wa1470dem_update_noise(struct wtimer_desc *desc)
-{   
-#define DEM_NOISE_AVER  (16)
-   if(dem_noise_cntr == DEM_NOISE_AVER)
-   {
-      dem_noise_cntr = 0;
-      
-      for(uint8_t i = 0; i != 32; i++)
-      {
-        uint32_t aver = dem_noise_sum[i]/DEM_NOISE_AVER;
-        dem_noise_sum[i] = 0;
-        aver_rssi_mas[i] = aver;
-        if(aver < dem_noise_min[i]) dem_noise_min[i] = aver; 
-        if(dem_noise_min_cntr == 0)
-        {
-          if(dem_noise_min[i] == 0) dem_noise[i] = aver;
-          else dem_noise[i] = dem_noise_min[i];
-          dem_noise[i] = log10f(dem_noise[i])*20 - rfe_logoffset;
-          dem_noise_min[i] = 0xffffffff;
-        }       
-      }
-      
-      if(dem_noise_min_cntr)
-      {
-        dem_noise_min_cntr--;
-      }else  dem_noise_min_cntr = 8;
-      
-   }
-   else
-   {
-      uint32_t tmp_mas[32];
-      
-      wa1470dem_read_rssi(32, tmp_mas);     
-        
-      for(uint8_t i = 0; i != 32; i++) 
-      {
-        dem_noise_sum[i] += tmp_mas[i];
-      }
-      dem_noise_cntr++;
-   }
-   
-   ScheduleTask(desc, 0, RELATIVE, MILLISECONDS(50));
-   
-}*/
 
 #define DEM_NOISE_TICK  50      //50 ms
 #define DEM_NOISE_AVER  10      //10 times
+#define DEM_NOISE_CALC_TIME  20      //Total noise calculation = 20*DEM_NOISE_AVER*DEM_NOISE_TICK ms
+
 static void wa1470dem_update_noise(struct wtimer_desc *desc)
-{   
-   
+{  
    static uint32_t dem_noise_sum;
    static uint32_t dem_noise_min;
-   static uint8_t dem_noise_cntr = 0;
-   static uint8_t dem_noise_min_cntr = 10;
-  
+   static uint8_t dem_noise_cntr;
+   static uint8_t dem_noise_min_cntr ;
+   
+   if(desc == 0) //init noise engine
+   {
+      dem_noise_min = 0xffffffff;
+      dem_noise_cntr = 0;
+      dem_noise_min_cntr = 0;
+      return;
+   }
+   
    if(dem_noise_cntr == DEM_NOISE_AVER)
    {
       dem_noise_cntr = 0;          
       uint32_t aver = dem_noise_sum/DEM_NOISE_AVER;
       dem_noise_sum = 0;
-      if(aver < dem_noise_min) dem_noise_min = aver; 
-              
-      if(dem_noise_min_cntr) dem_noise_min_cntr--;
-      else  
+      if(aver < dem_noise_min) dem_noise_min = aver;              
+      if(dem_noise_min_cntr == DEM_NOISE_CALC_TIME) 
       {
-        if(dem_noise_min == 0) dem_noise = aver;
-        else dem_noise = dem_noise_min;
-        dem_noise = log10f(dem_noise)*20 - wa1470dem_get_rssi_logoffset();
-        dem_noise_min = 0xffffffff;
-        
-        switch(current_rx_phy)
+        dem_noise_min_cntr = 0;
+        dem_noise = dem_noise_min;
+        dem_noise = log10f(dem_noise)*20 - wa1470dem_get_rssi_logoffset() + 2; //2 dB is approximate difference between minimum and average noise level
+        dem_noise_min = 0xffffffff;      
+        /* switch(current_rx_phy)
         {
           case DBPSK_50_PROT_D:
-            dem_noise_min_cntr = 20;
+            dem_noise_min_cntr = 13;
             break;
           case DBPSK_400_PROT_D:
-            dem_noise_min_cntr = 8;
+            dem_noise_min_cntr = 13;
             break;
           case DBPSK_3200_PROT_D:
           case DBPSK_25600_PROT_D:
-            dem_noise_min_cntr = 5;
+            dem_noise_min_cntr = 13;
             break;
           case DBPSK_100H_PROT_D:
-            dem_noise_min_cntr = 12;
+            dem_noise_min_cntr = 13;
             break;
-        }
-      }     
+        }*/
+      }
+      else  dem_noise_min_cntr++;
+
    }
    else
    {
@@ -521,9 +492,15 @@ static void wa1470dem_update_noise(struct wtimer_desc *desc)
    
 }
 
+
 void wa1470dem_rx_enable(_Bool en)
 {
   dem_rx_enabled = en;
-  if(en) ScheduleTask(&dem_update_noise_desc,  wa1470dem_update_noise, RELATIVE, MILLISECONDS(DEM_NOISE_TICK));
+  if(en) 
+  {
+    wa1470dem_update_noise(0); //init noise engine
+    ScheduleTask(&dem_update_noise_desc,  wa1470dem_update_noise, RELATIVE, MILLISECONDS(DEM_NOISE_TICK));
+  }
   else wtimer0_remove(&dem_update_noise_desc);
 }
+

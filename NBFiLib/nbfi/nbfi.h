@@ -8,6 +8,10 @@
 #define NBFI_TX_PKTBUF_SIZE     64
 #define NBFI_RX_PKTBUF_SIZE     32
 
+
+#define NBFI_LOG
+
+
 typedef enum
 {   
     NRX         =   0,
@@ -85,6 +89,7 @@ typedef struct
     int16_t last_rssi;
     uint8_t UL_rating;
     uint8_t DL_rating;
+    uint32_t last_bs_id;
 }nbfi_state_t;
 
 
@@ -121,18 +126,21 @@ typedef void (*rx_handler_t)(uint8_t*, uint16_t);
 
 enum nbfi_func_t
 {
-	NBFI_BEFORE_TX,
-	NBFI_BEFORE_RX,
-        NBFI_BEFORE_OFF,
-	NBFI_RECEIVE_COMLETE,
-	NBFI_READ_DEFAULT_SETTINGS,
-	NBFI_READ_FLASH_SETTINGS,
-	NBFI_WRITE_FLASH_SETTINGS,
-	NBFI_MEASURE_VOLTAGE_OR_TEMPERATURE,
-        NBFI_UPDATE_RTC,
-        NBFI_RTC_SYNCHRONIZED,
-        NBFI_LOCKUNLOCKNBFIIRQ
+    NBFI_ON_OFF_PWR,
+    NBFI_BEFORE_TX,
+    NBFI_BEFORE_RX,
+    NBFI_BEFORE_OFF,
+    NBFI_RECEIVE_COMLETE,
+    NBFI_READ_DEFAULT_SETTINGS,
+    NBFI_READ_FLASH_SETTINGS,
+    NBFI_WRITE_FLASH_SETTINGS,
+    NBFI_MEASURE_VOLTAGE_OR_TEMPERATURE,
+    NBFI_UPDATE_RTC,
+    NBFI_RTC_SYNCHRONIZED,
+    NBFI_LOCKUNLOCKNBFIIRQ,
+    NBFI_RESET
 };
+
 
 void 	        NBFI_reg_func(uint8_t name, void*);
 nbfi_status_t   NBFI_Init();

@@ -206,7 +206,7 @@ void wa1470dem_isr(void)
           if(dem_mess_received == (DEM_MAS_SIZE - 1))  return;
 
           
-          ScheduleTask(&dem_processMessages_desc,  wa1470dem_process_messages, RELATIVE, MILLISECONDS(50));
+          ScheduleTask(&dem_processMessages_desc,  wa1470dem_process_messages, RELATIVE, MILLISECONDS(20));
           
           
           uint16_t id = (*((uint16_t*)(&dem_mas[dem_mess_received])));
@@ -228,7 +228,8 @@ void wa1470dem_isr(void)
           
           if(i == dem_mess_received)
           {
-                  dem_mess_received++;
+                  if(++dem_mess_received > 1);
+                    //while(1);
           }
           else
           {

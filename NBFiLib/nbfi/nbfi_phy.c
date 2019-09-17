@@ -24,11 +24,41 @@ struct axradio_address  fastdladdress = {
 };*/
 
 
-uint32_t tx_freq, rx_freq;
+// rx_freq;
 
 extern nbfi_state_t nbfi_state;
 extern nbfi_transport_packet_t* nbfi_active_pkt;
 extern _Bool wait_RxEnd;
+
+static uint32_t NBFi_set_UL_freq(uint8_t lastcrc8, _Bool parity)
+{
+    uint32_t tx_freq;
+    switch(nbfi.freq_plan)
+    {
+      
+      
+    }
+    switch(nbfi.tx_phy_channel)
+    {
+          case UL_DBPSK_3200_PROT_D:
+            tx_freq = nbfi.ul_freq_base + 1600 + (((*((const uint32_t*)FULL_ID)+lastcrc8)%210)*100);
+            if(parity) tx_freq = tx_freq + 27500 - 1600;
+            if(nbfi.freq_plan == NBFI_FREQ_PLAN_SHIFTED_HIGHPHY) tx_freq -= 51200;
+            break;
+          case UL_DBPSK_25600_PROT_D:
+            tx_freq = nbfi.ul_freq_base + 25600;// + 12800;// + (((*((const uint32_t*)FULL_ID)+lastcrc8)%210)*100);
+            //if(parity) tx_freq = tx_freq + 25600;
+            if(nbfi.freq_plan == NBFI_FREQ_PLAN_SHIFTED_HIGHPHY) tx_freq -= 51200;
+            break;
+          default:
+            tx_freq = nbfi.ul_freq_base + (((*((const uint32_t*)FULL_ID)+lastcrc8)%226)*100);
+            if(parity) tx_freq = tx_freq + 27500;
+            break;
+   }
+     
+   return tx_freq;
+}
+
 
 nbfi_status_t NBFi_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 {
@@ -37,7 +67,8 @@ nbfi_status_t NBFi_TX_ProtocolD(nbfi_transport_packet_t* pkt)
     static _Bool parity = 0;
     uint8_t lastcrc8;
     _Bool downlink;
-
+    uint32_t tx_freq;
+         
     memset_xdata(ul_buf,0,sizeof(ul_buf));
 
     if(nbfi.mode == TRANSPARENT) pkt->phy_data_length--;
@@ -77,11 +108,12 @@ nbfi_status_t NBFi_TX_ProtocolD(nbfi_transport_packet_t* pkt)
     memcpy_xdatageneric(&ul_buf[len], pkt->phy_data.payload, pkt->phy_data_length);
 
     lastcrc8 =  CRC8(&ul_buf[len], 8);
-
+    
     if(XTEA_Enabled() && XTEA_Available() && !(nbfi.additional_flags&NBFI_FLG_NO_XTEA))
     {
         XTEA_Encode(&ul_buf[len]);
     }
+   
     len += 8;
 
     if(nbfi.mode == TRANSPARENT)
@@ -101,19 +133,8 @@ nbfi_status_t NBFi_TX_ProtocolD(nbfi_transport_packet_t* pkt)
         tx_freq = nbfi.tx_freq ;
         parity = (nbfi.tx_freq > (nbfi.ul_freq_base + 25000));
     }
-    else
-    {
-        if(nbfi.tx_phy_channel < UL_DBPSK_3200_PROT_D)
-        {
-                tx_freq = nbfi.ul_freq_base + (((*((const uint32_t*)FULL_ID)+lastcrc8)%226)*100);
-                if(parity) tx_freq = tx_freq + 27500;
-        }
-        else
-        {
-            tx_freq = nbfi.ul_freq_base + 1600 + (((*((const uint32_t*)FULL_ID)+lastcrc8)%210)*100);
-            if(parity) tx_freq = tx_freq + 27500 - 1600;
-        }
-    }
+    else tx_freq = NBFi_set_UL_freq(lastcrc8, parity);
+    
 
     if((nbfi.tx_phy_channel < UL_DBPSK_3200_PROT_D) && !downlink)
     {
@@ -123,7 +144,7 @@ nbfi_status_t NBFi_TX_ProtocolD(nbfi_transport_packet_t* pkt)
     {          
       ZCODE_Append(&ul_buf[4], &ul_buf[len], 1);
     }
-
+        
     if(!nbfi.tx_freq) parity = !parity;
 
     if((nbfi.mode == NRX) && parity) // For NRX send in ALOHA mode
@@ -139,7 +160,7 @@ nbfi_status_t NBFi_TX_ProtocolD(nbfi_transport_packet_t* pkt)
     }
     
     RF_Init(nbfi.tx_phy_channel, (rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
-
+      
     RF_Transmit(ul_buf, len + ZCODE_LEN, nbfi.tx_phy_channel, NONBLOCKING);
 
     nbfi_state.UL_total++;
@@ -221,6 +242,7 @@ nbfi_status_t NBFi_RX_Controller()
 nbfi_status_t NBFi_RX()
 {
     nbfi_status_t result;
+    uint32_t rx_freq;
     if(nbfi.rx_freq == 0) rx_freq = nbfi.dl_freq_base + ((*((const uint32_t*)FULL_ID)%276)*363);
     else rx_freq = nbfi.rx_freq;
     wa1470dem_rx_enable(1);

@@ -186,8 +186,9 @@ uint8_t NBFi_Packets_To_Send()
         case PACKET_QUEUED:
         case PACKET_QUEUED_AGAIN:
         case PACKET_NEED_TO_SEND_RIGHT_NOW:
-        case PACKET_SENT_NOACKED:
             break;
+        case PACKET_SENT_NOACKED:
+            if(nbfi.mack_mode < MACK_2) break;
         default:
             packets_free++;
             continue;
@@ -377,7 +378,7 @@ void NBFi_Clear_RX_Buffer()
 {
     for(uint8_t i = 0; i != NBFI_RX_PKTBUF_SIZE; i++ )
     {
-        nbfi_RX_pktBuf[i]->state = PACKET_CLEARED;
+        if(nbfi_RX_pktBuf[i]->state != PACKET_RECEIVED) nbfi_RX_pktBuf[i]->state = PACKET_CLEARED;
     }
 }
 
@@ -442,9 +443,13 @@ void NBFi_Resend_Pkt(nbfi_transport_packet_t* act_pkt, uint32_t mask)
         if(one&mask)
         {
           mask &= ~one;
-          pkt->state = PACKET_QUEUED_AGAIN;
-          if(last_resending_pkt == 0) last_resending_pkt = pkt;
-          nbfi_state.fault_total++;
+          if(++pkt->retry_num > nbfi.num_of_retries) pkt->state = PACKET_LOST;
+          else
+          {
+            pkt->state = PACKET_QUEUED_AGAIN;
+            if(last_resending_pkt == 0) last_resending_pkt = pkt;
+            nbfi_state.fault_total++;
+          }
         }
         else
         {

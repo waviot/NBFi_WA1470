@@ -6,22 +6,24 @@
 #define WRITE_PARAM_WITH_ACK_CMD    0x02
 #define WRITE_PARAM_AND_SAVE_CMD    0x03
 
-#define NBFI_PARAM_MODE         0x00
-#define NBFI_PARAM_HANDSHAKE    0x01
-#define NBFI_PARAM_MAXLEN       0x02
-#define NBFI_PARAM_TXFREQ       0x03
-#define NBFI_PARAM_RXFREQ       0x04
-#define NBFI_PARAM_ANT          0x05
-#define NBFI_PARAM_DL_ADD       0x06
-#define NBFI_PARAM_HEART_BEAT   0x07
-#define NBFI_PARAM_TX_BRATES    0x08
-#define NBFI_PARAM_RX_BRATES    0x09
-#define NBFI_PARAM_VERSION      0x0A
-#define NBFI_ADD_FLAGS          0x0B
-#define NBFI_QUALITY            0x0C
-#define NBFI_UL_BASE_FREQ       0x0D
-#define NBFI_DL_BASE_FREQ       0x0E
-#define NBFI_QUALITY_EX         0x0F
+#define NBFI_PARAM_MODE                 0x00
+#define NBFI_PARAM_HANDSHAKE            0x01
+#define NBFI_PARAM_MAXLEN               0x02
+#define NBFI_PARAM_TXFREQ               0x03
+#define NBFI_PARAM_RXFREQ               0x04
+#define NBFI_PARAM_ANT                  0x05
+#define NBFI_PARAM_DL_ADD               0x06
+#define NBFI_PARAM_HEART_BEAT           0x07
+#define NBFI_PARAM_TX_BRATES            0x08
+#define NBFI_PARAM_RX_BRATES            0x09
+#define NBFI_PARAM_VERSION              0x0A
+#define NBFI_ADD_FLAGS                  0x0B
+#define NBFI_QUALITY                    0x0C
+#define NBFI_UL_BASE_FREQ               0x0D
+#define NBFI_DL_BASE_FREQ               0x0E
+#define NBFI_QUALITY_EX                 0x0F
+#define NBFI_PARAM_BROADCAST_ADD        0x10
+
 
 typedef struct
 {
@@ -46,19 +48,21 @@ typedef struct
     uint8_t     additional_flags;
     uint32_t    ul_freq_base;
     uint32_t    dl_freq_base;
-    uint8_t     reserved[3];
+    uint8_t     freq_plan;
+    uint8_t     reserved[2];
 }nbfi_settings_t;
 
 extern nbfi_settings_t nbfi;
 
 //aditional flags:
-#define NBFI_FLG_FIXED_BAUD_RATE        0x01
-#define NBFI_FLG_NO_RESET_TO_DEFAULTS   0x02
-#define NBFI_FLG_NO_SENDINFO            0x04
-#define NBFI_FLG_NO_XTEA                0x08
-#define NBFI_FLG_DO_OSCCAL              0x10
-#define NBFI_FLG_NO_REDUCE_TX_PWR       0x20
-#define NBFI_OFF_MODE_ON_INIT           0x40
+#define NBFI_FLG_FIXED_BAUD_RATE                0x01
+#define NBFI_FLG_NO_RESET_TO_DEFAULTS           0x02
+#define NBFI_FLG_NO_SENDINFO                    0x04
+#define NBFI_FLG_NO_XTEA                        0x08
+#define NBFI_FLG_DO_OSCCAL                      0x10
+#define NBFI_FLG_NO_REDUCE_TX_PWR               0x20
+#define NBFI_OFF_MODE_ON_INIT                   0x40
+#define NBFI_FLG_DO_NOT_SEND_PKTS_ON_START      0x80
 
 typedef struct
 {
@@ -83,8 +87,16 @@ extern nbfi_dev_info_t dev_info;
 #define UL864000_DL446000            6
 #define UL863175_DL446000            7
 #define UL864000_DL875000            8
-#define UL868800_DL869100            20
-#define UL868800_DL868000            99
+#define UL868100_DL869550            9
+#define UL868500_DL864000            10
+#define UL864000_DL864000            11 //KAZ
+#define UL868800_DL869100            12 //NEWRU
+#define UL866975_DL865000            13 //INDIA
+
+//FREQENCY PLANS
+#define NBFI_FREQ_PLAN_DEFAULT                  0
+#define NBFI_FREQ_PLAN_SHIFTED_HIGHPHY          1
+
 
 typedef enum
 {
@@ -112,7 +124,7 @@ void NBFi_Config_Set_Device_Info(nbfi_dev_info_t *);
 nbfi_settings_t* NBFi_get_settings();
 _Bool NBFi_Config_Parser(uint8_t* buf);
 void NBFi_Clear_Saved_Configuration();
-void NBFi_Config_Set_FastDl(_Bool);
+void NBFi_Config_Set_FastDl(_Bool, _Bool);
 _Bool NBFi_Is_Mode_Normal();
 
 #endif // NBFI_CONFIG_H

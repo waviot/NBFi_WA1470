@@ -60,7 +60,7 @@
 const nbfi_settings_t nbfi_set_default =
 {
     CRX,//mode;
-    UL_DBPSK_50_PROT_D, // tx_phy_channel;
+    UL_DBPSK_50_PROT_D,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
     DL_DBPSK_50_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
     MACK_1,             //mack_mode
@@ -75,11 +75,12 @@ const nbfi_settings_t nbfi_set_default =
     PCB,                //tx_antenna;
     PCB,                //rx_antenna;
     TX_MAX_POWER,       //tx_pwr;
-    3600*6,             //heartbeat_interval
+    1,//3600*6,             //heartbeat_interval
     255,                //heartbeat_num
-    NBFI_FLG_NO_SENDINFO,                  //additional_flags
+    0,//NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
     NBFI_UL_FREQ_BASE,
-    NBFI_DL_FREQ_BASE
+    NBFI_DL_FREQ_BASE,
+    NBFI_FREQ_PLAN_SHIFTED_HIGHPHY
 };
 
 
@@ -455,7 +456,8 @@ void nbfi_receive_complete(uint8_t * data, uint16_t length)
 {
 
   NBFi_Send(data, length); //loopback
-  
+  //uint8_t _data[]={1,2,3,4,5};
+  //NBFi_Send(_data, 5);
 }
 
 uint8_t nbfi_lock = 1;

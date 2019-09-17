@@ -41,17 +41,25 @@ void wa1470mod_isr(void)
 
 }
 
-
+extern void (*__wa1470_nop_dalay_ms)(uint32_t);
 void wa1470mod_send(uint8_t* data, mod_bitrate_s bitrate)
 { 
   wa1470mod_set_bitrate(bitrate);
+ //tatic uint8_t tmpmas[36] = {0x97,0x15,0x7A,0x6F,0x79,0x73,0x92,0xC0,0x0A,0x0B,0xEB,0x5B,0x23,0x0D,0xE6,0xDA,0xE2,0x67,0x7A,0x52,0x44,0x54,0xF0,0x11,0x45,0xBD,0x1C,0xA4,0xF9,0x6E,0xB0,0x66,0xCA,0xBF,0x47,0x9E};
+  /*static uint8_t counter = 0;
+  
+  if(++counter == 5)
+  {
+    for(int i=0; i != 36; i++) data[i] = tmpmas[i];
+  }*/
+  
   switch(bitrate)
   {
+    case MOD_DBPSK_25600_PROT_D:
     case MOD_DBPSK_50_PROT_D:
     case MOD_DBPSK_400_PROT_D:
     case MOD_DBPSK_3200_PROT_D:
-    case MOD_DBPSK_25600_PROT_D:
-      for(uint8_t i = 0; i != 36; i++) wa1470_spi_write8(MOD_DATA_START + i, data[i]);
+      for(int i = 0; i != 36; i++) wa1470_spi_write8(MOD_DATA_START + i, data[i]);
       //wa1470_spi_write(MOD_DATA_START, data, 36);
       wa1470_spi_write8(MOD_CONFIG, MOD_CONF_IRQ_ON_TX_END_EN|MOD_CONF_CLEAR_IRQ|MOD_CONF_TX_START);
       break;
@@ -71,6 +79,7 @@ void wa1470mod_send(uint8_t* data, mod_bitrate_s bitrate)
       wa1470_spi_write8(MOD_CONFIG, MOD_CONF_HOP_EN|MOD_CONF_PROT_E_EN|MOD_CONF_IRQ_ON_TX_END_EN|MOD_CONF_CLEAR_IRQ|MOD_CONF_TX_START);
       break;
   }
+     
   
 }
 

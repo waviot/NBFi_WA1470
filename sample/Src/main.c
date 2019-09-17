@@ -18,8 +18,16 @@ extern void (*__wa1470_disable_pin_irq)(void);
 
 void send_data(struct wtimer_desc *desc) {
 
- if(!NBFi_Packets_To_Send())
-    NBFi_Send("Hello everybody!", sizeof("Hello everybody!"));
+  static uint64_t mas[2]={0,0x0123456789ABCDEF};
+  
+/* if(!NBFi_Packets_To_Send())
+ {
+     uint8_t _data[]={1,2,3,4,5};
+    NBFi_Send(_data, 5); 
+   //NBFi_Send((uint8_t*)mas, 16);
+    _data[4]++;
+    //mas[0]++;
+ }*/
   ScheduleTask(desc, 0, RELATIVE, SECONDS(10));
   
 }

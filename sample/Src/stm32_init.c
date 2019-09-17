@@ -76,17 +76,17 @@ void MX_NVIC_Init(void)
 void MX_GPIO_Init(void)
 {
 
-  GPIO_InitTypeDef GPIO_InitStruct;
+ // GPIO_InitTypeDef GPIO_InitStruct;
 
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
-  GPIO_InitStruct.Pin = GPIO_PIN_12;   //BPSK
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  //GPIO_InitStruct.Pin = AX_BPSK_PIN_Pin;   //BPSK PIN
+  //GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  //GPIO_InitStruct.Pull = GPIO_NOPULL;
+  //GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  //HAL_GPIO_Init(AX_BPSK_PIN_GPIO_Port, &GPIO_InitStruct);
 
   
 }

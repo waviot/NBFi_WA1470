@@ -88,7 +88,7 @@ typedef enum
         RFE_BAND_LOCUR              = 2
 }rfe_rx_mode_s;
 
-void wa1470rfe_init();
+void wa1470rfe_init(_Bool send_by_bpsk_pin);
 void wa1470rfe_deinit();
 //void wa1470rfe_reset();
 //void wa1470rfe_enable();

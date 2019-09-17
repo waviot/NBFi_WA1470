@@ -1,8 +1,8 @@
 #include "nbfi.h"
 #include "nbfi_config.h"
-#include "nbfi_phy.h"
+#include "nbfi_mac.h"
 #include "nbfi_misc.h"
-#include "rf.h"
+#include "nbfi_rf.h"
 #include <wtimer.h>
 #include <stdlib.h>
 #include <string.h>
@@ -615,7 +615,7 @@ void NBFi_Config_Set_FastDl(_Bool fast, _Bool save_settings)
         else NBFi_Config_Set_Default();
     }
 
-    if(rf_state == STATE_RX) NBFi_RX();
+    if(rf_state == STATE_RX) NBFi_MAC_RX();
     
     if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
 }

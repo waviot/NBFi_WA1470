@@ -4,7 +4,8 @@
 #include "wtimer.h"
 #include "string.h"
 #include "nbfi.h"
-#include "rf.h"
+#include "nbfi_mac.h"
+#include "nbfi_rf.h"
 #include "nbfi_config.h"
 #include "stm32l0xx_hal_conf.h"
 
@@ -117,6 +118,9 @@ static LPTIM_HandleTypeDef hlptim;
 #define AX_CHIP_EN_Pin 			GPIO_PIN_13
 #define AX_DFT_EN_GPIO_Port 		GPIOB
 #define AX_DFT_EN_Pin 			GPIO_PIN_11
+#define AX_BPSK_PIN_GPIO_Port 		GPIOB
+#define AX_BPSK_PIN_Pin 		GPIO_PIN_12
+
 
 
 void RADIO_GPIO_Init()
@@ -146,6 +150,7 @@ void RADIO_GPIO_Init()
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(AX_IRQ_GPIO_Port, &GPIO_InitStruct);
 
+           
   HAL_NVIC_SetPriority(AX_IRQ_EXTI_IRQn, 1, 0);
   HAL_NVIC_EnableIRQ(AX_IRQ_EXTI_IRQn);
   
@@ -227,6 +232,21 @@ void LPTIM1_IRQHandler(void)
 	}
 }
 
+
+
+void RADIO_BPSK_PIN_Init(void)
+{
+  GPIO_InitTypeDef GPIO_InitStruct;
+  GPIO_InitStruct.Pin = AX_BPSK_PIN_Pin;   
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+  HAL_GPIO_Init(AX_BPSK_PIN_GPIO_Port, &GPIO_InitStruct);  
+}      
+
+
+
+    
 void SPI_RX(uint8_t* byte, uint16_t len) {
 	volatile uint16_t timeout;
 	
@@ -333,6 +353,13 @@ void radio_spi_write_cs(uint8_t state)
   else
 	HAL_GPIO_WritePin(AX_CS_GPIO_Port, AX_CS_Pin, GPIO_PIN_RESET);
 }
+
+
+void radio_bpsk_pin_send(uint8_t* data, uint16_t len, uint16_t bitrate)
+{
+  wa1470_bpsk_pin_tx_finished();
+}
+
 
 #define NOP_DELAY_MS_TICK		1600
 void NOP_Delay(uint32_t i)
@@ -478,6 +505,8 @@ void radio_init(void)
         
         RADIO_SPI_Init();
         
+        RADIO_BPSK_PIN_Init();
+        
 	wa1470_reg_func(WARADIO_ENABLE_GLOBAL_IRQ, (void*)radio_enable_global_irq);
 	wa1470_reg_func(WARADIO_DISABLE_GLOBAL_IRQ, (void*)radio_disable_global_irq);
 	wa1470_reg_func(WARADIO_ENABLE_IRQ_PIN, (void*)radio_enable_pin_irq);
@@ -490,6 +519,8 @@ void radio_init(void)
 	wa1470_reg_func(WARADIO_SPI_TX_RX, (void*)radio_spi_tx_rx);
 	wa1470_reg_func(WARADIO_SPI_CS_WRITE, (void*)radio_spi_write_cs);
         wa1470_reg_func(WARADIO_NOP_DELAY_MS, (void*)NOP_Delay_ms);
+        wa1470_reg_func(WARADIO_SEND_TO_BPSK_PIN, (void*)radio_bpsk_pin_send);
+        
 	wtimer_reg_func(WTIMER_GLOBAL_IRQ_ENABLE, (void*)radio_enable_global_irq);
 	wtimer_reg_func(WTIMER_GLOBAL_IRQ_DISABLE, (void*)radio_disable_global_irq);
 	wtimer_reg_func(WTIMER_CC_IRQ_ENABLE, (void*)wtimer_cc_irq_enable);
@@ -521,7 +552,12 @@ void radio_init(void)
         
         //NBFi_Clear_Saved_Configuration(); //if you need to clear previously saved nbfi configuration in EEPROM
 	//wa1470_set_freq(868800000);
-        NBFI_Init(0);
+        
+        wa1470_reg_func(WARADIO_DATA_RECEIVED, (void*)NBFi_MAC_RX_ProtocolD);
+        wa1470_reg_func(WARADIO_TX_FINISHED, (void*)NBFi_RF_TX_Finished);
+        wa1470_init(WA1470_SEND_BY_I_Q_MODULATOR);
+    
+        NBFI_Init();
   
 }
 

@@ -2619,22 +2619,22 @@
         <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_defines.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_mac.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_mac.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_misc.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_misc.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_phy.c</name>
+        <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_rf.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_phy.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\NBFiLib\nbfi\rf.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\NBFiLib\nbfi\rf.h</name>
+        <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_rf.h</name>
       </file>
     </group>
     <group>
@@ -2656,6 +2656,9 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470mod.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470mod_bpsk_pin.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470rfe.c</name>

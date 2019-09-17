@@ -16,10 +16,10 @@ void (*__spi_rx)(uint8_t *, uint16_t);
 void (*__spi_tx)(uint8_t *, uint16_t);
 void (*__spi_tx_rx)(uint8_t *, uint8_t *, uint16_t);
 void (*__spi_cs_set)(uint8_t);
-void (*__wa1470_data_received)(dem_packet_st *pkt, dem_packet_info_st * info) = 0;
+void (*__wa1470_data_received)(uint8_t *, uint8_t *) = 0;
 void (*__wa1470_tx_finished)(void) = 0;
 void (*__wa1470_nop_dalay_ms)(uint32_t) = 0;
-
+void (*__wa1470_send_to_bpsk_pin)(uint8_t *, uint16_t, uint16_t) = 0;
 
 void wa1470_reg_func(uint8_t name, void*  fn)
 {
@@ -59,7 +59,7 @@ void wa1470_reg_func(uint8_t name, void*  fn)
 		__spi_cs_set = (void(*)(uint8_t))fn;
 		break;
 	case WARADIO_DATA_RECEIVED:
-		__wa1470_data_received = (void(*)(dem_packet_st*, dem_packet_info_st*))fn;
+		__wa1470_data_received = (void(*)(uint8_t*, uint8_t*))fn;
 		break;
         case WARADIO_TX_FINISHED:
 		__wa1470_tx_finished = (void(*)(void))fn;
@@ -67,6 +67,9 @@ void wa1470_reg_func(uint8_t name, void*  fn)
         case WARADIO_NOP_DELAY_MS:
               	__wa1470_nop_dalay_ms = (void(*)(uint32_t))fn;
 		break;
+        case WARADIO_SEND_TO_BPSK_PIN:
+                __wa1470_send_to_bpsk_pin = (void(*)(uint8_t*,uint16_t,uint16_t))fn;
+                break;
 	default:
 		break;
 	}
@@ -122,11 +125,11 @@ _Bool wa1470_spi_wait_for(uint16_t address, uint8_t value, uint8_t mask)
 }
 
 
-void wa1470_init()
+void wa1470_init(_Bool send_by_bpsk_pin)
 {
-  wa1470rfe_init();
+  wa1470rfe_init(send_by_bpsk_pin);
   wa1470dem_init();
-  wa1470mod_init(); 
+  wa1470mod_init(send_by_bpsk_pin); 
 }
 
 void wa1470_isr()

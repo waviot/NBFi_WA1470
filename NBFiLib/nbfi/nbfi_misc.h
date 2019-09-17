@@ -35,7 +35,7 @@ typedef struct
         uint8_t header;
     };
     uint8_t payload[0];     //begining of packet payload
-}nbfi_pfy_packet_t;
+}nbfi_transport_frame_t;
 
 
 /*NBFi transport layer packet struct*/
@@ -46,7 +46,7 @@ typedef struct
     uint8_t             retry_num;          //retry counter
     uint8_t             mack_num;           //number of packets for multi ack mode
     uint8_t             phy_data_length;    //length of packet payload(without header)
-    nbfi_pfy_packet_t   phy_data;           //physical layer packet data
+    nbfi_transport_frame_t   phy_data;      //transport layer frame data
 }nbfi_transport_packet_t;
 
 
@@ -56,7 +56,7 @@ void                                NBFi_RxPacket_Free(nbfi_transport_packet_t* 
 nbfi_transport_packet_t*            NBFi_AllocateRxPkt(uint8_t header, uint8_t payload_length);
 nbfi_transport_packet_t*            NBFi_GetQueuedTXPkt();
 void                                NBFi_Mark_Lost_All_Unacked();
-_Bool                               NBFi_Check_RX_Packet_Duplicate(nbfi_pfy_packet_t * pkt, uint8_t len);
+_Bool                               NBFi_Check_RX_Packet_Duplicate(nbfi_transport_frame_t * pkt, uint8_t len);
 nbfi_transport_packet_t*            NBFi_Get_QueuedRXPkt(uint8_t *groupe, uint16_t *total_length);
 nbfi_transport_packet_t*            NBFi_GetSentTXPkt_By_Iter(uint8_t iter);
 uint8_t                             NBFi_Calc_Queued_Sys_Packets_With_Type(uint8_t type);

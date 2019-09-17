@@ -1,10 +1,10 @@
 #include "nbfi.h"
 #include "wa1470.h"
-#include "nbfi_phy.h"
+#include "nbfi_mac.h"
 #include "nbfi_config.h"
 #include "nbfi_misc.h"
 #include "nbfi_defines.h"
-#include "rf.h"
+#include "nbfi_rf.h"
 #include "xtea.h"
 #include <stdlib.h>
 #include <wtimer.h>
@@ -81,6 +81,7 @@ static void    NBFi_RX_DL_EndHandler(struct wtimer_desc *desc);
 static void    NBFi_Wait_Extra_Handler(struct wtimer_desc *desc);
 static void    NBFi_SendHeartBeats(struct wtimer_desc *desc);
 static void    NBFi_Force_process();
+static nbfi_status_t NBFi_RX_Controller();
 
 _Bool NBFi_Config_Tx_Power_Change(nbfi_rate_direct_t dir);
 void NBFi_Config_Return();
@@ -357,24 +358,25 @@ void NBFi_ProcessRxPackets(_Bool external)
 }
 
 
-static void NBFi_ParseReceivedPacket(dem_packet_st *packet, dem_packet_info_st* info)
+void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_packet_t* info)
 {
-    int16_t rtc_offset;
+    
+  int16_t rtc_offset;
 
-    if((nbfi.mode != TRANSPARENT) && (!NBFi_Match_ID((uint8_t *)&packet->packet.id_0))) return;
+    //if((nbfi.mode != TRANSPARENT) && (!NBFi_MAC_Match_ID((uint8_t *)&packet->packet.id_0))) return;
 
     rx_complete = 1;
 
 
-    if(XTEA_Enabled() && XTEA_Available())
+ /*   if(XTEA_Enabled() && XTEA_Available())
     {
-        	/*uint64_t tmp = *((uint64_t*)packet->packet.payload);
-        	XTEA_Decode((uint8_t*)(&tmp));
-        	if(CRC8((uint8_t*)(&tmp), 8) == packet->packet.payload_crc)
-        	{
-        		*((uint64_t*)packet->packet.payload) = tmp;
-        	}
-        	else*/
+        	//uint64_t tmp = *((uint64_t*)packet->packet.payload);
+        	//XTEA_Decode((uint8_t*)(&tmp));
+        	//if(CRC8((uint8_t*)(&tmp), 8) == packet->packet.payload_crc)
+        	//{
+        	//	*((uint64_t*)packet->packet.payload) = tmp;
+        	//}
+        	//else
         	{
         		NBFi_XTEA_OFB(packet->packet.payload, 8, packet->packet.flags&0x1f);
         		if((CRC16(packet->packet.payload, 8, 0xffff)&0xff) != packet->packet.payload_crc) return;
@@ -384,35 +386,15 @@ static void NBFi_ParseReceivedPacket(dem_packet_st *packet, dem_packet_info_st* 
      {
         	uint8_t ccrc = CRC8(packet->packet.payload, 8);
         	if(ccrc != packet->packet.payload_crc) return;
-     }
+     }*/
 
     nbfi_state.DL_total++;
     
-    //if(++noise_min_cntr > NBFI_NOISE_DINAMIC[nbfi.rx_phy_channel - 10]) noise_min_cntr =   NBFI_NOISE_DINAMIC[nbfi.rx_phy_channel - 10];
-    
-    
-    /*uint8_t snr;
-    if(st->u.rx.phy.rssi < noise) snr = 0;
-    else snr = (st->u.rx.phy.rssi - noise) & 0xff;
-
-    nbfi_last_snr = snr;
-
-    nbfi_state.last_rssi = st->u.rx.phy.rssi;
-    nbfi_state.aver_rx_snr = (((uint16_t)nbfi_state.aver_rx_snr)*3 + snr)>>2;
-
-    nbfi_transport_packet_t* pkt = 0;*/
-    
-   /* uint64_t rssi64 = packet->rssi_39_32;
-    rssi64 <<= 32;
-    rssi64 += packet->rssi;
-    int16_t rssi = -130;//log10f(rssi64)*20 - 48 - LOGOFFSET;//fxlog(packet->rssi);
-    int16_t noise = -150;//log10f(noise32)*20 - LOGOFFSET;//fxlog(noise);
-    int8_t snr = 0;
-    if(rssi > noise) snr = rssi - noise;*/
 
     nbfi_state.aver_rx_snr = (((uint16_t)nbfi_state.aver_rx_snr)*3 + info->snr)>>2;
     nbfi_last_snr = info->snr;  
     noise = info->rssi - info->snr;  
+   
     nbfi_transport_packet_t* pkt = 0;
 
     if(nbfi.mode == TRANSPARENT)
@@ -422,7 +404,7 @@ static void NBFi_ParseReceivedPacket(dem_packet_st *packet, dem_packet_info_st* 
     }
 
 
-    nbfi_pfy_packet_t *phy_pkt = (nbfi_pfy_packet_t *)(&packet->packet.flags);
+    //nbfi_transport_frame_t *phy_pkt = (nbfi_transport_frame_t *)(&packet->packet.flags);
 
 
     wtimer0_remove(&wait_for_extra_desc);
@@ -662,7 +644,7 @@ static void NBFi_ProcessTasks(struct wtimer_desc *desc)
                 }
 
                 if(wait_RxEnd) {wait_RxEnd = 0; wtimer0_remove(&dl_drx_desc);}
-                NBFi_TX(pkt);
+                NBFi_MAC_TX(pkt);
 #ifdef NBFI_LOG
                 sprintf(log_string, "%05u: DL ", (uint16_t)(NBFi_get_RTC()&0xffff));
                 sprintf(log_string + strlen(log_string), " %c%c%c - %d - PLD:", pkt->phy_data.SYS?'S':' ', pkt->phy_data.ACK?'A':' ',pkt->phy_data.MULTI?'M':' ', pkt->phy_data.ITER&0x1f);
@@ -722,6 +704,36 @@ void NBFi_TX_Finished()
         else NBFI_Config_Check_State();
         NBFi_RX_Controller();
     }
+}
+
+static nbfi_status_t NBFi_RX_Controller()
+{
+    switch(nbfi.mode)
+    {
+    case  DRX:
+    case  NRX:
+        if(wait_RxEnd ) if(rf_state != STATE_RX)return NBFi_MAC_RX();
+        else break;
+        switch(nbfi_active_pkt->state)
+        {
+        case PACKET_WAIT_ACK:
+        case PACKET_QUEUED_AGAIN:
+        case PACKET_WAIT_FOR_EXTRA_PACKETS:
+            if(rf_state != STATE_RX) return NBFi_MAC_RX();
+            break;
+        default:
+            if(rf_state != STATE_OFF)  return NBFi_RF_Deinit();
+        }
+        break;
+    case CRX:
+    case TRANSPARENT:
+        if(rf_state != STATE_RX) return NBFi_MAC_RX();
+        break;
+    case OFF:
+        if(rf_state != STATE_OFF)  return NBFi_RF_Deinit();
+        break;
+    }
+    return OK;
 }
 
 static void NBFi_RX_DL_EndHandler(struct wtimer_desc *desc)
@@ -842,7 +854,7 @@ static void NBFi_SendHeartBeats(struct wtimer_desc *desc)
 {
 
     static uint16_t hb_timer = 0;
-    static uint16_t osccal_timer = 0;
+    //static uint16_t osccal_timer = 0;
 
     NBFi_update_RTC();
 
@@ -904,18 +916,18 @@ static void NBFi_SendHeartBeats(struct wtimer_desc *desc)
         }
     }
 
-
+/*
     if((nbfi.additional_flags&NBFI_FLG_DO_OSCCAL)&&(nbfi.mode <= DRX))
     {
         if((osccal_timer++%MAKE_OSCCAL_INTERVAL) == 0)
         {
             if(!rf_busy)
             {
-                RF_Init(OSC_CAL, (rf_antenna_t)0, 0, 0);
+                NBFi_RF_Init(OSC_CAL, (rf_antenna_t)0, 0, 0);
             }
         }
     }
-
+*/
 }
 
 static void NBFi_Force_process()
@@ -935,7 +947,7 @@ void NBFi_Go_To_Sleep(_Bool sleep)
     {
         nbfi.mode = OFF;
         NBFi_Clear_TX_Buffer();
-        RF_Deinit();
+        NBFi_RF_Deinit();
     }
     else
     {
@@ -955,10 +967,6 @@ void NBFi_Go_To_Sleep(_Bool sleep)
 nbfi_status_t NBFI_Init()
 {
     
-    wa1470_reg_func(WARADIO_DATA_RECEIVED, (void*)NBFi_ParseReceivedPacket);
-    wa1470_reg_func(WARADIO_TX_FINISHED, (void*)NBFi_TX_Finished);
-    
-    wa1470_init();
     
     NBFi_Config_Set_Default();
     for(uint8_t i = 0; i < NBFI_TX_PKTBUF_SIZE; i++) nbfi_TX_pktBuf[i] = 0;

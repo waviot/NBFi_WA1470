@@ -23,15 +23,15 @@ struct wtimer_desc dem_processMessages_desc;
 
 extern void (*__wa1470_enable_pin_irq)(void);
 extern void (*__wa1470_disable_pin_irq)(void);
-extern void (*__wa1470_data_received)(dem_packet_st *pkt, dem_packet_info_st * info);
+extern void (*__wa1470_data_received)(uint8_t*, uint8_t*);
 
 dem_packet_st tmp_dem_mas[DEM_MAS_SIZE];
 dem_packet_info_st tmp_dem_info_mas[DEM_MAS_SIZE];
 uint8_t	tmp_dem_mess_received;
 
 dem_bitrate_s current_rx_phy = DBPSK_100H_PROT_D;
-_Bool dem_rx_enabled = 0;
 
+_Bool dem_rx_enabled = 0;
 
 extern uint8_t (*__wa1470_get_irq_pin_state)(void);
 
@@ -39,17 +39,6 @@ uint8_t current_hop_table[8] = {DEM_PLUS90000,DEM_PLUS90000,DEM_PLUS40000,DEM_PL
 
 const int32_t DEM_FREQ_OFFSETS[8] = {90000,65000,40000,15000,-15000,-40000,-65000,-90000};
 
-
-//uint8_t mas[128];
-/*
-uint32_t dem_noise_sum[32];
-uint32_t dem_noise_min[32];
-float dem_noise[32];
-uint8_t dem_noise_cntr = 0;
-uint8_t dem_noise_min_cntr = 10;
-
-uint32_t aver_rssi_mas[32];
-*/
 
 struct wtimer_desc dem_update_noise_desc;
 float dem_noise = -150;
@@ -62,11 +51,10 @@ uint32_t dem_spectrum_mas[32];
 
 void wa1470dem_init()
 {
-  
+     
     uint8_t preambule[4] = {0x97,0x15,0x7a,0x6f};
     uint8_t NB_FI_RX_CRC_POLY[4] = {0xb7, 0x1d, 0xc1, 0x04};
   
-    //wa1470_spi_read(0x20, mas, 128);
     wa1470_spi_write8(DEM_CONTROL, DEM_CONTROL_RESET);
     wa1470dem_set_bitrate(DBPSK_50_PROT_D);
     wa1470dem_set_threshold(1024);
@@ -74,18 +62,9 @@ void wa1470dem_init()
     wa1470dem_set_crc_poly(NB_FI_RX_CRC_POLY);
     wa1470dem_set_hop_table(current_hop_table);
     wa1470dem_set_hop_len(36);
-    //wa1470dem_set_gain(23);
-    wa1470_spi_write8(DEM_FFT_MSB, 0x80 + 23);
-    //wa1470_spi_write8(DEM_DET_TRESHOLD, 0x58); // wtite 600 to DEM_DET_TRESHOLD
-    //wa1470_spi_write8(DEM_DET_TRESHOLD + 1, 0x02);
-    //wa1470dem_reset();
-    
+    wa1470_spi_write8(DEM_FFT_MSB, 0x80 + 23);    
     wa1470_spi_write8(DEM_CONTROL, 0);  
      
-    //wa1470_spi_read(0x20, mas, 128);
-    //memset(dem_noise_table_temp, 0xff, sizeof(dem_noise_table_temp));
-   // for(uint8_t i = 0; i != 32; i++) dem_noise_min[i] = -150;
-    //log_send_str_len("Demodulator inited\n\r", sizeof("Demodulator inited\n\r"));
 }
 
 void wa1470dem_reset(void)
@@ -175,7 +154,7 @@ static void  wa1470dem_process_messages(struct wtimer_desc *desc)
                     
                   }
                   log_send_str(log_string);
-                  __wa1470_data_received(&tmp_dem_mas[i], &tmp_dem_info_mas[i]);
+                  __wa1470_data_received((uint8_t*)&tmp_dem_mas[i].packet, (uint8_t*)&tmp_dem_info_mas[i]);
                 }
 	
 }

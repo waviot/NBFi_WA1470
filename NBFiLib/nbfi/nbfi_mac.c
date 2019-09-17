@@ -1,8 +1,8 @@
 #include "nbfi.h"
 #include "nbfi_config.h"
 #include "nbfi_misc.h"
-#include "nbfi_phy.h"
-#include "rf.h"
+#include "nbfi_mac.h"
+#include "nbfi_rf.h"
 #include "xtea.h"
 #include "zcode.h"
 #include <string.h>
@@ -16,21 +16,30 @@
 
 uint32_t last_pkt_crc = 0;
 
-const uint8_t protD_preambula[] = {0x97, 0x15, 0x7A, 0x6F};
-
-/*
-struct axradio_address  fastdladdress = {
-	{ 0x6f, 0x6f, 0x6f, 0x6f}
-};*/
-
-
-// rx_freq;
 
 extern nbfi_state_t nbfi_state;
 extern nbfi_transport_packet_t* nbfi_active_pkt;
 extern _Bool wait_RxEnd;
 
-static uint32_t NBFi_set_UL_freq(uint8_t lastcrc8, _Bool parity)
+void  NBFi_MAC_RX_ProtocolD(nbfi_mac_protd_packet_t* packet, nbfi_mac_info_packet_t* info)
+{
+    if(!NBFi_MAC_Match_ID((uint8_t *)&packet->id_0)) return;
+
+    if(XTEA_Enabled() && XTEA_Available())
+    {
+      NBFi_XTEA_OFB(packet->payload, 8, packet->flags&0x1f);
+      if((CRC16(packet->payload, 8, 0xffff)&0xff) != packet->payload_crc) return;
+    }
+    else
+    {
+      	uint8_t ccrc = CRC8(packet->payload, 8);
+       	if(ccrc != packet->payload_crc) return;
+    }
+     
+    NBFi_ParseReceivedPacket((nbfi_transport_frame_t *)(&packet->flags), info);
+}
+
+static uint32_t NBFi_MAC_set_UL_freq(uint8_t lastcrc8, _Bool parity)
 {
     uint32_t tx_freq;
     switch(nbfi.freq_plan)
@@ -60,8 +69,9 @@ static uint32_t NBFi_set_UL_freq(uint8_t lastcrc8, _Bool parity)
 }
 
 
-nbfi_status_t NBFi_TX_ProtocolD(nbfi_transport_packet_t* pkt)
+nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 {
+    const uint8_t protD_preambula[] = {0x97, 0x15, 0x7A, 0x6F};
     uint8_t ul_buf[64];
     uint8_t len = 0;
     static _Bool parity = 0;
@@ -133,7 +143,7 @@ nbfi_status_t NBFi_TX_ProtocolD(nbfi_transport_packet_t* pkt)
         tx_freq = nbfi.tx_freq ;
         parity = (nbfi.tx_freq > (nbfi.ul_freq_base + 25000));
     }
-    else tx_freq = NBFi_set_UL_freq(lastcrc8, parity);
+    else tx_freq = NBFi_MAC_set_UL_freq(lastcrc8, parity);
     
 
     if((nbfi.tx_phy_channel < UL_DBPSK_3200_PROT_D) && !downlink)
@@ -150,18 +160,18 @@ nbfi_status_t NBFi_TX_ProtocolD(nbfi_transport_packet_t* pkt)
     if((nbfi.mode == NRX) && parity) // For NRX send in ALOHA mode
     {
       
-      RF_Init(nbfi.tx_phy_channel, (rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
+      NBFi_RF_Init(nbfi.tx_phy_channel, (rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
       
-      RF_Transmit(ul_buf, len + ZCODE_LEN, nbfi.tx_phy_channel, BLOCKING);
+      NBFi_RF_Transmit(ul_buf, len + ZCODE_LEN, nbfi.tx_phy_channel, BLOCKING);
       
       nbfi_state.UL_total++;
       
-      return NBFi_TX_ProtocolD(pkt);
+      return NBFi_MAC_TX_ProtocolD(pkt);
     }
     
-    RF_Init(nbfi.tx_phy_channel, (rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
+    NBFi_RF_Init(nbfi.tx_phy_channel, (rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
       
-    RF_Transmit(ul_buf, len + ZCODE_LEN, nbfi.tx_phy_channel, NONBLOCKING);
+    NBFi_RF_Transmit(ul_buf, len + ZCODE_LEN, nbfi.tx_phy_channel, NONBLOCKING);
 
     nbfi_state.UL_total++;
 
@@ -169,7 +179,7 @@ nbfi_status_t NBFi_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 
 }
 
-_Bool NBFi_Match_ID(uint8_t * addr)
+_Bool NBFi_MAC_Match_ID(uint8_t * addr)
 {
     uint8_t i;
     for( i = 0; i !=3; i++) if(nbfi.temp_ID[i] != addr[i]) break;
@@ -181,11 +191,10 @@ _Bool NBFi_Match_ID(uint8_t * addr)
     return 0;
 }
 
-nbfi_status_t NBFi_TX(nbfi_transport_packet_t* pkt)
+nbfi_status_t NBFi_MAC_TX(nbfi_transport_packet_t* pkt)
 {
     
     //if((pkt->phy_data_length==0)&&(pkt->phy_data_length>240)) return ERR; // len check
-    wa1470dem_rx_enable(0);
     switch(nbfi.tx_phy_channel)
     {
     case UL_DBPSK_50_PROT_D:
@@ -196,7 +205,7 @@ nbfi_status_t NBFi_TX(nbfi_transport_packet_t* pkt)
     case DL_DBPSK_400_PROT_D:
     case DL_DBPSK_3200_PROT_D:
     case DL_DBPSK_25600_PROT_D:
-        return NBFi_TX_ProtocolD(pkt);
+        return NBFi_MAC_TX_ProtocolD(pkt);
     case UL_PSK_FASTDL:
     case UL_PSK_200:
     case UL_PSK_500:
@@ -209,44 +218,13 @@ nbfi_status_t NBFi_TX(nbfi_transport_packet_t* pkt)
 }
 
 
-nbfi_status_t NBFi_RX_Controller()
-{
-    switch(nbfi.mode)
-    {
-    case  DRX:
-    case  NRX:
-        if(wait_RxEnd ) if(rf_state != STATE_RX)return NBFi_RX();
-        else break;
-        switch(nbfi_active_pkt->state)
-        {
-        case PACKET_WAIT_ACK:
-        case PACKET_QUEUED_AGAIN:
-        case PACKET_WAIT_FOR_EXTRA_PACKETS:
-            if(rf_state != STATE_RX) return NBFi_RX();
-            break;
-        default:
-            if(rf_state != STATE_OFF)  return RF_Deinit();
-        }
-        break;
-    case CRX:
-    case TRANSPARENT:
-        if(rf_state != STATE_RX) return NBFi_RX();
-        break;
-    case OFF:
-        if(rf_state != STATE_OFF)  return RF_Deinit();
-        break;
-    }
-    return OK;
-}
-
-nbfi_status_t NBFi_RX()
+nbfi_status_t NBFi_MAC_RX()
 {
     nbfi_status_t result;
     uint32_t rx_freq;
     if(nbfi.rx_freq == 0) rx_freq = nbfi.dl_freq_base + ((*((const uint32_t*)FULL_ID)%276)*363);
     else rx_freq = nbfi.rx_freq;
-    wa1470dem_rx_enable(1);
-    result = RF_Init(nbfi.rx_phy_channel, (rf_antenna_t)nbfi.rx_antenna, 0, rx_freq);
+    result = NBFi_RF_Init(nbfi.rx_phy_channel, (rf_antenna_t)nbfi.rx_antenna, 0, rx_freq);
     return result;
 }
 

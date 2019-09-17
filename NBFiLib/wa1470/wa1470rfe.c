@@ -13,7 +13,7 @@ extern void (*__wa1470_chip_disable)(void);
 extern void (*__wa1470_nop_dalay_ms)(uint32_t);
 
 
-void wa1470rfe_init()
+void wa1470rfe_init(_Bool send_by_bpsk_pin)
 {
 
   if(__wa1470_chip_enable) __wa1470_chip_enable();
@@ -72,11 +72,10 @@ void wa1470rfe_init()
   
  wa1470rfe_set_pll_mode(RFE_PLL_MODE_FRACTIONAL);
   
-#ifdef TX_BPSK_PIN_MODE
+if(send_by_bpsk_pin)
   wa1470rfe_set_tx_mode(RFE_TX_MODE_BPSK);
-#else
+else
   wa1470rfe_set_tx_mode(RFE_TX_MODE_I_Q);
-#endif
   
   wa1470rfe_set_rx_mode(RFE_RX_MODE_LONF);
   wa1470rfe_set_rx_gain(RFE_DEFAULT_VGA_GAIN);

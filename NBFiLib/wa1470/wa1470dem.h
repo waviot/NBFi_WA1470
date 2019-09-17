@@ -51,14 +51,6 @@ typedef struct {
 } dem_packet_st;
 #pragma pack(pop)
 
-typedef struct {
-	uint8_t	num_of_crc;
-	uint8_t	num_of_zigzag;
-        int16_t rssi;
-        uint8_t snr;
-} dem_packet_info_st;
-
-
 typedef enum
 {
 	DBPSK_50_PROT_D		= 10,
@@ -68,7 +60,13 @@ typedef enum
         DBPSK_100H_PROT_D       = 18
 }dem_bitrate_s;
 
-
+typedef struct {
+        dem_bitrate_s bitrate;
+        int16_t rssi;
+        uint8_t snr;
+	uint8_t	num_of_crc;
+	uint8_t	num_of_zigzag;
+} dem_packet_info_st;
 
 //----------------------------------------------------------
 // DEMODULATOR REGs

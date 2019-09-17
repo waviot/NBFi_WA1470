@@ -1,7 +1,7 @@
 #include "nbfi.h"
 #include "nbfi_config.h"
 #include "nbfi_misc.h"
-#include "rf.h"
+#include "nbfi_rf.h"
 #include <stdlib.h>
 #include <string.h>
 
@@ -301,9 +301,9 @@ uint32_t NBFi_Get_RX_ACK_Mask()
     return mask;
 }
 
-_Bool NBFi_Check_RX_Packet_Duplicate(nbfi_pfy_packet_t * pkt, uint8_t len)
+_Bool NBFi_Check_RX_Packet_Duplicate(nbfi_transport_frame_t * pkt, uint8_t len)
 {
-    nbfi_pfy_packet_t *rec_pkt = &nbfi_RX_pktBuf[nbfi_state.DL_iter&0x1f]->phy_data;
+    nbfi_transport_frame_t *rec_pkt = &nbfi_RX_pktBuf[nbfi_state.DL_iter&0x1f]->phy_data;
 
     for(uint8_t i = 0; i != len; i++)
     {

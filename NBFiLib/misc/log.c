@@ -29,7 +29,6 @@ void log_send_str_len(const char *str, uint16_t len)
 	while(ptr != len) RS485_UART_send(str[ptr++]);
 }
 
-//extern uint32_t aver_rssi_mas[32];
 extern uint16_t rfe_rx_total_vga_gain;
 extern dem_bitrate_s current_rx_phy;
 void log_print_spectrum()
@@ -44,11 +43,8 @@ void log_print_spectrum()
   RS485_UART_send(0x5B);
   RS485_UART_send('J');
   uint16_t offset = 170;
-  uint32_t summ = 0;
   float max = -200;
   uint32_t freq;
-  static float aver_snr = 0;
-  static int aver_snr_count = 0;
   uint8_t len;
   float spectrum[32];
   switch(current_rx_phy)

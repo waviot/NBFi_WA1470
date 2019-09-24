@@ -90,7 +90,8 @@ typedef struct
     int16_t last_rssi;
     uint8_t UL_rating;
     uint8_t DL_rating;
-    uint32_t last_bs_id;
+    uint32_t bs_id;
+    uint32_t server_id;
 }nbfi_state_t;
 
 
@@ -113,14 +114,7 @@ typedef enum
 {
     PCB = 0,       //PCB or ANT 1
     SMA = 1        //SMA or ANT 2
-}rf_antenna_t;
-
-typedef enum
-{
-    RX = 0,
-    TX = 1,
-    IDLE = 2
-}rf_direction_t;
+}nbfi_rf_antenna_t;
 
 
 typedef void (*rx_handler_t)(uint8_t*, uint16_t);

@@ -52,7 +52,7 @@ uint32_t dem_spectrum_mas[32];
 void wa1470dem_init()
 {
      
-    uint8_t preambule[4] = {0x97,0x15,0x7a,0x6f};
+    //uint8_t preambule[4] = {0x97,0x15,0x7a,0x6f};
     uint8_t NB_FI_RX_CRC_POLY[4] = {0xb7, 0x1d, 0xc1, 0x04};
   
     wa1470_spi_write8(DEM_CONTROL, DEM_CONTROL_RESET);
@@ -230,11 +230,13 @@ int16_t wa1470dem_get_bitrate_sensitivity(dem_bitrate_s bitrate)
 {
 	switch(bitrate)
 	{
-          case DBPSK_50_PROT_D: return -148;
+          case DBPSK_50_PROT_D: 
+          default: return -148;
           case DBPSK_400_PROT_D: return -139;
           case DBPSK_3200_PROT_D: return -130;
           case DBPSK_25600_PROT_D: return -118;
           case DBPSK_100H_PROT_D: return -145;
+        
 	}  
 }
 
@@ -356,7 +358,6 @@ static uint32_t wa1470dem_get_rssi_int(_Bool aver_or_max)
   uint32_t data[32];
   uint8_t size;
   uint32_t rssi = 0;
-  uint32_t gain = 1;
   uint32_t max = 0;
   switch(current_rx_phy)
   {
@@ -371,7 +372,6 @@ static uint32_t wa1470dem_get_rssi_int(_Bool aver_or_max)
       break;
     case DBPSK_25600_PROT_D:
       size = 1;
-      gain = 64;
       break;  
     case DBPSK_100H_PROT_D:
       size = 16;

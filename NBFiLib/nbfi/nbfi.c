@@ -5,7 +5,7 @@
 #include "nbfi_misc.h"
 #include "nbfi_defines.h"
 #include "nbfi_rf.h"
-#include "xtea.h"
+#include "nbfi_crypto.h"
 #include <stdlib.h>
 #include <wtimer.h>
 #include <string.h>
@@ -20,7 +20,7 @@ extern nbfi_transport_packet_t * nbfi_TX_pktBuf[NBFI_TX_PKTBUF_SIZE];
 extern nbfi_transport_packet_t* nbfi_RX_pktBuf[NBFI_RX_PKTBUF_SIZE];
 
 
-nbfi_state_t nbfi_state = {0,0,0,0,0,0,0,0,0,0,0};
+nbfi_state_t nbfi_state = {0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 extern nbfi_dev_info_t dev_info;
 
@@ -361,32 +361,9 @@ void NBFi_ProcessRxPackets(_Bool external)
 void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_packet_t* info)
 {
     
-  int16_t rtc_offset;
-
-    //if((nbfi.mode != TRANSPARENT) && (!NBFi_MAC_Match_ID((uint8_t *)&packet->packet.id_0))) return;
+    int16_t rtc_offset;
 
     rx_complete = 1;
-
-
- /*   if(XTEA_Enabled() && XTEA_Available())
-    {
-        	//uint64_t tmp = *((uint64_t*)packet->packet.payload);
-        	//XTEA_Decode((uint8_t*)(&tmp));
-        	//if(CRC8((uint8_t*)(&tmp), 8) == packet->packet.payload_crc)
-        	//{
-        	//	*((uint64_t*)packet->packet.payload) = tmp;
-        	//}
-        	//else
-        	{
-        		NBFi_XTEA_OFB(packet->packet.payload, 8, packet->packet.flags&0x1f);
-        		if((CRC16(packet->packet.payload, 8, 0xffff)&0xff) != packet->packet.payload_crc) return;
-        	}
-     }
-     else
-     {
-        	uint8_t ccrc = CRC8(packet->packet.payload, 8);
-        	if(ccrc != packet->packet.payload_crc) return;
-     }*/
 
     nbfi_state.DL_total++;
     
@@ -402,9 +379,6 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
         NBFi_RX_Controller();
         return;
     }
-
-
-    //nbfi_transport_frame_t *phy_pkt = (nbfi_transport_frame_t *)(&packet->packet.flags);
 
 
     wtimer0_remove(&wait_for_extra_desc);
@@ -910,24 +884,16 @@ static void NBFi_SendHeartBeats(struct wtimer_desc *desc)
         if(info_timer >= dev_info.send_info_interval)
         {
                 info_timer = 0;
-                NBFi_Config_Send_Mode(0, NBFI_PARAM_TX_BRATES);
-                NBFi_Config_Send_Mode(0, NBFI_PARAM_RX_BRATES);
-                NBFi_Config_Send_Mode(0, NBFI_PARAM_VERSION);
+                NBFi_Config_Send_Mode(nbfi.handshake_mode, NBFI_PARAM_VERSION);
+                NBFi_Config_Send_Mode(nbfi.handshake_mode, NBFI_PARAM_TX_BRATES);
+                NBFi_Config_Send_Mode(nbfi.handshake_mode, NBFI_PARAM_RX_BRATES);
+                NBFi_Config_Send_Mode(nbfi.handshake_mode, NBFI_PARAM_APP_IDS);
+                NBFi_Config_Send_Mode(nbfi.handshake_mode, NBFI_UL_BASE_FREQ);
+                NBFi_Config_Send_Mode(nbfi.handshake_mode, NBFI_DL_BASE_FREQ);
         }
     }
+    
 
-/*
-    if((nbfi.additional_flags&NBFI_FLG_DO_OSCCAL)&&(nbfi.mode <= DRX))
-    {
-        if((osccal_timer++%MAKE_OSCCAL_INTERVAL) == 0)
-        {
-            if(!rf_busy)
-            {
-                NBFi_RF_Init(OSC_CAL, (rf_antenna_t)0, 0, 0);
-            }
-        }
-    }
-*/
 }
 
 static void NBFi_Force_process()

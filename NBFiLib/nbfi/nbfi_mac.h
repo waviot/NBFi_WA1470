@@ -30,6 +30,5 @@ nbfi_status_t   NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt);
 nbfi_status_t   NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt);
 nbfi_status_t   NBFi_MAC_RX();
 nbfi_status_t   NBFi_MAC_TX(nbfi_transport_packet_t* pkt);
-void            NBFi_XTEA_OFB(uint8_t* buf, uint8_t len, uint8_t iter);
 
 #endif

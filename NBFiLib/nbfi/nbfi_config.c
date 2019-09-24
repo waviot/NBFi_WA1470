@@ -7,7 +7,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "nbfi_defines.h"
-#include "XTEA.h"
+#include "nbfi_crypto.h"
 
 
 #define memset_xdata memset
@@ -27,12 +27,13 @@ nbfi_dev_info_t dev_info =
 {
     0x700000,
     0,
-    RF_MIN_POWER,
-    RF_MAX_POWER,
-    HARDWARE_ID,
-    HARDWARE_REV,
-    BAND_ID,
-    SEND_INFO_INTERVAL
+    NBFI_DEFAULT_RF_MIN_POWER,
+    NBFI_DEFAULT_RF_MAX_POWER,
+    NBFI_DEFAULT_MANUFACTURER_ID,
+    NBFI_DEFAULT_HARDWARE_TYPE_ID,
+    NBFI_DEFAULT_PROTOCOL_ID,
+    NBFI_DEFAULT_BAND_ID,
+    NBFI_DEFAULT_SEND_INFO_INTERVAL
 };
 
 
@@ -53,10 +54,10 @@ const nbfi_settings_t nbfi_fastdl =
     865000000,      
     PCB,    
     PCB,    
-    RF_MAX_POWER,     
+    NBFI_DEFAULT_RF_MAX_POWER,     
     60,     
     0,      
-    NBFI_FLG_FIXED_BAUD_RATE | NBFI_FLG_NO_RESET_TO_DEFAULTS | NBFI_FLG_NO_SENDINFO |NBFI_FLG_NO_XTEA,
+    NBFI_FLG_FIXED_BAUD_RATE | NBFI_FLG_NO_RESET_TO_DEFAULTS | NBFI_FLG_NO_SENDINFO |NBFI_FLG_NO_CRYPTO,
     0,
     0,
     0
@@ -422,9 +423,13 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         buf[1] = NBFI_REV;
                         buf[2] = NBFI_SUBREV;
                         buf[3] = CompVersion();
-                        buf[4] = dev_info.hardware_id;
-                        buf[5] = dev_info.hardware_rev;
+                        bigendian_cpy((uint8_t*)&dev_info.hardware_type_id, &buf[4], 2);
                         buf[6] = dev_info.band_id;
+                        break;
+                    case NBFI_PARAM_APP_IDS:
+                        bigendian_cpy((uint8_t*)&dev_info.manufacturer_id, &buf[1], 2);
+                        bigendian_cpy((uint8_t*)&dev_info.hardware_type_id, &buf[3], 2);
+                        bigendian_cpy((uint8_t*)&dev_info.protocol_id, &buf[5], 2);
                         break;
                     case NBFI_QUALITY:
                         bigendian_cpy((uint8_t*)&nbfi_state.UL_total, &buf[1], 2);
@@ -437,6 +442,10 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         buf[2] = nbfi_state.DL_rating;
                         bigendian_cpy((uint8_t*)&nbfi_state.success_total, &buf[3], 2);
                         bigendian_cpy((uint8_t*)&nbfi_state.fault_total, &buf[5], 2);
+                        break;
+                    case NBFI_PARAM_BSANDSERVER_IDS:
+                        bigendian_cpy((uint8_t*)&nbfi_state.bs_id, &buf[1], 3);
+                        bigendian_cpy((uint8_t*)&nbfi_state.server_id, &buf[4], 3);
                         break;
                     case NBFI_ADD_FLAGS:
                         buf[1] = nbfi.additional_flags;
@@ -713,7 +722,7 @@ _Bool NBFi_Is_Mode_Normal()
 void NBFi_Config_Set_Device_Info(nbfi_dev_info_t *info)
 {
 	dev_info = *info;
-        if(dev_info.key) XTEA_Set_KEY(dev_info.key);
+        if(dev_info.key) NBFi_Crypto_Set_KEY(dev_info.key);
 }
 
 nbfi_settings_t* NBFi_get_settings()

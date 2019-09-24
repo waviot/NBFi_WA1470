@@ -3,7 +3,7 @@
 #include "nbfi_misc.h"
 #include "nbfi_mac.h"
 #include "nbfi_rf.h"
-#include "xtea.h"
+#include "nbfi_crypto.h"
 #include "zcode.h"
 #include <string.h>
 #include <stdlib.h> 
@@ -21,13 +21,15 @@ extern nbfi_state_t nbfi_state;
 extern nbfi_transport_packet_t* nbfi_active_pkt;
 extern _Bool wait_RxEnd;
 
+void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_packet_t* info);
+
 void  NBFi_MAC_RX_ProtocolD(nbfi_mac_protd_packet_t* packet, nbfi_mac_info_packet_t* info)
 {
     if(!NBFi_MAC_Match_ID((uint8_t *)&packet->id_0)) return;
 
-    if(XTEA_Enabled() && XTEA_Available())
+    if(NBFi_Crypto_Available()&&!(nbfi.additional_flags&NBFI_FLG_NO_CRYPTO))
     {
-      NBFi_XTEA_OFB(packet->payload, 8, packet->flags&0x1f);
+      NBFi_Crypto_OFB(packet->payload, 8, nbfi.temp_ID, packet->flags&0x1f);
       if((CRC16(packet->payload, 8, 0xffff)&0xff) != packet->payload_crc) return;
     }
     else
@@ -119,9 +121,9 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 
     lastcrc8 =  CRC8(&ul_buf[len], 8);
     
-    if(XTEA_Enabled() && XTEA_Available() && !(nbfi.additional_flags&NBFI_FLG_NO_XTEA))
+    if(NBFi_Crypto_Available() && !(nbfi.additional_flags&NBFI_FLG_NO_CRYPTO))
     {
-        XTEA_Encode(&ul_buf[len]);
+        NBFi_Crypto_Encode(&ul_buf[len]);
     }
    
     len += 8;
@@ -160,7 +162,7 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
     if((nbfi.mode == NRX) && parity) // For NRX send in ALOHA mode
     {
       
-      NBFi_RF_Init(nbfi.tx_phy_channel, (rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
+      NBFi_RF_Init(nbfi.tx_phy_channel, (nbfi_rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
       
       NBFi_RF_Transmit(ul_buf, len + ZCODE_LEN, nbfi.tx_phy_channel, BLOCKING);
       
@@ -169,7 +171,7 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
       return NBFi_MAC_TX_ProtocolD(pkt);
     }
     
-    NBFi_RF_Init(nbfi.tx_phy_channel, (rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
+    NBFi_RF_Init(nbfi.tx_phy_channel, (nbfi_rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
       
     NBFi_RF_Transmit(ul_buf, len + ZCODE_LEN, nbfi.tx_phy_channel, NONBLOCKING);
 
@@ -224,30 +226,8 @@ nbfi_status_t NBFi_MAC_RX()
     uint32_t rx_freq;
     if(nbfi.rx_freq == 0) rx_freq = nbfi.dl_freq_base + ((*((const uint32_t*)FULL_ID)%276)*363);
     else rx_freq = nbfi.rx_freq;
-    result = NBFi_RF_Init(nbfi.rx_phy_channel, (rf_antenna_t)nbfi.rx_antenna, 0, rx_freq);
+    result = NBFi_RF_Init(nbfi.rx_phy_channel, (nbfi_rf_antenna_t)nbfi.rx_antenna, 0, rx_freq);
     return result;
 }
 
 
-void NBFi_XTEA_OFB(uint8_t* buf, uint8_t len, uint8_t iter)
-{
- uint8_t vector[8];
- for(uint8_t i = 0; i != 3; i++)
- {
-    vector[i] = 0;
-    vector[i+5] = nbfi.temp_ID[i];
- }
- vector[3] = 0;
- vector[4] = iter;
-
- uint8_t n = 0;// number of cyphered bytes
-
- while(n < len)
- {
-
-  if((n % 8) == 0) XTEA_Encode(vector); // next block
-
-  buf[n] = vector[n%8] ^ buf[n];
-  n++;
- }
-}

@@ -24,7 +24,7 @@ extern void (* __nbfi_before_off)();
 
 
 nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
-                        rf_antenna_t        antenna,
+                        nbfi_rf_antenna_t        antenna,
                         int8_t              power,
                         uint32_t            freq)
 {

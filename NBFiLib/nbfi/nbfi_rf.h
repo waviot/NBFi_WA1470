@@ -54,7 +54,7 @@ extern _Bool transmit;
 //void            RF_SetDstAddress(uint8_t * addr);
 //void            RF_SetLocalAddress(uint8_t * addr);
 nbfi_status_t   NBFi_RF_Init(nbfi_phy_channel_t  phy_channel,
-                        rf_antenna_t        antenna,
+                        nbfi_rf_antenna_t        antenna,
                         int8_t              power,
                         uint32_t            freq);
 nbfi_status_t   NBFi_RF_Deinit();

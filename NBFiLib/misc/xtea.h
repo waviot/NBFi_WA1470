@@ -1,19 +1,10 @@
 #ifndef XTEA_H
 #define XTEA_H
 
+typedef  uint32_t*  xtea_key_t;
 
-void XTEA_Encode(uint8_t* buf);
+void XTEA_Encode(unsigned long * data, unsigned char dataLength, xtea_key_t key);
 
-void XTEA_Decode(uint8_t* buf);
-
-_Bool XTEA_Available();
-
-_Bool XTEA_Enabled();
-
-void XTEA_Enable(_Bool enable);
-
-void XTEA_Set_KEY(uint32_t* key);
-
-void XTEA_Set_KEY_Ptr(uint32_t* ptr);
+void XTEA_Decode(unsigned long * data, unsigned char dataLength, xtea_key_t key);
 
 #endif

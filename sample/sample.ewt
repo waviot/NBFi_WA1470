@@ -2616,6 +2616,12 @@
         <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_config.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_crypto.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_crypto.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_defines.h</name>
       </file>
       <file>

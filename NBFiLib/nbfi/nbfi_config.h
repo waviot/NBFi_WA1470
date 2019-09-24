@@ -23,6 +23,8 @@
 #define NBFI_DL_BASE_FREQ               0x0E
 #define NBFI_QUALITY_EX                 0x0F
 #define NBFI_PARAM_BROADCAST_ADD        0x10
+#define NBFI_PARAM_APP_IDS              0x11
+#define NBFI_PARAM_BSANDSERVER_IDS      0x12
 
 
 typedef struct
@@ -58,7 +60,7 @@ extern nbfi_settings_t nbfi;
 #define NBFI_FLG_FIXED_BAUD_RATE                0x01
 #define NBFI_FLG_NO_RESET_TO_DEFAULTS           0x02
 #define NBFI_FLG_NO_SENDINFO                    0x04
-#define NBFI_FLG_NO_XTEA                        0x08
+#define NBFI_FLG_NO_CRYPTO                      0x08
 #define NBFI_FLG_DO_OSCCAL                      0x10
 #define NBFI_FLG_NO_REDUCE_TX_PWR               0x20
 #define NBFI_OFF_MODE_ON_INIT                   0x40
@@ -70,8 +72,9 @@ typedef struct
         uint32_t* key;
 	uint8_t tx_min_pwr;
 	uint8_t tx_max_pwr;
-	uint8_t hardware_id;
-	uint8_t hardware_rev;
+	uint16_t manufacturer_id;
+	uint16_t hardware_type_id;
+        uint16_t protocol_id;
 	uint8_t band_id;
 	uint32_t send_info_interval;
 }nbfi_dev_info_t;

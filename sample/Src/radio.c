@@ -13,12 +13,13 @@
 #define MODEM_ID  *((const uint32_t*)0x0801ff80)  
 #define KEY  ((const uint32_t*)0x0801ff84)            
 
-#define HW_ID     255
-#define HW_REV    0
+#define MANUFACTURER_ID         0x8080 //Waviot
+#define HARDWARE_TYPE_ID        0       //undefined
+#define PROTOCOL_ID             0       //undefined
 #define TX_MAX_POWER 16
 #define TX_MIN_POWER 0
-#define SEND_INFO_PERIOD	2592000  //one time per month
-#define BAND         UL868800_DL869100//UL868800_DL864000
+#define SEND_INFO_PERIOD	2592000         //one time per month
+#define BAND         UL868800_DL869100          //UL868800_DL864000
 
 
 
@@ -546,7 +547,7 @@ void radio_init(void)
         //NBFI_reg_func(NBFI_UPDATE_RTC, (void*)nbfi_update_rtc);
         //NBFI_reg_func(NBFI_RTC_SYNCHRONIZED, (void*)nbfi_rtc_synchronized);
         
-	nbfi_dev_info_t info = {MODEM_ID, (uint32_t*)KEY, TX_MIN_POWER, TX_MAX_POWER, HW_ID, HW_REV, BAND, SEND_INFO_PERIOD};
+	nbfi_dev_info_t info = {MODEM_ID, (uint32_t*)KEY, TX_MIN_POWER, TX_MAX_POWER, MANUFACTURER_ID, HARDWARE_TYPE_ID, PROTOCOL_ID, BAND, SEND_INFO_PERIOD};
 
 	NBFi_Config_Set_Device_Info(&info);
         

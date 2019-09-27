@@ -4,12 +4,10 @@
 
 #pragma pack(push, 1)
 typedef struct {
-	uint8_t	id_0;
-	uint8_t	id_1;
-	uint8_t	id_2;
+	uint16_t iter;
 	uint8_t	flags;
 	uint8_t payload[8];
-	uint8_t payload_crc;
+	uint16_t mic;
 	uint8_t crc0;
 	uint8_t crc1;
 	uint8_t crc2;

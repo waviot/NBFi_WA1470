@@ -18,16 +18,31 @@ static const uint8_t app_random[] =
 	0xdd, 0xf2, 0x93, 0x67, 0x1b, 0x43, 0x40, 0x67
 };
 
-void NBFi_Crypto_Encode(uint8_t * buf)
+void NBFi_Crypto_Encode(uint8_t *buf)
 {
   	Magma_ECB_enc(&app_ctx, buf);
 	memcpy(buf, app_ctx.out, MAGMA_DATA_SIZE);
 }
 
-void NBFi_Crypto_Decode(uint8_t * buf)
+void NBFi_Crypto_Decode(uint8_t *buf)
 {
   	Magma_ECB_dec(&app_ctx, buf);
 	memcpy(buf, app_ctx.out, MAGMA_DATA_SIZE);
+}
+
+uint16_t NBFi_Crypto_MIC(const uint8_t *buf, const uint8_t *iter)
+{
+  	uint16_t mic;
+	uint8_t secret[MAGMA_DATA_SIZE];
+	const uint8_t *internal[MIC_BLOCK_COUNT] = {buf, secret};
+	
+	memset(secret, 0x00, MAGMA_DATA_SIZE);
+	memcpy(secret, iter, 2);
+	
+	Magma_MIC(&app_ctx, internal, 2, 0);
+	memcpy((uint8_t *)&mic, app_ctx.out, 2);
+	
+	return mic;
 }
 
 _Bool NBFi_Crypto_Available()

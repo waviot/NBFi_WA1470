@@ -13,9 +13,7 @@
 #define memcpy_xdatageneric memcpy
 #define memcpy_genericxdata memcpy
 
-
 uint32_t last_pkt_crc = 0;
-
 
 extern nbfi_state_t nbfi_state;
 extern nbfi_transport_packet_t* nbfi_active_pkt;
@@ -23,22 +21,22 @@ extern _Bool wait_RxEnd;
 
 void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_packet_t* info);
 
-void  NBFi_MAC_RX_ProtocolD(nbfi_mac_protd_packet_t* packet, nbfi_mac_info_packet_t* info)
+void NBFi_MAC_RX_ProtocolD(nbfi_mac_protd_packet_t* packet, nbfi_mac_info_packet_t* info)
 {
-    if(!NBFi_MAC_Match_ID((uint8_t *)&packet->id_0)) return;
+	if(NBFi_Crypto_Available()&&!(nbfi.additional_flags&NBFI_FLG_NO_CRYPTO))
+	{
+	  	if (NBFi_Crypto_MIC(packet->payload, (uint8_t *)&packet->iter) != packet->mic)
+			return;
+		NBFi_Crypto_Decode(packet->payload);
+	}
+//	else
+//	{
+//		uint8_t ccrc = CRC8(packet->payload, 8);
+//		if(ccrc != packet->payload_crc) 
+//			return;
+//	}
 
-    if(NBFi_Crypto_Available()&&!(nbfi.additional_flags&NBFI_FLG_NO_CRYPTO))
-    {
-	  NBFi_Crypto_Decode(packet->payload);
-      if((CRC16(packet->payload, 8, 0xffff)&0xff) != packet->payload_crc) return;
-    }
-    else
-    {
-      	uint8_t ccrc = CRC8(packet->payload, 8);
-       	if(ccrc != packet->payload_crc) return;
-    }
-     
-    NBFi_ParseReceivedPacket((nbfi_transport_frame_t *)(&packet->flags), info);
+	NBFi_ParseReceivedPacket((nbfi_transport_frame_t *)(&packet->flags), info);
 }
 
 static uint32_t NBFi_MAC_set_UL_freq(uint8_t lastcrc8, _Bool parity)

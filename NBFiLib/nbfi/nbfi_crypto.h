@@ -7,7 +7,6 @@ typedef uint32_t*  nbfi_crypto_key_t;
 
 void NBFi_Crypto_Encode(uint8_t* buf);
 void NBFi_Crypto_Decode(uint8_t* buf);
-void NBFi_Crypto_OFB(uint8_t* buf, uint8_t len, uint8_t* ID, uint8_t iter);
 void NBFi_Crypto_Set_KEY(uint32_t *key, uint32_t *id);
 _Bool NBFi_Crypto_Available();
 

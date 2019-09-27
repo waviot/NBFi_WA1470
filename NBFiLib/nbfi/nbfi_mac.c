@@ -29,7 +29,7 @@ void  NBFi_MAC_RX_ProtocolD(nbfi_mac_protd_packet_t* packet, nbfi_mac_info_packe
 
     if(NBFi_Crypto_Available()&&!(nbfi.additional_flags&NBFI_FLG_NO_CRYPTO))
     {
-      NBFi_Crypto_OFB(packet->payload, 8, nbfi.temp_ID, packet->flags&0x1f);
+	  NBFi_Crypto_Decode(packet->payload);
       if((CRC16(packet->payload, 8, 0xffff)&0xff) != packet->payload_crc) return;
     }
     else

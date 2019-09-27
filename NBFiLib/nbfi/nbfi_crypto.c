@@ -30,28 +30,6 @@ void NBFi_Crypto_Decode(uint8_t * buf)
 	memcpy(buf, app_ctx.out, MAGMA_DATA_SIZE);
 }
 
-void NBFi_Crypto_OFB(uint8_t* buf, uint8_t len, uint8_t* ID, uint8_t iter)
-{
-	uint8_t vector[8];
-	for(uint8_t i = 0; i != 3; i++)
-	{
-		vector[i] = 0;
-		vector[i + 5] = ID[i];
-	}
-	vector[3] = 0;
-	vector[4] = iter;
-
-	uint8_t n = 0;// number of cyphered bytes
-
-	while(n < len)
-	{
-		if(n % 8 == 0)
-			NBFi_Crypto_Encode(vector); // next block
-		buf[n] = vector[n % 8] ^ buf[n];
-		n++;
-	}
-}
-
 _Bool NBFi_Crypto_Available()
 {
 	return inited ? 1 : 0;

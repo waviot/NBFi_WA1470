@@ -718,11 +718,11 @@ _Bool NBFi_Is_Mode_Normal()
     return (nbfi.tx_phy_channel != UL_PSK_FASTDL);
 }
 
-
 void NBFi_Config_Set_Device_Info(nbfi_dev_info_t *info)
 {
 	dev_info = *info;
-        if(dev_info.key) NBFi_Crypto_Set_KEY(dev_info.key);
+	if(dev_info.key) 
+		NBFi_Crypto_Set_KEY(dev_info.key, &dev_info.modem_id);
 }
 
 nbfi_settings_t* NBFi_get_settings()

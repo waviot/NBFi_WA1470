@@ -2589,6 +2589,18 @@
         <name>$PROJ_DIR$\..\NBFiLib\misc\log.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\NBFiLib\misc\magma.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\NBFiLib\misc\magma.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\NBFiLib\misc\stribog.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\NBFiLib\misc\stribog.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\NBFiLib\misc\XTEA.c</name>
       </file>
       <file>

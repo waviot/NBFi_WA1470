@@ -655,17 +655,17 @@ uint16_t NBFi_Phy_To_Bitrate(nbfi_phy_channel_t ch)
         return 57600;
 //    case UL_DBPSK_50_PROT_C:
     case UL_DBPSK_50_PROT_D:
-//    case UL_DBPSK_50_PROT_E:
+    case UL_DBPSK_50_PROT_E:
         return 50;
 //    case UL_DBPSK_400_PROT_C:
     case UL_DBPSK_400_PROT_D:
-//    case UL_DBPSK_400_PROT_E:
+    case UL_DBPSK_400_PROT_E:
         return 400;
     case UL_DBPSK_3200_PROT_D:
-//    case UL_DBPSK_3200_PROT_E:
+    case UL_DBPSK_3200_PROT_E:
         return 3200;
     case UL_DBPSK_25600_PROT_D:
-//    case UL_DBPSK_25600_PROT_E:
+    case UL_DBPSK_25600_PROT_E:
         return 25600;
     }
     return 0;

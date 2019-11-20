@@ -81,7 +81,7 @@ typedef struct {
 #define DEM_CRC_POLY			0x2E
 #define DEM_HOP_TABLE			0x32
 #define DEM_FFT_READ_BUF		0x80
-#define DEM_GAIN				0x88
+#define DEM_GAIN				0x88
 //#define DEM_BS3_FREQ			0x6C
 //#define DEM_BS3_FREQ_APPLY		0x84
 

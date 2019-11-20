@@ -76,7 +76,7 @@ _Bool nbfi_settings_changed = 0;
 #define NUM_OF_TX_RATES    4
 #define NUM_OF_RX_RATES    4
 
-nbfi_phy_channel_t TxRateTable[NUM_OF_TX_RATES] = {UL_DBPSK_50_PROT_D, UL_DBPSK_400_PROT_D, UL_DBPSK_3200_PROT_D, UL_DBPSK_25600_PROT_D};
+nbfi_phy_channel_t TxRateTable[NUM_OF_TX_RATES] = {UL_DBPSK_50_PROT_E, UL_DBPSK_400_PROT_E, UL_DBPSK_3200_PROT_E, UL_DBPSK_25600_PROT_E};
 const uint8_t TxSNRDegradationTable[NUM_OF_TX_RATES] = {0,9,18,27};
 nbfi_phy_channel_t RxRateTable[NUM_OF_RX_RATES] = {DL_DBPSK_50_PROT_D, DL_DBPSK_400_PROT_D, DL_DBPSK_3200_PROT_D, DL_DBPSK_25600_PROT_D};
 const uint8_t RxSNRDegradationTable[NUM_OF_RX_RATES] = {0,9,18,30};
@@ -247,7 +247,7 @@ static _Bool NBFi_Config_Rate_Change(uint8_t rx_tx, nbfi_rate_direct_t dir )
         if((dir == UP)&& nbfi_station_info.UL_SPEED_NOT_MAX)
         {
             if(++current_tx_rate > NUM_OF_TX_RATES - 1)  current_tx_rate = NUM_OF_TX_RATES - 1;
-            if(RxRateTable[current_rx_rate] == DL_PSK_200) 
+            /*if(RxRateTable[current_rx_rate] == DL_PSK_200) 
               while(TxRateTable[current_tx_rate] != UL_DBPSK_50_PROT_D)
               {
                 current_tx_rate--;
@@ -258,7 +258,7 @@ static _Bool NBFi_Config_Rate_Change(uint8_t rx_tx, nbfi_rate_direct_t dir )
               {
                 current_tx_rate--;
                 should_not_to_reduce_pwr = 1;
-              }
+              }*/
         }
         /*if(dir == DOWN)
         {

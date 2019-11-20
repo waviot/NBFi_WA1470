@@ -48,7 +48,7 @@ void NBFi_MAC_RX_ProtocolD(nbfi_mac_protd_packet_t* packet, nbfi_mac_info_packet
 	NBFi_ParseReceivedPacket((nbfi_transport_frame_t *)(&packet->flags), info);
 }
 
-static uint32_t NBFi_MAC_set_UL_freq(uint8_t lastcrc8, _Bool parity)
+static uint32_t NBFi_MAC_set_UL_freq(uint16_t lastcrc, _Bool parity)
 {
 	uint32_t tx_freq;
 	switch(nbfi.freq_plan)
@@ -58,7 +58,7 @@ static uint32_t NBFi_MAC_set_UL_freq(uint8_t lastcrc8, _Bool parity)
 	switch(nbfi.tx_phy_channel)
 	{
 	case UL_DBPSK_3200_PROT_D:
-		tx_freq = nbfi.ul_freq_base + 1600 + (((*((const uint32_t*)FULL_ID)+lastcrc8)%210)*100);
+		tx_freq = nbfi.ul_freq_base + 1600 + (((*((const uint32_t*)FULL_ID)+lastcrc)%210)*100);
 		if(parity) tx_freq = tx_freq + 27500 - 1600;
 		if(nbfi.freq_plan == NBFI_FREQ_PLAN_SHIFTED_HIGHPHY) tx_freq -= 51200;
 		break;
@@ -68,7 +68,7 @@ static uint32_t NBFi_MAC_set_UL_freq(uint8_t lastcrc8, _Bool parity)
 		if(nbfi.freq_plan == NBFI_FREQ_PLAN_SHIFTED_HIGHPHY) tx_freq -= 51200;
 		break;
 	default:
-		tx_freq = nbfi.ul_freq_base + (((*((const uint32_t*)FULL_ID)+lastcrc8)%226)*100);
+		tx_freq = nbfi.ul_freq_base + (((*((const uint32_t*)FULL_ID)+lastcrc)%226)*100);
 		if(parity) tx_freq = tx_freq + 27500;
 		break;
 	}
@@ -196,6 +196,106 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 	return OK;
 }
 
+
+nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
+{
+	const uint8_t protD_preambula[] = {0x97, 0x15, 0x7A, 0x6F};
+	uint8_t ul_buf[64];
+	uint8_t len = 0;
+	static _Bool parity = 0;
+	 uint16_t lastcrc16;
+	uint32_t tx_freq;
+
+	memset_xdata(ul_buf,0,sizeof(ul_buf));
+
+	if(nbfi.mode == TRANSPARENT)
+		pkt->phy_data_length--;
+
+	for(int i=0; i<sizeof(protD_preambula); i++)
+	{
+		ul_buf[len++] = protD_preambula[i];
+	}
+
+	ul_buf[len++] = nbfi.full_ID[0];
+        ul_buf[len++] = nbfi.full_ID[1];
+        ul_buf[len++] = nbfi.full_ID[2];
+        ul_buf[len++] = nbfi.full_ID[3];
+
+        if(nbfi.tx_phy_channel == DL_DBPSK_50_PROT_E) nbfi.tx_phy_channel = UL_DBPSK_50_PROT_E;
+        else if(nbfi.tx_phy_channel == DL_DBPSK_400_PROT_E) nbfi.tx_phy_channel = UL_DBPSK_400_PROT_E;
+        else if(nbfi.tx_phy_channel == DL_DBPSK_3200_PROT_E) nbfi.tx_phy_channel = UL_DBPSK_3200_PROT_E;
+        else if(nbfi.tx_phy_channel == DL_DBPSK_25600_PROT_E) nbfi.tx_phy_channel = UL_DBPSK_25600_PROT_E;
+
+
+	ul_buf[len++] = pkt->phy_data.header;
+
+	memcpy_xdatageneric(&ul_buf[len], pkt->phy_data.payload, pkt->phy_data_length);
+
+	lastcrc16 =  CRC16(&ul_buf[len], 8, 0xFFFF);
+
+	if(NBFi_Crypto_Available() && !(nbfi.additional_flags&NBFI_FLG_NO_CRYPTO))
+	{
+		uint32_t modem_id;
+		modem_id = nbfi.dl_ID[2];
+		modem_id |= (uint32_t)nbfi.dl_ID[1] << 8;
+		modem_id |= (uint32_t)nbfi.dl_ID[0] << 16;
+		NBFi_Crypto_Encode(&ul_buf[len], modem_id, 0, 8);
+	}
+	
+	len += 8;
+
+	if(nbfi.mode == TRANSPARENT)
+	{
+		ul_buf[len++] = pkt->phy_data.payload[8];
+                ul_buf[len++] = pkt->phy_data.payload[9];
+	}
+	else
+	{
+            ul_buf[len++] = lastcrc16&0xff;
+            ul_buf[len++] = (lastcrc16>>8)&0xff;
+        }
+
+	last_pkt_crc = CRC32(ul_buf + 4, 15); 
+
+	ul_buf[len++] = (uint8_t)(last_pkt_crc >> 16);
+	ul_buf[len++] = (uint8_t)(last_pkt_crc >> 8);
+	ul_buf[len++] = (uint8_t)(last_pkt_crc);
+
+	if(nbfi.tx_freq)
+	{
+		tx_freq = nbfi.tx_freq ;
+		parity = (nbfi.tx_freq > (nbfi.ul_freq_base + 25000));
+	}
+	else
+		tx_freq = NBFi_MAC_set_UL_freq(lastcrc16, parity);
+
+
+        ZCODE_E_Append(&ul_buf[4], &ul_buf[len], 1);
+
+	if(!nbfi.tx_freq) parity = !parity;
+
+	if((nbfi.mode == NRX) && parity) // For NRX send in ALOHA mode
+	{
+
+		NBFi_RF_Init(nbfi.tx_phy_channel, (nbfi_rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
+
+		NBFi_RF_Transmit(ul_buf, len + ZCODE_LEN, nbfi.tx_phy_channel, BLOCKING);
+
+		nbfi_state.UL_total++;
+
+		return NBFi_MAC_TX_ProtocolE(pkt);
+	}
+	
+	NBFi_RF_Init(nbfi.tx_phy_channel, (nbfi_rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
+
+	NBFi_RF_Transmit(ul_buf, len + ZCODE_LEN, nbfi.tx_phy_channel, NONBLOCKING);
+
+	nbfi_state.UL_total++;
+
+	return OK;
+}
+
+
 _Bool NBFi_MAC_Match_ID(uint8_t * addr)
 {
 	uint8_t i;
@@ -228,6 +328,15 @@ nbfi_status_t NBFi_MAC_TX(nbfi_transport_packet_t* pkt)
 	case DL_DBPSK_3200_PROT_D:
 	case DL_DBPSK_25600_PROT_D:
 		return NBFi_MAC_TX_ProtocolD(pkt);
+        case UL_DBPSK_50_PROT_E:
+	case UL_DBPSK_400_PROT_E:
+	case UL_DBPSK_3200_PROT_E:
+	case UL_DBPSK_25600_PROT_E:
+	case DL_DBPSK_50_PROT_E:
+	case DL_DBPSK_400_PROT_E:
+	case DL_DBPSK_3200_PROT_E:
+	case DL_DBPSK_25600_PROT_E:
+		return NBFi_MAC_TX_ProtocolE(pkt);
 	case UL_PSK_FASTDL:
 	case UL_PSK_200:
 	case UL_PSK_500:

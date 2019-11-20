@@ -159,7 +159,6 @@ void wa1470rfe_set_rx_mode(rfe_rx_mode_s mode)
 	//rfe_logoffset = RFE_LOGOFFSET_LONF;
 }
 
-
 //const uint8_t wa1470_tx_pwr_table[17] = {};
 void wa1470rfe_set_tx_power(uint8_t power)
 {

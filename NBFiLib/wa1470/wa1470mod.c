@@ -6,21 +6,23 @@
 
 #define MODOSCFREQ			26000000
 
+struct wtimer_desc mod_callTXfinished_desc;
+
 _Bool mod_i_q_or_bpsk_pin;
 
 mod_hop_channels_t mod_current_hop_table[8] = {MOD_MINUS90000, MOD_MINUS65000, MOD_MINUS40000, MOD_MINUS15000, MOD_PLUS15000, MOD_PLUS40000, MOD_PLUS65000, MOD_PLUS90000};
-
-struct wtimer_desc mod_callTXfinished_desc;
-
 mod_bitrate_s current_tx_phy;
+
+extern void (*__wa1470_tx_finished)(void);
+extern void (*__wa1470_nop_dalay_ms)(uint32_t);
+void wa1470_bpsk_pin_send(uint8_t* data, mod_bitrate_s bitrate);
 
 void wa1470mod_init(_Bool send_by_bpsk_pin)
 {
 	mod_i_q_or_bpsk_pin = send_by_bpsk_pin;
-	if(send_by_bpsk_pin == WA1470_SEND_BY_I_Q_MODULATOR) wa1470mod_set_hop_table((mod_hop_channels_t *)mod_current_hop_table);
+	if(send_by_bpsk_pin == WA1470_SEND_BY_I_Q_MODULATOR)
+		wa1470mod_set_hop_table((mod_hop_channels_t *)mod_current_hop_table);
 }
-
-extern void (*__wa1470_tx_finished)(void);
 
 static void	wa1470mod_call_TX_finished(struct wtimer_desc *desc)
 {
@@ -36,19 +38,18 @@ void wa1470mod_isr(void)
 {
 	uint8_t status;
 
-	if(mod_i_q_or_bpsk_pin != WA1470_SEND_BY_I_Q_MODULATOR) return;
+	if(mod_i_q_or_bpsk_pin != WA1470_SEND_BY_I_Q_MODULATOR)
+		return;
 	
-	wa1470_spi_read(MOD_STATUS, &status, 1);	
+	wa1470_spi_read(MOD_STATUS, &status, 1);
 
-	if(!(status&MOD_STATUS_IRQ_ON_TX_FLAG)) return;
+	if(!(status&MOD_STATUS_IRQ_ON_TX_FLAG))
+		return;
 	
-	wa1470_spi_write8(MOD_CONFIG, MOD_CONF_CLEAR_IRQ);	
+	wa1470_spi_write8(MOD_CONFIG, MOD_CONF_CLEAR_IRQ);
 	
 	wa1470_tx_finished();
 }
-
-extern void (*__wa1470_nop_dalay_ms)(uint32_t);
-void wa1470_bpsk_pin_send(uint8_t* data, mod_bitrate_s bitrate);
 
 void wa1470mod_send(uint8_t* data, mod_bitrate_s bitrate)
 {
@@ -127,7 +128,6 @@ uint16_t wa1470mod_phy_to_bitrate(mod_bitrate_s bitrate)
 	}
 }
 
-
 void wa1470mod_set_bitrate(mod_bitrate_s bitrate)
 {
 	uint64_t rate = wa1470mod_phy_to_bitrate(bitrate);
@@ -142,7 +142,7 @@ void wa1470mod_set_bitrate(mod_bitrate_s bitrate)
 void wa1470mod_set_freq(uint32_t freq)
 {
 	sprintf(log_string, "mod_set_freq to %ld", freq);
-	log_send_str(log_string);		
+	log_send_str(log_string);
 	
 	if(mod_i_q_or_bpsk_pin == WA1470_SEND_BY_BPSK_PIN)
 	{

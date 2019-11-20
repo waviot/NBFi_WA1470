@@ -33,13 +33,12 @@ void wa1470_bpsk_pin_send(uint8_t* data, mod_bitrate_s bitrate)
 	{
 	//for (int i=0; i<3;i++){
 	PWM_CLOCK_CONFIG();
-	 while(GET_STATUS_TX()) // Wait for TX complete
-	 {
-		  wtimer_runcallbacks();
-		  cmd_type_log st = check_cmd();
-		  if (st != SWITCH_PIN_BPSK && st != SWITCH_OPENUNB && st != NO_CMD)
-			  ABORT_TX();
-
+	while(GET_STATUS_TX()) // Wait for TX complete
+	{
+		wtimer_runcallbacks();
+		cmd_type_log st = check_cmd();
+		if (st != SWITCH_PIN_BPSK && st != SWITCH_OPENUNB && st != NO_CMD)
+			ABORT_TX();
 	 }
 	}
 */

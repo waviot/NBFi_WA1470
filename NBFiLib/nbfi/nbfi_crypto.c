@@ -9,7 +9,7 @@ static uint8_t inited;
 
 static uint32_t NBFi_Crypto_MIC(magma_ctx_t *ctx, const uint8_t *buf, uint8_t len)
 {
-  	uint32_t mic;
+	uint32_t mic;
 
 	Magma_MIC(ctx, buf, len);
 	memcpy((uint8_t *)&mic, ctx->out, 4);
@@ -35,12 +35,12 @@ void NBFi_Crypto_Decode(uint8_t *buf, uint32_t modem_id, uint32_t crypto_iter, u
 
 uint32_t NBFi_Crypto_UL_MIC(const uint8_t *buf, const uint8_t len)
 {
-  	return NBFi_Crypto_MIC(&key_ul_mic_ctx, buf, len);
+	return NBFi_Crypto_MIC(&key_ul_mic_ctx, buf, len);
 }
 
 uint32_t NBFi_Crypto_DL_MIC(const uint8_t *buf, const uint8_t len)
 {
-  	return NBFi_Crypto_MIC(&key_dl_mic_ctx, buf, len);
+	return NBFi_Crypto_MIC(&key_dl_mic_ctx, buf, len);
 }
 
 _Bool NBFi_Crypto_Available()

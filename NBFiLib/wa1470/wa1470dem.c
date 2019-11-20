@@ -24,6 +24,7 @@ struct wtimer_desc dem_processMessages_desc;
 extern void (*__wa1470_enable_pin_irq)(void);
 extern void (*__wa1470_disable_pin_irq)(void);
 extern void (*__wa1470_data_received)(uint8_t*, uint8_t*);
+extern uint8_t (*__wa1470_get_irq_pin_state)(void);
 
 dem_packet_st tmp_dem_mas[DEM_MAS_SIZE];
 dem_packet_info_st tmp_dem_info_mas[DEM_MAS_SIZE];
@@ -32,8 +33,6 @@ uint8_t	tmp_dem_mess_received;
 dem_bitrate_s current_rx_phy = DBPSK_100H_PROT_D;
 
 _Bool dem_rx_enabled = 0;
-
-extern uint8_t (*__wa1470_get_irq_pin_state)(void);
 
 uint8_t current_hop_table[8] = {DEM_PLUS90000,DEM_PLUS90000,DEM_PLUS40000,DEM_PLUS15000,DEM_MINUS15000,DEM_MINUS40000,DEM_MINUS65000,DEM_MINUS90000};
 
@@ -74,15 +73,15 @@ void wa1470dem_init(uint32_t modem_id)
 	wa1470dem_set_hop_len(36);
 //	wa1470dem_set_preambule(_preambule_protD);
 	wa1470dem_set_preambule((uint8_t *)&_preambula);
-	wa1470_spi_write8(DEM_FFT_MSB, 0x80 + 23);    
-	wa1470_spi_write8(DEM_CONTROL, 0);  
+	wa1470_spi_write8(DEM_FFT_MSB, 0x80 + 23);
+	wa1470_spi_write8(DEM_CONTROL, 0);
 	 
 }
 
 void wa1470dem_reset(void)
 {
-  wa1470_spi_write8(DEM_CONTROL, DEM_CONTROL_RESET);
-  wa1470_spi_write8(DEM_CONTROL, 0);  
+	wa1470_spi_write8(DEM_CONTROL, DEM_CONTROL_RESET);
+	wa1470_spi_write8(DEM_CONTROL, 0);
 }
 
 static uint8_t wa1470dem_get_bitrate_gain(dem_bitrate_s bitrate)
@@ -123,7 +122,7 @@ static void  wa1470dem_process_messages(struct wtimer_desc *desc)
 	memset(dem_info_mas, 0 , sizeof(dem_info_mas));
 
 	if(__wa1470_enable_pin_irq) 
-	  __wa1470_enable_pin_irq();
+		__wa1470_enable_pin_irq();
 
 	/*  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_SET);
 	delay_ms(1000);
@@ -262,7 +261,8 @@ static int8_t wa1470dem_get_sensitivity_diff(dem_bitrate_s bitrate_1, dem_bitrat
 void wa1470dem_set_bitrate(dem_bitrate_s bitrate)
 {
 	// if(current_rx_phy == bitrate) return;
-	if(__wa1470_disable_pin_irq) __wa1470_disable_pin_irq();
+	if(__wa1470_disable_pin_irq)
+		__wa1470_disable_pin_irq();
 
 	switch(bitrate)
 	{
@@ -376,7 +376,7 @@ void wa1470dem_set_freq(uint32_t freq)
 		break;
 	}
 }
- 
+
 static uint32_t wa1470dem_get_rssi_int(_Bool aver_or_max)
 {
 	uint32_t data[32];
@@ -443,7 +443,7 @@ void wa1470dem_get_spectrum(uint8_t size, float* data)
 #define DEM_NOISE_CALC_TIME  20      //Total noise calculation = 20*DEM_NOISE_AVER*DEM_NOISE_TICK ms
 
 static void wa1470dem_update_noise(struct wtimer_desc *desc)
-{  
+{
 	static uint32_t dem_noise_sum;
 	static uint32_t dem_noise_min;
 	static uint8_t dem_noise_cntr;
@@ -459,17 +459,17 @@ static void wa1470dem_update_noise(struct wtimer_desc *desc)
 
 	if(dem_noise_cntr == DEM_NOISE_AVER)
 	{
-		dem_noise_cntr = 0;          
+		dem_noise_cntr = 0;
 		uint32_t aver = dem_noise_sum/DEM_NOISE_AVER;
 		dem_noise_sum = 0;
 		if(aver < dem_noise_min)
-			dem_noise_min = aver;              
+			dem_noise_min = aver;
 		if(dem_noise_min_cntr == DEM_NOISE_CALC_TIME) 
 		{
 			dem_noise_min_cntr = 0;
 			dem_noise = dem_noise_min;
 			dem_noise = log10f(dem_noise)*20 - wa1470dem_get_rssi_logoffset() + 2; //2 dB is approximate difference between minimum and average noise level
-			dem_noise_min = 0xffffffff;      
+			dem_noise_min = 0xffffffff;
 			/* switch(current_rx_phy)
 			{
 			case DBPSK_50_PROT_D:

@@ -17,7 +17,6 @@
 
 #define RFE_IQ_TX_MODE			0x4006
 
-
 #define RFE_ADC_COMPVALID		0x4008
 #define RFE_GP_ADC_SETTING		0x400A
 #define RFE_GP_ADC_DELAY		0x400C
@@ -100,7 +99,7 @@ void wa1470rfe_set_tx_power(uint8_t power);
 void wa1470rfe_set_band(rfe_band_s band);
 _Bool wa1470rfe_set_freq(uint32_t freq);
 
-void	wa1470rfe_set_rx_gain(uint8_t gain);
+void wa1470rfe_set_rx_gain(uint8_t gain);
 extern uint16_t rfe_rx_total_vga_gain;
 //extern uint32_t rfe_logoffset;
 

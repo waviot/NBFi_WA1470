@@ -6,8 +6,8 @@
 #include "wa1470mod.h"
 
 //#define TX_BPSK_PIN_MODE
-#define WA1470_SEND_BY_I_Q_MODULATOR    0
-#define WA1470_SEND_BY_BPSK_PIN         1
+#define WA1470_SEND_BY_I_Q_MODULATOR	0
+#define WA1470_SEND_BY_BPSK_PIN			1
 
 enum wa1470_func_name_t
 {

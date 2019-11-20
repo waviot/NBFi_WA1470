@@ -1,6 +1,6 @@
 [submodule "NBFiLib/gost_crypto"]
 	path = NBFiLib/gost_crypto
-	url = git@github.com:lema100/gost_crypto.git
+	url = https://github.com/lema100/gost_crypto.git
 [submodule "NBFiLib/preambula"]
 	path = NBFiLib/preambula
-	url = git@github.com:lema100/preambula.git
+	url = https://github.com/lema100/preambula.git

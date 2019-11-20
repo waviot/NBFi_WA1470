@@ -7,14 +7,14 @@
 
 typedef enum
 {
-	DEM_MINUS90000          = 7,
-	DEM_MINUS65000      	= 6,
-	DEM_MINUS40000      	= 5,
-	DEM_MINUS15000          = 4,
-	DEM_PLUS15000           = 3,
-	DEM_PLUS40000           = 2,
-	DEM_PLUS65000       	= 1,
-	DEM_PLUS90000           = 0
+	DEM_MINUS90000			= 7,
+	DEM_MINUS65000			= 6,
+	DEM_MINUS40000			= 5,
+	DEM_MINUS15000			= 4,
+	DEM_PLUS15000			= 3,
+	DEM_PLUS40000			= 2,
+	DEM_PLUS65000			= 1,
+	DEM_PLUS90000			= 0
 }dem_hop_channels_t;
 
 typedef enum {
@@ -52,7 +52,7 @@ typedef enum
 	DBPSK_400_PROT_D	= 11,
 	DBPSK_3200_PROT_D	= 12,
 	DBPSK_25600_PROT_D	= 13,
-	DBPSK_100H_PROT_D       = 18
+	DBPSK_100H_PROT_D	= 18
 }dem_bitrate_s;
 
 typedef struct {
@@ -66,28 +66,28 @@ typedef struct {
 //----------------------------------------------------------
 // DEMODULATOR REGs
 //----------------------------------------------------------
-#define  DEM_RECEIVED_MES_BUF   0
-#define  DEM_CONTROL            0x20
-#define  DEM_RX_MODE            0x21
-#define  DEM_DET_TRESHOLD       0x22 //600
-#define  DEM_NOSE_START_BIT     0x24
-#define  DEM_ALPHA_SHIFT        0x25
-#define  DEM_HOP_LENGTH         0x26
-//#define  DEM_NOISE_RD_CHAN      0x27
-//#define  DEM_NOISE_VALUE        0x28
-//#define  DEM_FFT_READY          0x2B
-#define  DEM_FFT_MSB            0x2C
-#define  DEM_PREAMBLE_ID        0x28
-#define  DEM_CRC_POLY           0x2E
-#define  DEM_HOP_TABLE          0x32
-#define  DEM_FFT_READ_BUF       0x80
-//#define  DEM_GAIN               0x88
-//#define  DEM_BS3_FREQ           0x6C
-//#define  DEM_BS3_FREQ_APPLY     0x84
+#define	DEM_RECEIVED_MES_BUF	0
+#define	DEM_CONTROL			0x20
+#define	DEM_RX_MODE			0x21
+#define	DEM_DET_TRESHOLD		0x22 //600
+#define	DEM_NOSE_START_BIT	 0x24
+#define	DEM_ALPHA_SHIFT		0x25
+#define	DEM_HOP_LENGTH		 0x26
+//#define	DEM_NOISE_RD_CHAN		0x27
+//#define	DEM_NOISE_VALUE		0x28
+//#define	DEM_FFT_READY			0x2B
+#define	DEM_FFT_MSB			0x2C
+#define	DEM_PREAMBLE_ID		0x28
+#define	DEM_CRC_POLY			0x2E
+#define	DEM_HOP_TABLE			0x32
+#define	DEM_FFT_READ_BUF		0x80
+//#define	DEM_GAIN				0x88
+//#define	DEM_BS3_FREQ			0x6C
+//#define	DEM_BS3_FREQ_APPLY	 0x84
 
-#define DEM_CONTROL_RESET       0x01
-#define DEM_CONTROL_FFT_READY   0x40
-#define DEM_CONTROL_IRQ_FLAG    0x80
+#define DEM_CONTROL_RESET		0x01
+#define DEM_CONTROL_FFT_READY	0x40
+#define DEM_CONTROL_IRQ_FLAG	0x80
 
 
 void wa1470dem_init(uint32_t modem_id);

@@ -2,3 +2,4 @@ sample/Debug/
 sample/settings/
 settings/
 sample/Release/
+*.dep

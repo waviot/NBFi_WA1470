@@ -6,12 +6,12 @@
 #include "rs485_uart.h"
 #include "wa1470dem.h"
 #include <math.h>
-char   log_string[1024];
+char log_string[1024];
 
 
 void log_init(void)
 {
-        RS485_UART_init();
+	RS485_UART_init();
 }
 
 void log_send_str(const char *str)

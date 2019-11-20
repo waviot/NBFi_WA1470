@@ -5,13 +5,10 @@
 #include "radio.h"
 #include "log.h"
 
-
-
 struct wtimer_desc test_desc;
 struct wtimer_desc spectrum_desc;
 //uint32_t fft[32];
 //uint32_t noise_tbl[32];
-
 
 extern void (*__wa1470_enable_pin_irq)(void);
 extern void (*__wa1470_disable_pin_irq)(void);
@@ -46,7 +43,7 @@ void HAL_SYSTICK_Callback(void)
 extern uint16_t rfe_rx_total_vga_gain;
 int main(void)
 {
-  char   log_string[256];
+  char log_string[256];
         
   HAL_Init();
 

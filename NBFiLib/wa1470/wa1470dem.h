@@ -7,14 +7,14 @@
 
 typedef enum
 {
-        DEM_MINUS90000          = 7,
+	DEM_MINUS90000          = 7,
 	DEM_MINUS65000      	= 6,
-        DEM_MINUS40000      	= 5,
-        DEM_MINUS15000          = 4,
-        DEM_PLUS15000           = 3,
-        DEM_PLUS40000           = 2,
-        DEM_PLUS65000       	= 1,
-        DEM_PLUS90000           = 0
+	DEM_MINUS40000      	= 5,
+	DEM_MINUS15000          = 4,
+	DEM_PLUS15000           = 3,
+	DEM_PLUS40000           = 2,
+	DEM_PLUS65000       	= 1,
+	DEM_PLUS90000           = 0
 }dem_hop_channels_t;
 
 typedef enum {
@@ -24,17 +24,12 @@ typedef enum {
 
 #pragma pack(push, 1)
 typedef struct {
-	uint8_t	id_0;
-	uint8_t	id_1;
-	uint8_t	id_2;
+	uint8_t iter;
 	uint8_t	flags;
 	uint8_t payload[8];
-	uint8_t payload_crc;
-	uint8_t crc0;
-	uint8_t crc1;
-	uint8_t crc2;
+	uint8_t mic[3];
+	uint8_t crc[3];
 } dem_protd_st;
-
 
 typedef struct {
 	dem_protd_st packet;
@@ -43,11 +38,11 @@ typedef struct {
 	uint8_t rot;
 	uint32_t rssi;
 	uint8_t rssi_39_32;
-	uint32_t   noise;
+	uint32_t noise;
 	uint8_t crc_or_zigzag;
-        uint8_t inverted;
-        uint8_t i_or_q;
-        uint8_t dummy2;
+	uint8_t inverted;
+	uint8_t i_or_q;
+	uint8_t dummy2;
 } dem_packet_st;
 #pragma pack(pop)
 
@@ -57,13 +52,13 @@ typedef enum
 	DBPSK_400_PROT_D	= 11,
 	DBPSK_3200_PROT_D	= 12,
 	DBPSK_25600_PROT_D	= 13,
-        DBPSK_100H_PROT_D       = 18
+	DBPSK_100H_PROT_D       = 18
 }dem_bitrate_s;
 
 typedef struct {
-        dem_bitrate_s bitrate;
-        int16_t rssi;
-        uint8_t snr;
+	dem_bitrate_s bitrate;
+	int16_t rssi;
+	uint8_t snr;
 	uint8_t	num_of_crc;
 	uint8_t	num_of_zigzag;
 } dem_packet_info_st;
@@ -82,7 +77,7 @@ typedef struct {
 //#define  DEM_NOISE_VALUE        0x28
 //#define  DEM_FFT_READY          0x2B
 #define  DEM_FFT_MSB            0x2C
-#define  DEM_PREAMBLE_ID        0x2D
+#define  DEM_PREAMBLE_ID        0x28
 #define  DEM_CRC_POLY           0x2E
 #define  DEM_HOP_TABLE          0x32
 #define  DEM_FFT_READ_BUF       0x80
@@ -95,9 +90,7 @@ typedef struct {
 #define DEM_CONTROL_IRQ_FLAG    0x80
 
 
-
-
-void wa1470dem_init();
+void wa1470dem_init(uint32_t modem_id);
 void wa1470dem_rx_enable(_Bool en);
 void wa1470dem_isr(void);
 void wa1470dem_reset(void);
@@ -116,4 +109,5 @@ float wa1470dem_get_rssi();
 float wa1470dem_get_noise();
 void wa1470dem_get_spectrum(uint8_t size, float* data);
 int16_t wa1470dem_get_bitrate_sensitivity(dem_bitrate_s bitrate);
+
 #endif

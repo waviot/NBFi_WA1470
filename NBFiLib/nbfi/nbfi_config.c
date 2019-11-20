@@ -601,7 +601,7 @@ void NBFi_Config_Set_FastDl(_Bool fast, _Bool save_settings)
         }
         NBFi_Clear_TX_Buffer();
         uint32_t dl_base_freq = nbfi.dl_freq_base;
-	memcpy(&nbfi, &nbfi_fastdl, sizeof(nbfi_settings_t));
+		memcpy(&nbfi, &nbfi_fastdl, sizeof(nbfi_settings_t));
 
 
 

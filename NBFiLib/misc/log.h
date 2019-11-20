@@ -4,7 +4,7 @@
 #define LOG_H_
 #include <stdint.h>
 
-extern char   log_string[];
+extern char log_string[];
 
 void log_init(void);
 void log_send_str(const char *str);

@@ -1,48 +1,46 @@
 #include "nbfi_crypto.h"
-#include "magma.h"
-#include "stribog.h"
 #include <string.h>
+#include "magma.h"
 
-static magma_ctx_t mic_ctx, app_ctx;
+static magma_ctx_t key_root_ctx;
+static magma_ctx_t key_ul_master_ctx, key_ul_mic_ctx, key_ul_work_ctx;
+static magma_ctx_t key_dl_master_ctx, key_dl_mic_ctx, key_dl_work_ctx;
 static uint8_t inited;
 
-static const uint8_t mic_random[] = 
+static uint32_t NBFi_Crypto_MIC(magma_ctx_t *ctx, const uint8_t *buf, uint8_t len)
 {
-	0x9f, 0x91, 0xa7, 0x6e, 0x86, 0x6d, 0x25, 0xe2, 
-	0x08, 0xbf, 0x57, 0x85, 0x85, 0x43, 0x63, 0x56
-};
+  	uint32_t mic;
 
-static const uint8_t app_random[] = 
-{
- 	0x51, 0xc6, 0xb8, 0x85, 0xf0, 0x21, 0x31, 0xc3, 
-	0xdd, 0xf2, 0x93, 0x67, 0x1b, 0x43, 0x40, 0x67
-};
+	Magma_MIC(ctx, buf, len);
+	memcpy((uint8_t *)&mic, ctx->out, 4);
 
-void NBFi_Crypto_Encode(uint8_t *buf)
-{
-  	Magma_ECB_enc(&app_ctx, buf);
-	memcpy(buf, app_ctx.out, MAGMA_DATA_SIZE);
-}
-
-void NBFi_Crypto_Decode(uint8_t *buf)
-{
-  	Magma_ECB_dec(&app_ctx, buf);
-	memcpy(buf, app_ctx.out, MAGMA_DATA_SIZE);
-}
-
-uint16_t NBFi_Crypto_MIC(const uint8_t *buf, const uint8_t *iter)
-{
-  	uint16_t mic;
-	uint8_t secret[MAGMA_DATA_SIZE];
-	const uint8_t *internal[MIC_BLOCK_COUNT] = {buf, secret};
-	
-	memset(secret, 0x00, MAGMA_DATA_SIZE);
-	memcpy(secret, iter, 2);
-	
-	Magma_MIC(&app_ctx, internal, 2, 0);
-	memcpy((uint8_t *)&mic, app_ctx.out, 2);
-	
 	return mic;
+}
+
+void NBFi_Crypto_Encode(uint8_t *buf, uint32_t modem_id, uint32_t crypto_iter, uint8_t len)
+{
+	uint8_t iv[MAGMA_DATA_SIZE];
+	memcpy(&iv[0], &modem_id, 4);
+	memcpy(&iv[4], &crypto_iter, 4);
+	Magma_CTR(&key_ul_work_ctx, buf, iv, buf, len);
+}
+
+void NBFi_Crypto_Decode(uint8_t *buf, uint32_t modem_id, uint32_t crypto_iter, uint8_t len)
+{
+	uint8_t iv[MAGMA_DATA_SIZE];
+	memcpy(&iv[0], &modem_id, 4);
+	memcpy(&iv[4], &crypto_iter, 4);
+	Magma_CTR(&key_dl_work_ctx, buf, iv, buf, len);
+}
+
+uint32_t NBFi_Crypto_UL_MIC(const uint8_t *buf, const uint8_t len)
+{
+  	return NBFi_Crypto_MIC(&key_ul_mic_ctx, buf, len);
+}
+
+uint32_t NBFi_Crypto_DL_MIC(const uint8_t *buf, const uint8_t len)
+{
+  	return NBFi_Crypto_MIC(&key_dl_mic_ctx, buf, len);
 }
 
 _Bool NBFi_Crypto_Available()
@@ -52,22 +50,28 @@ _Bool NBFi_Crypto_Available()
 
 void NBFi_Crypto_Set_KEY(uint32_t *key, uint32_t *id)
 {
-  	uint8_t hash_data[STRIBOG_BLOCK_SIZE];
-	stribog_ctx_t hash_ctx;
-	
-	memset(hash_data, 0x00, STRIBOG_BLOCK_SIZE);
-	memcpy(hash_data, key, MAGMA_KEY_SIZE);
-	memcpy(&hash_data[MAGMA_KEY_SIZE], (uint8_t *)id, 4);
-	  
-	memcpy(&hash_data[MAGMA_KEY_SIZE + 4], mic_random, HASH_RANDOM_SIZE);
-	stribog_init(&hash_ctx, STRIBOG_OUTPUT_SIZE_256);
-	stribog_calc(&hash_ctx, hash_data, STRIBOG_BLOCK_SIZE);
-	Magma_Init(&mic_ctx, hash_ctx.h);
-	
-	memcpy(&hash_data[MAGMA_KEY_SIZE + 4], app_random, HASH_RANDOM_SIZE);
-	stribog_init(&hash_ctx, STRIBOG_OUTPUT_SIZE_256);
-	stribog_calc(&hash_ctx, hash_data, STRIBOG_BLOCK_SIZE);
-	Magma_Init(&app_ctx, hash_ctx.h);
-	
+	uint8_t blk[MAGMA_KEY_SIZE], out[MAGMA_KEY_SIZE], iv[MAGMA_DATA_SIZE];
+	Magma_Init(&key_root_ctx, (uint8_t *)key);
+	memset(blk, 0, MAGMA_KEY_SIZE);
+
+	memset(iv, 0x00, MAGMA_DATA_SIZE);
+	Magma_CTR(&key_root_ctx, blk, iv, out, MAGMA_KEY_SIZE);
+	Magma_Init(&key_ul_master_ctx, out);
+
+	memset(iv, 0xFF, MAGMA_DATA_SIZE / 2);
+	Magma_CTR(&key_root_ctx, blk, iv, out, MAGMA_KEY_SIZE);
+	Magma_Init(&key_dl_master_ctx, out);
+
+	memset(iv, 0x00, MAGMA_DATA_SIZE);
+	Magma_CTR(&key_ul_master_ctx, blk, iv, out, MAGMA_KEY_SIZE);
+	Magma_Init(&key_ul_mic_ctx, out);
+	Magma_CTR(&key_dl_master_ctx, blk, iv, out, MAGMA_KEY_SIZE);
+	Magma_Init(&key_dl_mic_ctx, out);
+
+	memset(iv, 0xFF, MAGMA_DATA_SIZE / 2);
+	Magma_CTR(&key_ul_master_ctx, blk, iv, out, MAGMA_KEY_SIZE);
+	Magma_Init(&key_ul_work_ctx, out);
+	Magma_CTR(&key_dl_master_ctx, blk, iv, out, MAGMA_KEY_SIZE);
+	Magma_Init(&key_dl_work_ctx, out);	
 	inited = 1;
 }

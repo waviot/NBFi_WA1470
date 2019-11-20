@@ -4,20 +4,18 @@
 
 #pragma pack(push, 1)
 typedef struct {
-	uint16_t iter;
+	uint8_t iter;
 	uint8_t	flags;
 	uint8_t payload[8];
-	uint16_t mic;
-	uint8_t crc0;
-	uint8_t crc1;
-	uint8_t crc2;
+	uint8_t mic[3];
+	uint8_t crc[3];
 } nbfi_mac_protd_packet_t;
 #pragma pack(pop)
 
 typedef struct {
-        nbfi_phy_channel_t phy;
-        int16_t rssi;
-        uint8_t snr;
+	nbfi_phy_channel_t phy;
+	int16_t rssi;
+	uint8_t snr;
 } nbfi_mac_info_packet_t;
 
 

@@ -319,6 +319,8 @@
           <state>$PROJ_DIR$\..\NBFiLib\misc</state>
           <state>$PROJ_DIR$\..\NBFiLib\nbfi</state>
           <state>$PROJ_DIR$\Drivers\STM32L0xx_HAL_Driver\Inc\Legacy</state>
+          <state>$PROJ_DIR$\..\NBFiLib\gost_crypto\crypto</state>
+          <state>$PROJ_DIR$\..\NBFiLib\preambula\preambula</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -2162,31 +2164,31 @@
     </group>
   </group>
   <group>
-    <name>inc</name>
-    <file>
-      <name>$PROJ_DIR$\Inc\main.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\Inc\radio.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\Inc\rs485_uart.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\Inc\stm32_init.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\Inc\stm32l0xx_hal_conf.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\Inc\stm32l0xx_it.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\Inc\xbuf.h</name>
-    </file>
-  </group>
-  <group>
     <name>NBFiLib</name>
+    <group>
+      <name>inc</name>
+      <file>
+        <name>$PROJ_DIR$\Inc\main.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\Inc\radio.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\Inc\rs485_uart.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\Inc\stm32_init.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\Inc\stm32l0xx_hal_conf.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\Inc\stm32l0xx_it.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\Inc\xbuf.h</name>
+      </file>
+    </group>
     <group>
       <name>libmf</name>
       <file>
@@ -2211,22 +2213,16 @@
         <name>$PROJ_DIR$\..\NBFiLib\misc\log.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\misc\magma.c</name>
+        <name>$PROJ_DIR$\..\NBFiLib\gost_crypto\crypto\magma.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\misc\magma.h</name>
+        <name>$PROJ_DIR$\..\NBFiLib\gost_crypto\crypto\magma.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\misc\stribog.c</name>
+        <name>$PROJ_DIR$\..\NBFiLib\preambula\preambula\preambula.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\misc\stribog.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\NBFiLib\misc\XTEA.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\NBFiLib\misc\xtea.h</name>
+        <name>$PROJ_DIR$\..\NBFiLib\preambula\preambula\preambula.h</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\NBFiLib\misc\zcode.c</name>

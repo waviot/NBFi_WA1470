@@ -26,7 +26,6 @@
 #define NBFI_PARAM_APP_IDS              0x11
 #define NBFI_PARAM_BSANDSERVER_IDS      0x12
 
-
 typedef struct
 {
     nbfi_mode_t mode;
@@ -68,13 +67,13 @@ extern nbfi_settings_t nbfi;
 
 typedef struct
 {
-        uint32_t modem_id;
-        uint32_t* key;
+	uint32_t modem_id;
+	uint32_t* key;
 	uint8_t tx_min_pwr;
 	uint8_t tx_max_pwr;
 	uint16_t manufacturer_id;
 	uint16_t hardware_type_id;
-        uint16_t protocol_id;
+	uint16_t protocol_id;
 	uint8_t band_id;
 	uint32_t send_info_interval;
 }nbfi_dev_info_t;

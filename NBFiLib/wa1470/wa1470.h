@@ -29,7 +29,7 @@ enum wa1470_func_name_t
 };
 
 void wa1470_reg_func(uint8_t name, void * fn);
-void wa1470_init(_Bool send_by_bpsk_pin);
+void wa1470_init(_Bool send_by_bpsk_pin, uint32_t modem_id);
 void wa1470_spi_write(uint16_t address, uint8_t *data, uint8_t length);
 void wa1470_spi_read(uint16_t address, uint8_t *data, uint8_t length);
 void wa1470_spi_write8(uint16_t address, uint8_t data);

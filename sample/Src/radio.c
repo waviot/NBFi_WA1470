@@ -62,8 +62,8 @@
 const nbfi_settings_t nbfi_set_default =
 {
     CRX,//mode;
-    UL_DBPSK_50_PROT_D,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
-    DL_DBPSK_50_PROT_D, // rx_phy_channel;
+    UL_DBPSK_400_PROT_D,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
+    DL_DBPSK_400_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
     MACK_1,             //mack_mode
     2,                  //num_of_retries;
@@ -79,7 +79,7 @@ const nbfi_settings_t nbfi_set_default =
     TX_MAX_POWER,       //tx_pwr;
     1,//3600*6,             //heartbeat_interval
     255,                //heartbeat_num
-    0,//NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
+    NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
     NBFI_UL_FREQ_BASE,
     NBFI_DL_FREQ_BASE,
     NBFI_FREQ_PLAN_SHIFTED_HIGHPHY
@@ -498,30 +498,30 @@ void nbfi_lock_unlock_nbfi_irq(uint8_t lock)
 void radio_init(void)
 {
 
-        RADIO_GPIO_Init();
-        
-        RADIO_LPTIM_Init();       
-        
-        HAL_LPTIM_Counter_Start(&hlptim, 0xffff);
-        
-        RADIO_SPI_Init();
-        
-        RADIO_BPSK_PIN_Init();
-        
+	RADIO_GPIO_Init();
+
+	RADIO_LPTIM_Init();       
+
+	HAL_LPTIM_Counter_Start(&hlptim, 0xffff);
+
+	RADIO_SPI_Init();
+
+	RADIO_BPSK_PIN_Init();
+
 	wa1470_reg_func(WARADIO_ENABLE_GLOBAL_IRQ, (void*)radio_enable_global_irq);
 	wa1470_reg_func(WARADIO_DISABLE_GLOBAL_IRQ, (void*)radio_disable_global_irq);
 	wa1470_reg_func(WARADIO_ENABLE_IRQ_PIN, (void*)radio_enable_pin_irq);
 	wa1470_reg_func(WARADIO_DISABLE_IRQ_PIN, (void*)radio_disable_pin_irq);
-        wa1470_reg_func(WARADIO_CHIP_ENABLE, (void*)radio_chip_enable);
+	wa1470_reg_func(WARADIO_CHIP_ENABLE, (void*)radio_chip_enable);
 	wa1470_reg_func(WARADIO_CHIP_DISABLE, (void*)radio_chip_disable);
 	wa1470_reg_func(WARADIO_GET_IRQ_PIN, (void*)radio_get_irq_pin_state);
 	wa1470_reg_func(WARADIO_SPI_RX, (void*)radio_spi_rx);
 	wa1470_reg_func(WARADIO_SPI_TX, (void*)radio_spi_tx);
 	wa1470_reg_func(WARADIO_SPI_TX_RX, (void*)radio_spi_tx_rx);
 	wa1470_reg_func(WARADIO_SPI_CS_WRITE, (void*)radio_spi_write_cs);
-        wa1470_reg_func(WARADIO_NOP_DELAY_MS, (void*)NOP_Delay_ms);
-        wa1470_reg_func(WARADIO_SEND_TO_BPSK_PIN, (void*)radio_bpsk_pin_send);
-        
+	wa1470_reg_func(WARADIO_NOP_DELAY_MS, (void*)NOP_Delay_ms);
+	wa1470_reg_func(WARADIO_SEND_TO_BPSK_PIN, (void*)radio_bpsk_pin_send);
+
 	wtimer_reg_func(WTIMER_GLOBAL_IRQ_ENABLE, (void*)radio_enable_global_irq);
 	wtimer_reg_func(WTIMER_GLOBAL_IRQ_DISABLE, (void*)radio_disable_global_irq);
 	wtimer_reg_func(WTIMER_CC_IRQ_ENABLE, (void*)wtimer_cc_irq_enable);
@@ -532,33 +532,33 @@ void radio_init(void)
 	wtimer_reg_func(WTIMER_CHECK_CC_IRQ, (void*)wtimer_check_cc_irq);
 
 	wtimer_init();
-        nbfi_lock = 0;
-        
+	nbfi_lock = 0;
+
 	NBFI_reg_func(NBFI_BEFORE_TX, (void*)nbfi_before_tx);
 	NBFI_reg_func(NBFI_BEFORE_RX, (void*)nbfi_before_rx);
-        NBFI_reg_func(NBFI_BEFORE_OFF, (void*)nbfi_before_off);
+	NBFI_reg_func(NBFI_BEFORE_OFF, (void*)nbfi_before_off);
 	NBFI_reg_func(NBFI_RECEIVE_COMLETE, (void*)nbfi_receive_complete);
 	NBFI_reg_func(NBFI_READ_FLASH_SETTINGS, (void*)nbfi_read_flash_settings);
 	NBFI_reg_func(NBFI_WRITE_FLASH_SETTINGS, (void*)nbfi_write_flash_settings);
-        NBFI_reg_func(NBFI_READ_DEFAULT_SETTINGS, (void*)nbfi_read_default_settings);
+	NBFI_reg_func(NBFI_READ_DEFAULT_SETTINGS, (void*)nbfi_read_default_settings);
 	NBFI_reg_func(NBFI_MEASURE_VOLTAGE_OR_TEMPERATURE, (void*)nbfi_measure_valtage_or_temperature);
-        
-        //register callbacks when external RTC used
-        //NBFI_reg_func(NBFI_UPDATE_RTC, (void*)nbfi_update_rtc);
-        //NBFI_reg_func(NBFI_RTC_SYNCHRONIZED, (void*)nbfi_rtc_synchronized);
-        
+
+	//register callbacks when external RTC used
+	//NBFI_reg_func(NBFI_UPDATE_RTC, (void*)nbfi_update_rtc);
+	//NBFI_reg_func(NBFI_RTC_SYNCHRONIZED, (void*)nbfi_rtc_synchronized);
+
 	nbfi_dev_info_t info = {MODEM_ID, (uint32_t*)KEY, TX_MIN_POWER, TX_MAX_POWER, MANUFACTURER_ID, HARDWARE_TYPE_ID, PROTOCOL_ID, BAND, SEND_INFO_PERIOD};
 
 	NBFi_Config_Set_Device_Info(&info);
-        
-        //NBFi_Clear_Saved_Configuration(); //if you need to clear previously saved nbfi configuration in EEPROM
+
+	//NBFi_Clear_Saved_Configuration(); //if you need to clear previously saved nbfi configuration in EEPROM
 	//wa1470_set_freq(868800000);
-        
-        wa1470_reg_func(WARADIO_DATA_RECEIVED, (void*)NBFi_MAC_RX_ProtocolD);
-        wa1470_reg_func(WARADIO_TX_FINISHED, (void*)NBFi_RF_TX_Finished);
-        wa1470_init(WA1470_SEND_BY_I_Q_MODULATOR);
-    
-        NBFI_Init();
+
+	wa1470_reg_func(WARADIO_DATA_RECEIVED, (void*)NBFi_MAC_RX_ProtocolD);
+	wa1470_reg_func(WARADIO_TX_FINISHED, (void*)NBFi_RF_TX_Finished);
+	wa1470_init(WA1470_SEND_BY_I_Q_MODULATOR, MODEM_ID);
+
+	NBFI_Init();
   
 }
 

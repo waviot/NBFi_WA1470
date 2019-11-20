@@ -125,10 +125,10 @@ _Bool wa1470_spi_wait_for(uint16_t address, uint8_t value, uint8_t mask)
 }
 
 
-void wa1470_init(_Bool send_by_bpsk_pin)
+void wa1470_init(_Bool send_by_bpsk_pin, uint32_t modem_id)
 {
   wa1470rfe_init(send_by_bpsk_pin);
-  wa1470dem_init();
+  wa1470dem_init(modem_id);
   wa1470mod_init(send_by_bpsk_pin); 
 }
 

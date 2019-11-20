@@ -25,9 +25,18 @@ void NBFi_MAC_RX_ProtocolD(nbfi_mac_protd_packet_t* packet, nbfi_mac_info_packet
 {
 	if(NBFi_Crypto_Available()&&!(nbfi.additional_flags&NBFI_FLG_NO_CRYPTO))
 	{
-	  	if (NBFi_Crypto_MIC(packet->payload, (uint8_t *)&packet->iter) != packet->mic)
-			return;
-		NBFi_Crypto_Decode(packet->payload);
+	  	uint32_t modem_id;
+		uint32_t mic = NBFi_Crypto_DL_MIC(&packet->flags, 9) & 0x00FFFFFF;
+				
+		for (uint8_t i = 0; i < 3; i++)
+			if (((uint8_t *)&mic)[2 - i] != packet->mic[i])
+				return;
+		
+		modem_id = nbfi.dl_ID[2];
+		modem_id |= (uint32_t)nbfi.dl_ID[1] << 8;
+		modem_id |= (uint32_t)nbfi.dl_ID[0] << 16;
+
+		NBFi_Crypto_Decode(&packet->flags, modem_id, packet->iter, 9);
 	}
 //	else
 //	{
@@ -117,11 +126,15 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 
     memcpy_xdatageneric(&ul_buf[len], pkt->phy_data.payload, pkt->phy_data_length);
 
-    lastcrc8 =  CRC8(&ul_buf[len], 8);
+    lastcrc8 = CRC8(&ul_buf[len], 8);
     
     if(NBFi_Crypto_Available() && !(nbfi.additional_flags&NBFI_FLG_NO_CRYPTO))
     {
-        NBFi_Crypto_Encode(&ul_buf[len]);
+	  	uint32_t modem_id;
+		modem_id = nbfi.dl_ID[2];
+		modem_id |= (uint32_t)nbfi.dl_ID[1] << 8;
+		modem_id |= (uint32_t)nbfi.dl_ID[0] << 16;
+        NBFi_Crypto_Encode(&ul_buf[len], modem_id, 0, 8);
     }
    
     len += 8;
@@ -197,10 +210,10 @@ nbfi_status_t NBFi_MAC_TX(nbfi_transport_packet_t* pkt)
     //if((pkt->phy_data_length==0)&&(pkt->phy_data_length>240)) return ERR; // len check
     switch(nbfi.tx_phy_channel)
     {
-    case UL_DBPSK_50_PROT_D:
-    case UL_DBPSK_400_PROT_D:
-    case UL_DBPSK_3200_PROT_D:
-    case UL_DBPSK_25600_PROT_D:
+    case UL_DBPSK_50_PROT_E:
+    case UL_DBPSK_400_PROT_E:
+    case UL_DBPSK_3200_PROT_E:
+    case UL_DBPSK_25600_PROT_E:
     case DL_DBPSK_50_PROT_D:
     case DL_DBPSK_400_PROT_D:
     case DL_DBPSK_3200_PROT_D:

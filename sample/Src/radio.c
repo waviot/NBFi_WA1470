@@ -62,8 +62,8 @@
 const nbfi_settings_t nbfi_set_default =
 {
     CRX,//mode;
-    UL_DBPSK_50_PROT_D,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
-    DL_DBPSK_50_PROT_D, // rx_phy_channel;
+    UL_DBPSK_400_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
+    DL_DBPSK_400_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
     MACK_1,             //mack_mode
     2,                  //num_of_retries;
@@ -79,7 +79,7 @@ const nbfi_settings_t nbfi_set_default =
     TX_MAX_POWER,       //tx_pwr;
     1,//3600*6,             //heartbeat_interval
     255,                //heartbeat_num
-    0,//NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
+    NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
     NBFI_UL_FREQ_BASE,
     NBFI_DL_FREQ_BASE,
     NBFI_FREQ_PLAN_SHIFTED_HIGHPHY

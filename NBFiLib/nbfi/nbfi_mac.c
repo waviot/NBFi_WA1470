@@ -38,12 +38,13 @@ void NBFi_MAC_RX_ProtocolD(nbfi_mac_protd_packet_t* packet, nbfi_mac_info_packet
 
 		NBFi_Crypto_Decode(&packet->flags, modem_id, packet->iter, 9);
 	}
-//	else
-//	{
-//		uint8_t ccrc = CRC8(packet->payload, 8);
-//		if(ccrc != packet->payload_crc) 
-//			return;
-//	}
+	else
+	{
+		uint32_t payload_crc = CRC32(&packet->flags, 9);
+		for (uint8_t i = 0; i < 3; i++)
+			if (((uint8_t *)&payload_crc)[2 - i] != packet->mic[i])
+				return;
+	}
 
 	NBFi_ParseReceivedPacket((nbfi_transport_frame_t *)(&packet->flags), info);
 }
@@ -143,9 +144,7 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 	len += 8;
 
 	if(nbfi.mode == TRANSPARENT)
-	{
 		ul_buf[len++] = pkt->phy_data.payload[8];
-	}
 	else
 		ul_buf[len++] = lastcrc8;
 
@@ -216,8 +215,8 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 		ul_buf[len++] = protD_preambula[i];
 	}
 
-	ul_buf[len++] = nbfi.full_ID[0];
-	ul_buf[len++] = nbfi.full_ID[1];
+//	ul_buf[len++] = nbfi.full_ID[0];
+//	ul_buf[len++] = nbfi.full_ID[1];
 	ul_buf[len++] = nbfi.full_ID[2];
 	ul_buf[len++] = nbfi.full_ID[3];
 
@@ -229,35 +228,39 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 		nbfi.tx_phy_channel = UL_DBPSK_3200_PROT_E;
 	else if(nbfi.tx_phy_channel == DL_DBPSK_25600_PROT_E)
 		nbfi.tx_phy_channel = UL_DBPSK_25600_PROT_E;
-
+	
+	static uint32_t crypto_iter;
+	ul_buf[len++] = crypto_iter;
 	ul_buf[len++] = pkt->phy_data.header;
 
-	memcpy_xdatageneric(&ul_buf[len], pkt->phy_data.payload, pkt->phy_data_length);
-
-	lastcrc16 = CRC16(&ul_buf[len], 8, 0xFFFF);
+	memcpy(&ul_buf[len], pkt->phy_data.payload, pkt->phy_data_length);
 
 	if(NBFi_Crypto_Available() && !(nbfi.additional_flags&NBFI_FLG_NO_CRYPTO))
 	{
 		uint32_t modem_id;
+		
 		modem_id = nbfi.dl_ID[2];
 		modem_id |= (uint32_t)nbfi.dl_ID[1] << 8;
 		modem_id |= (uint32_t)nbfi.dl_ID[0] << 16;
-		NBFi_Crypto_Encode(&ul_buf[len], modem_id, 0, 8);
+		NBFi_Crypto_Encode(&ul_buf[len - 1], modem_id, crypto_iter++ & 0xFF, 9);
 	}
-	
 	len += 8;
-
-	if(nbfi.mode == TRANSPARENT)
+	
+	if(NBFi_Crypto_Available() && !(nbfi.additional_flags&NBFI_FLG_NO_CRYPTO))
 	{
-		ul_buf[len++] = pkt->phy_data.payload[8];
-		ul_buf[len++] = pkt->phy_data.payload[9];
+		uint32_t mic = NBFi_Crypto_UL_MIC(&ul_buf[len - 9], 9);
+		ul_buf[len++] = (uint8_t)(mic >> 16);
+		ul_buf[len++] = (uint8_t)(mic >> 8);
+		ul_buf[len++] = (uint8_t)(mic);
 	}
 	else
 	{
-		ul_buf[len++] = lastcrc16&0xff;
-		ul_buf[len++] = (lastcrc16>>8)&0xff;
+		uint32_t payload_crc = CRC32(&ul_buf[len - 9], 9);
+		ul_buf[len++] = (uint8_t)(payload_crc >> 16);
+		ul_buf[len++] = (uint8_t)(payload_crc >> 8);
+		ul_buf[len++] = (uint8_t)(payload_crc);
 	}
-
+	
 	last_pkt_crc = CRC32(ul_buf + 4, 15); 
 
 	ul_buf[len++] = (uint8_t)(last_pkt_crc >> 16);
@@ -270,7 +273,7 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 		parity = (nbfi.tx_freq > (nbfi.ul_freq_base + 25000));
 	}
 	else
-		tx_freq = NBFi_MAC_set_UL_freq(lastcrc16, parity);
+		tx_freq = NBFi_MAC_set_UL_freq(ul_buf[len - 4], parity);
 
 
 	ZCODE_E_Append(&ul_buf[4], &ul_buf[len], 1);
@@ -302,13 +305,13 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 _Bool NBFi_MAC_Match_ID(uint8_t * addr)
 {
 	uint8_t i;
-	for( i = 0; i !=3; i++)
+	for( i = 0; i != 3; i++)
 		if(nbfi.temp_ID[i] != addr[i])
 			break;
 	if(i == 3)
 		return 1;
 
-	for(i = 0; i !=3; i++) 
+	for(i = 0; i != 3; i++) 
 		if(nbfi.broadcast_ID[i] != addr[i])
 			break;
 	if(i == 3)

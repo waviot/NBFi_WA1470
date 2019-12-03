@@ -54,7 +54,7 @@ static void _memcpy(uint8_t *dst, const uint8_t *src, uint8_t len)
 
 void wa1470dem_init(uint32_t modem_id)
 {
-	uint8_t _preambule_protD[4] = {0x97,0x15,0x7a,0x6f};
+//	uint8_t _preambule_protD[4] = {0x97,0x15,0x7a,0x6f};
 	static uint32_t _preambula;
 	if(!_preambula)
 	{
@@ -75,7 +75,6 @@ void wa1470dem_init(uint32_t modem_id)
 	wa1470dem_set_preambule((uint8_t *)&_preambula);
 	wa1470_spi_write8(DEM_FFT_MSB, 0x80 + 23);
 	wa1470_spi_write8(DEM_CONTROL, 0);
-	 
 }
 
 void wa1470dem_reset(void)

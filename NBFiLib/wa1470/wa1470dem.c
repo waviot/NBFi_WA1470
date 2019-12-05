@@ -134,7 +134,7 @@ static void  wa1470dem_process_messages(struct wtimer_desc *desc)
 			sprintf(log_string, "%05u: PLD: ", (uint16_t)(NBFi_get_RTC()&0xffff));
 			for(uint8_t k = 0; k != 8; k++) 
 				sprintf(log_string + strlen(log_string), "%02X", tmp_dem_mas[i].packet.payload[k]);
-			sprintf(log_string + strlen(log_string), " IT=%3d COP=%2d(%2d) FREQ=%2d", tmp_dem_mas[i].packet.iter, tmp_dem_info_mas[i].num_of_crc + tmp_dem_info_mas[i].num_of_zigzag, tmp_dem_info_mas[i].num_of_zigzag, tmp_dem_mas[i].freq&0x1f);
+			sprintf(log_string + strlen(log_string), " IT crypto=%3d COP=%2d(%2d) FREQ=%2d", tmp_dem_mas[i].packet.iter, tmp_dem_info_mas[i].num_of_crc + tmp_dem_info_mas[i].num_of_zigzag, tmp_dem_info_mas[i].num_of_zigzag, tmp_dem_mas[i].freq&0x1f);
 			uint64_t rssi64 = tmp_dem_mas[i].rssi_39_32;
 			rssi64 <<= 32;
 			rssi64 += tmp_dem_mas[i].rssi;

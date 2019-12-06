@@ -230,7 +230,7 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 	else if(nbfi.tx_phy_channel == DL_DBPSK_25600_PROT_E)
 		nbfi.tx_phy_channel = UL_DBPSK_25600_PROT_E;
 	
-	static uint32_t crypto_iter = 240;
+	static uint32_t crypto_iter;
 	ul_buf[len++] = crypto_iter;
 	ul_buf[len++] = pkt->phy_data.header;
 

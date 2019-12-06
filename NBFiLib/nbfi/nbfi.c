@@ -923,8 +923,6 @@ static void NBFi_SendHeartBeats(struct wtimer_desc *desc)
                 NBFi_Config_Send_Mode(nbfi.handshake_mode, NBFI_DL_BASE_FREQ);
         }
     }
-    
-
 }
 
 static void NBFi_Force_process()

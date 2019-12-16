@@ -13,20 +13,63 @@ struct wtimer_desc spectrum_desc;
 extern void (*__wa1470_enable_pin_irq)(void);
 extern void (*__wa1470_disable_pin_irq)(void);
 
+//#define BANKA
+//#include "nbfi.h"
+//#include "nbfi_config.h"
+
 void send_data(struct wtimer_desc *desc) {
 
-  static uint64_t mas[2]={0,0x0123456789ABCDEF};
-  
-/* if(!NBFi_Packets_To_Send())
- {
-     uint8_t _data[]={1,2,3,4,5};
-    NBFi_Send(_data, 5); 
-   //NBFi_Send((uint8_t*)mas, 16);
-    _data[4]++;
-    //mas[0]++;
- }*/
-  ScheduleTask(desc, 0, RELATIVE, SECONDS(10));
-  
+#ifdef BANKA
+    
+    static uint32_t counter = 0;
+
+    uint8_t packet[8] = {0,0,0,0,0,0,0,0};
+
+    ScheduleTask(&test_desc, send_data, RELATIVE, SECONDS(1));
+   
+    if(NBFi_GetQueuedTXPkt()) return;
+
+    packet[0] = (counter/5)>>8;
+    packet[1] = (counter/5)&0xff;
+
+    if(counter > 500) return;
+    if(counter == 0)
+    {
+        packet[2] = nbfi.tx_pwr;
+        NBFi_Send(packet, 8);
+        NBFi_Send(packet, 8);
+        counter = 1;
+    }
+
+    switch(counter++%5)
+    {
+        case 0:
+            if(--nbfi.tx_pwr < 0) nbfi.tx_pwr = 16;
+            nbfi.tx_phy_channel = UL_DBPSK_50_PROT_E;
+            break;
+        case 1:
+            nbfi.tx_phy_channel = UL_DBPSK_400_PROT_E;
+            break;
+        case 2:
+            nbfi.tx_phy_channel = UL_DBPSK_3200_PROT_E;
+            break;
+        case 3:
+            nbfi.tx_phy_channel = UL_DBPSK_25600_PROT_E;
+            break;
+        default:
+            ScheduleTask(&test_desc, send_data, RELATIVE, SECONDS(3));
+            return;
+            break;
+    }
+    packet[2] = nbfi.tx_pwr;
+    NBFi_Send(packet, 8);
+#else
+    
+    
+    ScheduleTask(&test_desc, send_data, RELATIVE, SECONDS(1));
+
+
+#endif
 }
 
 void plot_spectrum(struct wtimer_desc *desc) {

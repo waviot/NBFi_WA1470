@@ -67,11 +67,18 @@ void wa1470mod_send(uint8_t* data, mod_bitrate_s bitrate)
 	case MOD_DBPSK_400_PROT_D:
 	case MOD_DBPSK_3200_PROT_D:
 	case MOD_DBPSK_25600_PROT_D:
+        #ifndef NBFI_OLD_PROTE  
+        case MOD_DBPSK_50_PROT_E:
+	case MOD_DBPSK_400_PROT_E:
+	case MOD_DBPSK_3200_PROT_E:
+	case MOD_DBPSK_25600_PROT_E: 
+        #endif
 		for(int i = 0; i != 36; i++) 
 			wa1470_spi_write8(MOD_DATA_START + i, data[i]);
 		//wa1470_spi_write(MOD_DATA_START, data, 36);
 		wa1470_spi_write8(MOD_CONFIG, MOD_CONF_IRQ_ON_TX_END_EN|MOD_CONF_CLEAR_IRQ|MOD_CONF_TX_START);
 		break;
+        #ifdef NBFI_OLD_PROTE        
 	case MOD_DBPSK_50_PROT_E:
 	case MOD_DBPSK_400_PROT_E:
 	case MOD_DBPSK_3200_PROT_E:
@@ -81,6 +88,7 @@ void wa1470mod_send(uint8_t* data, mod_bitrate_s bitrate)
 		//wa1470_spi_write(MOD_DATA_START, data, 40);
 		wa1470_spi_write8(MOD_CONFIG, MOD_CONF_PROT_E_EN|MOD_CONF_IRQ_ON_TX_END_EN|MOD_CONF_CLEAR_IRQ|MOD_CONF_TX_START);
 		break;
+        #endif
 	case MOD_DBPSK_100H_PROT_D:
 		for(int i = 0; i != 36; i++) 
 			wa1470_spi_write8(MOD_DATA_START + i, data[i]);

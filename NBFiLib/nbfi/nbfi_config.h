@@ -59,8 +59,8 @@ extern nbfi_settings_t nbfi;
 #define NBFI_FLG_FIXED_BAUD_RATE                0x01
 #define NBFI_FLG_NO_RESET_TO_DEFAULTS           0x02
 #define NBFI_FLG_NO_SENDINFO                    0x04
-#define NBFI_FLG_NO_CRYPTO                      0x08
-#define NBFI_FLG_DO_OSCCAL                      0x10
+//#define NBFI_FLG_NO_CRYPTO                      0x08
+//#define NBFI_FLG_DO_OSCCAL                      0x10
 #define NBFI_FLG_NO_REDUCE_TX_PWR               0x20
 #define NBFI_OFF_MODE_ON_INIT                   0x40
 #define NBFI_FLG_DO_NOT_SEND_PKTS_ON_START      0x80

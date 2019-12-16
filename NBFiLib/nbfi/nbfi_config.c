@@ -57,7 +57,7 @@ const nbfi_settings_t nbfi_fastdl =
     NBFI_DEFAULT_RF_MAX_POWER,     
     60,     
     0,      
-    NBFI_FLG_FIXED_BAUD_RATE | NBFI_FLG_NO_RESET_TO_DEFAULTS | NBFI_FLG_NO_SENDINFO |NBFI_FLG_NO_CRYPTO,
+    NBFI_FLG_FIXED_BAUD_RATE | NBFI_FLG_NO_RESET_TO_DEFAULTS | NBFI_FLG_NO_SENDINFO,
     0,
     0,
     0
@@ -551,7 +551,7 @@ void NBFi_Config_Return()
 
 void NBFi_Configure_IDs()
 {
-    nbfi.full_ID[0] = 0;
+    nbfi.full_ID[0] = FULL_ID[3];
     nbfi.full_ID[1] = FULL_ID[2];
     nbfi.full_ID[2] = FULL_ID[1];
     nbfi.full_ID[3] = FULL_ID[0];

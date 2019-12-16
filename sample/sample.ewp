@@ -2477,6 +2477,12 @@
         <name>$PROJ_DIR$\..\NBFiLib\gost_crypto\crypto\magma.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\NBFiLib\misc\pcode.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\NBFiLib\misc\pcode.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\NBFiLib\preambula\preambula\preambula.c</name>
         <configuration>
           <name>Debug</name>

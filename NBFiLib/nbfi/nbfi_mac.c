@@ -5,6 +5,7 @@
 #include "nbfi_rf.h"
 #include "nbfi_crypto.h"
 #include "zcode.h"
+#include "pcode.h"
 #include <string.h>
 #include <stdlib.h> 
 
@@ -23,7 +24,7 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
 
 void NBFi_MAC_RX_ProtocolD(nbfi_mac_protd_packet_t* packet, nbfi_mac_info_packet_t* info)
 {
-	if(NBFi_Crypto_Available()&&!(nbfi.additional_flags&NBFI_FLG_NO_CRYPTO))
+	if(NBFi_Crypto_Available())
 	{
 		uint32_t modem_id;
 		static uint32_t crypto_iter;
@@ -133,7 +134,7 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 
 	lastcrc8 = CRC8(&ul_buf[len], 8);
 
-	if(NBFi_Crypto_Available() && !(nbfi.additional_flags&NBFI_FLG_NO_CRYPTO))
+	if(NBFi_Crypto_Available())
 	{
 		uint32_t modem_id;
 		modem_id = nbfi.dl_ID[2];
@@ -203,7 +204,7 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 	uint8_t ul_buf[64];
 	uint8_t len = 0;
 	static _Bool parity = 0;
-	uint16_t lastcrc16;
+	//uint16_t lastcrc16;
 	uint32_t tx_freq;
 
 	memset_xdata(ul_buf,0,sizeof(ul_buf));
@@ -236,7 +237,7 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 
 	memcpy(&ul_buf[len], pkt->phy_data.payload, pkt->phy_data_length);
 
-	if(NBFi_Crypto_Available() && !(nbfi.additional_flags&NBFI_FLG_NO_CRYPTO))
+	if(NBFi_Crypto_Available())
 	{
 		uint32_t modem_id;
 		
@@ -247,7 +248,7 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 	}
 	len += 8;
 	
-	if(NBFi_Crypto_Available() && !(nbfi.additional_flags&NBFI_FLG_NO_CRYPTO))
+	if(NBFi_Crypto_Available())
 	{
 		uint32_t mic = NBFi_Crypto_UL_MIC(&ul_buf[len - 9], 9);
 		crypto_iter = NBFI_Crypto_inc_iter(crypto_iter);
@@ -304,6 +305,117 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 }
 
 
+nbfi_status_t NBFi_MAC_TX_ProtocolEx(nbfi_transport_packet_t* pkt)
+{
+	const uint8_t protE_preambula[] = {0x97, 0x15, 0x7A, 0x6F};
+	uint8_t ul_buf[20];
+	uint8_t ul_buf_encoded[36];
+        uint8_t len = 0;
+	static _Bool parity = 0;
+	//uint16_t lastcrc16;
+	uint32_t tx_freq;
+
+	//memset_xdata(ul_buf,0,sizeof(ul_buf));
+
+
+	ul_buf[len++] = nbfi.full_ID[0];
+	ul_buf[len++] = nbfi.full_ID[1];
+	ul_buf[len++] = nbfi.full_ID[2];
+	ul_buf[len++] = nbfi.full_ID[3];
+
+	if(nbfi.tx_phy_channel == DL_DBPSK_50_PROT_E)
+		nbfi.tx_phy_channel = UL_DBPSK_50_PROT_E;
+	else if(nbfi.tx_phy_channel == DL_DBPSK_400_PROT_E)
+		nbfi.tx_phy_channel = UL_DBPSK_400_PROT_E;
+	else if(nbfi.tx_phy_channel == DL_DBPSK_3200_PROT_E)
+		nbfi.tx_phy_channel = UL_DBPSK_3200_PROT_E;
+	else if(nbfi.tx_phy_channel == DL_DBPSK_25600_PROT_E)
+		nbfi.tx_phy_channel = UL_DBPSK_25600_PROT_E;
+	
+	static uint32_t crypto_iter;
+	ul_buf[len++] = crypto_iter;
+	ul_buf[len++] = pkt->phy_data.header;
+
+	memcpy(&ul_buf[len], pkt->phy_data.payload, pkt->phy_data_length);
+
+        if(NBFi_Crypto_Available())
+        {
+          uint32_t modem_id;		
+          modem_id = nbfi.dl_ID[2];
+          modem_id |= (uint32_t)nbfi.dl_ID[1] << 8;
+          modem_id |= (uint32_t)nbfi.dl_ID[0] << 16;
+          NBFi_Crypto_Encode(&ul_buf[len - 1], modem_id, crypto_iter, 9);
+        }
+	
+	len += 8;
+	
+	//if(NBFi_Crypto_Available())
+	{
+		uint32_t mic = NBFi_Crypto_UL_MIC(&ul_buf[len - 9], 9);
+		crypto_iter = NBFI_Crypto_inc_iter(crypto_iter);
+		ul_buf[len++] = (uint8_t)(mic >> 16);
+		ul_buf[len++] = (uint8_t)(mic >> 8);
+		ul_buf[len++] = (uint8_t)(mic);
+	}
+	//else
+	//{
+	//	uint32_t payload_crc = CRC32(&ul_buf[len - 9], 9);
+	//	ul_buf[len++] = (uint8_t)(payload_crc >> 16);
+	//	ul_buf[len++] = (uint8_t)(payload_crc >> 8);
+	//	ul_buf[len++] = (uint8_t)(payload_crc);
+	//}
+
+        
+	last_pkt_crc = CRC32(ul_buf, 17); 
+
+	ul_buf[len++] = (uint8_t)(last_pkt_crc >> 16);
+	ul_buf[len++] = (uint8_t)(last_pkt_crc >> 8);
+	ul_buf[len++] = (uint8_t)(last_pkt_crc);
+
+	if(nbfi.tx_freq)
+	{
+		tx_freq = nbfi.tx_freq ;
+		parity = (nbfi.tx_freq > (nbfi.ul_freq_base + 25000));
+	}
+	else
+		tx_freq = NBFi_MAC_set_UL_freq(ul_buf[len - 4], parity);
+
+
+        for(int i=0; i<sizeof(protE_preambula); i++)
+	{
+		ul_buf_encoded[i] = protE_preambula[i];
+	}
+        
+        PCODE_encode(8, &ul_buf[0], &ul_buf_encoded[4]);
+        
+	//ZCODE_E_Append(&ul_buf[4], &ul_buf[len], 1);
+
+	if(!nbfi.tx_freq) parity = !parity;
+
+	if((nbfi.mode == NRX) && parity) // For NRX send in ALOHA mode
+	{
+
+		NBFi_RF_Init(nbfi.tx_phy_channel, (nbfi_rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
+
+		NBFi_RF_Transmit(ul_buf_encoded, 36, nbfi.tx_phy_channel, BLOCKING);
+
+		nbfi_state.UL_total++;
+
+		return NBFi_MAC_TX_ProtocolEx(pkt);
+	}
+	
+	NBFi_RF_Init(nbfi.tx_phy_channel, (nbfi_rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
+
+	NBFi_RF_Transmit(ul_buf_encoded, 36, nbfi.tx_phy_channel, NONBLOCKING);
+
+	nbfi_state.UL_total++;
+
+	return OK;
+}
+
+
+
+
 _Bool NBFi_MAC_Match_ID(uint8_t * addr)
 {
 	uint8_t i;
@@ -344,7 +456,11 @@ nbfi_status_t NBFi_MAC_TX(nbfi_transport_packet_t* pkt)
 	case DL_DBPSK_400_PROT_E:
 	case DL_DBPSK_3200_PROT_E:
 	case DL_DBPSK_25600_PROT_E:
-		return NBFi_MAC_TX_ProtocolE(pkt);
+#ifdef NBFI_OLD_PROTE
+                return NBFi_MAC_TX_ProtocolE(pkt);
+#else
+                return NBFi_MAC_TX_ProtocolEx(pkt);
+#endif
 	case UL_PSK_FASTDL:
 	case UL_PSK_200:
 	case UL_PSK_500:

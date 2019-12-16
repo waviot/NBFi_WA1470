@@ -12,6 +12,7 @@
 
 #define NBFI_LOG
 
+//#define NBFI_OLD_PROTE
 
 typedef enum
 {   

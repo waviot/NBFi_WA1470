@@ -1,11 +1,15 @@
 #include "nbfi_crypto.h"
+#include "nbfi_defines.h"
 #include <string.h>
 #include "magma.h"
+
+#ifndef NBFI_NO_CRYPTO
+uint8_t inited = 0;
+#endif
 
 static magma_ctx_t key_root_ctx;
 static magma_ctx_t key_ul_master_ctx, key_ul_mic_ctx, key_ul_work_ctx;
 static magma_ctx_t key_dl_master_ctx, key_dl_mic_ctx, key_dl_work_ctx;
-static uint8_t inited;
 
 static uint32_t NBFi_Crypto_MIC(magma_ctx_t *ctx, const uint8_t *buf, uint8_t len)
 {
@@ -43,9 +47,14 @@ uint32_t NBFi_Crypto_DL_MIC(const uint8_t *buf, const uint8_t len)
 	return NBFi_Crypto_MIC(&key_dl_mic_ctx, buf, len);
 }
 
+
 uint8_t NBFi_Crypto_Available()
 {
+#ifdef NBFI_NO_CRYPTO
+        return 0;
+#else  
 	return inited;
+#endif
 }
 
 uint8_t NBFI_Crypto_mic_check(uint8_t *buf, uint8_t len, uint8_t *mic, uint32_t *iter_int, uint8_t iter)
@@ -123,6 +132,7 @@ void NBFi_Crypto_Set_KEY(uint32_t *key, uint32_t ul_iter, uint32_t dl_iter)
 	Magma_KEY_mesh(&key_dl_master_ctx, &key_dl_mic_ctx, 0x00);
 	Magma_KEY_mesh(&key_ul_master_ctx, &key_ul_work_ctx, 0xFF);
 	Magma_KEY_mesh(&key_dl_master_ctx, &key_dl_work_ctx, 0xFF);
-
+#ifndef NBFI_NO_CRYPTO
 	inited = 1;
+#endif
 }

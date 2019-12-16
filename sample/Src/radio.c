@@ -62,7 +62,7 @@
 const nbfi_settings_t nbfi_set_default =
 {
     CRX,//mode;
-    UL_DBPSK_400_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
+    UL_DBPSK_50_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
     DL_DBPSK_3200_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
     MACK_1,             //mack_mode
@@ -84,6 +84,34 @@ const nbfi_settings_t nbfi_set_default =
     NBFI_DL_FREQ_BASE,
     NBFI_FREQ_PLAN_DEFAULT//NBFI_FREQ_PLAN_SHIFTED_HIGHPHY
 };
+
+
+//for BANKA
+/*const nbfi_settings_t nbfi_set_default =
+{
+    CRX,//mode;
+    UL_DBPSK_50_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
+    DL_DBPSK_3200_PROT_D, // rx_phy_channel;
+    HANDSHAKE_NONE,
+    MACK_1,             //mack_mode
+    2,                  //num_of_retries;
+    8,                  //max_payload_len;
+    {0},                //dl_ID[3];
+    {0},                //temp_ID[3];
+    {0xFF,0,0},         //broadcast_ID[3];
+    {0},                //full_ID[6];
+    868790000,//0,//868800000,                  //tx_freq;
+    0,//858090000,//868791000,//0,//868790000,//0,//868735500,//868710000,//868800000,                  //rx_freq;
+    PCB,                //tx_antenna;
+    PCB,                //rx_antenna;
+    TX_MAX_POWER,       //tx_pwr;
+    1,//3600*6,             //heartbeat_interval
+    0,                //heartbeat_num
+    NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
+    NBFI_UL_FREQ_BASE,
+    NBFI_DL_FREQ_BASE,
+    NBFI_FREQ_PLAN_DEFAULT//NBFI_FREQ_PLAN_SHIFTED_HIGHPHY
+};*/
 
 
 static SPI_HandleTypeDef hspi;

@@ -162,7 +162,7 @@ void wa1470rfe_set_rx_mode(rfe_rx_mode_s mode)
 //const uint8_t wa1470_tx_pwr_table[17] = {};
 void wa1470rfe_set_tx_power(uint8_t power)
 {
-	power = (power%17)*5/8 + 11;
+	power = (power%17)*5/8  + 11;
 	wa1470_spi_write8( RFE_POWER_CONTROL, (wa1470_spi_read8(RFE_POWER_CONTROL)&0xe0)+power&0x1f);
 }
 

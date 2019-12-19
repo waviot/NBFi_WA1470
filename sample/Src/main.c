@@ -161,6 +161,3 @@ extern uint16_t rfe_rx_total_vga_gain;
       }
   }
 }
-
-
-

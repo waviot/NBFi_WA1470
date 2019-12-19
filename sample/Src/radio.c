@@ -529,7 +529,7 @@ void nbfi_read_default_settings(nbfi_settings_t* settings)
 
 void  nbfi_read_flash_settings(nbfi_settings_t* settings) 
 {
-  memcpy((void*)settings, ((const void*)EEPROM_INT_nbfi_data), sizeof(nbfi_settings_t));
+	memcpy((void*)settings, ((const void*)EEPROM_INT_nbfi_data), sizeof(nbfi_settings_t));
 }
 
 void nbfi_write_flash_settings(nbfi_settings_t* settings)
@@ -537,7 +537,7 @@ void nbfi_write_flash_settings(nbfi_settings_t* settings)
     if(HAL_FLASHEx_DATAEEPROM_Unlock() != HAL_OK) return;
     for(uint8_t i = 0; i != sizeof(nbfi_settings_t); i++)
     {
-      if(HAL_FLASHEx_DATAEEPROM_Program(FLASH_TYPEPROGRAMDATA_BYTE, EEPROM_INT_nbfi_data + i, ((uint8_t *)settings)[i]) != HAL_OK) break;
+		if(HAL_FLASHEx_DATAEEPROM_Program(FLASH_TYPEPROGRAMDATA_BYTE, EEPROM_INT_nbfi_data + i, ((uint8_t *)settings)[i]) != HAL_OK) break;
     }
     HAL_FLASHEx_DATAEEPROM_Lock(); 
 }

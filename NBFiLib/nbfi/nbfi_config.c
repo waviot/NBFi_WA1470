@@ -664,16 +664,18 @@ read_default:
 extern void (* __nbfi_write_flash_settings)(nbfi_settings_t*);
 void NBFi_WriteConfig()
 {
-	if(__nbfi_write_flash_settings == 0) return;
+	if(__nbfi_write_flash_settings == 0) 
+		return;
 	__nbfi_write_flash_settings(&nbfi);
 }
 
 void NBFi_Clear_Saved_Configuration()
 {
-  if(__nbfi_write_flash_settings == 0) return;
-  nbfi_settings_t empty;
-  empty.tx_phy_channel = DL_PSK_200;
-  __nbfi_write_flash_settings(&empty);
+	if(__nbfi_write_flash_settings == 0) 
+		return;
+	nbfi_settings_t empty;
+	empty.tx_phy_channel = DL_PSK_200;
+	__nbfi_write_flash_settings(&empty);
 }
 
 

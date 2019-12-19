@@ -1,15 +1,12 @@
 #ifndef NBFI_H
 #define NBFI_H
 
-
 #include "wa1470.h"
 
 #define FULL_ID     ((uint8_t*)(&dev_info.modem_id))
 
 #define NBFI_TX_PKTBUF_SIZE     64
 #define NBFI_RX_PKTBUF_SIZE     32
-
-
 
 //#define NBFI_OLD_PROTE
 

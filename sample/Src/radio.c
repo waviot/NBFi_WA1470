@@ -92,8 +92,8 @@ const nbfi_settings_t nbfi_set_default =
 const nbfi_settings_t nbfi_set_default =
 {
     CRX,//mode;
-    UL_DBPSK_50_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
-    DL_DBPSK_50_PROT_D, // rx_phy_channel;
+    UL_DBPSK_400_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
+    DL_DBPSK_3200_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
     MACK_1,             //mack_mode
     2,                  //num_of_retries;
@@ -107,7 +107,7 @@ const nbfi_settings_t nbfi_set_default =
     PCB,                //tx_antenna;
     PCB,                //rx_antenna;
     TX_MAX_POWER,       //tx_pwr;
-    30,//3600*6,             //heartbeat_interval
+    2,//3600*6,             //heartbeat_interval
     255,                //heartbeat_num
     NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
     NBFI_UL_FREQ_BASE,
@@ -539,7 +539,7 @@ void  nbfi_read_flash_settings(nbfi_settings_t* settings)
 }
 
 void nbfi_write_flash_settings(nbfi_settings_t* settings)
-{
+{	
     if(HAL_FLASHEx_DATAEEPROM_Unlock() != HAL_OK) return;
     for(uint8_t i = 0; i != sizeof(nbfi_settings_t); i++)
     {
@@ -647,9 +647,5 @@ void radio_init(void)
 	wa1470_reg_func(WARADIO_TX_FINISHED, (void*)NBFi_RF_TX_Finished);
 	wa1470_init(WA1470_SEND_BY_I_Q_MODULATOR, MODEM_ID);
 
-	NBFI_Init();
-  
+	NBFI_Init();  
 }
-
-
-

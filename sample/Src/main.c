@@ -82,7 +82,7 @@ void HAL_SYSTICK_Callback(void)
 }
 
 extern uint16_t rfe_rx_total_vga_gain;
- int main(void)
+int main(void)
 {
         
   HAL_Init();

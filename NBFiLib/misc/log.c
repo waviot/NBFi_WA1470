@@ -18,9 +18,10 @@ void log_send_str(const char *str)
 {
 	uint16_t ptr = 0;
 	char c;
-	while((c = str[ptr++])) RS485_UART_send(c);
+	while(c = str[ptr++])
+		RS485_UART_send(c);
 	RS485_UART_send(0x0A);
-        RS485_UART_send(0x0D); 
+	RS485_UART_send(0x0D); 
 }
 
 void log_send_str_len(const char *str, uint16_t len)
@@ -34,7 +35,7 @@ extern dem_bitrate_s current_rx_phy;
 
 void log_print_spectrum()
 {
-  char   log_string[256];
+  char log_string[256];
   RS485_UART_send(0x1B);
   RS485_UART_send(0x5B);
   RS485_UART_send('3');

@@ -9,7 +9,6 @@
 #include "nbfi_defines.h"
 #include "nbfi_crypto.h"
 
-
 #define memset_xdata memset
 #define memcpy_xdata memcpy
 #define memcpy_xdatageneric memcpy
@@ -569,7 +568,6 @@ void NBFi_Configure_IDs()
 
 void NBFi_Config_Set_Default()
 {
-
     NBFi_ReadConfig();
 
     NBFi_Configure_IDs();
@@ -743,4 +741,3 @@ nbfi_settings_t* NBFi_get_settings()
 {
     return &nbfi;
 }
-

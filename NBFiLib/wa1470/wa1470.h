@@ -4,6 +4,7 @@
 #include "wa1470rfe.h"
 #include "wa1470dem.h"
 #include "wa1470mod.h"
+#include "nbfi_defines.h"
 
 //#define TX_BPSK_PIN_MODE
 #define WA1470_SEND_BY_I_Q_MODULATOR	0

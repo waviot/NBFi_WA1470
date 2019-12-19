@@ -1,7 +1,7 @@
 #include "wa1470.h"
 #include "wtimer.h"
 #include "log.h"
-#include	<string.h>
+#include <string.h>
 #include <stdio.h>
 
 #define MODOSCFREQ			26000000

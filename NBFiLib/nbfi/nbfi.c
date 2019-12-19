@@ -962,7 +962,7 @@ void NBFi_Go_To_Sleep(_Bool sleep)
 nbfi_status_t NBFI_Init()
 {
     NBFi_Config_Set_Default();
-	NBFi_WriteConfig(0);
+	NBFi_WriteConfig_interval(0);
 	
     for(uint8_t i = 0; i < NBFI_TX_PKTBUF_SIZE; i++) nbfi_TX_pktBuf[i] = 0;
     for(uint8_t i = 0; i < NBFI_RX_PKTBUF_SIZE; i++) nbfi_RX_pktBuf[i] = 0;

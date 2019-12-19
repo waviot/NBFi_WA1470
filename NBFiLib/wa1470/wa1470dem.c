@@ -137,7 +137,7 @@ static void  wa1470dem_process_messages(struct wtimer_desc *desc)
 				sprintf(log_string + strlen(log_string), "%02X", tmp_dem_mas[i].packet.payload[k]);
 			sprintf(log_string + strlen(log_string), " IT crypto=%3d COP=%2d(%2d) FREQ=%2d", tmp_dem_mas[i].packet.iter, tmp_dem_info_mas[i].num_of_crc + tmp_dem_info_mas[i].num_of_zigzag, tmp_dem_info_mas[i].num_of_zigzag, tmp_dem_mas[i].freq&0x1f);
 #endif
-                        uint64_t rssi64 = tmp_dem_mas[i].rssi_39_32;
+            uint64_t rssi64 = tmp_dem_mas[i].rssi_39_32;
 			rssi64 <<= 32;
 			rssi64 += tmp_dem_mas[i].rssi;
 			float rssi = log10f(rssi64)*20 - 48 - wa1470dem_get_rssi_logoffset();
@@ -146,7 +146,7 @@ static void  wa1470dem_process_messages(struct wtimer_desc *desc)
 			if(snr < 0) snr = 0;
 			tmp_dem_info_mas[i].snr = (uint8_t)snr;
 #ifdef NBFI_LOG		
-                        float dsnr = log10f(((float)rssi64)/tmp_dem_mas[i].noise/4)*20;
+            float dsnr = log10f(((float)rssi64)/tmp_dem_mas[i].noise/4)*20;
 			sprintf(log_string + strlen(log_string), " RSSI=%ld", tmp_dem_mas[i].rssi);
 			sprintf(log_string + strlen(log_string), " LRSSI=%f", rssi);
 			sprintf(log_string + strlen(log_string), " SNR=%f", rssi - dem_noise);

@@ -149,9 +149,10 @@ void wa1470mod_set_bitrate(mod_bitrate_s bitrate)
 
 void wa1470mod_set_freq(uint32_t freq)
 {
+#ifdef NBFI_LOG
 	sprintf(log_string, "mod_set_freq to %ld", freq);
 	log_send_str(log_string);
-	
+#endif
 	if(mod_i_q_or_bpsk_pin == WA1470_SEND_BY_BPSK_PIN)
 	{
 		wa1470rfe_set_freq(freq);

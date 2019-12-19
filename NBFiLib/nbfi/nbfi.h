@@ -10,7 +10,6 @@
 #define NBFI_RX_PKTBUF_SIZE     32
 
 
-#define NBFI_LOG
 
 //#define NBFI_OLD_PROTE
 

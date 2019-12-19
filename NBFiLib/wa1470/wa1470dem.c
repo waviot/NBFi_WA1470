@@ -131,27 +131,27 @@ static void  wa1470dem_process_messages(struct wtimer_desc *desc)
 	{
 		for(uint8_t i = 0; i != tmp_dem_mess_received; i++) 
 		{
+#ifdef NBFI_LOG
 			sprintf(log_string, "%05u: PLD: ", (uint16_t)(NBFi_get_RTC()&0xffff));
 			for(uint8_t k = 0; k != 8; k++) 
 				sprintf(log_string + strlen(log_string), "%02X", tmp_dem_mas[i].packet.payload[k]);
 			sprintf(log_string + strlen(log_string), " IT crypto=%3d COP=%2d(%2d) FREQ=%2d", tmp_dem_mas[i].packet.iter, tmp_dem_info_mas[i].num_of_crc + tmp_dem_info_mas[i].num_of_zigzag, tmp_dem_info_mas[i].num_of_zigzag, tmp_dem_mas[i].freq&0x1f);
-			uint64_t rssi64 = tmp_dem_mas[i].rssi_39_32;
+#endif
+                        uint64_t rssi64 = tmp_dem_mas[i].rssi_39_32;
 			rssi64 <<= 32;
 			rssi64 += tmp_dem_mas[i].rssi;
-			//int16_t rssi = 0;//omsplog10(rssi64);// - 52 - 192;//log10f(rssi64)*20 - 48 - 192;//fxlog(packet->rssi);
 			float rssi = log10f(rssi64)*20 - 48 - wa1470dem_get_rssi_logoffset();
-			float dsnr = log10f(((float)rssi64)/tmp_dem_mas[i].noise/4)*20;
 			tmp_dem_info_mas[i].rssi = (int16_t)rssi;
 			float snr = rssi - dem_noise;//[tmp_dem_mas[i].freq&0x1f];
 			if(snr < 0) snr = 0;
-				tmp_dem_info_mas[i].snr = (uint8_t)snr;
-			
+			tmp_dem_info_mas[i].snr = (uint8_t)snr;
+#ifdef NBFI_LOG		
+                        float dsnr = log10f(((float)rssi64)/tmp_dem_mas[i].noise/4)*20;
 			sprintf(log_string + strlen(log_string), " RSSI=%ld", tmp_dem_mas[i].rssi);
 			sprintf(log_string + strlen(log_string), " LRSSI=%f", rssi);
 			sprintf(log_string + strlen(log_string), " SNR=%f", rssi - dem_noise);
 			sprintf(log_string + strlen(log_string), " DSNR=%f", dsnr);
-
-
+                        
 			switch(current_rx_phy)
 			{
 			case DBPSK_50_PROT_D:
@@ -172,6 +172,7 @@ static void  wa1470dem_process_messages(struct wtimer_desc *desc)
 
 			}
 			log_send_str(log_string);
+#endif
 			__wa1470_data_received((uint8_t*)&tmp_dem_mas[i].packet, (uint8_t*)&tmp_dem_info_mas[i]);
 		}
 	}
@@ -358,8 +359,10 @@ void wa1470dem_set_hop_table(uint8_t* hop)
 
 void wa1470dem_set_freq(uint32_t freq)
 {
+#ifdef NBFI_LOG
 	sprintf(log_string, "dem_set_freq to %ld", freq);
 	log_send_str(log_string); 
+#endif
 	switch(current_rx_phy)
 	{
 	case DBPSK_50_PROT_D:

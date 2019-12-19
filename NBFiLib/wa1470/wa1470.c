@@ -143,20 +143,3 @@ _Bool wa1470_cansleep()
 	return 1;
 }
 
-//uint8_t mas[32];
-/*
-void wa1470_test()
-{
-	uint32_t hop_table = 0x33333333;
-	wa1470_spi_write(0x32, ((uint8_t*)&hop_table), 4);
-	wa1470_spi_read(0x20, mas, 32);
-}*/
-
-//uint32_t tmp_freq;
-//extern uint8_t mas[128];
-
-/*
-void wa1470_tcxo_set_reset(uint8_t set)
-{
-	
-}*/

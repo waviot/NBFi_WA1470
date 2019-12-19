@@ -1,6 +1,5 @@
 #include "main.h"
 #include "radio.h"
-#include "radio.h"
 #include "wtimer.h"
 #include "string.h"
 #include "nbfi.h"
@@ -8,7 +7,7 @@
 #include "nbfi_rf.h"
 #include "nbfi_config.h"
 #include "stm32l0xx_hal_conf.h"
-
+#include "defines.h"
 
 #define MODEM_ID  *((const uint32_t*)0x0801ff80)  
 #define KEY  ((const uint32_t*)0x0801ff84)            
@@ -59,38 +58,11 @@
 #endif 
 
 
+#ifdef BANKA
 const nbfi_settings_t nbfi_set_default =
 {
     CRX,//mode;
-    UL_DBPSK_50_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
-    DL_DBPSK_3200_PROT_D, // rx_phy_channel;
-    HANDSHAKE_SIMPLE,
-    MACK_1,             //mack_mode
-    2,                  //num_of_retries;
-    8,                  //max_payload_len;
-    {0},                //dl_ID[3];
-    {0},                //temp_ID[3];
-    {0xFF,0,0},         //broadcast_ID[3];
-    {0},                //full_ID[6];
-    0,//0,//868800000,                  //tx_freq;
-    0,//858090000,//868791000,//0,//868790000,//0,//868735500,//868710000,//868800000,                  //rx_freq;
-    PCB,                //tx_antenna;
-    PCB,                //rx_antenna;
-    TX_MAX_POWER,       //tx_pwr;
-    1,//3600*6,             //heartbeat_interval
-    255,                //heartbeat_num
-    NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
-    NBFI_UL_FREQ_BASE,
-    NBFI_DL_FREQ_BASE,
-    NBFI_FREQ_PLAN_DEFAULT//NBFI_FREQ_PLAN_SHIFTED_HIGHPHY
-};
-
-
-//for BANKA
-/*const nbfi_settings_t nbfi_set_default =
-{
-    CRX,//mode;
-    UL_DBPSK_50_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
+    UL_DBPSK_50_PROT_D,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
     DL_DBPSK_3200_PROT_D, // rx_phy_channel;
     HANDSHAKE_NONE,
     MACK_1,             //mack_mode
@@ -111,8 +83,35 @@ const nbfi_settings_t nbfi_set_default =
     NBFI_UL_FREQ_BASE,
     NBFI_DL_FREQ_BASE,
     NBFI_FREQ_PLAN_DEFAULT//NBFI_FREQ_PLAN_SHIFTED_HIGHPHY
-};*/
+};
+#else
 
+const nbfi_settings_t nbfi_set_default =
+{
+    CRX,//mode;
+    UL_DBPSK_50_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
+    DL_DBPSK_50_PROT_D, // rx_phy_channel;
+    HANDSHAKE_SIMPLE,
+    MACK_1,             //mack_mode
+    2,                  //num_of_retries;
+    8,                  //max_payload_len;
+    {0},                //dl_ID[3];
+    {0},                //temp_ID[3];
+    {0xFF,0,0},         //broadcast_ID[3];
+    {0},                //full_ID[6];
+    0,//0,//868800000,                  //tx_freq;
+    0,//858090000,//868791000,//0,//868790000,//0,//868735500,//868710000,//868800000,                  //rx_freq;
+    PCB,                //tx_antenna;
+    PCB,                //rx_antenna;
+    TX_MAX_POWER,       //tx_pwr;
+    30,//3600*6,             //heartbeat_interval
+    255,                //heartbeat_num
+    NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
+    NBFI_UL_FREQ_BASE,
+    NBFI_DL_FREQ_BASE,
+    NBFI_FREQ_PLAN_DEFAULT//NBFI_FREQ_PLAN_SHIFTED_HIGHPHY
+};
+#endif
 
 static SPI_HandleTypeDef hspi;
 
@@ -120,36 +119,72 @@ static LPTIM_HandleTypeDef hlptim;
 
 #define SPI_TIMEOUT	1000
 
-#define	AX_LPTIM			LPTIM1
-#define AX_LPTIM_IRQn			LPTIM1_IRQn
-#define	AX_LPTIM_RCC_ENABLE 	        __HAL_RCC_LPTIM1_CLK_ENABLE
-#define	AX_LPTIM_RCC_DISABLE 	        __HAL_RCC_LPTIM1_CLK_DISABLE
-#define AX_SPI				SPI1
-#define AX_SPI_RCC_ENABLE		__HAL_RCC_SPI1_CLK_ENABLE
-#define	AX_SPI_RCC_DISABLE	 	__HAL_RCC_SPI1_CLK_DISABLE
-#define AX_SPI_MOSI_Port		GPIOA
-#define AX_SPI_MOSI_Pin			GPIO_PIN_7
-#define AX_SPI_MOSI_AF			GPIO_AF0_SPI1
-#define AX_SPI_MISO_Port		GPIOA
-#define AX_SPI_MISO_Pin			GPIO_PIN_6
-#define AX_SPI_MISO_AF			GPIO_AF0_SPI1
-#define AX_SPI_SCK_Port			GPIOA
-#define AX_SPI_SCK_Pin			GPIO_PIN_5
-#define AX_SPI_SCK_AF			GPIO_AF0_SPI1
-#define AX_IRQ_GPIO_Port 		GPIOB
-#define AX_IRQ_Pin 			GPIO_PIN_0
-#define AX_IRQ_EXTI_IRQn 		EXTI0_1_IRQn
-#define AX_CS_GPIO_Port 		GPIOB
-#define AX_CS_Pin 			GPIO_PIN_1
-#define AX_TCXO_GPIO_Port 		GPIOA
-#define AX_TCXO_Pin 			GPIO_PIN_8
-#define AX_CHIP_EN_GPIO_Port 		GPIOB
-#define AX_CHIP_EN_Pin 			GPIO_PIN_13
-#define AX_DFT_EN_GPIO_Port 		GPIOB
-#define AX_DFT_EN_Pin 			GPIO_PIN_11
-#define AX_BPSK_PIN_GPIO_Port 		GPIOB
-#define AX_BPSK_PIN_Pin 		GPIO_PIN_12
+#ifdef PHOBOS_EXT_MODULE
+  #define AX_LPTIM			LPTIM1
+  #define AX_LPTIM_IRQn			LPTIM1_IRQn
+  #define AX_LPTIM_RCC_ENABLE 	        __HAL_RCC_LPTIM1_CLK_ENABLE
+  #define AX_LPTIM_RCC_DISABLE 	        __HAL_RCC_LPTIM1_CLK_DISABLE
+  #define AX_SPI			SPI1
+  #define AX_SPI_RCC_ENABLE		__HAL_RCC_SPI1_CLK_ENABLE
+  #define AX_SPI_RCC_DISABLE	 	__HAL_RCC_SPI1_CLK_DISABLE
+  #define AX_SPI_MOSI_Port		GPIOA
+  #define AX_SPI_MOSI_Pin		GPIO_PIN_7
+  #define AX_SPI_MOSI_AF		GPIO_AF0_SPI1
+  #define AX_SPI_MISO_Port		GPIOA
+  #define AX_SPI_MISO_Pin		GPIO_PIN_6
+  #define AX_SPI_MISO_AF		GPIO_AF0_SPI1
+  #define AX_SPI_SCK_Port		GPIOA
+  #define AX_SPI_SCK_Pin		GPIO_PIN_5
+  #define AX_SPI_SCK_AF			GPIO_AF0_SPI1
+  #define AX_IRQ_GPIO_Port 		GPIOB
+  #define AX_IRQ_Pin 			GPIO_PIN_0
+  #define AX_IRQ_EXTI_IRQn 		EXTI0_1_IRQn
+  #define AX_CS_GPIO_Port 		GPIOB
+  #define AX_CS_Pin 			GPIO_PIN_1
+  #define AX_TCXO_GPIO_Port 		GPIOB
+  #define AX_TCXO_Pin 			GPIO_PIN_2
+  #define AX_CHIP_EN_GPIO_Port 		GPIOA
+  #define AX_CHIP_EN_Pin 		GPIO_PIN_4
+  #define AX_BPSK_PIN_GPIO_Port 	GPIOB
+  #define AX_BPSK_PIN_Pin 		GPIO_PIN_12
+  #define AX_DFT_EN_GPIO_Port 		GPIOB
+  #define AX_DFT_EN_Pin 		GPIO_PIN_9
+  #define AX_SWITCH_TX_ON_GPIO_Port     GPIOB
+  #define AX_SWITCH_TX_ON_Pin 		GPIO_PIN_10
+  #define AX_SWITCH_NTX_ON_GPIO_Port    GPIOB
+  #define AX_SWITCH_NTX_ON_Pin 		GPIO_PIN_11
 
+#else
+  #define AX_LPTIM			LPTIM1
+  #define AX_LPTIM_IRQn			LPTIM1_IRQn
+  #define AX_LPTIM_RCC_ENABLE 	        __HAL_RCC_LPTIM1_CLK_ENABLE
+  #define AX_LPTIM_RCC_DISABLE 	        __HAL_RCC_LPTIM1_CLK_DISABLE
+  #define AX_SPI			SPI1
+  #define AX_SPI_RCC_ENABLE		__HAL_RCC_SPI1_CLK_ENABLE
+  #define AX_SPI_RCC_DISABLE	 	__HAL_RCC_SPI1_CLK_DISABLE
+  #define AX_SPI_MOSI_Port		GPIOA
+  #define AX_SPI_MOSI_Pin		GPIO_PIN_7
+  #define AX_SPI_MOSI_AF		GPIO_AF0_SPI1
+  #define AX_SPI_MISO_Port		GPIOA
+  #define AX_SPI_MISO_Pin		GPIO_PIN_6
+  #define AX_SPI_MISO_AF		GPIO_AF0_SPI1
+  #define AX_SPI_SCK_Port		GPIOA
+  #define AX_SPI_SCK_Pin		GPIO_PIN_5
+  #define AX_SPI_SCK_AF			GPIO_AF0_SPI1
+  #define AX_IRQ_GPIO_Port 		GPIOB
+  #define AX_IRQ_Pin 			GPIO_PIN_0
+  #define AX_IRQ_EXTI_IRQn 		EXTI0_1_IRQn
+  #define AX_CS_GPIO_Port 		GPIOB
+  #define AX_CS_Pin 			GPIO_PIN_1
+  #define AX_TCXO_GPIO_Port 		GPIOA
+  #define AX_TCXO_Pin 			GPIO_PIN_8
+  #define AX_CHIP_EN_GPIO_Port 		GPIOB
+  #define AX_CHIP_EN_Pin 		GPIO_PIN_13
+  #define AX_DFT_EN_GPIO_Port 		GPIOB
+  #define AX_DFT_EN_Pin 		GPIO_PIN_11
+  #define AX_BPSK_PIN_GPIO_Port 	GPIOB
+  #define AX_BPSK_PIN_Pin 		GPIO_PIN_12
+#endif
 
 
 void RADIO_GPIO_Init()
@@ -179,7 +214,18 @@ void RADIO_GPIO_Init()
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(AX_IRQ_GPIO_Port, &GPIO_InitStruct);
 
-           
+  
+  #ifdef PHOBOS_EXT_MODULE
+  GPIO_InitStruct.Pin = AX_SWITCH_TX_ON_Pin;    
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(AX_SWITCH_TX_ON_GPIO_Port, &GPIO_InitStruct);
+  GPIO_InitStruct.Pin = AX_SWITCH_NTX_ON_Pin;   
+  HAL_GPIO_Init(AX_SWITCH_TX_ON_GPIO_Port, &GPIO_InitStruct);
+  #endif
+
+  
   HAL_NVIC_SetPriority(AX_IRQ_EXTI_IRQn, 1, 0);
   HAL_NVIC_EnableIRQ(AX_IRQ_EXTI_IRQn);
   
@@ -340,9 +386,9 @@ void radio_disable_pin_irq(void)
 
 void radio_chip_enable(void)
 {
-  HAL_GPIO_WritePin(AX_TCXO_GPIO_Port, AX_TCXO_Pin,  GPIO_PIN_SET);
   HAL_GPIO_WritePin(AX_DFT_EN_GPIO_Port, AX_DFT_EN_Pin,  GPIO_PIN_RESET);
   HAL_GPIO_WritePin(AX_CHIP_EN_GPIO_Port, AX_CHIP_EN_Pin,  GPIO_PIN_SET);
+  HAL_GPIO_WritePin(AX_TCXO_GPIO_Port, AX_TCXO_Pin,  GPIO_PIN_SET);
 }
 
 void radio_chip_disable(void)
@@ -447,17 +493,26 @@ uint16_t wtimer_cnt_get(uint8_t chan)
 
 void nbfi_before_tx()
 {
-
+  #ifdef PHOBOS_EXT_MODULE
+    HAL_GPIO_WritePin(AX_SWITCH_TX_ON_GPIO_Port, AX_SWITCH_TX_ON_Pin,  GPIO_PIN_SET);
+    HAL_GPIO_WritePin(AX_SWITCH_NTX_ON_GPIO_Port, AX_SWITCH_NTX_ON_Pin,  GPIO_PIN_RESET);
+  #endif
 }
 
 void nbfi_before_rx()
 {
-    
+  #ifdef PHOBOS_EXT_MODULE
+    HAL_GPIO_WritePin(AX_SWITCH_TX_ON_GPIO_Port, AX_SWITCH_TX_ON_Pin,  GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(AX_SWITCH_NTX_ON_GPIO_Port, AX_SWITCH_NTX_ON_Pin,  GPIO_PIN_SET);
+  #endif
 }
 
 void nbfi_before_off()
 {
-
+  #ifdef PHOBOS_EXT_MODULE
+    HAL_GPIO_WritePin(AX_SWITCH_TX_ON_GPIO_Port, AX_SWITCH_TX_ON_Pin,  GPIO_PIN_RESET);
+    HAL_GPIO_WritePin(AX_SWITCH_NTX_ON_GPIO_Port, AX_SWITCH_NTX_ON_Pin,  GPIO_PIN_RESET);
+  #endif
 }
 
 

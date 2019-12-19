@@ -1,11 +1,11 @@
 
 #include "log.h"
-
 #include <stdio.h>
-
+#include <string.h>
 #include "rs485_uart.h"
 #include "wa1470dem.h"
 #include <math.h>
+
 char log_string[1024];
 
 
@@ -31,6 +31,7 @@ void log_send_str_len(const char *str, uint16_t len)
 
 extern uint16_t rfe_rx_total_vga_gain;
 extern dem_bitrate_s current_rx_phy;
+
 void log_print_spectrum()
 {
   char   log_string[256];
@@ -75,34 +76,10 @@ void log_print_spectrum()
      {
         sprintf(log_string + strlen(log_string), "%c", 0xdb); 
      }
-     /* while(l < 120)
-     {
-        sprintf(log_string + strlen(log_string), " "); 
-        l++;  
-     }*/
+
      log_send_str(log_string);   
   }
-  //summ-=aver_rssi_mas[freq];
   float snr = max - wa1470dem_get_noise();
-  //aver_snr += snr;
-  //aver_snr_count++;
   sprintf(log_string, "noise=%4f, rssi=%4f, snr=%f, max=%4f, freq=%2d, gain=%d", wa1470dem_get_noise(), wa1470dem_get_rssi(), snr, max, freq, rfe_rx_total_vga_gain);
   log_send_str(log_string); 
 }
-
-  
-/*
-void log_send_to_sfmonitor(uint32_t *mas, uint16_t len)
-{
-  RS485_UART_send(0x12);
-  for(uint16_t i = 0; i != len; i++)
-  {
-   // RS485_UART_send(0x12);
-    uint16_t rssi = log10f(mas[i])*20;// - 48 - 192;
-    RS485_UART_send((rssi>>8)&0xff);
-    RS485_UART_send((rssi>>0)&0xff);
-    //RS485_UART_send(0x13);
-    RS485_UART_send(0x10);
-  }
-  RS485_UART_send(0x13);
-}*/

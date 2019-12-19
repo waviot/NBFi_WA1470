@@ -2544,6 +2544,9 @@
     <group>
       <name>inc</name>
       <file>
+        <name>$PROJ_DIR$\Inc\defines.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\Inc\main.h</name>
       </file>
       <file>

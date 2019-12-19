@@ -50,45 +50,25 @@ void SystemClock_Config(void)
   {
     _Error_Handler(__FILE__, __LINE__);
   }
-  
-  
-  //LL_RCC_SetClkAfterWakeFromStop(LL_RCC_STOP_WAKEUPCLOCK_HSI);
+
 
   HAL_SYSTICK_Config(HAL_RCC_GetHCLKFreq()/1000);
 
   HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 
-  //HAL_NVIC_SetPriority(SysTick_IRQn, 1, 0);
 }
 
-
-/*
-void MX_NVIC_Init(void)
-{
-  HAL_NVIC_SetPriority(EXTI0_1_IRQn, 1, 0);
-  HAL_NVIC_EnableIRQ(EXTI0_1_IRQn);
-  HAL_NVIC_SetPriority(LPTIM1_IRQn, 1, 0);
-  HAL_NVIC_EnableIRQ(LPTIM1_IRQn);
-}*/
 
 
 
 void MX_GPIO_Init(void)
 {
 
- // GPIO_InitTypeDef GPIO_InitStruct;
 
   __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
-
-  //GPIO_InitStruct.Pin = AX_BPSK_PIN_Pin;   //BPSK PIN
-  //GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  //GPIO_InitStruct.Pull = GPIO_NOPULL;
-  //GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-  //HAL_GPIO_Init(AX_BPSK_PIN_GPIO_Port, &GPIO_InitStruct);
-
-  
+ 
 }
 
 void _Error_Handler(char *file, int line)

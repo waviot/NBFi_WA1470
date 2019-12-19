@@ -122,5 +122,11 @@ void NBFi_RF_TX_Finished()
   NBFi_TX_Finished();
 }
 
+float NBFi_RF_get_noise()
+{
+  //if(wa1470dem_get_noise() < -150) return -150;
+  //else 
+  wa1470dem_get_noise();
+}
 
 

@@ -4,23 +4,19 @@
 #include "wtimer.h"
 #include "radio.h"
 #include "log.h"
+#include "defines.h"
 
 struct wtimer_desc test_desc;
 struct wtimer_desc spectrum_desc;
-//uint32_t fft[32];
-//uint32_t noise_tbl[32];
 
 extern void (*__wa1470_enable_pin_irq)(void);
 extern void (*__wa1470_disable_pin_irq)(void);
 
-//#define BANKA
-//#include "nbfi.h"
-//#include "nbfi_config.h"
-
 void send_data(struct wtimer_desc *desc) {
 
 #ifdef BANKA
-    
+    #include "nbfi.h"
+    #include "nbfi_config.h"
     static uint32_t counter = 0;
 
     uint8_t packet[8] = {0,0,0,0,0,0,0,0};
@@ -45,16 +41,16 @@ void send_data(struct wtimer_desc *desc) {
     {
         case 0:
             if(--nbfi.tx_pwr < 0) nbfi.tx_pwr = 16;
-            nbfi.tx_phy_channel = UL_DBPSK_50_PROT_E;
+            nbfi.tx_phy_channel = UL_DBPSK_50_PROT_D;
             break;
         case 1:
-            nbfi.tx_phy_channel = UL_DBPSK_400_PROT_E;
+            nbfi.tx_phy_channel = UL_DBPSK_400_PROT_D;
             break;
         case 2:
-            nbfi.tx_phy_channel = UL_DBPSK_3200_PROT_E;
+            nbfi.tx_phy_channel = UL_DBPSK_3200_PROT_D;
             break;
         case 3:
-            nbfi.tx_phy_channel = UL_DBPSK_25600_PROT_E;
+            nbfi.tx_phy_channel = UL_DBPSK_25600_PROT_D;
             break;
         default:
             ScheduleTask(&test_desc, send_data, RELATIVE, SECONDS(3));
@@ -64,29 +60,30 @@ void send_data(struct wtimer_desc *desc) {
     packet[2] = nbfi.tx_pwr;
     NBFi_Send(packet, 8);
 #else
-    
-    
+       
     ScheduleTask(&test_desc, send_data, RELATIVE, SECONDS(1));
 
 
 #endif
 }
 
+#ifdef PLOT_SPECTRUM
 void plot_spectrum(struct wtimer_desc *desc) {
 
   log_print_spectrum(32); 
   ScheduleTask(desc, 0, RELATIVE, MILLISECONDS(500));
 }
+#endif
 
 extern uint8_t nbfi_lock;
 void HAL_SYSTICK_Callback(void)
 {
   if(!nbfi_lock) wtimer_runcallbacks();
 }
+
 extern uint16_t rfe_rx_total_vga_gain;
-int main(void)
+ int main(void)
 {
-  char log_string[256];
         
   HAL_Init();
 
@@ -108,7 +105,10 @@ int main(void)
   {     
       NBFi_ProcessRxPackets(1);
       
-      //wa1470_test();
+      #ifdef PLOT_SPECTRUM
+      
+      char log_string[256];
+      
       if(!RS485_UART_is_empty())
       {
         switch(RS485_UART_get())
@@ -154,7 +154,7 @@ int main(void)
           break;
         }
       }
-      
+      #endif
       if (wa1470_cansleep()&& NBFi_can_sleep()) 
       {
           //HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_SLEEPENTRY_WFI);

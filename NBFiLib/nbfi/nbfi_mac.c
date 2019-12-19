@@ -27,16 +27,15 @@ void NBFi_MAC_RX_ProtocolD(nbfi_mac_protd_packet_t* packet, nbfi_mac_info_packet
 	if(NBFi_Crypto_Available())
 	{
 		uint32_t modem_id;
-		static uint32_t crypto_iter;
 
-		if (!NBFI_Crypto_mic_check(&packet->flags, 9, packet->mic, &crypto_iter, packet->iter))
+		if (!NBFI_Crypto_mic_check(&packet->flags, 9, packet->mic, &nbfi.crypto_iter_dl, packet->iter))
 			return;
 		
 		modem_id = nbfi.dl_ID[2];
 		modem_id |= (uint32_t)nbfi.dl_ID[1] << 8;
 		modem_id |= (uint32_t)nbfi.dl_ID[0] << 16;
 
-		NBFi_Crypto_Decode(&packet->flags, modem_id, crypto_iter, 9);
+		NBFi_Crypto_Decode(&packet->flags, modem_id, nbfi.crypto_iter_dl, 9);
 	}
 
 	NBFi_ParseReceivedPacket((nbfi_transport_frame_t *)(&packet->flags), info);
@@ -223,8 +222,7 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 	else if(nbfi.tx_phy_channel == DL_DBPSK_25600_PROT_E)
 		nbfi.tx_phy_channel = UL_DBPSK_25600_PROT_E;
 	
-	static uint32_t crypto_iter;
-	ul_buf[len++] = crypto_iter;
+	ul_buf[len++] = nbfi.crypto_iter_ul;
 	ul_buf[len++] = pkt->phy_data.header;
 
 	memcpy(&ul_buf[len], pkt->phy_data.payload, pkt->phy_data_length);
@@ -236,11 +234,11 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 		modem_id = nbfi.dl_ID[2];
 		modem_id |= (uint32_t)nbfi.dl_ID[1] << 8;
 		modem_id |= (uint32_t)nbfi.dl_ID[0] << 16;
-		NBFi_Crypto_Encode(&ul_buf[len - 1], modem_id, crypto_iter, 9);
+		NBFi_Crypto_Encode(&ul_buf[len - 1], modem_id, nbfi.crypto_iter_ul, 9);
 		len += 8;
 		
 		uint32_t mic = NBFi_Crypto_UL_MIC(&ul_buf[len - 9], 9);
-		crypto_iter = NBFI_Crypto_inc_iter(crypto_iter);
+		nbfi.crypto_iter_ul = NBFI_Crypto_inc_iter(nbfi.crypto_iter_ul);
 		ul_buf[len++] = (uint8_t)(mic >> 16);
 		ul_buf[len++] = (uint8_t)(mic >> 8);
 		ul_buf[len++] = (uint8_t)(mic);
@@ -311,8 +309,7 @@ nbfi_status_t NBFi_MAC_TX_ProtocolEx(nbfi_transport_packet_t* pkt)
 	else if(nbfi.tx_phy_channel == DL_DBPSK_25600_PROT_E)
 		nbfi.tx_phy_channel = UL_DBPSK_25600_PROT_E;
 	
-	static uint32_t crypto_iter;
-	ul_buf[len++] = crypto_iter;
+	ul_buf[len++] = nbfi.crypto_iter_ul;
 	ul_buf[len++] = pkt->phy_data.header;
 
 	memcpy(&ul_buf[len], pkt->phy_data.payload, pkt->phy_data_length);
@@ -323,11 +320,11 @@ nbfi_status_t NBFi_MAC_TX_ProtocolEx(nbfi_transport_packet_t* pkt)
 		modem_id = nbfi.dl_ID[2];
 		modem_id |= (uint32_t)nbfi.dl_ID[1] << 8;
 		modem_id |= (uint32_t)nbfi.dl_ID[0] << 16;
-		NBFi_Crypto_Encode(&ul_buf[len - 1], modem_id, crypto_iter, 9);
+		NBFi_Crypto_Encode(&ul_buf[len - 1], modem_id, nbfi.crypto_iter_ul, 9);
 		len += 8;
 	
 		uint32_t mic = NBFi_Crypto_UL_MIC(&ul_buf[len - 9], 9);
-		crypto_iter = NBFI_Crypto_inc_iter(crypto_iter);
+		nbfi.crypto_iter_ul = NBFI_Crypto_inc_iter(nbfi.crypto_iter_ul);
 		ul_buf[len++] = (uint8_t)(mic >> 16);
 		ul_buf[len++] = (uint8_t)(mic >> 8);
 		ul_buf[len++] = (uint8_t)(mic);

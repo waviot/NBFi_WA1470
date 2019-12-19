@@ -82,6 +82,7 @@ _Bool NBFi_Config_Send_Mode(_Bool, uint8_t);
 void NBFi_Config_Set_Default();
 void NBFi_ReadConfig();
 void NBFi_WriteConfig();
+void NBFi_WriteConfig_interval(struct wtimer_desc *desc);
 void NBFi_Config_Set_TX_Chan(nbfi_phy_channel_t ch);
 void NBFi_Config_Set_RX_Chan(nbfi_phy_channel_t ch);
 void NBFi_Config_Set_Device_Info(nbfi_dev_info_t *);
@@ -795,7 +796,6 @@ static void NBFi_Receive_Timeout_cb(struct wtimer_desc *desc)
                 NBFi_Config_Set_Default(); //set default configuration
                 NBFi_Config_Send_Mode(0, NBFI_PARAM_MODE);
             }
-
         }
     }
     else
@@ -961,9 +961,9 @@ void NBFi_Go_To_Sleep(_Bool sleep)
 
 nbfi_status_t NBFI_Init()
 {
-    
-    
     NBFi_Config_Set_Default();
+	NBFi_WriteConfig(0);
+	
     for(uint8_t i = 0; i < NBFI_TX_PKTBUF_SIZE; i++) nbfi_TX_pktBuf[i] = 0;
     for(uint8_t i = 0; i < NBFI_RX_PKTBUF_SIZE; i++) nbfi_RX_pktBuf[i] = 0;
 

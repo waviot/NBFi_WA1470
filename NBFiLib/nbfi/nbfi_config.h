@@ -26,13 +26,15 @@
 #define NBFI_PARAM_APP_IDS              0x11
 #define NBFI_PARAM_BSANDSERVER_IDS      0x12
 
+//	sizeof(nbfi_settings_t) must be 128 bytes
+#pragma pack(push, 4)
 typedef struct
 {
-    nbfi_mode_t mode;
-    nbfi_phy_channel_t tx_phy_channel;
-    nbfi_phy_channel_t rx_phy_channel;
-    nbfi_handshake_t   handshake_mode;
-    nbfi_mack_mode_t   mack_mode;
+    nbfi_mode_t 		mode;
+    nbfi_phy_channel_t	tx_phy_channel;
+    nbfi_phy_channel_t 	rx_phy_channel;
+    nbfi_handshake_t	handshake_mode;
+    nbfi_mack_mode_t	mack_mode;
     uint8_t     num_of_retries;
     uint8_t     max_payload_len;
     uint8_t     dl_ID[3];
@@ -46,12 +48,16 @@ typedef struct
     int8_t      tx_pwr;
     uint16_t    heartbeat_interval;
     uint8_t     heartbeat_num;
-    uint8_t     additional_flags;
+    uint32_t    additional_flags;
     uint32_t    ul_freq_base;
     uint32_t    dl_freq_base;
     uint8_t     freq_plan;
-    uint8_t     reserved[2];
+	uint32_t	crypto_iter_ul;
+	uint32_t	crypto_iter_dl;
+	uint32_t	save_interval;
+    uint8_t     reserved[44];
 }nbfi_settings_t;
+#pragma pack(pop)
 
 extern nbfi_settings_t nbfi;
 
@@ -64,6 +70,7 @@ extern nbfi_settings_t nbfi;
 #define NBFI_FLG_NO_REDUCE_TX_PWR               0x20
 #define NBFI_OFF_MODE_ON_INIT                   0x40
 #define NBFI_FLG_DO_NOT_SEND_PKTS_ON_START      0x80
+#define NBFI_FLG_NO_SAVE_SETTING     			0x100
 
 typedef struct
 {

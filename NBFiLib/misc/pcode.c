@@ -55,7 +55,5 @@ void PCODE_encode(uint8_t power, uint8_t* in, uint8_t* out){
                 out[t] = out[t] ^ out[t + sl/2];
             }
         }
-    }
-
-
+	}
 }

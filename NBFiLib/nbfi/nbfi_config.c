@@ -22,6 +22,7 @@ _Bool NBFi_Config_Tx_Idle();
 
 nbfi_settings_t nbfi;
 
+struct wtimer_desc nbfi_save_setting_desc;
 
 nbfi_dev_info_t dev_info =
 {
@@ -57,10 +58,12 @@ const nbfi_settings_t nbfi_fastdl =
     NBFI_DEFAULT_RF_MAX_POWER,     
     60,     
     0,      
-    NBFI_FLG_FIXED_BAUD_RATE | NBFI_FLG_NO_RESET_TO_DEFAULTS | NBFI_FLG_NO_SENDINFO,
+    NBFI_FLG_FIXED_BAUD_RATE | NBFI_FLG_NO_RESET_TO_DEFAULTS | NBFI_FLG_NO_SENDINFO | NBFI_FLG_NO_SAVE_SETTING,
     0,
     0,
-    0
+    0,
+	0,
+	3600
 };
 
 
@@ -109,6 +112,7 @@ _Bool NBFi_Config_Send_Mode(_Bool, uint8_t);
 void NBFi_Config_Set_Default();
 void NBFi_ReadConfig();
 void NBFi_WriteConfig();
+void NBFi_WriteConfig_interval(struct wtimer_desc *desc);
 void NBFi_Config_Set_TX_Chan(nbfi_phy_channel_t ch);
 void NBFi_Config_Set_RX_Chan(nbfi_phy_channel_t ch);
 void NBFi_Config_Send_Current_Mode(struct wtimer_desc *desc);
@@ -662,6 +666,14 @@ read_default:
 }
 
 extern void (* __nbfi_write_flash_settings)(nbfi_settings_t*);
+
+void NBFi_WriteConfig_interval(struct wtimer_desc *desc)
+{
+	if(!(nbfi.additional_flags & NBFI_FLG_NO_SAVE_SETTING) && desc)
+		NBFi_WriteConfig();
+	ScheduleTask(&nbfi_save_setting_desc, NBFi_WriteConfig_interval, RELATIVE, SECONDS(nbfi.save_interval));
+}
+
 void NBFi_WriteConfig()
 {
 	if(__nbfi_write_flash_settings == 0) 

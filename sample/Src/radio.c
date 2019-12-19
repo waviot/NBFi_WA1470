@@ -82,7 +82,10 @@ const nbfi_settings_t nbfi_set_default =
     NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
     NBFI_UL_FREQ_BASE,
     NBFI_DL_FREQ_BASE,
-    NBFI_FREQ_PLAN_DEFAULT//NBFI_FREQ_PLAN_SHIFTED_HIGHPHY
+    NBFI_FREQ_PLAN_DEFAULT,//NBFI_FREQ_PLAN_SHIFTED_HIGHPHY
+	0,
+	0,
+	12 * 3600
 };
 #else
 
@@ -109,7 +112,10 @@ const nbfi_settings_t nbfi_set_default =
     NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
     NBFI_UL_FREQ_BASE,
     NBFI_DL_FREQ_BASE,
-    NBFI_FREQ_PLAN_DEFAULT//NBFI_FREQ_PLAN_SHIFTED_HIGHPHY
+    NBFI_FREQ_PLAN_DEFAULT,//NBFI_FREQ_PLAN_SHIFTED_HIGHPHY
+	0,
+	0,
+	12 * 3600
 };
 #endif
 

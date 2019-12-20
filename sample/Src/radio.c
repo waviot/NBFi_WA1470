@@ -82,10 +82,7 @@ const nbfi_settings_t nbfi_set_default =
     NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
     NBFI_UL_FREQ_BASE,
     NBFI_DL_FREQ_BASE,
-    NBFI_FREQ_PLAN_DEFAULT,//NBFI_FREQ_PLAN_SHIFTED_HIGHPHY
-	0,
-	0,
-	12 * 3600
+    NBFI_FREQ_PLAN_DEFAULT//NBFI_FREQ_PLAN_SHIFTED_HIGHPHY
 };
 #else
 
@@ -112,10 +109,7 @@ const nbfi_settings_t nbfi_set_default =
     NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
     NBFI_UL_FREQ_BASE,
     NBFI_DL_FREQ_BASE,
-    NBFI_FREQ_PLAN_DEFAULT,//NBFI_FREQ_PLAN_SHIFTED_HIGHPHY
-	0,
-	0,
-	12 * 3600
+    NBFI_FREQ_PLAN_DEFAULT//NBFI_FREQ_PLAN_SHIFTED_HIGHPHY
 };
 #endif
 
@@ -533,7 +527,7 @@ void nbfi_read_default_settings(nbfi_settings_t* settings)
 
 #define EEPROM_INT_nbfi_data (DATA_EEPROM_BASE + 1024*5)
 
-void  nbfi_read_flash_settings(nbfi_settings_t* settings) 
+void nbfi_read_flash_settings(nbfi_settings_t* settings) 
 {
 	memcpy((void*)settings, ((const void*)EEPROM_INT_nbfi_data), sizeof(nbfi_settings_t));
 }
@@ -584,6 +578,18 @@ void nbfi_lock_unlock_nbfi_irq(uint8_t lock)
     nbfi_lock = lock;
 }
 
+void nbfi_get_iterator(nbfi_crypto_iterator_t * iter)
+{
+	//	Read iterator from retain storage
+	iter->dl = iter->ul = 0;
+}
+
+void nbfi_set_iterator(nbfi_crypto_iterator_t * iter)
+{
+	//	Write iterator to retain storage
+	//	Cause every send/receive packet
+}
+
 void radio_init(void)
 {
 
@@ -631,6 +637,8 @@ void radio_init(void)
 	NBFI_reg_func(NBFI_WRITE_FLASH_SETTINGS, (void*)nbfi_write_flash_settings);
 	NBFI_reg_func(NBFI_READ_DEFAULT_SETTINGS, (void*)nbfi_read_default_settings);
 	NBFI_reg_func(NBFI_MEASURE_VOLTAGE_OR_TEMPERATURE, (void*)nbfi_measure_valtage_or_temperature);
+	NBFI_reg_func(NBFI_GET_ITERATOR, (void*)nbfi_get_iterator);
+	NBFI_reg_func(NBFI_SET_ITERATOR, (void*)nbfi_set_iterator);
 
 	//register callbacks when external RTC used
 	//NBFI_reg_func(NBFI_UPDATE_RTC, (void*)nbfi_update_rtc);

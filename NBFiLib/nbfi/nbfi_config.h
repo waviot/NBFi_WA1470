@@ -26,8 +26,6 @@
 #define NBFI_PARAM_APP_IDS              0x11
 #define NBFI_PARAM_BSANDSERVER_IDS      0x12
 
-//	sizeof(nbfi_settings_t) must be 128 bytes
-#pragma pack(push, 4)
 typedef struct
 {
     nbfi_mode_t 		mode;
@@ -48,18 +46,21 @@ typedef struct
     int8_t      tx_pwr;
     uint16_t    heartbeat_interval;
     uint8_t     heartbeat_num;
-    uint32_t    additional_flags;
+    uint8_t    additional_flags;
     uint32_t    ul_freq_base;
     uint32_t    dl_freq_base;
     uint8_t     freq_plan;
-	uint32_t	crypto_iter_ul;
-	uint32_t	crypto_iter_dl;
-	uint32_t	save_interval;
-    uint8_t     reserved[44];
+    uint8_t     reserved[2];
 }nbfi_settings_t;
-#pragma pack(pop)
+
+typedef struct
+{
+	uint32_t ul;
+	uint32_t dl;
+}nbfi_crypto_iterator_t;
 
 extern nbfi_settings_t nbfi;
+extern nbfi_crypto_iterator_t nbfi_iter;
 
 //aditional flags:
 #define NBFI_FLG_FIXED_BAUD_RATE                0x01
@@ -70,7 +71,6 @@ extern nbfi_settings_t nbfi;
 #define NBFI_FLG_NO_REDUCE_TX_PWR               0x20
 #define NBFI_OFF_MODE_ON_INIT                   0x40
 #define NBFI_FLG_DO_NOT_SEND_PKTS_ON_START      0x80
-#define NBFI_FLG_NO_SAVE_SETTING     			0x100
 
 typedef struct
 {

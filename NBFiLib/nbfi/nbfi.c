@@ -15,7 +15,7 @@
 #endif
 
 extern nbfi_transport_packet_t * nbfi_TX_pktBuf[NBFI_TX_PKTBUF_SIZE];
-extern nbfi_transport_packet_t* nbfi_RX_pktBuf[NBFI_RX_PKTBUF_SIZE];
+extern nbfi_transport_packet_t * nbfi_RX_pktBuf[NBFI_RX_PKTBUF_SIZE];
 
 nbfi_state_t nbfi_state = {0,0,0,0,0,0,0,0,0,0,0,0,0};
 
@@ -80,6 +80,8 @@ _Bool NBFi_Config_Tx_Power_Change(nbfi_rate_direct_t dir);
 void NBFi_Config_Return();
 _Bool NBFi_Config_Send_Mode(_Bool, uint8_t);
 void NBFi_Config_Set_Default();
+void NBFi_Set_Iterator();
+void NBFi_Get_Iterator();
 void NBFi_ReadConfig();
 void NBFi_WriteConfig();
 void NBFi_WriteConfig_interval(struct wtimer_desc *desc);
@@ -107,6 +109,8 @@ void (* __nbfi_rtc_synchronized)(uint32_t) = 0;
 void (* __nbfi_lock_unlock_nbfi_irq)(uint8_t) = 0;
 void (* __nbfi_reset)(void) = 0;
 
+void (* __nbfi_get_iterator)(nbfi_crypto_iterator_t*) = 0;
+void (* __nbfi_set_iterator)(nbfi_crypto_iterator_t*) = 0;
 
 
 void NBFI_reg_func(uint8_t name, void* fn)
@@ -137,18 +141,24 @@ void NBFI_reg_func(uint8_t name, void* fn)
 	case NBFI_MEASURE_VOLTAGE_OR_TEMPERATURE:
 		__nbfi_measure_voltage_or_temperature = (uint32_t(*)(uint8_t))fn;
 		break;
-        case NBFI_UPDATE_RTC:
-                __nbfi_update_rtc = (uint32_t(*)(void))fn;
-                break;
-        case NBFI_RTC_SYNCHRONIZED:
-                __nbfi_rtc_synchronized = (void(*)(uint32_t))fn;
-                break;
-        case NBFI_LOCKUNLOCKNBFIIRQ:
-                __nbfi_lock_unlock_nbfi_irq = (void(*)(uint8_t))fn;
-                break; 
-        case NBFI_RESET:
-                __nbfi_reset = (void(*)(void))fn;
-                break;
+	case NBFI_UPDATE_RTC:
+		__nbfi_update_rtc = (uint32_t(*)(void))fn;
+		break;
+	case NBFI_RTC_SYNCHRONIZED:
+		__nbfi_rtc_synchronized = (void(*)(uint32_t))fn;
+		break;
+	case NBFI_LOCKUNLOCKNBFIIRQ:
+		__nbfi_lock_unlock_nbfi_irq = (void(*)(uint8_t))fn;
+		break; 
+	case NBFI_RESET:
+		__nbfi_reset = (void(*)(void))fn;
+		break;
+	case NBFI_GET_ITERATOR:
+		__nbfi_get_iterator = (void(*)(nbfi_crypto_iterator_t*))fn;
+		break;
+	case NBFI_SET_ITERATOR:
+		__nbfi_set_iterator = (void(*)(nbfi_crypto_iterator_t*))fn;
+		break;
 	default:
 		break;
 	}
@@ -962,11 +972,10 @@ void NBFi_Go_To_Sleep(_Bool sleep)
 nbfi_status_t NBFI_Init()
 {
     NBFi_Config_Set_Default();
-	NBFi_WriteConfig_interval(0);
+	NBFi_Get_Iterator();
 	
     for(uint8_t i = 0; i < NBFI_TX_PKTBUF_SIZE; i++) nbfi_TX_pktBuf[i] = 0;
     for(uint8_t i = 0; i < NBFI_RX_PKTBUF_SIZE; i++) nbfi_RX_pktBuf[i] = 0;
-
 
     info_timer = dev_info.send_info_interval - 300 - rand()%600;
 

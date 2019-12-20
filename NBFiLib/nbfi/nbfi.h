@@ -130,9 +130,10 @@ enum nbfi_func_t
     NBFI_UPDATE_RTC,
     NBFI_RTC_SYNCHRONIZED,
     NBFI_LOCKUNLOCKNBFIIRQ,
-    NBFI_RESET
+    NBFI_RESET,
+    NBFI_GET_ITERATOR,
+    NBFI_SET_ITERATOR,
 };
-
 
 void 	        NBFI_reg_func(uint8_t name, void*);
 nbfi_status_t   NBFI_Init();

@@ -91,7 +91,6 @@ typedef struct
     uint32_t server_id;
 }nbfi_state_t;
 
-
 typedef enum
 {
     OK = 0,

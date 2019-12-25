@@ -93,7 +93,7 @@ const nbfi_settings_t nbfi_set_default =
     DL_DBPSK_50_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
     MACK_1,             //mack_mode
-    2,                  //num_of_retries;
+    0x82,                  //num_of_retries;
     8,                  //max_payload_len;
     {0},                //dl_ID[3];
     {0},                //temp_ID[3];

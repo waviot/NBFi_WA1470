@@ -443,7 +443,7 @@ void NBFi_Resend_Pkt(nbfi_transport_packet_t* act_pkt, uint32_t mask)
         if(one&mask)
         {
           mask &= ~one;
-          if(++pkt->retry_num > nbfi.num_of_retries) pkt->state = PACKET_LOST;
+          if(++pkt->retry_num > NBFi_Get_Retry_Number()) pkt->state = PACKET_LOST;
           else
           {
             pkt->state = PACKET_QUEUED_AGAIN;
@@ -699,4 +699,11 @@ void delay_ms(uint16_t ms)
         delaymstimer--;
     }
     while (delaymstimer);
+}
+
+uint8_t NBFi_Get_Retry_Number()
+{
+  if((NBFi_Phy_To_Bitrate(nbfi.rx_phy_channel) >= 3200) && (NBFi_Phy_To_Bitrate(nbfi.tx_phy_channel) >= 3200))
+    return nbfi.num_of_retries&0x0f + (nbfi.num_of_retries >> 4);
+  else return nbfi.num_of_retries&0x0f;
 }

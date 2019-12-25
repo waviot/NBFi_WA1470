@@ -8,6 +8,11 @@ extern LPTIM_HandleTypeDef hlptim1;
 
 extern SPI_HandleTypeDef hspi2;
 
+#define ADC_TIMEOUT		100
+void ADC_init(void);
+void ADC_deinit(void);
+int ADC_get(uint32_t * voltage, uint32_t * temp);
+
 void SystemClock_Config(void);
 
 void MX_GPIO_Init(void);

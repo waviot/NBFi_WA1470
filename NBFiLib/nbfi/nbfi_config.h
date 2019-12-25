@@ -25,6 +25,7 @@
 #define NBFI_PARAM_BROADCAST_ADD        0x10
 #define NBFI_PARAM_APP_IDS              0x11
 #define NBFI_PARAM_BSANDSERVER_IDS      0x12
+#define NBFI_PARAM_MODE_V5              0x13
 
 typedef struct
 {
@@ -46,7 +47,7 @@ typedef struct
     int8_t      tx_pwr;
     uint16_t    heartbeat_interval;
     uint8_t     heartbeat_num;
-    uint8_t    additional_flags;
+    uint8_t     additional_flags;
     uint32_t    ul_freq_base;
     uint32_t    dl_freq_base;
     uint8_t     freq_plan;

@@ -282,7 +282,7 @@ static _Bool NBFi_Config_Rate_Change(uint8_t rx_tx, nbfi_rate_direct_t dir )
 
     nbfi.rx_phy_channel = RxRateTable[current_rx_rate];
 
-    if(!NBFi_Config_Send_Mode(1, NBFI_PARAM_MODE))
+    if(!NBFi_Config_Send_Mode(1, NBFI_PARAM_MODE_V5))
     {
         NBFi_Config_Return();
         return 0;
@@ -313,12 +313,6 @@ _Bool NBFi_Config_Tx_Power_Change(nbfi_rate_direct_t dir)
     return (nbfi.tx_pwr != old_pwr);
 }
 
-/*
-void NBFi_Config_Send_Current_Mode(struct wtimer_desc *desc)
-{
-    NBFi_Config_Send_Mode(0, NBFI_PARAM_MODE);
-    NBFi_Send_Clear_Cmd(0);
-}*/
 
 _Bool NBFi_Config_Send_Mode(_Bool ack, uint8_t param)
 {
@@ -376,6 +370,14 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         buf[4] = nbfi.rx_phy_channel;
                         buf[5] = nbfi.tx_pwr;
                         buf[6] = nbfi.num_of_retries;
+                        break;
+                     case NBFI_PARAM_MODE_V5:
+                        buf[1] = nbfi.mode;
+                        buf[2] = nbfi.tx_phy_channel;
+                        buf[3] = nbfi.rx_phy_channel;
+                        buf[4] = nbfi.freq_plan;
+                        buf[5] = (nbfi_iter.dl >> 16);
+                        buf[6] = (nbfi_iter.dl >> 8);
                         break;
                     case NBFI_PARAM_HANDSHAKE:
                         buf[1] = nbfi.handshake_mode;
@@ -477,6 +479,12 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         if(buf[5] != 0xff) nbfi.tx_pwr = buf[5];
                         if(buf[6] != 0xff) nbfi.num_of_retries = buf[6];
                         break;
+                    case NBFI_PARAM_MODE_V5:
+                        if(buf[1] != 0xff) nbfi.mode = (nbfi_mode_t)buf[1];
+                        if(buf[2] != 0xff) NBFi_Config_Set_TX_Chan((nbfi_phy_channel_t)buf[3]);
+                        if(buf[3] != 0xff) {NBFi_Config_Set_RX_Chan((nbfi_phy_channel_t)buf[4]); rf_state = STATE_CHANGED;}
+                        if(buf[3] != 0xff) nbfi.freq_plan = buf[4];
+                        break;
                     case NBFI_PARAM_HANDSHAKE:
                         if(buf[1] != 0xff)
                         {
@@ -530,7 +538,7 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                 if(buf[0]>>6 == WRITE_PARAM_AND_SAVE_CMD)
                 {
                     NBFi_WriteConfig();
-                    NBFi_Config_Send_Mode(0, NBFI_PARAM_MODE);
+                    NBFi_Config_Send_Mode(0, NBFI_PARAM_MODE_V5);
                     return 0;
                 }
             break;
@@ -547,7 +555,7 @@ void NBFi_Config_Return()
     current_tx_rate = prev_tx_rate;
     current_rx_rate = prev_rx_rate;
     if(nbfi.mode == NRX) nbfi.handshake_mode = HANDSHAKE_NONE;
-    NBFi_Config_Send_Mode(0, NBFI_PARAM_MODE);
+    NBFi_Config_Send_Mode(0, NBFI_PARAM_MODE_V5);
 }
 
 void NBFi_Configure_IDs()

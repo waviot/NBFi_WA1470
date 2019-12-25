@@ -55,7 +55,7 @@ uint8_t NBFI_Crypto_mic_check(uint8_t *buf, uint8_t len, uint8_t *mic, uint32_t 
 	magma_ctx_t tmp_ctx_mic, tmp_ctx_master;
 	uint32_t mic_calced;
 
-	if (!(*iter_int && ((*iter_int & 0xFF) >=  iter)))
+	if ((*iter_int == 0) || (((*iter_int) & 0xFF) <  iter))
 	{
 		mic_calced = NBFi_Crypto_DL_MIC(buf, len);
 

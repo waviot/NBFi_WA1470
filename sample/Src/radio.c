@@ -53,7 +53,7 @@
 #define NBFI_UL_FREQ_BASE       (868800000 - 25000)
 #define NBFI_DL_FREQ_BASE       868800000
 #elif BAND == UL868800_DL869100
-#define NBFI_UL_FREQ_BASE       (868800000 - 25000)
+#define NBFI_UL_FREQ_BASE       (864800000 - 25000)    ///Ahtung!!!
 #define NBFI_DL_FREQ_BASE       869100000
 #endif 
 
@@ -78,7 +78,7 @@ const nbfi_settings_t nbfi_set_default =
     PCB,                //rx_antenna;
     TX_MAX_POWER,       //tx_pwr;
     1,//3600*6,             //heartbeat_interval
-    0,                //heartbeat_num
+    255,                //heartbeat_num
     NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
     NBFI_UL_FREQ_BASE,
     NBFI_DL_FREQ_BASE,
@@ -89,8 +89,8 @@ const nbfi_settings_t nbfi_set_default =
 const nbfi_settings_t nbfi_set_default =
 {
     CRX,//mode;
-    UL_DBPSK_400_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
-    DL_DBPSK_3200_PROT_D, // rx_phy_channel;
+    UL_DBPSK_50_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
+    DL_DBPSK_50_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
     MACK_1,             //mack_mode
     2,                  //num_of_retries;
@@ -104,9 +104,9 @@ const nbfi_settings_t nbfi_set_default =
     PCB,                //tx_antenna;
     PCB,                //rx_antenna;
     TX_MAX_POWER,       //tx_pwr;
-    2,//3600*6,             //heartbeat_interval
+    1,//3600*6,             //heartbeat_interval
     255,                //heartbeat_num
-    NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
+    0,//NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
     NBFI_UL_FREQ_BASE,
     NBFI_DL_FREQ_BASE,
     NBFI_FREQ_PLAN_DEFAULT//NBFI_FREQ_PLAN_SHIFTED_HIGHPHY
@@ -648,7 +648,7 @@ void radio_init(void)
 
 	NBFi_Config_Set_Device_Info(&info);
 
-	//NBFi_Clear_Saved_Configuration(); //if you need to clear previously saved nbfi configuration in EEPROM
+	NBFi_Clear_Saved_Configuration(); //if you need to clear previously saved nbfi configuration in EEPROM
 	//wa1470_set_freq(868800000);
 
 	wa1470_reg_func(WARADIO_DATA_RECEIVED, (void*)NBFi_MAC_RX_ProtocolD);

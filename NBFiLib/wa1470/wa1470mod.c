@@ -31,7 +31,11 @@ static void	wa1470mod_call_TX_finished(struct wtimer_desc *desc)
 
 void wa1470_tx_finished()
 {
-	ScheduleTask(&mod_callTXfinished_desc,	wa1470mod_call_TX_finished, RELATIVE, MILLISECONDS(5));
+  #ifdef NBFI_LOG
+        sprintf(log_string, "%05u: TX finished ", (uint16_t)(NBFi_get_RTC()&0xffff));
+	log_send_str(log_string);
+#endif
+ 	ScheduleTask(&mod_callTXfinished_desc,	wa1470mod_call_TX_finished, RELATIVE, MILLISECONDS(2));
 }
 
 void wa1470mod_isr(void)
@@ -150,7 +154,7 @@ void wa1470mod_set_bitrate(mod_bitrate_s bitrate)
 void wa1470mod_set_freq(uint32_t freq)
 {
 #ifdef NBFI_LOG
-	sprintf(log_string, "mod_set_freq to %ld", freq);
+        sprintf(log_string, "%05u: mod_set_freq to %ld", ((uint16_t)(NBFi_get_RTC()&0xffff)), freq); 
 	log_send_str(log_string);
 #endif
 	if(mod_i_q_or_bpsk_pin == WA1470_SEND_BY_BPSK_PIN)

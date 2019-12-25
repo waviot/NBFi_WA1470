@@ -1,12 +1,12 @@
-#ifndef _DEFINES_H
-#define _DEFINES_H
+#ifndef _NBFI_DEFINES_H
+#define _NBFI_DEFINES_H
 
 #define NBFI_REV							5
 #define NBFI_SUBREV							0
 
 //#define NBFI_NO_CRYPTO
 
-//#define NBFI_LOG
+#define NBFI_LOG
 
 #define NBFI_DEFAULT_MANUFACTURER_ID		        0x8888     //Waviot
 #define NBFI_DEFAULT_HARDWARE_TYPE_ID		        0 //UNDEFINED
@@ -19,4 +19,4 @@
 #define NBFI_DEFAULT_SEND_INFO_INTERVAL		2592000  //one time per month
 //#define MAKE_OSCCAL_INTERVAL       30
 
-#endif // _DEFINES_H
+#endif // _NBFI_DEFINES_H

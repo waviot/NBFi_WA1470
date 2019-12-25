@@ -180,7 +180,7 @@ static uint32_t NBFI_PhyToDL_Delay(nbfi_phy_channel_t chan)
 
 static uint32_t NBFI_PhyToDL_ListenTime(nbfi_phy_channel_t chan)
 {
-	const uint32_t NBFI_DL_LISTEN_TIME[4] = {40000, 40000, 40000, 40000};
+	const uint32_t NBFI_DL_LISTEN_TIME[4] = {40000, 40000, 5000, 5000};
 
 	if (chan > DL_DBPSK_25600_PROT_E)
 		return NBFI_DL_LISTEN_TIME[0];
@@ -193,7 +193,7 @@ static uint32_t NBFI_PhyToDL_ListenTime(nbfi_phy_channel_t chan)
 
 static uint32_t NBFI_PhyToDL_AddRndListenTime(nbfi_phy_channel_t chan)
 {
-	const uint32_t NBFI_DL_ADD_RND_LISTEN_TIME[4] = {20000, 20000, 20000, 20000};
+	const uint32_t NBFI_DL_ADD_RND_LISTEN_TIME[4] = {20000, 20000, 2000, 2000};
 	
 	if (chan > DL_DBPSK_25600_PROT_E)
 		return NBFI_DL_ADD_RND_LISTEN_TIME[0];
@@ -804,7 +804,7 @@ static void NBFi_Receive_Timeout_cb(struct wtimer_desc *desc)
                     nbfi_active_pkt->state = PACKET_QUEUED;
                 }
                 NBFi_Config_Set_Default(); //set default configuration
-                NBFi_Config_Send_Mode(0, NBFI_PARAM_MODE);
+                NBFi_Config_Send_Mode(0, NBFI_PARAM_MODE_V5);
             }
         }
     }
@@ -961,7 +961,7 @@ void NBFi_Go_To_Sleep(_Bool sleep)
             nbfi_settings_t settings;
             NBFi_ReadConfig(&settings);
             nbfi.mode = settings.mode;
-            NBFi_Config_Send_Mode(0, NBFI_PARAM_MODE);
+            NBFi_Config_Send_Mode(0, NBFI_PARAM_MODE_V5);
             NBFi_Send_Clear_Cmd(0);
             NBFi_Force_process();
         }
@@ -991,7 +991,7 @@ nbfi_status_t NBFI_Init()
       NBFi_RX_Controller();
       if(!(nbfi.additional_flags&NBFI_FLG_DO_NOT_SEND_PKTS_ON_START))
       { 
-            NBFi_Config_Send_Mode(0, NBFI_PARAM_MODE);
+            NBFi_Config_Send_Mode(0, NBFI_PARAM_MODE_V5);
             NBFi_Send_Clear_Cmd(0);
       }
 

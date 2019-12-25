@@ -76,8 +76,10 @@ void plot_spectrum(struct wtimer_desc *desc) {
 #endif
 
 extern uint8_t nbfi_lock;
+uint32_t systick_timer = 0;
 void HAL_SYSTICK_Callback(void)
 {
+  systick_timer++;
   if(!nbfi_lock) wtimer_runcallbacks();
 }
 
@@ -96,10 +98,10 @@ int main(void)
   log_init();
   
   ScheduleTask(&test_desc, send_data, RELATIVE, SECONDS(1));
-  
-  
+    
   //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
   //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, GPIO_PIN_RESET);
+  
   
   while (1) 
   {     
@@ -134,23 +136,23 @@ int main(void)
           break;  
         case '5':
           wa1470dem_set_bitrate(DBPSK_50_PROT_D);
-          log_send_str_len("Switched to DBPSK_50_PROT_D\n\r", sizeof("Switched to DBPSK_50_PROT_D\n\r"));          
+          //log_send_str_len("Switched to DBPSK_50_PROT_D\n\r", sizeof("Switched to DBPSK_50_PROT_D\n\r"));          
           break;
         case '4':
           wa1470dem_set_bitrate(DBPSK_400_PROT_D);
-          log_send_str_len("Switched to DBPSK_400_PROT_D\n\r", sizeof("Switched to DBPSK_400_PROT_D\n\r"));
+          //log_send_str_len("Switched to DBPSK_400_PROT_D\n\r", sizeof("Switched to DBPSK_400_PROT_D\n\r"));
           break;
         case '3':
           wa1470dem_set_bitrate(DBPSK_3200_PROT_D);
-          log_send_str_len("Switched to DBPSK_3200_PROT_D\n\r", sizeof("Switched to DBPSK_3200_PROT_D\n\r"));
+          //log_send_str_len("Switched to DBPSK_3200_PROT_D\n\r", sizeof("Switched to DBPSK_3200_PROT_D\n\r"));
           break;
         case '2':
           wa1470dem_set_bitrate(DBPSK_25600_PROT_D);
-          log_send_str_len("Switched to DBPSK_25600_PROT_D\n\r", sizeof("Switched to DBPSK_25600_PROT_D\n\r"));               
+          //log_send_str_len("Switched to DBPSK_25600_PROT_D\n\r", sizeof("Switched to DBPSK_25600_PROT_D\n\r"));               
           break;
         case '1':
           wa1470dem_set_bitrate(DBPSK_100H_PROT_D);
-          log_send_str_len("Switched to DBPSK_100H_PROT_D\n\r", sizeof("Switched to DBPSK_100H_PROT_D\n\r"));
+         // log_send_str_len("Switched to DBPSK_100H_PROT_D\n\r", sizeof("Switched to DBPSK_100H_PROT_D\n\r"));
           break;
         }
       }

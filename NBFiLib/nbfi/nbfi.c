@@ -167,7 +167,7 @@ void NBFI_reg_func(uint8_t name, void* fn)
 static uint32_t NBFI_PhyToDL_Delay(nbfi_phy_channel_t chan)
 {
 	const uint32_t NBFI_DL_DELAY_C_D[10] = {30000, 30000, 30000, 5000, 5000, 5000, 1000, 1000, 500, 500};
-	const uint32_t NBFI_DL_DELAY_E[10] = {30000, 5000, 1000, 500};
+	const uint32_t NBFI_DL_DELAY_E[10] = {6000, 1000, 500, 500};
 
 	if (chan > UL_DBPSK_25600_PROT_E)
 		return NBFI_DL_DELAY_E[0];
@@ -180,7 +180,7 @@ static uint32_t NBFI_PhyToDL_Delay(nbfi_phy_channel_t chan)
 
 static uint32_t NBFI_PhyToDL_ListenTime(nbfi_phy_channel_t chan)
 {
-	const uint32_t NBFI_DL_LISTEN_TIME[4] = {40000, 40000, 5000, 5000};
+	const uint32_t NBFI_DL_LISTEN_TIME[4] = {60000, 55000, 4000, 4000};
 
 	if (chan > DL_DBPSK_25600_PROT_E)
 		return NBFI_DL_LISTEN_TIME[0];
@@ -193,7 +193,7 @@ static uint32_t NBFI_PhyToDL_ListenTime(nbfi_phy_channel_t chan)
 
 static uint32_t NBFI_PhyToDL_AddRndListenTime(nbfi_phy_channel_t chan)
 {
-	const uint32_t NBFI_DL_ADD_RND_LISTEN_TIME[4] = {20000, 20000, 2000, 2000};
+	const uint32_t NBFI_DL_ADD_RND_LISTEN_TIME[4] = {5000, 5000, 2000, 2000};
 	
 	if (chan > DL_DBPSK_25600_PROT_E)
 		return NBFI_DL_ADD_RND_LISTEN_TIME[0];
@@ -441,8 +441,8 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
             if(phy_pkt->payload[0] & 0x80) goto place_to_stack;
             switch(phy_pkt->payload[0]) // Message type
             {
-            case 0x00:  //ACK received
-
+            case 0x00:    //ACK received
+            case 0x03:    //ACK on system packet received
                 if(((nbfi_active_pkt->state == PACKET_WAIT_ACK) ) && (phy_pkt->ITER == nbfi_active_pkt->phy_data.ITER))
                 {
                     wtimer0_remove(&dl_receive_desc);
@@ -461,22 +461,20 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
                     rtc_offset <<= 8;
                     rtc_offset |= phy_pkt->payload[6];
                     if(rtc_offset) NBFi_set_RTC(NBFi_get_RTC() + rtc_offset);                 
-                    do
+                    if(phy_pkt->payload[0] == 0x00)
                     {
-                        mask = (mask << 8) + phy_pkt->payload[i];
-                    }   while (++i < 5);
+                      do
+                      {
+                          mask = (mask << 8) + phy_pkt->payload[i];
+                      }   while (++i < 5);
 
-                    NBFi_Resend_Pkt(nbfi_active_pkt, mask);
-
-                }
-                break;
-            case 03:    //ACK on system packet received
-                if((nbfi_active_pkt->state == PACKET_WAIT_ACK))
-                {
-                    wtimer0_remove(&dl_receive_desc);
-                    wait_Receive = 0;
-                    nbfi_active_pkt->state =  PACKET_DELIVERED;
-                    nbfi_state.success_total++;
+                      NBFi_Resend_Pkt(nbfi_active_pkt, mask);
+                    }
+                    else
+                    {
+                       nbfi_state.bs_id = (((uint16_t)phy_pkt->payload[1]) << 8) + phy_pkt->payload[2];
+                       nbfi_state.server_id = (((uint16_t)phy_pkt->payload[3]) << 8) + phy_pkt->payload[4];
+                    }
                 }
                 break;
             case 0x04:  //clear RX buffer message received
@@ -778,7 +776,7 @@ static void NBFi_Receive_Timeout_cb(struct wtimer_desc *desc)
     }
     nbfi_state.fault_total++;
     NBFi_Config_Tx_Power_Change(UP);
-    if(++nbfi_active_pkt->retry_num > nbfi.num_of_retries)
+    if(++nbfi_active_pkt->retry_num > NBFi_Get_Retry_Number())
     {
        nbfi_active_pkt->state = PACKET_LOST;
 

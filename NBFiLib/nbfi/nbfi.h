@@ -8,14 +8,12 @@
 #define NBFI_TX_PKTBUF_SIZE     64
 #define NBFI_RX_PKTBUF_SIZE     32
 
-//#define NBFI_OLD_PROTE
 
 typedef enum
 {   
     NRX         =   0,
     DRX         =   1,
     CRX         =   2,
-    TRANSPARENT =   3,
     OFF         =   4
 }nbfi_mode_t;
 

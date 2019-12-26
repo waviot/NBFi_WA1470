@@ -44,15 +44,8 @@ rx_handler_t  rx_handler = 0;
 
 uint8_t not_acked = 0;
 
-uint8_t aver_tx_snr = 0;
-uint8_t aver_rx_snr = 0;
 int16_t noise = -150;
 uint8_t nbfi_last_snr = 0;
-
-//int16_t noise_summ = 0;
-//uint8_t noise_cntr = 0;
-//int16_t noise_min = -150;
-//uint8_t noise_min_cntr = 2;
 
 _Bool wait_Receive = 0;
 _Bool wait_Extra = 0;
@@ -417,12 +410,6 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
    
     nbfi_transport_packet_t* pkt = 0;
 
-    if(nbfi.mode == TRANSPARENT)
-    {
-        NBFi_RX_Controller();
-        return;
-    }
-
 
     wtimer0_remove(&wait_for_extra_desc);
     wait_Extra = 0;
@@ -628,7 +615,7 @@ static void NBFi_ProcessTasks(struct wtimer_desc *desc)
             pkt = NBFi_GetQueuedTXPkt();
             if(pkt)
             {
-                if((pkt->handshake != HANDSHAKE_NONE) && (nbfi.mode != TRANSPARENT))
+                if((pkt->handshake != HANDSHAKE_NONE))
                 {
                     if(pkt->phy_data.ACK)
                     {
@@ -650,12 +637,21 @@ static void NBFi_ProcessTasks(struct wtimer_desc *desc)
                 nbfi_active_pkt = pkt;
                 if(/*pkt->phy_data.SYS &&*/ !pkt->phy_data.ACK && NBFi_GetQueuedTXPkt()) pkt->phy_data.header |= MULTI_FLAG;
 
-                if(pkt->phy_data.SYS && (pkt->phy_data.payload[0] == 0x08))
+                if(pkt->phy_data.SYS)
                 {
-                  uint32_t rtc = NBFi_get_RTC();
-                  pkt->phy_data.SYS = 1;
-                  memcpy(&pkt->phy_data.payload[1], &rtc, 4);
+                  if(pkt->phy_data.payload[0] == 0x08)   //update current timestamp
+                  {
+                    uint32_t rtc = NBFi_get_RTC();
+                    pkt->phy_data.SYS = 1;
+                    memcpy(&pkt->phy_data.payload[1], &rtc, 4);
+                  }
+                  else if((pkt->phy_data.payload[0] == 0x06) && ((pkt->phy_data.payload[1]&0x3f) == NBFI_PARAM_MODE_V5))
+                  {
+                     pkt->phy_data.payload[6] = (nbfi_iter.dl >> 16); 
+                     pkt->phy_data.payload[7] = (nbfi_iter.dl >> 8);
+                  }
                 }
+                
 
                 if(wait_RxEnd) {wait_RxEnd = 0; wtimer0_remove(&dl_drx_desc);}
                 NBFi_MAC_TX(pkt);
@@ -725,9 +721,11 @@ static nbfi_status_t NBFi_RX_Controller()
     switch(nbfi.mode)
     {
     case  DRX:
-    case  NRX:
-        if(wait_RxEnd ) if(rf_state != STATE_RX) return NBFi_MAC_RX();
-        else break;
+        if(wait_RxEnd )
+        {
+          if(rf_state != STATE_RX) return NBFi_MAC_RX();
+          else break;
+        }
         switch(nbfi_active_pkt->state)
         {
         case PACKET_WAIT_ACK:
@@ -740,9 +738,9 @@ static nbfi_status_t NBFi_RX_Controller()
         }
         break;
     case CRX:
-    case TRANSPARENT:
         if(rf_state != STATE_RX) return NBFi_MAC_RX();
         break;
+    case NRX:
     case OFF:
         if(rf_state != STATE_OFF)  return NBFi_RF_Deinit();
         break;
@@ -784,7 +782,7 @@ static void NBFi_Receive_Timeout_cb(struct wtimer_desc *desc)
         {
             NBFi_Mark_Lost_All_Unacked();
             NBFi_Config_Return(); //return to previous work configuration
-            nbfi_state.aver_rx_snr = nbfi_state.aver_tx_snr = 0;
+            //nbfi_state.aver_rx_snr = nbfi_state.aver_tx_snr = 15;
         }
         else
         {
@@ -896,6 +894,7 @@ static void NBFi_SendHeartBeats(struct wtimer_desc *desc)
         if(!ack_pkt)   return;
         ack_pkt->phy_data.payload[0] = 0x01;
         ack_pkt->phy_data.payload[1] = 0;                      //heart beat type
+        if(MinVoltage == 0) MinVoltage = __nbfi_measure_voltage_or_temperature(1);
         ack_pkt->phy_data.payload[2] = (MinVoltage >= 300 ? 0x80 : 0) + MinVoltage % 100;         //min supply voltage since last heartbeat
         MinVoltage = 0; //reset min voltage detection
         ack_pkt->phy_data.payload[3] = __nbfi_measure_voltage_or_temperature(0);    //temperature

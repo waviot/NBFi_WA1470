@@ -87,7 +87,7 @@ typedef enum
 	MOD_DBPSK_100H_PROT_E	= 35,
 }mod_bitrate_s;
 
-void wa1470mod_init(_Bool send_by_bpsk_pin);
+void wa1470mod_init();
 void wa1470mod_isr(void);
 void wa1470mod_set_hop_table(mod_hop_channels_t *hop_table);
 uint16_t wa1470mod_phy_to_bitrate(mod_bitrate_s bitrate);

@@ -12,8 +12,8 @@
 #define MODEM_ID  *((const uint32_t*)0x0801ff80)  
 #define KEY  ((const uint32_t*)0x0801ff84)            
 
-#define MANUFACTURER_ID         0x8080 //Waviot
-#define HARDWARE_TYPE_ID        0       //undefined
+#define MANUFACTURER_ID         0x8888 //Waviot
+#define HARDWARE_TYPE_ID        0x3       //ASIC_PROTOTYPE
 #define PROTOCOL_ID             0       //undefined
 #define TX_MAX_POWER 16
 #define TX_MIN_POWER 0
@@ -89,8 +89,8 @@ const nbfi_settings_t nbfi_set_default =
 const nbfi_settings_t nbfi_set_default =
 {
     CRX,//mode;
-    UL_DBPSK_50_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
-    DL_DBPSK_50_PROT_D, // rx_phy_channel;
+    UL_DBPSK_400_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
+    DL_DBPSK_400_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
     MACK_1,             //mack_mode
     0x82,                  //num_of_retries;
@@ -104,7 +104,7 @@ const nbfi_settings_t nbfi_set_default =
     PCB,                //tx_antenna;
     PCB,                //rx_antenna;
     TX_MAX_POWER,       //tx_pwr;
-    1,//3600*6,             //heartbeat_interval
+    15,//3600*6,             //heartbeat_interval
     255,                //heartbeat_num
     0,//NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
     NBFI_UL_FREQ_BASE,
@@ -542,7 +542,7 @@ void nbfi_write_flash_settings(nbfi_settings_t* settings)
     HAL_FLASHEx_DATAEEPROM_Lock(); 
 }
 
-
+int ADC_get(uint32_t * voltage, uint32_t * temp);
 uint32_t nbfi_measure_valtage_or_temperature(uint8_t val)
 {
 	uint32_t voltage, temp;

@@ -21,7 +21,6 @@ typedef struct {
 _Bool           NBFi_MAC_Match_ID(uint8_t * addr);
 void            NBFi_MAC_RX_ProtocolD(nbfi_mac_protd_packet_t* pkt, nbfi_mac_info_packet_t* info);
 nbfi_status_t   NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt);
-nbfi_status_t   NBFi_MAC_TX_ProtocolEx(nbfi_transport_packet_t* pkt);
 nbfi_status_t   NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt);
 nbfi_status_t   NBFi_MAC_RX();
 nbfi_status_t   NBFi_MAC_TX(nbfi_transport_packet_t* pkt);

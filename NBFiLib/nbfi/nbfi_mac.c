@@ -86,8 +86,6 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 
 	memset_xdata(ul_buf,0,sizeof(ul_buf));
 
-	if(nbfi.mode == TRANSPARENT)
-		pkt->phy_data_length--;
 
 	for(int i=0; i<sizeof(protD_preambula); i++)
 	{
@@ -140,10 +138,7 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 	
 	len += 8;
 
-	if(nbfi.mode == TRANSPARENT)
-		ul_buf[len++] = pkt->phy_data.payload[8];
-	else
-		ul_buf[len++] = lastcrc8;
+        ul_buf[len++] = lastcrc8;
 
 	last_pkt_crc = CRC32(ul_buf + 4, 13); 
 
@@ -192,7 +187,7 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 	return OK;
 }
 
-
+/*
 nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 {
 	const uint8_t protD_preambula[] = {0x97, 0x15, 0x7A, 0x6F};
@@ -202,9 +197,6 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 	uint32_t tx_freq;
 
 	memset_xdata(ul_buf,0,sizeof(ul_buf));
-
-	if(nbfi.mode == TRANSPARENT)
-		pkt->phy_data_length--;
 
 	for(int i=0; i<sizeof(protD_preambula); i++)
 	{
@@ -290,8 +282,8 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 
 	return OK;
 }
-
-nbfi_status_t NBFi_MAC_TX_ProtocolEx(nbfi_transport_packet_t* pkt)
+*/
+nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 {
 	const uint8_t protE_preambula[] = {0x97, 0x15, 0x7A, 0x6F};
 	uint8_t ul_buf[20];
@@ -370,7 +362,7 @@ nbfi_status_t NBFi_MAC_TX_ProtocolEx(nbfi_transport_packet_t* pkt)
 
 		nbfi_state.UL_total++;
 
-		return NBFi_MAC_TX_ProtocolEx(pkt);
+		return NBFi_MAC_TX_ProtocolE(pkt);
 	}
 	
 	NBFi_RF_Init(nbfi.tx_phy_channel, (nbfi_rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
@@ -424,11 +416,7 @@ nbfi_status_t NBFi_MAC_TX(nbfi_transport_packet_t* pkt)
 	case DL_DBPSK_400_PROT_E:
 	case DL_DBPSK_3200_PROT_E:
 	case DL_DBPSK_25600_PROT_E:
-#ifdef NBFI_OLD_PROTE
 		return NBFi_MAC_TX_ProtocolE(pkt);
-#else
-		return NBFi_MAC_TX_ProtocolEx(pkt);
-#endif
 	case UL_PSK_FASTDL:
 	case UL_PSK_200:
 	case UL_PSK_500:

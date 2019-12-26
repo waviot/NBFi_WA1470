@@ -704,6 +704,6 @@ void delay_ms(uint16_t ms)
 uint8_t NBFi_Get_Retry_Number()
 {
   if((NBFi_Phy_To_Bitrate(nbfi.rx_phy_channel) >= 3200) && (NBFi_Phy_To_Bitrate(nbfi.tx_phy_channel) >= 3200))
-    return nbfi.num_of_retries&0x0f + (nbfi.num_of_retries >> 4);
+    return (nbfi.num_of_retries&0x0f) + (nbfi.num_of_retries >> 4);
   else return nbfi.num_of_retries&0x0f;
 }

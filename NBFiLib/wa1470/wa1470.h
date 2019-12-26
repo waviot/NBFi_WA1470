@@ -6,7 +6,6 @@
 #include "wa1470mod.h"
 #include "nbfi_defines.h"
 
-//#define TX_BPSK_PIN_MODE
 #define WA1470_SEND_BY_I_Q_MODULATOR	0
 #define WA1470_SEND_BY_BPSK_PIN			1
 
@@ -36,10 +35,9 @@ void wa1470_spi_read(uint16_t address, uint8_t *data, uint8_t length);
 void wa1470_spi_write8(uint16_t address, uint8_t data);
 uint8_t wa1470_spi_read8(uint16_t address);
 _Bool wa1470_spi_wait_for(uint16_t address, uint8_t value, uint8_t mask);
-
 void wa1470_isr();
 void wa1470_bpsk_pin_tx_finished();
-
 _Bool wa1470_cansleep();
 void wa1470_test();
+extern _Bool send_by_dbpsk;
 #endif

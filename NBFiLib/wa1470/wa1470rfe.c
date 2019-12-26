@@ -11,11 +11,14 @@ extern void (*__wa1470_chip_enable)(void);
 extern void (*__wa1470_chip_disable)(void);
 extern void (*__wa1470_nop_dalay_ms)(uint32_t);
 
-void wa1470rfe_init(_Bool send_by_bpsk_pin)
+void wa1470rfe_init()
 {
-	if(__wa1470_chip_enable)
-		__wa1470_chip_enable();
-	wa1470_spi_wait_for(RFE_INIT_DONE, 1, 0x01);
+  
+        wa1470rfe_deinit();
+        __wa1470_nop_dalay_ms(1);
+	__wa1470_chip_enable();
+	
+        wa1470_spi_wait_for(RFE_INIT_DONE, 1, 0x01);
 
 	///////////Kostyl/////////
 	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);
@@ -67,7 +70,7 @@ void wa1470rfe_init(_Bool send_by_bpsk_pin)
 	
 	wa1470rfe_set_pll_mode(RFE_PLL_MODE_FRACTIONAL);
 	
-	if(send_by_bpsk_pin)
+	if(send_by_dbpsk)
 		wa1470rfe_set_tx_mode(RFE_TX_MODE_BPSK);
 	else
 		wa1470rfe_set_tx_mode(RFE_TX_MODE_I_Q);

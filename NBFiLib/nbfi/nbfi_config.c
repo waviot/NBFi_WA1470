@@ -376,8 +376,8 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         buf[2] = nbfi.tx_phy_channel;
                         buf[3] = nbfi.rx_phy_channel;
                         buf[4] = nbfi.freq_plan;
-                        buf[5] = (nbfi_iter.dl >> 16);
-                        buf[6] = (nbfi_iter.dl >> 8);
+                        //buf[5] = (nbfi_iter.dl >> 16); //thease fields will be updated in NBFi_ProcessTasks()  
+                        //buf[6] = (nbfi_iter.dl >> 8);
                         break;
                     case NBFI_PARAM_HANDSHAKE:
                         buf[1] = nbfi.handshake_mode;
@@ -582,9 +582,11 @@ void NBFi_Config_Set_Default()
 
     srand(nbfi.full_ID[0] ^ nbfi.full_ID[1] ^ nbfi.full_ID[2] ^ nbfi.full_ID[3] ^ nbfi.full_ID[4] ^ nbfi.full_ID[5]);
 
-
-    nbfi_state.aver_tx_snr = nbfi_state.aver_rx_snr = 0;
-    current_tx_rate = current_rx_rate = 0;
+    NBFi_Config_Set_TX_Chan(nbfi.tx_phy_channel);
+    NBFi_Config_Set_RX_Chan(nbfi.rx_phy_channel);
+    //nbfi_state.aver_tx_snr = nbfi_state.aver_rx_snr = 15;
+    
+    //current_tx_rate = current_rx_rate = 0;
 
     you_should_dl_power_step_down = 0;
 
@@ -744,12 +746,17 @@ _Bool NBFi_Is_Mode_Normal()
     return (nbfi.tx_phy_channel != UL_PSK_FASTDL);
 }
 
+extern uint32_t info_timer;
 void NBFi_Config_Set_Device_Info(nbfi_dev_info_t *info)
 {
 	dev_info = *info;
-	NBFi_Get_Iterator();
-	if(dev_info.key) 
-		NBFi_Crypto_Set_KEY(dev_info.key, nbfi_iter.ul, nbfi_iter.dl);
+	if(info->key != 0)
+        {
+          NBFi_Get_Iterator();
+          if(dev_info.key) 
+                  NBFi_Crypto_Set_KEY(dev_info.key, nbfi_iter.ul, nbfi_iter.dl);
+        }
+        info_timer = dev_info.send_info_interval - 300 - rand()%600;
 }
 
 nbfi_settings_t* NBFi_get_settings()

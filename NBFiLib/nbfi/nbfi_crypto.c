@@ -55,7 +55,7 @@ uint8_t NBFI_Crypto_mic_check(uint8_t *buf, uint8_t len, uint8_t *mic, uint32_t 
 	magma_ctx_t tmp_ctx_mic, tmp_ctx_master;
 	uint32_t mic_calced;
 
-	if ((*iter_int == 0) || (((*iter_int) & 0xFF) <  iter))
+	if ((*iter_int == 0) || (((*iter_int) & 0xFF) < iter))
 	{
 		mic_calced = NBFi_Crypto_DL_MIC(buf, len);
 
@@ -74,7 +74,10 @@ uint8_t NBFI_Crypto_mic_check(uint8_t *buf, uint8_t len, uint8_t *mic, uint32_t 
 
 	for (uint32_t i = 0; i < KEY_SCAN_DEPTH; i++)
 	{
-		Magma_KEY_mesh(&tmp_ctx_master, &tmp_ctx_master, 0x0F);
+		if ((i + 1) + (*iter_int >> 8) == (1 << (CRYPTO_ITER_SIZE - 8)))
+			Magma_KEY_mesh(&key_root_ctx, &tmp_ctx_master, 0xFF);
+		else
+			Magma_KEY_mesh(&tmp_ctx_master, &tmp_ctx_master, 0x0F);
 		Magma_KEY_mesh(&tmp_ctx_master, &tmp_ctx_mic, 0x00);
 
 		mic_calced = NBFi_Crypto_MIC(&tmp_ctx_mic, buf, len);
@@ -88,6 +91,7 @@ uint8_t NBFI_Crypto_mic_check(uint8_t *buf, uint8_t len, uint8_t *mic, uint32_t 
 
 			*iter_int &= 0xFFFFFF00;
 			*iter_int += ((i + 1) << 8) + iter;
+			*iter_int &= (1 << CRYPTO_ITER_SIZE) - 1;
 			
 			return 1;
 		}
@@ -99,6 +103,15 @@ uint8_t NBFI_Crypto_mic_check(uint8_t *buf, uint8_t len, uint8_t *mic, uint32_t 
 uint32_t NBFI_Crypto_inc_iter(uint32_t iter)
 {
 	iter++;
+	if (iter >> CRYPTO_ITER_SIZE)
+	{
+		Magma_KEY_mesh(&key_root_ctx, &key_ul_master_ctx, 0xFF);
+		Magma_KEY_mesh(&key_ul_master_ctx, &key_ul_mic_ctx, 0x00);
+		Magma_KEY_mesh(&key_ul_master_ctx, &key_ul_work_ctx, 0xFF);
+		iter &= (1 << CRYPTO_ITER_SIZE) - 1;
+		return iter;
+	}
+	
 	if (!(iter & 0xFF))
 	{
 		Magma_KEY_mesh(&key_ul_master_ctx, &key_ul_master_ctx, 0x0F);

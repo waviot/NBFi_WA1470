@@ -545,7 +545,9 @@ void nbfi_write_flash_settings(nbfi_settings_t* settings)
 
 uint32_t nbfi_measure_valtage_or_temperature(uint8_t val)
 {
-	return 0;
+	uint32_t voltage, temp;
+	ADC_get(&voltage, &temp);
+	return val ? voltage / 10 : temp;
 }
 
 uint32_t nbfi_update_rtc()
@@ -581,7 +583,7 @@ void nbfi_lock_unlock_nbfi_irq(uint8_t lock)
 void nbfi_get_iterator(nbfi_crypto_iterator_t * iter)
 {
 	//	Read iterator from retain storage
-	iter->dl = iter->ul = 0;
+	iter->ul = iter->dl = 0;
 }
 
 void nbfi_set_iterator(nbfi_crypto_iterator_t * iter)

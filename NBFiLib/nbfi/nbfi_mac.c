@@ -171,7 +171,7 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 	if(!nbfi.tx_freq) 
 		parity = !parity;
 
-	if((nbfi.mode == NRX) && parity) // For NRX send in ALOHA mode
+	if((nbfi.additional_flags&NBFI_FLG_SEND_ALOHA) && parity) // For NRX send in ALOHA mode
 	{
 
 		NBFi_RF_Init(nbfi.tx_phy_channel, (nbfi_rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
@@ -268,7 +268,7 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 
 	if(!nbfi.tx_freq) parity = !parity;
 
-	if((nbfi.mode == NRX) && parity) // For NRX send in ALOHA mode
+	if((nbfi.additional_flags&NBFI_FLG_SEND_ALOHA) && parity) // For NRX send in ALOHA mode
 	{
 
 		NBFi_RF_Init(nbfi.tx_phy_channel, (nbfi_rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
@@ -361,7 +361,7 @@ nbfi_status_t NBFi_MAC_TX_ProtocolEx(nbfi_transport_packet_t* pkt)
         
 	if(!nbfi.tx_freq) parity = !parity;
 
-	if((nbfi.mode == NRX) && parity) // For NRX send in ALOHA mode
+	if((nbfi.additional_flags&NBFI_FLG_SEND_ALOHA) && parity) // For NRX send in ALOHA mode
 	{
 
 		NBFi_RF_Init(nbfi.tx_phy_channel, (nbfi_rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);

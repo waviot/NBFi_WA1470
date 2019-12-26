@@ -554,7 +554,7 @@ void NBFi_Config_Return()
     memcpy_xdata(&nbfi, &nbfi_prev, sizeof(nbfi));
     current_tx_rate = prev_tx_rate;
     current_rx_rate = prev_rx_rate;
-    if(nbfi.mode == NRX) nbfi.handshake_mode = HANDSHAKE_NONE;
+   // if(nbfi.mode == NRX) nbfi.handshake_mode = HANDSHAKE_NONE;
     NBFi_Config_Send_Mode(0, NBFI_PARAM_MODE_V5);
 }
 

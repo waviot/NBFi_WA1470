@@ -239,7 +239,7 @@ nbfi_status_t NBFi_Send(uint8_t* payload, uint8_t length)
         packet->state = PACKET_QUEUED;
         packet->handshake = nbfi.handshake_mode;
         packet->phy_data.ITER = nbfi_state.UL_iter++ & 0x1f;
-        if(nbfi.handshake_mode != HANDSHAKE_NONE)
+        if((nbfi.handshake_mode != HANDSHAKE_NONE) && (nbfi.mode >= DRX))
         {
             if(((nbfi_state.UL_iter) % nbfi.mack_mode) == 0)
             {
@@ -287,7 +287,7 @@ nbfi_status_t NBFi_Send(uint8_t* payload, uint8_t length)
         groupe++;
         if((length == 0) && (groupe == 1))
         {
-            if(nbfi.handshake_mode != HANDSHAKE_NONE)
+            if((nbfi.handshake_mode != HANDSHAKE_NONE)&&(nbfi.mode >= DRX))
             {
                 if(((nbfi_state.UL_iter) % nbfi.mack_mode) == 0)
                 {
@@ -301,7 +301,7 @@ nbfi_status_t NBFi_Send(uint8_t* payload, uint8_t length)
         else   //the last packet of groupe must be acked
         {
             packet->phy_data.MULTI = 1;
-            if(nbfi.handshake_mode != HANDSHAKE_NONE)
+            if((nbfi.handshake_mode != HANDSHAKE_NONE)&& (nbfi.mode >= DRX))
             {
                 if(length == 0)
                 {
@@ -726,7 +726,7 @@ static nbfi_status_t NBFi_RX_Controller()
     {
     case  DRX:
     case  NRX:
-        if(wait_RxEnd ) if(rf_state != STATE_RX)return NBFi_MAC_RX();
+        if(wait_RxEnd ) if(rf_state != STATE_RX) return NBFi_MAC_RX();
         else break;
         switch(nbfi_active_pkt->state)
         {
@@ -905,7 +905,7 @@ static void NBFi_SendHeartBeats(struct wtimer_desc *desc)
         ack_pkt->phy_data.payload[7] = nbfi.tx_pwr;            // output power
         ack_pkt->phy_data.ITER = nbfi_state.UL_iter++ & 0x1f;;
         ack_pkt->phy_data.header |= SYS_FLAG;
-        if(nbfi.mode != NRX)
+        if(nbfi.mode >= DRX)
         {
           if(nbfi.handshake_mode != HANDSHAKE_NONE)  
           {

@@ -22,7 +22,7 @@ void (*__wa1470_nop_dalay_ms)(uint32_t) = 0;
 void (*__wa1470_send_to_bpsk_pin)(uint8_t *, uint16_t, uint16_t) = 0;
 
 _Bool send_by_dbpsk;
-
+uint32_t wa1470_modem_id;
 void wa1470_reg_func(uint8_t name, void* fn)
 {
 	switch(name)
@@ -131,8 +131,17 @@ void wa1470_init(_Bool send_by_bpsk_pin, uint32_t modem_id)
 {
         send_by_dbpsk = send_by_bpsk_pin;
 	wa1470rfe_init();
-	wa1470dem_init(modem_id);
+	wa1470dem_init(wa1470_modem_id = modem_id);
 	wa1470mod_init(send_by_dbpsk); 
+}
+
+void wa1470_reinit()
+{
+        wa1470rfe_deinit();
+        __wa1470_nop_dalay_ms(1);
+        wa1470rfe_init();
+        wa1470dem_init(wa1470_modem_id);
+  	wa1470mod_init(send_by_dbpsk); 
 }
 
 void wa1470_isr()

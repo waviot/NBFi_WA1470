@@ -33,7 +33,7 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
 
     rf_busy = 1;
 
-    wa1470rfe_init();
+    wa1470_reinit();
     
     switch(phy_channel)
     {

@@ -78,8 +78,8 @@ typedef struct
 {
 	uint32_t modem_id;
 	uint32_t* key;
-	uint8_t tx_min_pwr;
-	uint8_t tx_max_pwr;
+	int8_t tx_min_pwr;
+	int8_t tx_max_pwr;
 	uint16_t manufacturer_id;
 	uint16_t hardware_type_id;
 	uint16_t protocol_id;

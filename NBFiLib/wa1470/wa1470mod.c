@@ -8,7 +8,9 @@
 
 struct wtimer_desc mod_callTXfinished_desc;
 
-mod_hop_channels_t mod_current_hop_table[8] = {MOD_MINUS90000, MOD_MINUS65000, MOD_MINUS40000, MOD_MINUS15000, MOD_PLUS15000, MOD_PLUS40000, MOD_PLUS65000, MOD_PLUS90000};
+mod_hop_channels_t mod_current_hop_table[8] = {MOD_MINUS97000, MOD_MINUS65000, MOD_MINUS40000, MOD_MINUS15000, MOD_PLUS15000, MOD_PLUS40000, MOD_PLUS65000, MOD_PLUS90000};
+const int32_t MOD_FREQ_OFFSETS[32] = {-97000,-89000,-83000,-90000,-79000,-73000,-59000,-65000,-53000,-47000,-37000,-40000,-29000,-19000,-11000,-15000,15000,11000,19000,29000,40000,37000,47000,53000,65000,59000,73000,79000,90000,83000,89000,97000};
+
 mod_bitrate_s current_tx_phy;
 
 extern void (*__wa1470_tx_finished)(void);
@@ -17,7 +19,8 @@ void wa1470_bpsk_pin_send(uint8_t* data, mod_bitrate_s bitrate);
 void wa1470mod_init()
 {
 	if(send_by_dbpsk == WA1470_SEND_BY_I_Q_MODULATOR)
-		wa1470mod_set_hop_table((mod_hop_channels_t *)mod_current_hop_table);
+          wa1470mod_set_hop_table((mod_hop_channels_t *)mod_current_hop_table);
+        
 }
 
 static void	wa1470mod_call_TX_finished(struct wtimer_desc *desc)
@@ -150,7 +153,7 @@ void wa1470mod_set_freq(uint32_t freq)
 			wa1470rfe_set_freq(freq);
 			break;
 		default:
-			wa1470rfe_set_freq(freq + 90000);
+			wa1470rfe_set_freq(freq - MOD_FREQ_OFFSETS[mod_current_hop_table[0]]);
 			break;
 		}
 	}

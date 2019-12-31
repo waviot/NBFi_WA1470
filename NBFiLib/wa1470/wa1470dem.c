@@ -54,7 +54,6 @@ static void _memcpy(uint8_t *dst, const uint8_t *src, uint8_t len)
 
 void wa1470dem_init(uint32_t modem_id)
 {
-//	uint8_t _preambule_protD[4] = {0x97,0x15,0x7a,0x6f};
 	static uint32_t _preambula;
 	if(!_preambula)
 	{
@@ -66,12 +65,11 @@ void wa1470dem_init(uint32_t modem_id)
 
 	wa1470_spi_write8(DEM_CONTROL, DEM_CONTROL_RESET);
 	wa1470dem_set_bitrate(DBPSK_50_PROT_D);
-	wa1470dem_set_threshold(1024); //1024
+	wa1470dem_set_threshold(1024); 
 	wa1470dem_set_alpha(128, 5);
 	wa1470dem_set_crc_poly(NB_FI_RX_CRC_POLY);
 	wa1470dem_set_hop_table(current_hop_table);
 	wa1470dem_set_hop_len(36);
-//	wa1470dem_set_preambule(_preambule_protD);
 	wa1470dem_set_preambule((uint8_t *)&_preambula);
 	wa1470_spi_write8(DEM_FFT_MSB, 0x80 + 23);
 	wa1470_spi_write8(DEM_CONTROL, 0);
@@ -141,7 +139,7 @@ static void  wa1470dem_process_messages(struct wtimer_desc *desc)
 			rssi64 += tmp_dem_mas[i].rssi;
 			float rssi = log10f(rssi64)*20 - 48 - wa1470dem_get_rssi_logoffset();
 			tmp_dem_info_mas[i].rssi = (int16_t)rssi;
-			float snr = rssi - dem_noise;//[tmp_dem_mas[i].freq&0x1f];
+			float snr = rssi - dem_noise;
 			if(snr < 0) snr = 0;
 			tmp_dem_info_mas[i].snr = (uint8_t)snr;
 #ifdef NBFI_LOG		
@@ -217,7 +215,6 @@ void wa1470dem_isr(void)
 		if(i == dem_mess_received)
 		{
 			if(++dem_mess_received > 1);
-				//while(1);
 		}
 		else
 		{
@@ -259,7 +256,6 @@ static int8_t wa1470dem_get_sensitivity_diff(dem_bitrate_s bitrate_1, dem_bitrat
 
 void wa1470dem_set_bitrate(dem_bitrate_s bitrate)
 {
-	// if(current_rx_phy == bitrate) return;
 	if(__wa1470_disable_pin_irq)
 		__wa1470_disable_pin_irq();
 
@@ -425,7 +421,7 @@ static uint32_t wa1470dem_get_rssi_int(_Bool aver_or_max)
 		dem_spectrum_mas[i] = ((dem_spectrum_mas[i]*15 + data[i] + 1)>>4);
 #endif
 	}
-	return (aver_or_max?rssi/size:max);//*gain;  
+	return (aver_or_max?rssi/size:max); 
 }
 
 float wa1470dem_get_rssi()

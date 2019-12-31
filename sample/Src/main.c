@@ -93,6 +93,7 @@ int main(void)
   
   MX_GPIO_Init();
   ADC_init();
+  
   radio_init();
 
   log_init();

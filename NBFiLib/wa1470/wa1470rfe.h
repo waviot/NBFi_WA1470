@@ -43,6 +43,8 @@
 #define ADDR_1_8_V_FRACTIONAL_PLL_MODE		0x4032
 #define RFE_INIT_DONE			0x4039
 #define RFE_SET_MODE_BUSY		0x403B
+#define RFE_PLL_LOCK	        	0x401F
+
 
 
 /*#define	MODE_DEEP_SLEEP	(uint8_t) 128
@@ -95,7 +97,7 @@ void wa1470rfe_set_mode(rfe_mode_s mode);
 void wa1470rfe_set_pll_mode(rfe_pll_mode_s mode);
 void wa1470rfe_set_tx_mode(rfe_tx_mode_s mode);
 void wa1470rfe_set_rx_mode(rfe_rx_mode_s mode);
-void wa1470rfe_set_tx_power(uint8_t power);
+void wa1470rfe_set_tx_power(int8_t power);
 void wa1470rfe_set_band(rfe_band_s band);
 _Bool wa1470rfe_set_freq(uint32_t freq);
 

@@ -15,8 +15,8 @@
 #define MANUFACTURER_ID         0x8888 //Waviot
 #define HARDWARE_TYPE_ID        0x3       //ASIC_PROTOTYPE
 #define PROTOCOL_ID             0       //undefined
-#define TX_MAX_POWER 16
-#define TX_MIN_POWER 0
+#define TX_MAX_POWER 15
+#define TX_MIN_POWER -13
 #define SEND_INFO_PERIOD	2592000         //one time per month
 #define BAND         UL868800_DL869100          //UL868800_DL864000
 
@@ -53,7 +53,7 @@
 #define NBFI_UL_FREQ_BASE       (868800000 - 25000)
 #define NBFI_DL_FREQ_BASE       868800000
 #elif BAND == UL868800_DL869100
-#define NBFI_UL_FREQ_BASE       (864800000 - 25000)    ///Ahtung!!!
+#define NBFI_UL_FREQ_BASE       (868800000 - 25000)    
 #define NBFI_DL_FREQ_BASE       869100000
 #endif 
 
@@ -72,7 +72,7 @@ const nbfi_settings_t nbfi_set_default =
     {0},                //temp_ID[3];
     {0xFF,0,0},         //broadcast_ID[3];
     {0},                //full_ID[6];
-    868790000,//0,//868800000,                  //tx_freq;
+    0,//0,//868800000,                  //tx_freq;
     0,//858090000,//868791000,//0,//868790000,//0,//868735500,//868710000,//868800000,                  //rx_freq;
     PCB,                //tx_antenna;
     PCB,                //rx_antenna;
@@ -99,7 +99,7 @@ const nbfi_settings_t nbfi_set_default =
     {0},                //temp_ID[3];
     {0xFF,0,0},         //broadcast_ID[3];
     {0},                //full_ID[6];
-    0,//0,//868800000,                  //tx_freq;
+    0,                  //tx_freq;
     0,//858090000,//868791000,//0,//868790000,//0,//868735500,//868710000,//868800000,                  //rx_freq;
     PCB,                //tx_antenna;
     PCB,                //rx_antenna;
@@ -594,7 +594,6 @@ void nbfi_set_iterator(nbfi_crypto_iterator_t * iter)
 
 void radio_init(void)
 {
-
 	RADIO_GPIO_Init();
 
 	RADIO_LPTIM_Init();       
@@ -655,7 +654,7 @@ void radio_init(void)
 
 	wa1470_reg_func(WARADIO_DATA_RECEIVED, (void*)NBFi_MAC_RX_ProtocolD);
 	wa1470_reg_func(WARADIO_TX_FINISHED, (void*)NBFi_RF_TX_Finished);
-	wa1470_init(WA1470_SEND_BY_I_Q_MODULATOR, MODEM_ID);
-
+	//wa1470_init(WA1470_SEND_BY_BPSK_PIN/*WA1470_SEND_BY_I_Q_MODULATOR*/, MODEM_ID);
+        wa1470_init(WA1470_SEND_BY_I_Q_MODULATOR, MODEM_ID);
 	NBFI_Init();  
 }

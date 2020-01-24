@@ -441,10 +441,10 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
                         nbfi_active_pkt->state =  PACKET_DELIVERED;
                     }
                     nbfi_state.aver_tx_snr = (((uint16_t)nbfi_state.aver_tx_snr)*3 + phy_pkt->payload[5])>>2;
-                    nbfi_station_info.info = phy_pkt->payload[7];
+                    nbfi_station_info.info.byte = phy_pkt->payload[7];
                     
-                    if(nbfi_station_info.RTC_MSB&0x20) rtc_offset = 0xC0 | nbfi_station_info.RTC_MSB;
-                    else rtc_offset = nbfi_station_info.RTC_MSB;
+                    if(nbfi_station_info.info.RTC_MSB&0x20) rtc_offset = 0xC0 | nbfi_station_info.info.RTC_MSB;
+                    else rtc_offset = nbfi_station_info.info.RTC_MSB;
                     rtc_offset <<= 8;
                     rtc_offset |= phy_pkt->payload[6];
                     if(rtc_offset) NBFi_set_RTC(NBFi_get_RTC() + rtc_offset);                 
@@ -459,8 +459,10 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
                     }
                     else
                     {
-                       nbfi_state.bs_id = (((uint16_t)phy_pkt->payload[1]) << 8) + phy_pkt->payload[2];
-                       nbfi_state.server_id = (((uint16_t)phy_pkt->payload[3]) << 8) + phy_pkt->payload[4];
+                       nbfi_station_info.ul_fp.fp = phy_pkt->payload[3];
+                       nbfi_station_info.dl_fp.fp = ((phy_pkt->payload[4])&0x1f);
+                       if((nbfi_station_info.ul_fp.fp != 0) || (nbfi_station_info.dl_fp.fp != 0)) nbfi_state.bs_id = (((uint16_t)phy_pkt->payload[1]) << 8) + phy_pkt->payload[2];
+                       else nbfi_state.server_id = (((uint16_t)phy_pkt->payload[1]) << 8) + phy_pkt->payload[2];
                     }
                 }
                 break;

@@ -50,8 +50,9 @@ typedef struct
     uint8_t     additional_flags;
     uint32_t    ul_freq_base;
     uint32_t    dl_freq_base;
-    uint8_t     freq_plan;
-    uint8_t     reserved[2];
+    nbfi_ul_freq_plan_t     nbfi_ul_freq_plan;
+    nbfi_dl_freq_plan_t     nbfi_dl_freq_plan;    
+    uint8_t     reserved[1];
 }nbfi_settings_t;
 
 typedef struct
@@ -105,8 +106,10 @@ extern nbfi_dev_info_t dev_info;
 #define UL866975_DL865000            13 //INDIA
 
 //FREQENCY PLANS
-#define NBFI_FREQ_PLAN_DEFAULT                  0
-#define NBFI_FREQ_PLAN_SHIFTED_HIGHPHY          1
+
+#define NBFI_FREQ_PLAN_MINIMAL                  0
+#define NBFI_UL_FREQ_PLAN_51200_0               96
+
 
 
 typedef enum
@@ -116,16 +119,21 @@ typedef enum
 }nbfi_rate_direct_t;
 
 
-typedef union
+typedef struct
 {
-        struct
-        {
-            uint8_t RTC_MSB          : 6;//LSB
-            uint8_t DL_SPEED_NOT_MAX : 1;
-            uint8_t UL_SPEED_NOT_MAX : 1;
-        };
-        uint8_t info;
-}NBFi_station_info_s;
+  union
+  {
+          struct
+          {
+              uint8_t RTC_MSB          : 6;//LSB
+              uint8_t DL_SPEED_NOT_MAX : 1;
+              uint8_t UL_SPEED_NOT_MAX : 1;
+          };
+          uint8_t byte;
+  } info;
+  nbfi_ul_freq_plan_t ul_fp;
+  nbfi_ul_freq_plan_t dl_fp;  
+} NBFi_station_info_s;
 
  
 

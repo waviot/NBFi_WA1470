@@ -64,6 +64,37 @@ typedef enum
 }nbfi_phy_channel_t;
 
 
+typedef union 
+{
+    //union
+    //{
+        struct
+        {
+            uint8_t offset      : 4;//LSB
+            uint8_t sign        : 1;
+            uint8_t width       : 3;//MSB
+        };
+        uint8_t fp;
+    //};
+} nbfi_ul_freq_plan_t;
+
+
+typedef union
+{
+    //union
+    //{
+        struct
+        {
+            uint8_t offset      : 2;//LSB
+            uint8_t sign        : 1;
+            uint8_t width       : 2;
+            uint8_t unused      : 3;//MSB
+        };
+        uint8_t fp;
+    //};
+}nbfi_dl_freq_plan_t;
+
+
 typedef enum
 {
     HANDSHAKE_NONE      = 0,

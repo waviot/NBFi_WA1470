@@ -288,9 +288,8 @@ void wa1470dem_set_bitrate(dem_bitrate_s bitrate)
 	wa1470dem_reset();
 	if(__wa1470_enable_pin_irq) 
 		__wa1470_enable_pin_irq();  
-        #ifdef NBFI_LOG
-        uint32_t        NBFi_get_RTC();
-        uint16_t NBFi_Phy_To_Bitrate(nbfi_phy_channel_t ch);
+        #ifdef NBFI_LOG       
+        //uint16_t NBFi_Phy_To_Bitrate(nbfi_phy_channel_t ch);
 	sprintf(log_string, "%05u: dem_set_bitrate to %d", ((uint16_t)(NBFi_get_RTC()&0xffff)), NBFi_Phy_To_Bitrate((nbfi_phy_channel_t)bitrate)); 
 	log_send_str(log_string); 
         #endif
@@ -375,7 +374,7 @@ void wa1470dem_set_freq(uint32_t freq)
 		break;
 	}
         #ifdef NBFI_LOG
-        uint32_t        NBFi_get_RTC();
+        //uint32_t        NBFi_get_RTC();
 	sprintf(log_string, "%05u: dem_set_freq to %ld", ((uint16_t)(NBFi_get_RTC()&0xffff)), freq); 
 	log_send_str(log_string); 
         #endif

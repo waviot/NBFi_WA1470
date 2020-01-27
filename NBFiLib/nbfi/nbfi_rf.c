@@ -1,7 +1,4 @@
 #include "nbfi.h"
-#include "nbfi_config.h"
-#include "nbfi_rf.h"
-#include "nbfi_misc.h"
 #include <libmfwtimer.h>
 
 _Bool rf_busy = 0;
@@ -11,16 +8,6 @@ _Bool transmit = 0;
 nbfi_rf_state_s rf_state = STATE_OFF;
 
 nbfi_phy_channel_t nbfi_phy_channel;
-
-//uint8_t PSK_BAND;
-
-//void    NBFi_TX_Finished();
-//void    wa1470_set_constants(void);
-
-
-extern void (* __nbfi_before_tx)();
-extern void (* __nbfi_before_rx)();
-extern void (* __nbfi_before_off)();
 
 
 nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
@@ -48,9 +35,7 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
     case UL_DBPSK_25600_PROT_E:
         wa1470dem_rx_enable(0);
         if(__nbfi_before_tx) __nbfi_before_tx();
-                 
-        //wa1470mod_set_bitrate((mod_bitrate_s)phy_channel);
-        
+                        
         wa1470mod_set_freq(freq);
         wa1470rfe_set_tx_power(power);
         wa1470rfe_set_mode(RFE_MODE_TX);           

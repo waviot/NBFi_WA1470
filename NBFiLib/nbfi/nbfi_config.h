@@ -25,44 +25,17 @@
 #define NBFI_PARAM_BROADCAST_ADD        0x10
 #define NBFI_PARAM_APP_IDS              0x11
 #define NBFI_PARAM_BSANDSERVER_IDS      0x12
-#define NBFI_PARAM_MODE_V5              0x13
+//#define NBFI_PARAM_MODE_V5              0x13
 
-typedef struct
-{
-    nbfi_mode_t 		mode;
-    nbfi_phy_channel_t	tx_phy_channel;
-    nbfi_phy_channel_t 	rx_phy_channel;
-    nbfi_handshake_t	handshake_mode;
-    nbfi_mack_mode_t	mack_mode;
-    uint8_t     num_of_retries;
-    uint8_t     max_payload_len;
-    uint8_t     dl_ID[3];
-    uint8_t     temp_ID[3];
-    uint8_t     broadcast_ID[3];
-    uint8_t     full_ID[6];
-    uint32_t    tx_freq;
-    uint32_t    rx_freq;
-    uint8_t     tx_antenna;
-    uint8_t     rx_antenna;
-    int8_t      tx_pwr;
-    uint16_t    heartbeat_interval;
-    uint8_t     heartbeat_num;
-    uint8_t     additional_flags;
-    uint32_t    ul_freq_base;
-    uint32_t    dl_freq_base;
-    nbfi_ul_freq_plan_t     nbfi_ul_freq_plan;
-    nbfi_dl_freq_plan_t     nbfi_dl_freq_plan;    
-    uint8_t     reserved[1];
-}nbfi_settings_t;
-
-typedef struct
-{
-	uint32_t ul;
-	uint32_t dl;
-}nbfi_crypto_iterator_t;
 
 extern nbfi_settings_t nbfi;
+extern nbfi_dev_info_t dev_info;
 extern nbfi_crypto_iterator_t nbfi_iter;
+
+extern uint8_t you_should_dl_power_step_up;
+extern uint8_t you_should_dl_power_step_down;
+extern uint8_t current_tx_rate;
+extern uint8_t current_rx_rate;
 
 //aditional flags:
 #define NBFI_FLG_FIXED_BAUD_RATE                0x01
@@ -75,18 +48,8 @@ extern nbfi_crypto_iterator_t nbfi_iter;
 #define NBFI_OFF_MODE_ON_INIT                   0x40
 #define NBFI_FLG_DO_NOT_SEND_PKTS_ON_START      0x80
 
-typedef struct
-{
-	uint32_t modem_id;
-	uint32_t* key;
-	int8_t tx_min_pwr;
-	int8_t tx_max_pwr;
-	uint16_t manufacturer_id;
-	uint16_t hardware_type_id;
-	uint16_t protocol_id;
-	uint8_t band_id;
-	uint32_t send_info_interval;
-}nbfi_dev_info_t;
+
+
 extern nbfi_dev_info_t dev_info;
 
 //BAND IDs
@@ -106,44 +69,20 @@ extern nbfi_dev_info_t dev_info;
 #define UL866975_DL865000            13 //INDIA
 
 //FREQENCY PLANS
-
 #define NBFI_FREQ_PLAN_MINIMAL                  0
 #define NBFI_UL_FREQ_PLAN_51200_0               96
 
-
-
-typedef enum
-{
-    DOWN = 0,     // data rate change down direction
-    UP = 1        // data rate change up direction
-}nbfi_rate_direct_t;
-
-
-typedef struct
-{
-  union
-  {
-          struct
-          {
-              uint8_t RTC_MSB          : 6;//LSB
-              uint8_t DL_SPEED_NOT_MAX : 1;
-              uint8_t UL_SPEED_NOT_MAX : 1;
-          };
-          uint8_t byte;
-  } info;
-  nbfi_ul_freq_plan_t ul_fp;
-  nbfi_ul_freq_plan_t dl_fp;  
-} NBFi_station_info_s;
-
- 
+#define FULL_ID     ((uint8_t*)(&dev_info.modem_id))
 
 extern NBFi_station_info_s nbfi_station_info;
 
-void NBFi_Config_Set_Device_Info(nbfi_dev_info_t *);
-nbfi_settings_t* NBFi_get_settings();
-_Bool NBFi_Config_Parser(uint8_t* buf);
-void NBFi_Clear_Saved_Configuration();
-void NBFi_Config_Set_FastDl(_Bool, _Bool);
-_Bool NBFi_Is_Mode_Normal();
+void NBFI_Config_Check_State();
+_Bool NBFi_Config_Tx_Power_Change(nbfi_rate_direct_t dir);
+void NBFi_Config_Return();
+void NBFi_Config_Set_Default();
+void NBFi_ReadConfig();
+void NBFi_WriteConfig();
+void NBFi_Config_Set_TX_Chan(nbfi_phy_channel_t ch);
+void NBFi_Config_Set_RX_Chan(nbfi_phy_channel_t ch);
 
 #endif // NBFI_CONFIG_H

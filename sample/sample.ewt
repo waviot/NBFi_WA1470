@@ -2655,6 +2655,12 @@
         <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_config.h</name>
       </file>
       <file>
+        <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_crc.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_crc.h</name>
+      </file>
+      <file>
         <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_crypto.c</name>
       </file>
       <file>
@@ -2670,16 +2676,25 @@
         <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_mac.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_misc.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_misc.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_rf.c</name>
       </file>
       <file>
         <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_rf.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_transport.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_transport.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_transport_misc.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_transport_misc.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\NBFiLib\nbfi\nbfi_types.h</name>
       </file>
     </group>
     <group>

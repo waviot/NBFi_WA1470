@@ -14,6 +14,10 @@ extern void (*__wa1470_disable_pin_irq)(void);
 
 void send_data(struct wtimer_desc *desc) {
 
+  //const uint8_t string[] = "Hello, we are testing 3200bps receaiving stability. This huge packet is sending for giving a numerous quantity of packets";
+  //NBFi_Send((uint8_t*)string, sizeof(string));
+  
+  
 #ifdef BANKA
     #include "nbfi.h"
     #include "nbfi_config.h"
@@ -28,7 +32,7 @@ void send_data(struct wtimer_desc *desc) {
     packet[0] = (counter/5)>>8;
     packet[1] = (counter/5)&0xff;
 
-    if(counter > 500) return;
+    if(counter > 2000) return;
     if(counter == 0)
     {
         packet[2] = nbfi.tx_pwr;
@@ -40,17 +44,17 @@ void send_data(struct wtimer_desc *desc) {
     switch(counter++%5)
     {
         case 0:
-            if(--nbfi.tx_pwr < 0) nbfi.tx_pwr = 16;
-            nbfi.tx_phy_channel = UL_DBPSK_50_PROT_D;
+            if(--nbfi.tx_pwr < -9) nbfi.tx_pwr = 16;
+            nbfi.tx_phy_channel = UL_DBPSK_50_PROT_E;
             break;
         case 1:
-            nbfi.tx_phy_channel = UL_DBPSK_400_PROT_D;
+            nbfi.tx_phy_channel = UL_DBPSK_400_PROT_E;
             break;
         case 2:
-            nbfi.tx_phy_channel = UL_DBPSK_3200_PROT_D;
+            nbfi.tx_phy_channel = UL_DBPSK_3200_PROT_E;
             break;
         case 3:
-            nbfi.tx_phy_channel = UL_DBPSK_25600_PROT_D;
+            nbfi.tx_phy_channel = UL_DBPSK_25600_PROT_E;
             break;
         default:
             ScheduleTask(&test_desc, send_data, RELATIVE, SECONDS(3));

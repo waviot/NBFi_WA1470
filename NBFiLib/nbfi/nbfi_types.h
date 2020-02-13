@@ -152,12 +152,12 @@ typedef union
 {
   struct
   {
-    uint8_t dl_offset      : 3;//LSB
-    uint8_t dl_sign        : 1;
-    uint8_t dl_width       : 2;
-    uint8_t ul_offset      : 6;
-    uint8_t ul_sign        : 1;
-    uint8_t ul_width       : 3;//MSB
+    uint16_t dl_offset      : 3;//LSB
+    uint16_t dl_sign        : 1;
+    uint16_t dl_width       : 2;
+    uint16_t ul_offset      : 6;
+    uint16_t ul_sign        : 1;
+    uint16_t ul_width       : 3;//MSB
   };
   uint16_t fp;
 } nbfi_freq_plan_t;

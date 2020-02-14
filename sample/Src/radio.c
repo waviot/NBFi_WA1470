@@ -89,9 +89,9 @@ const nbfi_settings_t nbfi_set_default =
 const nbfi_settings_t nbfi_set_default =
 {
     CRX,//mode;
-    UL_DBPSK_400_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
+    UL_DBPSK_25600_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
     DL_DBPSK_400_PROT_D, // rx_phy_channel;
-    HANDSHAKE_NONE,
+    HANDSHAKE_SIMPLE,
     MACK_1,             //mack_mode
     0x82,                  //num_of_retries;
     8,                  //max_payload_len;

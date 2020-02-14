@@ -29,11 +29,22 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
                         uint32_t            freq)
 {
 
+    static nbfi_phy_channel_t last_phy = UNDEFINED;
+    static int8_t last_tx_prw;
+    static uint32_t last_tx_freq;
+    static uint32_t last_rx_freq;
+    
     if(rf_busy) return ERR_RF_BUSY;
 
     rf_busy = 1;
 
-    wa1470_reinit();
+    if(last_phy != phy_channel)
+    {
+      wa1470_reinit();
+      last_tx_prw = 100;
+      last_tx_freq = 0;
+      last_rx_freq = 0;
+    }
     
     switch(phy_channel)
     {
@@ -51,12 +62,23 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
                  
         //wa1470mod_set_bitrate((mod_bitrate_s)phy_channel);
         
-        wa1470mod_set_freq(freq);
-        wa1470rfe_set_tx_power(power);
+        if(freq != last_tx_freq)
+        {
+          last_tx_freq = freq;
+          wa1470mod_set_freq(freq);
+        }
+                
+        if(power != last_tx_prw)
+        {
+          last_tx_prw = power;
+          wa1470rfe_set_tx_power(power);
+        }
+        
         wa1470rfe_set_mode(RFE_MODE_TX);           
                      
         rf_busy = 0;
         rf_state = STATE_TX;
+        last_phy = phy_channel;
         return OK;
        
     case DL_DBPSK_50_PROT_D:
@@ -65,11 +87,21 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
     case DL_DBPSK_25600_PROT_D:
         if(__nbfi_before_rx) __nbfi_before_rx();
         wa1470dem_rx_enable(1);
-        wa1470dem_set_bitrate((dem_bitrate_s)phy_channel);
+        
+       if(last_phy != phy_channel)
+          wa1470dem_set_bitrate((dem_bitrate_s)phy_channel);
+        
         wa1470rfe_set_mode(RFE_MODE_RX);
+        
+        if(freq != last_rx_freq)
+        {
+          last_rx_freq = freq;
+          wa1470mod_set_freq(freq);
+        }
         wa1470dem_set_freq(freq);
         rf_busy = 0;
         rf_state = STATE_RX;
+        last_phy = phy_channel;
         return OK;
     }
     rf_busy = 0;

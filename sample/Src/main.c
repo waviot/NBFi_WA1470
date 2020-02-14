@@ -14,8 +14,8 @@ extern void (*__wa1470_disable_pin_irq)(void);
 
 void send_data(struct wtimer_desc *desc) {
 
-  //const uint8_t string[] = "Hello, we are testing 3200bps receaiving stability. This huge packet is sending for giving a numerous quantity of packets";
-  //NBFi_Send((uint8_t*)string, sizeof(string));
+ // const uint8_t string[] = "Hello, we are testing 3200bps receaiving stability. This huge packet is sending for giving a numerous quantity of packets";
+ // NBFi_Send((uint8_t*)string, sizeof(string));
   
   
 #ifdef BANKA

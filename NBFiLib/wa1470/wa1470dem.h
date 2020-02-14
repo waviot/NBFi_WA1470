@@ -52,7 +52,8 @@ typedef enum
 	DBPSK_400_PROT_D	= 11,
 	DBPSK_3200_PROT_D	= 12,
 	DBPSK_25600_PROT_D	= 13,
-	DBPSK_100H_PROT_D	= 18
+	DBPSK_100H_PROT_D	= 18,
+        DBPSK_UNDEFINED         = 100
 }dem_bitrate_s;
 
 typedef struct {

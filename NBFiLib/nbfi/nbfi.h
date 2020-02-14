@@ -60,7 +60,7 @@ typedef enum
 	UL_DBPSK_100H_PROT_D    = 34,
 	UL_DBPSK_100H_PROT_E    = 35,
 	UL_CARRIER              = 50,
-	OSC_CAL                 = 51
+	UNDEFINED               = 100
 }nbfi_phy_channel_t;
 
 

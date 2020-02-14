@@ -847,10 +847,12 @@ static void NBFi_update_RTC()
     old_time_cur = tmp;
 }
 
+//extern uint32_t systick_timer;
 uint32_t NBFi_get_RTC()
 {
     NBFi_update_RTC();
     return nbfi_rtc;
+    //return systick_timer;
 }
 
 void NBFi_set_RTC(uint32_t time)
@@ -934,7 +936,7 @@ static void NBFi_SendHeartBeats(struct wtimer_desc *desc)
 
 static void NBFi_Force_process()
 {
-    ScheduleTask(&nbfi_processTask_desc, NBFi_ProcessTasks, RELATIVE, MILLISECONDS(5));
+    ScheduleTask(&nbfi_processTask_desc, NBFi_ProcessTasks, RELATIVE, MILLISECONDS(1));
 }
 
 nbfi_state_t* NBFi_get_state()

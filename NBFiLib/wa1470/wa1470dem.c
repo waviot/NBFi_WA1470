@@ -13,6 +13,9 @@
 
 #define DEM_MAS_SIZE	8
 
+#define DEM_NOISE_TICK  50      //50 ms
+#define DEM_NOISE_AVER  10      //10 times
+
 dem_packet_st dem_mas[DEM_MAS_SIZE];
 
 dem_packet_info_st dem_info_mas[DEM_MAS_SIZE];
@@ -199,7 +202,7 @@ void wa1470dem_isr(void)
 			return;
 
 		ScheduleTask(&dem_processMessages_desc,  wa1470dem_process_messages, RELATIVE, (current_rx_phy == DBPSK_25600_PROT_D)?MILLISECONDS(10):MILLISECONDS(20));
-                
+                ScheduleTask(&dem_update_noise_desc,  wa1470dem_update_noise, RELATIVE, MILLISECONDS(DEM_NOISE_TICK));
 		uint8_t i;
 		for(i = 0; i < dem_mess_received; i++)
 		{
@@ -440,10 +443,6 @@ void wa1470dem_get_spectrum(uint8_t size, float* data)
 		data[i] = 20*log10f(dem_spectrum_mas[i]) - wa1470dem_get_rssi_logoffset();
 }
 #endif
-
-#define DEM_NOISE_TICK  50      //50 ms
-#define DEM_NOISE_AVER  10      //10 times
-//#define DEM_NOISE_CALC_TIME  20      //Total noise calculation = 20*DEM_NOISE_AVER*DEM_NOISE_TICK ms
 
 static uint8_t wa1470dem_get_noise_calc_duration()
 {

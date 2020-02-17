@@ -413,6 +413,8 @@ place_to_stack:
             pkt->state = PACKET_RECEIVED;
         }
 
+        if(process_rx_external == 0) NBFi_ProcessRxPackets(0);
+        
         if(phy_pkt->ACK && !NBFi_Calc_Queued_Sys_Packets_With_Type(0))
         {
             // Send ACK
@@ -454,7 +456,7 @@ place_to_stack:
         if(nbfi_active_pkt->state == PACKET_WAIT_FOR_EXTRA_PACKETS) nbfi_active_pkt->state = nbfi_active_pkt_old_state;
 
     }
-    if(process_rx_external == 0) NBFi_ProcessRxPackets(0);
+   // if(process_rx_external == 0) NBFi_ProcessRxPackets(0);
     if(!phy_pkt->ACK) NBFI_Config_Check_State();
     if(NBFi_GetQueuedTXPkt()) NBFi_Force_process();
     else
@@ -734,10 +736,12 @@ static void NBFi_update_RTC()
     old_time_cur = tmp;
 }
 
+//extern uint32_t systick_timer;
 uint32_t NBFi_get_RTC()
 {
     NBFi_update_RTC();
     return nbfi_rtc;
+    //return systick_timer;
 }
 
 void NBFi_set_RTC(uint32_t time)
@@ -820,7 +824,7 @@ static void NBFi_SendHeartBeats(struct wtimer_desc *desc)
 
 void NBFi_Force_process()
 {
-    ScheduleTask(&nbfi_processTask_desc, NBFi_ProcessTasks, RELATIVE, MILLISECONDS(5));
+    ScheduleTask(&nbfi_processTask_desc, NBFi_ProcessTasks, RELATIVE, MILLISECONDS(1));
 }
 
 static uint32_t NBFI_PhyToDL_Delay(nbfi_phy_channel_t chan)

@@ -292,15 +292,15 @@ _Bool NBFi_Config_Tx_Power_Change(nbfi_rate_direct_t dir)
     int8_t old_pwr = nbfi.tx_pwr;
     if(dir == UP)
     {
-        nbfi.tx_pwr += 3;
-        nbfi_state.aver_tx_snr += 3;
-        if(nbfi.tx_pwr > dev_info.tx_max_pwr) nbfi.tx_pwr = dev_info.tx_max_pwr;
+        uint8_t gap = ((dev_info.tx_max_pwr - nbfi.tx_pwr) >= 3) ? 3 : (dev_info.tx_max_pwr - nbfi.tx_pwr); 
+        nbfi.tx_pwr += gap;
+        nbfi_state.aver_tx_snr += gap;
     }
     else
     {
-        nbfi.tx_pwr -= 3;
-        nbfi_state.aver_tx_snr -= 3;
-        if(nbfi.tx_pwr < dev_info.tx_min_pwr) nbfi.tx_pwr = dev_info.tx_min_pwr;
+        uint8_t gap = ((nbfi.tx_pwr - dev_info.tx_min_pwr) >= 3) ? 3 : (nbfi.tx_pwr - dev_info.tx_min_pwr); 
+        nbfi.tx_pwr -= gap;
+        nbfi_state.aver_tx_snr -= gap;
     }
     return (nbfi.tx_pwr != old_pwr);
 }

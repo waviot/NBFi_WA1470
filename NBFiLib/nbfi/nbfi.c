@@ -525,6 +525,8 @@ place_to_stack:
             pkt->state = PACKET_RECEIVED;
         }
 
+        if(process_rx_external == 0) NBFi_ProcessRxPackets(0);
+        
         if(phy_pkt->ACK && !NBFi_Calc_Queued_Sys_Packets_With_Type(0))
         {
             // Send ACK
@@ -566,7 +568,7 @@ place_to_stack:
         if(nbfi_active_pkt->state == PACKET_WAIT_FOR_EXTRA_PACKETS) nbfi_active_pkt->state = nbfi_active_pkt_old_state;
 
     }
-    if(process_rx_external == 0) NBFi_ProcessRxPackets(0);
+
     if(!phy_pkt->ACK) NBFI_Config_Check_State();
     if(NBFi_GetQueuedTXPkt()) NBFi_Force_process();
     else

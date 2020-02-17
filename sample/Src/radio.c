@@ -640,6 +640,7 @@ void radio_init(void)
 	NBFI_reg_func(NBFI_MEASURE_VOLTAGE_OR_TEMPERATURE, (void*)nbfi_measure_valtage_or_temperature);
 	NBFI_reg_func(NBFI_GET_ITERATOR, (void*)nbfi_get_iterator);
 	NBFI_reg_func(NBFI_SET_ITERATOR, (void*)nbfi_set_iterator);
+        NBFI_reg_func(NBFI_LOCKUNLOCKNBFIIRQ, (void*)nbfi_lock_unlock_nbfi_irq);
 
 	//register callbacks when external RTC used
 	//NBFI_reg_func(NBFI_UPDATE_RTC, (void*)nbfi_update_rtc);

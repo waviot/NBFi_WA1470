@@ -1,6 +1,5 @@
 #ifndef NBFI_MAC_H
 #define NBFI_MAC_H
-#include "nbfi_misc.h"
 
 #pragma pack(push, 1)
 typedef struct {

@@ -291,9 +291,8 @@ void wa1470dem_set_bitrate(dem_bitrate_s bitrate)
 	wa1470dem_reset();
 	if(__wa1470_enable_pin_irq) 
 		__wa1470_enable_pin_irq();  
-        #ifdef NBFI_LOG
-        uint32_t        NBFi_get_RTC();
-        uint16_t NBFi_Phy_To_Bitrate(nbfi_phy_channel_t ch);
+        #ifdef NBFI_LOG       
+        //uint16_t NBFi_Phy_To_Bitrate(nbfi_phy_channel_t ch);
 	sprintf(log_string, "%05u: dem_set_bitrate to %d", ((uint16_t)(NBFi_get_RTC()&0xffff)), NBFi_Phy_To_Bitrate((nbfi_phy_channel_t)bitrate)); 
 	log_send_str(log_string); 
         #endif
@@ -378,7 +377,7 @@ void wa1470dem_set_freq(uint32_t freq)
 		break;
 	}
         #ifdef NBFI_LOG
-        uint32_t        NBFi_get_RTC();
+        //uint32_t        NBFi_get_RTC();
 	sprintf(log_string, "%05u: dem_set_freq to %ld", ((uint16_t)(NBFi_get_RTC()&0xffff)), freq); 
 	log_send_str(log_string); 
         #endif
@@ -444,8 +443,6 @@ void wa1470dem_get_spectrum(uint8_t size, float* data)
 		data[i] = 20*log10f(dem_spectrum_mas[i]) - wa1470dem_get_rssi_logoffset();
 }
 #endif
-
-//#define DEM_NOISE_CALC_TIME  20      //Total noise calculation = 20*DEM_NOISE_AVER*DEM_NOISE_TICK ms
 
 static uint8_t wa1470dem_get_noise_calc_duration()
 {

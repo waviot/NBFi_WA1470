@@ -1,13 +1,7 @@
 #include "nbfi.h"
-#include "nbfi_config.h"
-#include "nbfi_mac.h"
-#include "nbfi_misc.h"
-#include "nbfi_rf.h"
 #include <wtimer.h>
 #include <stdlib.h>
 #include <string.h>
-#include "nbfi_defines.h"
-#include "nbfi_crypto.h"
 
 #define memset_xdata memset
 #define memcpy_xdata memcpy
@@ -58,11 +52,13 @@ const nbfi_settings_t nbfi_fastdl =
     0,      
     NBFI_FLG_FIXED_BAUD_RATE | NBFI_FLG_NO_RESET_TO_DEFAULTS | NBFI_FLG_NO_SENDINFO,
     0,
+    0,
+    0,
     0
 };
 
 
-NBFi_station_info_s nbfi_station_info = {0};
+NBFi_station_info_s nbfi_station_info = {0,0,0};
 
 extern uint8_t  string[50];
 
@@ -97,30 +93,15 @@ uint8_t success_rate = 0;
 uint8_t you_should_dl_power_step_up = 0;
 uint8_t you_should_dl_power_step_down = 0;
 
-extern nbfi_state_t nbfi_state;
-extern nbfi_transport_packet_t* nbfi_active_pkt;
 
 static _Bool NBFi_Config_Rate_Change(uint8_t rx_tx, nbfi_rate_direct_t dir );
 _Bool NBFi_Config_Tx_Power_Change(nbfi_rate_direct_t dir);
-void NBFi_Config_Return();
-_Bool NBFi_Config_Send_Mode(_Bool, uint8_t);
-void NBFi_Config_Set_Default();
-void NBFi_Set_Iterator();
-void NBFi_Get_Iterator();
-void NBFi_ReadConfig();
-void NBFi_WriteConfig();
-void NBFi_WriteConfig_interval(struct wtimer_desc *desc);
-void NBFi_Config_Set_TX_Chan(nbfi_phy_channel_t ch);
-void NBFi_Config_Set_RX_Chan(nbfi_phy_channel_t ch);
-void NBFi_Config_Send_Current_Mode(struct wtimer_desc *desc);
-
 
 uint8_t rx_delta = 10;
 uint8_t tx_delta = 10;
 
 static _Bool NBFI_Config_is_high_SNR_for_UP(uint8_t rx_tx)
 {
-    //uint8_t delta;
     if(rx_tx & RX_CONF)
     {
         if(current_rx_rate < (NUM_OF_RX_RATES - 1))
@@ -156,7 +137,6 @@ static _Bool NBFI_Config_is_high_SNR_for_UP(uint8_t rx_tx)
 }
 
 
-
 void NBFI_Config_Check_State()
 {
     if(nbfi.tx_phy_channel != UL_PSK_FASTDL)
@@ -171,9 +151,6 @@ void NBFI_Config_Check_State()
     }
 
 
-    #ifdef FIXED_BAUD_RATE
-    return;
-    #endif // FIXED_BAUD_RATE
     if(nbfi.mode == NRX) return;
     if(nbfi.additional_flags&NBFI_FLG_FIXED_BAUD_RATE) return;
     if(nbfi.handshake_mode == HANDSHAKE_NONE) return;
@@ -214,7 +191,7 @@ void NBFI_Config_Check_State()
 
     if(nbfi_state.aver_tx_snr < TX_SNRLEVEL_FOR_DOWN)
     {
-        NBFi_Config_Rate_Change(TX_CONF, DOWN);
+        NBFi_Config_Tx_Power_Change(UP);
         //if(!NBFi_Config_Tx_Power_Change(UP)) NBFi_Config_Rate_Change(TX_CONF, DOWN);
     }
 
@@ -226,6 +203,14 @@ void NBFI_Config_Check_State()
     }
 }
 
+#define NBFI_UL_FP_MASK       0xFFC0
+#define NBFI_DL_FP_MASK       0x003F
+          
+static _Bool NBFi_Config_Check_If_FP_Need_To_Change(nbfi_freq_plan_t current, nbfi_freq_plan_t new_one, uint16_t mask)
+{
+    return ((current.fp&mask)!=(new_one.fp&mask))&&(new_one.fp&mask);
+}    
+    
 static _Bool NBFi_Config_Rate_Change(uint8_t rx_tx, nbfi_rate_direct_t dir )
 {
     uint8_t  rx = current_rx_rate;
@@ -233,7 +218,7 @@ static _Bool NBFi_Config_Rate_Change(uint8_t rx_tx, nbfi_rate_direct_t dir )
     uint8_t should_not_to_reduce_pwr = 0;
     if((rx_tx & RX_CONF) && NBFi_Config_Tx_Idle())
     {
-        if((dir == UP)&& nbfi_station_info.DL_SPEED_NOT_MAX)
+        if((dir == UP)&& nbfi_station_info.info.DL_SPEED_NOT_MAX)
         {
             if(++current_rx_rate > NUM_OF_RX_RATES - 1)  current_rx_rate = NUM_OF_RX_RATES - 1;
         }
@@ -245,7 +230,7 @@ static _Bool NBFi_Config_Rate_Change(uint8_t rx_tx, nbfi_rate_direct_t dir )
 
     if((rx_tx & TX_CONF))
     {
-        if((dir == UP)&& nbfi_station_info.UL_SPEED_NOT_MAX)
+        if((dir == UP)&& nbfi_station_info.info.UL_SPEED_NOT_MAX)
         {
             if(++current_tx_rate > NUM_OF_TX_RATES - 1)  current_tx_rate = NUM_OF_TX_RATES - 1;
             /*if(RxRateTable[current_rx_rate] == DL_PSK_200) 
@@ -266,7 +251,7 @@ static _Bool NBFi_Config_Rate_Change(uint8_t rx_tx, nbfi_rate_direct_t dir )
             if(((int8_t)(--current_tx_rate)) < 0 ) current_tx_rate = 0;
         }*/
     }
-    if((nbfi.tx_phy_channel == TxRateTable[current_tx_rate]) && (nbfi.rx_phy_channel == RxRateTable[current_rx_rate]))
+    if((nbfi.tx_phy_channel == TxRateTable[current_tx_rate]) && (nbfi.rx_phy_channel == RxRateTable[current_rx_rate]) && !NBFi_Config_Check_If_FP_Need_To_Change(nbfi.nbfi_freq_plan, nbfi_station_info.fp, NBFI_UL_FP_MASK)&&!NBFi_Config_Check_If_FP_Need_To_Change(nbfi.nbfi_freq_plan, nbfi_station_info.fp, NBFI_DL_FP_MASK))
     {
         if(should_not_to_reduce_pwr) return 1;
         else return 0;
@@ -278,11 +263,20 @@ static _Bool NBFi_Config_Rate_Change(uint8_t rx_tx, nbfi_rate_direct_t dir )
 
     nbfi.tx_phy_channel = TxRateTable[current_tx_rate];
 
-    if((nbfi.rx_phy_channel == RxRateTable[current_rx_rate]) && (dir == DOWN)) return 1;
+    //if((nbfi.rx_phy_channel == RxRateTable[current_rx_rate]) && (dir == DOWN)) return 1;
 
     nbfi.rx_phy_channel = RxRateTable[current_rx_rate];
 
-    if(!NBFi_Config_Send_Mode(1, NBFI_PARAM_MODE_V5))
+    
+    if(NBFi_Config_Check_If_FP_Need_To_Change(nbfi.nbfi_freq_plan, nbfi_station_info.fp, NBFI_UL_FP_MASK))
+    {
+      nbfi.nbfi_freq_plan.fp = (nbfi.nbfi_freq_plan.fp&NBFI_DL_FP_MASK) + (nbfi_station_info.fp.fp & NBFI_UL_FP_MASK);
+    }
+  
+    if(NBFi_Config_Check_If_FP_Need_To_Change(nbfi.nbfi_freq_plan, nbfi_station_info.fp, NBFI_DL_FP_MASK))
+      nbfi.nbfi_freq_plan.fp = (nbfi.nbfi_freq_plan.fp&NBFI_UL_FP_MASK) + (nbfi_station_info.fp.fp&NBFI_DL_FP_MASK);
+    
+    if(!NBFi_Config_Send_Sync(1))
     {
         NBFi_Config_Return();
         return 0;
@@ -313,28 +307,6 @@ _Bool NBFi_Config_Tx_Power_Change(nbfi_rate_direct_t dir)
     return (nbfi.tx_pwr != old_pwr);
 }
 
-
-_Bool NBFi_Config_Send_Mode(_Bool ack, uint8_t param)
-{
-    nbfi_transport_packet_t* ack_pkt =  NBFi_AllocateTxPkt(8);
-
-    if(!ack_pkt)
-    {
-        return 0;
-    }
-    ack_pkt->phy_data.payload[0] = 0x06;
-    ack_pkt->phy_data.payload[1] = (READ_PARAM_CMD << 6) + param;
-    NBFi_Config_Parser(&ack_pkt->phy_data.payload[1]);
-    ack_pkt->phy_data.ITER = nbfi_state.UL_iter & 0x1f;;
-    ack_pkt->phy_data.header |= SYS_FLAG;
-    if(ack)
-    {
-        ack_pkt->handshake = nbfi.handshake_mode;
-        ack_pkt->phy_data.header |= ACK_FLAG;
-    }
-    ack_pkt->state = PACKET_NEED_TO_SEND_RIGHT_NOW;
-    return 1;
-}
 
 void bigendian_cpy(uint8_t* from, uint8_t* to, uint8_t len)
 {
@@ -371,14 +343,14 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         buf[5] = nbfi.tx_pwr;
                         buf[6] = nbfi.num_of_retries;
                         break;
-                     case NBFI_PARAM_MODE_V5:
-                        buf[1] = nbfi.mode;
+                    /* case NBFI_PARAM_MODE_V5:
+                        buf[1] = nbfi.mode + ((nbfi.nbfi_ul_freq_plan.fp) << 3);
                         buf[2] = nbfi.tx_phy_channel;
                         buf[3] = nbfi.rx_phy_channel;
-                        buf[4] = nbfi.freq_plan;
+                        buf[4] = nbfi.nbfi_ul_freq_plan.fp;
                         //buf[5] = (nbfi_iter.dl >> 16); //thease fields will be updated in NBFi_ProcessTasks()  
                         //buf[6] = (nbfi_iter.dl >> 8);
-                        break;
+                        break;*/
                     case NBFI_PARAM_HANDSHAKE:
                         buf[1] = nbfi.handshake_mode;
                         buf[2] = nbfi.mack_mode;
@@ -479,12 +451,16 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         if(buf[5] != 0xff) nbfi.tx_pwr = buf[5];
                         if(buf[6] != 0xff) nbfi.num_of_retries = buf[6];
                         break;
-                    case NBFI_PARAM_MODE_V5:
-                        if(buf[1] != 0xff) nbfi.mode = (nbfi_mode_t)buf[1];
+                   /* case NBFI_PARAM_MODE_V5:
+                        if(buf[1] != 0xff) 
+                        {
+                          nbfi.mode = (nbfi_mode_t)(buf[1]&0x03);
+                          nbfi.nbfi_dl_freq_plan.fp = (buf[1]>>3);
+                        }
                         if(buf[2] != 0xff) NBFi_Config_Set_TX_Chan((nbfi_phy_channel_t)buf[3]);
                         if(buf[3] != 0xff) {NBFi_Config_Set_RX_Chan((nbfi_phy_channel_t)buf[4]); rf_state = STATE_CHANGED;}
-                        if(buf[3] != 0xff) nbfi.freq_plan = buf[4];
-                        break;
+                        if(buf[3] != 0xff) nbfi.nbfi_ul_freq_plan.fp = buf[4];
+                        break;*/
                     case NBFI_PARAM_HANDSHAKE:
                         if(buf[1] != 0xff)
                         {
@@ -538,7 +514,7 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                 if(buf[0]>>6 == WRITE_PARAM_AND_SAVE_CMD)
                 {
                     NBFi_WriteConfig();
-                    NBFi_Config_Send_Mode(0, NBFI_PARAM_MODE_V5);
+                    NBFi_Config_Send_Sync(0);
                     return 0;
                 }
             break;
@@ -554,8 +530,9 @@ void NBFi_Config_Return()
     memcpy_xdata(&nbfi, &nbfi_prev, sizeof(nbfi));
     current_tx_rate = prev_tx_rate;
     current_rx_rate = prev_rx_rate;
+    nbfi_station_info.fp.fp = 0;
    // if(nbfi.mode == NRX) nbfi.handshake_mode = HANDSHAKE_NONE;
-    NBFi_Config_Send_Mode(0, NBFI_PARAM_MODE_V5);
+    NBFi_Config_Send_Sync(0);
 }
 
 void NBFi_Configure_IDs()
@@ -584,17 +561,14 @@ void NBFi_Config_Set_Default()
 
     NBFi_Config_Set_TX_Chan(nbfi.tx_phy_channel);
     NBFi_Config_Set_RX_Chan(nbfi.rx_phy_channel);
-    //nbfi_state.aver_tx_snr = nbfi_state.aver_rx_snr = 15;
-    
-    //current_tx_rate = current_rx_rate = 0;
 
     you_should_dl_power_step_down = 0;
 
-    if(nbfi_active_pkt->state == PACKET_WAIT_ACK) nbfi_active_pkt->state = PACKET_LOST;
+    if(nbfi_active_pkt->state == PACKET_WAIT_ACK) 
+      NBFi_Close_Active_Packet();//nbfi_active_pkt->state = PACKET_LOST;
 
 }
 
-extern void (* __nbfi_lock_unlock_nbfi_irq)(uint8_t);
 void NBFi_Config_Set_FastDl(_Bool fast, _Bool save_settings)
 {
   
@@ -654,12 +628,6 @@ _Bool NBFi_Config_Tx_Idle()
         }
 }
 
-
-extern void (* __nbfi_read_flash_settings)(nbfi_settings_t*);
-extern void (* __nbfi_read_default_settings)(nbfi_settings_t*);
-extern void (* __nbfi_get_iterator)(nbfi_crypto_iterator_t*);
-extern void (* __nbfi_set_iterator)(nbfi_crypto_iterator_t*);
-
 void NBFi_Set_Iterator()
 {
 	if (__nbfi_set_iterator)
@@ -686,8 +654,6 @@ read_default:
 
 }
 
-extern void (* __nbfi_write_flash_settings)(nbfi_settings_t*);
-
 void NBFi_WriteConfig()
 {
 	if(__nbfi_write_flash_settings == 0) 
@@ -707,7 +673,6 @@ void NBFi_Clear_Saved_Configuration()
 
 void NBFi_Config_Set_TX_Chan(nbfi_phy_channel_t ch)
 {
-    #ifndef FIXED_BAUD_RATE
     uint8_t i;
     if(nbfi.additional_flags&NBFI_FLG_FIXED_BAUD_RATE) {nbfi.tx_phy_channel = ch; return;}
     for(i = 0; i != NUM_OF_TX_RATES; i++) if(TxRateTable[i] == ch) break;
@@ -718,14 +683,10 @@ void NBFi_Config_Set_TX_Chan(nbfi_phy_channel_t ch)
         current_tx_rate = i;
         nbfi_state.aver_tx_snr = 15;
     }
-    #else
-    nbfi.tx_phy_channel = ch;
-    #endif
 }
 
 void NBFi_Config_Set_RX_Chan(nbfi_phy_channel_t ch)
 {
-    #ifndef FIXED_BAUD_RATE
     uint8_t i;
     if(nbfi.additional_flags&NBFI_FLG_FIXED_BAUD_RATE) {nbfi.rx_phy_channel = ch; return;}
     for(i = 0; i != NUM_OF_RX_RATES; i++) if(RxRateTable[i] == ch) break;
@@ -736,9 +697,6 @@ void NBFi_Config_Set_RX_Chan(nbfi_phy_channel_t ch)
         current_rx_rate = i;
         nbfi_state.aver_rx_snr = 15;
     }
-    #else
-    nbfi.rx_phy_channel = ch;
-    #endif
 }
 
 _Bool NBFi_Is_Mode_Normal()

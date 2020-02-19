@@ -1,8 +1,6 @@
 #ifndef NBFI_RF_H
 #define NBFI_RF_H
 
-#include "nbfi.h"
-
 #define PA_DIFFERENTIAL (0x1)
 #define PA_SINGLE_ENDED (0x2)
 #define PA_SHAPING      (0x4)

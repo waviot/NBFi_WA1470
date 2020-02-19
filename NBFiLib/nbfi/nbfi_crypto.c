@@ -1,5 +1,4 @@
-#include "nbfi_crypto.h"
-#include "nbfi_defines.h"
+#include "nbfi.h"
 #include <string.h>
 #include "magma.h"
 

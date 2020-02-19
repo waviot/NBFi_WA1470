@@ -3,6 +3,7 @@
 #include "log.h"
 #include <string.h>
 #include <stdio.h>
+#include "nbfi.h"
 
 #define MODOSCFREQ			26000000
 
@@ -33,7 +34,7 @@ void wa1470_tx_finished()
   #ifdef NBFI_LOG
         sprintf(log_string, "%05u: TX finished ", (uint16_t)(NBFi_get_RTC()&0xffff));
 	log_send_str(log_string);
-#endif
+  #endif
  	ScheduleTask(&mod_callTXfinished_desc,	wa1470mod_call_TX_finished, RELATIVE, MILLISECONDS(1));
 }
 

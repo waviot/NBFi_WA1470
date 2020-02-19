@@ -23,37 +23,37 @@
 
 
 #if BAND == UL868800_DL446000
-#define NBFI_UL_FREQ_BASE       (868800000 - 25000)
+#define NBFI_UL_FREQ_BASE       868800000
 #define NBFI_DL_FREQ_BASE       446000000
 #elif BAND == UL868800_DL864000
-#define NBFI_UL_FREQ_BASE       (868800000 - 25000)
+#define NBFI_UL_FREQ_BASE       868800000
 #define NBFI_DL_FREQ_BASE       864000000
 #elif BAND == UL868800_DL446000_DL864000
-#define NBFI_UL_FREQ_BASE       (868800000 - 25000)
+#define NBFI_UL_FREQ_BASE       868800000
 #define NBFI_DL_FREQ_BASE       864000000
 #elif BAND == UL867950_DL446000
-#define NBFI_UL_FREQ_BASE       (867950000 - 25000)
+#define NBFI_UL_FREQ_BASE       867950000
 #define NBFI_DL_FREQ_BASE       446000000
 #elif BAND == UL868500_DL446000
-#define NBFI_UL_FREQ_BASE       (868500000 - 25000)
+#define NBFI_UL_FREQ_BASE       868500000
 #define NBFI_DL_FREQ_BASE       446000000
 #elif BAND == UL868100_DL446000
-#define NBFI_UL_FREQ_BASE       (868100000 - 25000)
+#define NBFI_UL_FREQ_BASE       868100000
 #define NBFI_DL_FREQ_BASE       446000000
 #elif BAND == UL864000_DL446000
-#define NBFI_UL_FREQ_BASE       (864000000 - 25000)
+#define NBFI_UL_FREQ_BASE       864000000
 #define NBFI_DL_FREQ_BASE       446000000
 #elif BAND == UL863175_DL446000
-#define NBFI_UL_FREQ_BASE       (863175000 - 25000)
+#define NBFI_UL_FREQ_BASE       863175000
 #define NBFI_DL_FREQ_BASE       446000000
 #elif BAND == UL864000_DL875000
-#define NBFI_UL_FREQ_BASE       (864000000 - 25000)
+#define NBFI_UL_FREQ_BASE       864000000
 #define NBFI_DL_FREQ_BASE       875000000
 #elif BAND == UL868800_DL868000
-#define NBFI_UL_FREQ_BASE       (868800000 - 25000)
+#define NBFI_UL_FREQ_BASE       868800000
 #define NBFI_DL_FREQ_BASE       868800000
 #elif BAND == UL868800_DL869100
-#define NBFI_UL_FREQ_BASE       (868800000 - 25000) //(866342400 - 25000)//(868800000 - 25000)    
+#define NBFI_UL_FREQ_BASE       868800000    
 #define NBFI_DL_FREQ_BASE       869100000
 #endif 
 
@@ -89,7 +89,7 @@ const nbfi_settings_t nbfi_set_default =
 const nbfi_settings_t nbfi_set_default =
 {
     CRX,//mode;
-    UL_DBPSK_25600_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
+    UL_DBPSK_400_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
     DL_DBPSK_400_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
     MACK_1,             //mack_mode
@@ -109,7 +109,7 @@ const nbfi_settings_t nbfi_set_default =
     0,//NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
     NBFI_UL_FREQ_BASE,
     NBFI_DL_FREQ_BASE,
-    NBFI_FREQ_PLAN_DEFAULT//NBFI_FREQ_PLAN_SHIFTED_HIGHPHY
+    NBFI_UL_FREQ_PLAN_51200_0 + NBFI_FREQ_PLAN_MINIMAL
 };
 #endif
 
@@ -641,7 +641,7 @@ void radio_init(void)
 	NBFI_reg_func(NBFI_GET_ITERATOR, (void*)nbfi_get_iterator);
 	NBFI_reg_func(NBFI_SET_ITERATOR, (void*)nbfi_set_iterator);
         NBFI_reg_func(NBFI_LOCKUNLOCKNBFIIRQ, (void*)nbfi_lock_unlock_nbfi_irq);
-
+        
 	//register callbacks when external RTC used
 	//NBFI_reg_func(NBFI_UPDATE_RTC, (void*)nbfi_update_rtc);
 	//NBFI_reg_func(NBFI_RTC_SYNCHRONIZED, (void*)nbfi_rtc_synchronized);

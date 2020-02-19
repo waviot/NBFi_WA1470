@@ -16,7 +16,6 @@
 #define NBFI_DEFAULT_RF_MIN_POWER			0
 
 #define NBFI_DEFAULT_BAND_ID				UL868800_DL864000
-#define NBFI_DEFAULT_SEND_INFO_INTERVAL		2592000  //one time per month
-//#define MAKE_OSCCAL_INTERVAL       30
+#define NBFI_DEFAULT_SEND_INFO_INTERVAL		        2592000  //one time per month
 
 #endif // _NBFI_DEFINES_H

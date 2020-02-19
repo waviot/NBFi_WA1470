@@ -269,10 +269,12 @@ static _Bool NBFi_Config_Rate_Change(uint8_t rx_tx, nbfi_rate_direct_t dir )
 
     
     if(NBFi_Config_Check_If_FP_Need_To_Change(nbfi.nbfi_freq_plan, nbfi_station_info.fp, NBFI_UL_FP_MASK))
-      nbfi.nbfi_freq_plan.fp = (nbfi.nbfi_freq_plan.fp|~NBFI_UL_FP_MASK) + (nbfi_station_info.fp.fp&NBFI_UL_FP_MASK);
+    {
+      nbfi.nbfi_freq_plan.fp = (nbfi.nbfi_freq_plan.fp&NBFI_DL_FP_MASK) + (nbfi_station_info.fp.fp & NBFI_UL_FP_MASK);
+    }
   
     if(NBFi_Config_Check_If_FP_Need_To_Change(nbfi.nbfi_freq_plan, nbfi_station_info.fp, NBFI_DL_FP_MASK))
-      nbfi.nbfi_freq_plan.fp = (nbfi.nbfi_freq_plan.fp|~NBFI_DL_FP_MASK) + (nbfi_station_info.fp.fp&NBFI_DL_FP_MASK);
+      nbfi.nbfi_freq_plan.fp = (nbfi.nbfi_freq_plan.fp&NBFI_UL_FP_MASK) + (nbfi_station_info.fp.fp&NBFI_DL_FP_MASK);
     
     if(!NBFi_Config_Send_Sync(1))
     {
@@ -562,7 +564,8 @@ void NBFi_Config_Set_Default()
 
     you_should_dl_power_step_down = 0;
 
-    if(nbfi_active_pkt->state == PACKET_WAIT_ACK) nbfi_active_pkt->state = PACKET_LOST;
+    if(nbfi_active_pkt->state == PACKET_WAIT_ACK) 
+      NBFi_Close_Active_Packet();//nbfi_active_pkt->state = PACKET_LOST;
 
 }
 

@@ -13,7 +13,7 @@ void                                NBFi_TxPacket_Free(nbfi_transport_packet_t* 
 void                                NBFi_RxPacket_Free(nbfi_transport_packet_t* pkt);
 nbfi_transport_packet_t*            NBFi_AllocateRxPkt(uint8_t header, uint8_t payload_length);
 nbfi_transport_packet_t*            NBFi_GetQueuedTXPkt();
-void                                NBFi_Mark_Lost_All_Unacked();
+void                                NBFi_Close_Active_Packet();
 _Bool                               NBFi_Check_RX_Packet_Duplicate(nbfi_transport_frame_t * pkt, uint8_t len);
 nbfi_transport_packet_t*            NBFi_Get_QueuedRXPkt(uint8_t *groupe, uint16_t *total_length);
 nbfi_transport_packet_t*            NBFi_GetSentTXPkt_By_Iter(uint8_t iter);

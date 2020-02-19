@@ -70,7 +70,7 @@ extern nbfi_dev_info_t dev_info;
 
 //FREQENCY PLANS
 #define NBFI_FREQ_PLAN_MINIMAL                  0
-#define NBFI_UL_FREQ_PLAN_51200_0               96
+#define NBFI_UL_FREQ_PLAN_51200_0               (384<<6)
 
 #define FULL_ID     ((uint8_t*)(&dev_info.modem_id))
 

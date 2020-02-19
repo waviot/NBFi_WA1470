@@ -150,6 +150,7 @@ typedef struct
 
 typedef union 
 {
+  uint16_t fp;
   struct
   {
     uint16_t dl_offset      : 3;//LSB
@@ -159,7 +160,6 @@ typedef union
     uint16_t ul_sign        : 1;
     uint16_t ul_width       : 3;//MSB
   };
-  uint16_t fp;
 } nbfi_freq_plan_t;
 
 

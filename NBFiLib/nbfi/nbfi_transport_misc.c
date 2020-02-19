@@ -196,8 +196,12 @@ uint8_t NBFi_Packets_To_Send()
     return NBFI_TX_PKTBUF_SIZE - packets_free;
 }
 
-void NBFi_Mark_Lost_All_Unacked()
+
+
+void NBFi_Close_Active_Packet()
 {
+    nbfi_active_pkt->state = PACKET_LOST;
+    
     for(uint8_t i = nbfi_TXbuf_head - NBFI_TX_PKTBUF_SIZE; i != nbfi_TXbuf_head; i++)
     {
         uint8_t ptr = i%NBFI_TX_PKTBUF_SIZE;
@@ -438,6 +442,7 @@ _Bool NBFi_Config_Send_Sync(_Bool ack)
     ack_pkt->phy_data.payload[3] = nbfi.rx_phy_channel;    
     ack_pkt->phy_data.payload[4] = (nbfi.nbfi_freq_plan.fp>>8);
     ack_pkt->phy_data.payload[5] = (nbfi.nbfi_freq_plan.fp&0xff);   
+    
     ack_pkt->phy_data.ITER = nbfi_state.UL_iter & 0x1f;;
     ack_pkt->phy_data.header |= SYS_FLAG;
     if(ack)
@@ -476,7 +481,11 @@ void NBFi_Resend_Pkt(nbfi_transport_packet_t* act_pkt, uint32_t mask)
         if(one&mask)
         {
           mask &= ~one;
-          if(++pkt->retry_num > NBFi_Get_Retry_Number()) pkt->state = PACKET_LOST;
+          if(++pkt->retry_num > NBFi_Get_Retry_Number()) 
+          {
+            NBFi_Close_Active_Packet();
+            //pkt->state = PACKET_LOST;
+          }
           else
           {
             pkt->state = PACKET_QUEUED_AGAIN;

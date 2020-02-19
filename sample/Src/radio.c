@@ -109,8 +109,7 @@ const nbfi_settings_t nbfi_set_default =
     0,//NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
     NBFI_UL_FREQ_BASE,
     NBFI_DL_FREQ_BASE,
-    NBFI_UL_FREQ_PLAN_51200_0,
-    NBFI_FREQ_PLAN_MINIMAL
+    NBFI_UL_FREQ_PLAN_51200_0 + NBFI_FREQ_PLAN_MINIMAL
 };
 #endif
 

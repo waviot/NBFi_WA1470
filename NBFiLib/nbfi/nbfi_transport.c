@@ -334,7 +334,7 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
                     rtc_offset <<= 8;
                     rtc_offset |= phy_pkt->payload[6];
                     if(rtc_offset) NBFi_set_RTC(NBFi_get_RTC() + rtc_offset);                 
-                    if(phy_pkt->payload[0] == 0x00)
+                    if(phy_pkt->payload[0] == SYSTEM_PACKET_ACK)
                     {
                       do
                       {
@@ -345,10 +345,10 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
                     }
                     else
                     {
-                       nbfi_station_info.fp.fp = phy_pkt->payload[3];
-                       nbfi_station_info.fp.fp = (nbfi_station_info.fp.fp << 8) + phy_pkt->payload[4];
-                       if(nbfi_station_info.fp.fp != 0 ) nbfi_state.bs_id = (((uint16_t)phy_pkt->payload[1]) << 8) + phy_pkt->payload[2];
-                       else nbfi_state.server_id = (((uint16_t)phy_pkt->payload[1]) << 8) + phy_pkt->payload[2];
+                       nbfi_station_info.fp.fp = phy_pkt->payload[1];
+                       nbfi_station_info.fp.fp = (nbfi_station_info.fp.fp << 8) + phy_pkt->payload[2];
+                       if(nbfi_station_info.fp.fp == 0 ) nbfi_state.bs_id = (((uint16_t)phy_pkt->payload[3]) << 8) + phy_pkt->payload[4];
+                       else nbfi_state.server_id = (((uint16_t)phy_pkt->payload[3]) << 8) + phy_pkt->payload[4];
                     }
                 }
                 break;
@@ -665,11 +665,11 @@ static void NBFi_Receive_Timeout_cb(struct wtimer_desc *desc)
     NBFi_Config_Tx_Power_Change(UP);
     if(++nbfi_active_pkt->retry_num > NBFi_Get_Retry_Number())
     {
-       nbfi_active_pkt->state = PACKET_LOST;
-
+       //nbfi_active_pkt->state = PACKET_LOST;
+       NBFi_Close_Active_Packet();
        if(nbfi_active_pkt->phy_data.SYS && (nbfi_active_pkt->phy_data.payload[0] == SYSTEM_PACKET_SYNC)/* && (nbfi_active_pkt->phy_data.payload[1] != RATE_CHANGE_PARAM_CMD)*/)
         {
-            NBFi_Mark_Lost_All_Unacked();
+            //NBFi_Mark_Lost_All_Unacked();
             NBFi_Config_Return(); //return to previous work configuration
             //nbfi_state.aver_rx_snr = nbfi_state.aver_tx_snr = 15;
         }
@@ -680,7 +680,7 @@ static void NBFi_Receive_Timeout_cb(struct wtimer_desc *desc)
                 if((current_tx_rate == 0)&&(current_rx_rate == 0))
                 {
 
-                    NBFi_Mark_Lost_All_Unacked();
+                    //NBFi_Mark_Lost_All_Unacked();
 
                 }
                 else

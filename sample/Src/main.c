@@ -83,7 +83,15 @@ uint32_t systick_timer = 0;
 void HAL_SYSTICK_Callback(void)
 {
   systick_timer++;
-  if(!nbfi_lock) wtimer_runcallbacks();
+  if(!nbfi_lock) 
+  {
+     #define AX_BPSK_PIN_GPIO_Port 	GPIOB
+  #define AX_BPSK_PIN_Pin 		GPIO_PIN_12
+      HAL_GPIO_WritePin(AX_BPSK_PIN_GPIO_Port, AX_BPSK_PIN_Pin,  GPIO_PIN_SET);
+      wtimer_runcallbacks();
+     HAL_GPIO_WritePin(AX_BPSK_PIN_GPIO_Port, AX_BPSK_PIN_Pin,  GPIO_PIN_RESET);
+
+  }
 }
 
 extern uint16_t rfe_rx_total_vga_gain;

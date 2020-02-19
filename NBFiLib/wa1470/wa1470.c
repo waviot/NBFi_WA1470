@@ -5,8 +5,8 @@
 
 #define SPI_WAIT_TIMEOUT		100000
 
-void (*__wa1470_enable_global_irq)(void) = 0;
-void (*__wa1470_disable_global_irq)(void) = 0;
+//void (*__wa1470_enable_global_irq)(void) = 0;
+//void (*__wa1470_disable_global_irq)(void) = 0;
 void (*__wa1470_enable_pin_irq)(void) = 0;
 void (*__wa1470_disable_pin_irq)(void) = 0;
 void (*__wa1470_chip_enable)(void) = 0;
@@ -27,12 +27,12 @@ void wa1470_reg_func(uint8_t name, void* fn)
 {
 	switch(name)
 	{
-	case WARADIO_ENABLE_GLOBAL_IRQ:
-		__wa1470_enable_global_irq = (void(*)(void))fn;
-		break;
-	case WARADIO_DISABLE_GLOBAL_IRQ:
-		__wa1470_disable_global_irq = (void(*)(void))fn;
-		break;
+//	case WARADIO_ENABLE_GLOBAL_IRQ:
+//		__wa1470_enable_global_irq = (void(*)(void))fn;
+//		break;
+//	case WARADIO_DISABLE_GLOBAL_IRQ:
+//		__wa1470_disable_global_irq = (void(*)(void))fn;
+//		break;
 	case WARADIO_ENABLE_IRQ_PIN:
 		__wa1470_enable_pin_irq = (void(*)(void))fn;
 		break;
@@ -79,6 +79,7 @@ void wa1470_reg_func(uint8_t name, void* fn)
 
 void wa1470_spi_write(uint16_t address, uint8_t *data, uint8_t length)
 {
+        __wa1470_disable_pin_irq();
 	if(__spi_tx && __spi_cs_set)
 	{
 		__spi_cs_set(0);
@@ -88,10 +89,12 @@ void wa1470_spi_write(uint16_t address, uint8_t *data, uint8_t length)
 		__spi_tx(data, length);
 		__spi_cs_set(1);
 	}
+        __wa1470_enable_pin_irq();
 }
 
 void wa1470_spi_read(uint16_t address, uint8_t *data, uint8_t length)
 {
+        __wa1470_disable_pin_irq();
 	if(__spi_tx && __spi_rx && __spi_cs_set)
 	{
 		__spi_cs_set(0);
@@ -101,6 +104,7 @@ void wa1470_spi_read(uint16_t address, uint8_t *data, uint8_t length)
 		__spi_rx(data, length);
 		__spi_cs_set(1);
 	}
+        __wa1470_enable_pin_irq();
 }
 
 

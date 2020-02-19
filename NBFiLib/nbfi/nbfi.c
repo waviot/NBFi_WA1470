@@ -98,7 +98,13 @@ void NBFi_Go_To_Sleep(_Bool sleep)
 
 uint8_t NBFi_can_sleep()
 {
-  return (!rf_busy) && (rf_state == STATE_OFF) && (NBFi_Packets_To_Send() == 0);
+  if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(1);
+   
+  uint8_t can = (!rf_busy) && (rf_state == STATE_OFF) && (NBFi_Packets_To_Send() == 0);
+  
+  if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
+  
+  return can;
 }
 
 nbfi_state_t* NBFi_get_state()

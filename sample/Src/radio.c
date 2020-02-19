@@ -89,8 +89,8 @@ const nbfi_settings_t nbfi_set_default =
 const nbfi_settings_t nbfi_set_default =
 {
     CRX,//mode;
-    UL_DBPSK_400_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
-    DL_DBPSK_400_PROT_D, // rx_phy_channel;
+    UL_DBPSK_3200_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
+    DL_DBPSK_3200_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
     MACK_1,             //mack_mode
     0x82,                  //num_of_retries;
@@ -293,7 +293,7 @@ void RADIO_LPTIM_Init(void)
     hlptim.Init.CounterSource = LPTIM_COUNTERSOURCE_INTERNAL;
     HAL_LPTIM_Init(&hlptim);
     
-    HAL_NVIC_SetPriority(AX_LPTIM_IRQn, 1, 0);
+    HAL_NVIC_SetPriority(AX_LPTIM_IRQn, 2, 0);
     HAL_NVIC_EnableIRQ(AX_LPTIM_IRQn);
 
 }
@@ -302,9 +302,9 @@ void RADIO_LPTIM_Init(void)
 void LPTIM1_IRQHandler(void)
 {
   if (__HAL_LPTIM_GET_FLAG(&hlptim, LPTIM_FLAG_CMPM) != RESET) {
-		__HAL_LPTIM_CLEAR_FLAG(&hlptim, LPTIM_FLAG_CMPM);
+		__HAL_LPTIM_CLEAR_FLAG(&hlptim, LPTIM_FLAG_CMPM);  
 		wtimer_cc0_irq();
-	}
+  }
 }
 
 
@@ -568,9 +568,8 @@ void nbfi_rtc_synchronized(uint32_t time)
 void nbfi_receive_complete(uint8_t * data, uint16_t length)
 {
 
-  NBFi_Send(data, length); //loopback
-  //uint8_t _data[]={1,2,3,4,5};
-  //NBFi_Send(_data, 5);
+ NBFi_Send(data, length); //loopback
+
 }
 
 uint8_t nbfi_lock = 1;
@@ -604,8 +603,8 @@ void radio_init(void)
 
 	RADIO_BPSK_PIN_Init();
 
-	wa1470_reg_func(WARADIO_ENABLE_GLOBAL_IRQ, (void*)radio_enable_global_irq);
-	wa1470_reg_func(WARADIO_DISABLE_GLOBAL_IRQ, (void*)radio_disable_global_irq);
+	//wa1470_reg_func(WARADIO_ENABLE_GLOBAL_IRQ, (void*)radio_enable_global_irq);
+	//wa1470_reg_func(WARADIO_DISABLE_GLOBAL_IRQ, (void*)radio_disable_global_irq);
 	wa1470_reg_func(WARADIO_ENABLE_IRQ_PIN, (void*)radio_enable_pin_irq);
 	wa1470_reg_func(WARADIO_DISABLE_IRQ_PIN, (void*)radio_disable_pin_irq);
 	wa1470_reg_func(WARADIO_CHIP_ENABLE, (void*)radio_chip_enable);

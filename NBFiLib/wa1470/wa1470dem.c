@@ -37,7 +37,7 @@ dem_bitrate_s current_rx_phy = DBPSK_100H_PROT_D;
 
 _Bool dem_rx_enabled = 0;
 
-uint8_t current_hop_table[8] = {DEM_PLUS90000,DEM_MINUS40000,DEM_PLUS40000,DEM_PLUS15000,DEM_MINUS15000,DEM_MINUS40000,DEM_MINUS65000,DEM_MINUS90000};
+uint8_t current_hop_table[8] = {DEM_MINUS90000,DEM_MINUS40000,DEM_PLUS40000,DEM_PLUS15000,DEM_MINUS15000,DEM_MINUS40000,DEM_MINUS65000,DEM_MINUS90000};
 
 const int32_t DEM_FREQ_OFFSETS[8] = {90000,65000,40000,15000,-15000,-40000,-65000,-90000};
 
@@ -68,7 +68,7 @@ void wa1470dem_init(uint32_t modem_id)
 
 	wa1470_spi_write8(DEM_CONTROL, DEM_CONTROL_RESET);
 	wa1470dem_set_bitrate(DBPSK_50_PROT_D);
-	wa1470dem_set_threshold(1024); 
+	wa1470dem_set_threshold(800); //1024 
 	wa1470dem_set_alpha(128, 5);
 	wa1470dem_set_crc_poly(NB_FI_RX_CRC_POLY);
 	wa1470dem_set_hop_table(current_hop_table);
@@ -112,8 +112,8 @@ static int16_t wa1470dem_get_rssi_logoffset()
 
 static void  wa1470dem_process_messages(struct wtimer_desc *desc)
 {
-	if(__wa1470_disable_pin_irq) 
-		__wa1470_disable_pin_irq();
+	//if(__wa1470_disable_pin_irq) 
+	__wa1470_disable_pin_irq();
 
 	tmp_dem_mess_received = dem_mess_received;
 	memcpy(tmp_dem_mas, dem_mas, sizeof(tmp_dem_mas)); 
@@ -122,8 +122,8 @@ static void  wa1470dem_process_messages(struct wtimer_desc *desc)
 	memset(dem_mas, 0 , sizeof(dem_mas));
 	memset(dem_info_mas, 0 , sizeof(dem_info_mas));
 
-	if(__wa1470_enable_pin_irq) 
-		__wa1470_enable_pin_irq();
+	//if(__wa1470_enable_pin_irq) 
+	__wa1470_enable_pin_irq();
 
 	wa1470dem_update_noise(0);
 
@@ -259,8 +259,8 @@ static int8_t wa1470dem_get_sensitivity_diff(dem_bitrate_s bitrate_1, dem_bitrat
 
 void wa1470dem_set_bitrate(dem_bitrate_s bitrate)
 {
-	if(__wa1470_disable_pin_irq)
-		__wa1470_disable_pin_irq();
+	//if(__wa1470_disable_pin_irq)
+	//	__wa1470_disable_pin_irq();
 
 	switch(bitrate)
 	{
@@ -289,8 +289,9 @@ void wa1470dem_set_bitrate(dem_bitrate_s bitrate)
 	if(current_rx_phy != bitrate) wa1470dem_update_noise(0); //reinit noise engine
 	current_rx_phy = bitrate;    
 	wa1470dem_reset();
-	if(__wa1470_enable_pin_irq) 
-		__wa1470_enable_pin_irq();  
+	//if(__wa1470_enable_pin_irq) 
+	//	__wa1470_enable_pin_irq();  
+        
         #ifdef NBFI_LOG       
         //uint16_t NBFi_Phy_To_Bitrate(nbfi_phy_channel_t ch);
 	sprintf(log_string, "%05u: dem_set_bitrate to %d", ((uint16_t)(NBFi_get_RTC()&0xffff)), NBFi_Phy_To_Bitrate((nbfi_phy_channel_t)bitrate)); 
@@ -300,62 +301,62 @@ void wa1470dem_set_bitrate(dem_bitrate_s bitrate)
 
 void wa1470dem_set_alpha(uint8_t noise_start_bit, uint8_t shift)
 {
-	if(__wa1470_disable_pin_irq) 
-		__wa1470_disable_pin_irq();
+	//if(__wa1470_disable_pin_irq) 
+	//	__wa1470_disable_pin_irq();
 	wa1470_spi_write8(DEM_NOSE_START_BIT, noise_start_bit);
 	wa1470_spi_write8(DEM_ALPHA_SHIFT, shift);
-	if(__wa1470_enable_pin_irq) 
-		__wa1470_enable_pin_irq(); 
+	//if(__wa1470_enable_pin_irq) 
+	//	__wa1470_enable_pin_irq(); 
 }
 
 void wa1470dem_set_threshold(uint16_t SOFT_DETECT_THR)
 {
 	uint8_t  SOFT_DETECT_THR_ARR[2] = {SOFT_DETECT_THR & 255, SOFT_DETECT_THR >> 8};
-	if(__wa1470_disable_pin_irq) 
-		__wa1470_disable_pin_irq();
+	//if(__wa1470_disable_pin_irq) 
+	//	__wa1470_disable_pin_irq();
 	wa1470_spi_write(DEM_DET_TRESHOLD, SOFT_DETECT_THR_ARR, 2);
-	if(__wa1470_enable_pin_irq) 
-		__wa1470_enable_pin_irq();
+	//if(__wa1470_enable_pin_irq) 
+	//	__wa1470_enable_pin_irq();
 }
 
 
 void wa1470dem_set_crc_poly(uint8_t* crc)
 {
-	if(__wa1470_disable_pin_irq)
-		__wa1470_disable_pin_irq();
+	//if(__wa1470_disable_pin_irq)
+	//	__wa1470_disable_pin_irq();
 	wa1470_spi_write(DEM_CRC_POLY, crc, 4);
-	if(__wa1470_enable_pin_irq)
-		__wa1470_enable_pin_irq();
+	//if(__wa1470_enable_pin_irq)
+	//	__wa1470_enable_pin_irq();
 }
 
 void wa1470dem_set_hop_len(uint8_t hop_len)
 {
-	if(__wa1470_disable_pin_irq) 
-		__wa1470_disable_pin_irq();
+	//if(__wa1470_disable_pin_irq) 
+	//	__wa1470_disable_pin_irq();
 	wa1470_spi_write8(DEM_HOP_LENGTH, hop_len);
-	if(__wa1470_enable_pin_irq) 
-		__wa1470_enable_pin_irq();
+	//if(__wa1470_enable_pin_irq) 
+	//	__wa1470_enable_pin_irq();
 }
 
 void wa1470dem_set_preambule(uint8_t* preambule)
 {
-	if(__wa1470_disable_pin_irq) 
-		__wa1470_disable_pin_irq();
+	//if(__wa1470_disable_pin_irq) 
+	//	__wa1470_disable_pin_irq();
 	wa1470_spi_write(DEM_PREAMBLE_ID, preambule, 4);
-	if(__wa1470_enable_pin_irq) 
-		__wa1470_enable_pin_irq();
+	//if(__wa1470_enable_pin_irq) 
+	//	__wa1470_enable_pin_irq();
 }
 
 void wa1470dem_set_hop_table(uint8_t* hop)
 {
-	if(__wa1470_disable_pin_irq) 
-		__wa1470_disable_pin_irq();
+	//if(__wa1470_disable_pin_irq) 
+	//	__wa1470_disable_pin_irq();
 	wa1470_spi_write8(DEM_HOP_TABLE ,  (hop[1] << 4) | hop[0]);
 	wa1470_spi_write8(DEM_HOP_TABLE+1, (hop[3] << 4) | hop[2]);
 	wa1470_spi_write8(DEM_HOP_TABLE+2, (hop[5] << 4) | hop[4]);
 	wa1470_spi_write8(DEM_HOP_TABLE+3, (hop[7] << 4) | hop[6]);
-	if(__wa1470_enable_pin_irq) 
-		__wa1470_enable_pin_irq();
+	//if(__wa1470_enable_pin_irq) 
+	//	__wa1470_enable_pin_irq();
 	for(int i = 0; i<8; i++ ) 
 		current_hop_table[i] = hop[i];
 }
@@ -407,12 +408,12 @@ static uint32_t wa1470dem_get_rssi_int(_Bool aver_or_max)
 		size = 16;
 		break;
 	}
-	if(__wa1470_disable_pin_irq) 
-		__wa1470_disable_pin_irq(); 
+	//if(__wa1470_disable_pin_irq) 
+	//	__wa1470_disable_pin_irq(); 
 	wa1470_spi_read(DEM_FFT_READ_BUF, (uint8_t*)(&data[0]), 4*size); 
 	wa1470_spi_write8(DEM_FFT_READ_BUF + 100, 0); 
-	if(__wa1470_enable_pin_irq) 
-		__wa1470_enable_pin_irq();  
+	//if(__wa1470_enable_pin_irq) 
+	//	__wa1470_enable_pin_irq();  
 
 	for(int i = 0; i != size; i++) 
 	{
@@ -454,6 +455,7 @@ static uint8_t wa1470dem_get_noise_calc_duration()
 
 static void wa1470dem_update_noise(struct wtimer_desc *desc)
 {
+        
 	static uint32_t dem_noise_sum;
 	static uint32_t dem_noise_min;
 	static uint8_t dem_noise_cntr;

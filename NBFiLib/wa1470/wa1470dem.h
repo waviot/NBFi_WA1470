@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-#define DEM_CALC_SPECTRUM
+//#define DEM_CALC_SPECTRUM
 
 typedef enum
 {

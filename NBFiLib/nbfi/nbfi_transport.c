@@ -297,8 +297,11 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
     nbfi_transport_packet_t* pkt = 0;
 
 
-    wtimer0_remove(&wait_for_extra_desc);
-    wait_Extra = 0;
+    if(wait_Extra) 
+    {
+      wtimer0_remove(&wait_for_extra_desc);
+      wait_Extra = 0;
+    }
 
     if(nbfi_active_pkt->state == PACKET_WAIT_FOR_EXTRA_PACKETS)
     {

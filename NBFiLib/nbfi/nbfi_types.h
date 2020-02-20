@@ -20,6 +20,7 @@
 #define SYSTEM_PACKET_TIME              0x09
 #define SYSTEM_PACKET_SYNC              0x0A
 
+#define NBFI_PACKET_SIZE        8 //neccessary if no malloc used
 
 /*NBFi transport layer frame struct*/
 typedef struct
@@ -35,7 +36,11 @@ typedef struct
         };
         uint8_t header;
     };
+#ifdef NBFI_USE_MALLOC
     uint8_t payload[0];     //begining of packet payload
+#else
+    uint8_t payload[NBFI_PACKET_SIZE];     //begining of packet payload
+#endif
 }nbfi_transport_frame_t;
 
 typedef enum
@@ -65,6 +70,7 @@ typedef enum
 
 
 /*NBFi transport layer struct*/
+
 typedef struct
 {
     nbfi_packet_state_t state;              //packet state

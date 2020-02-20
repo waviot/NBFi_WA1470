@@ -55,10 +55,15 @@ static uint32_t NBFI_PhyToDL_AddRndListenTime(nbfi_phy_channel_t chan);
 
 void NBFI_Transport_Init()
 {
-	
+    
+    #ifdef NBFI_USE_MALLOC
     for(uint8_t i = 0; i < NBFI_TX_PKTBUF_SIZE; i++) nbfi_TX_pktBuf[i] = 0;
     for(uint8_t i = 0; i < NBFI_RX_PKTBUF_SIZE; i++) nbfi_RX_pktBuf[i] = 0;
-
+    #else
+    for(uint8_t i = 0; i < NBFI_TX_PKTBUF_SIZE; i++) nbfi_TX_pktBuf[i].state = PACKET_FREE;
+    for(uint8_t i = 0; i < NBFI_RX_PKTBUF_SIZE; i++) nbfi_RX_pktBuf[i].state = PACKET_FREE;
+    #endif
+    
     info_timer = dev_info.send_info_interval - 300 - rand()%600;
 
     if(nbfi.additional_flags&NBFI_OFF_MODE_ON_INIT)
@@ -239,7 +244,7 @@ void NBFi_ProcessRxPackets(_Bool external)
         else
         {
             uint8_t iter = pkt->phy_data.ITER;
-            group_with_crc = ((pkt->phy_data.SYS) && (nbfi_RX_pktBuf[(iter)&0x1f]->phy_data.payload[0] == SYSTEM_PACKET_GROUP_START));
+            group_with_crc = ((pkt->phy_data.SYS) && (NBFi_Get_RX_Packet_Ptr(iter&0x1f)->phy_data.payload[0] == SYSTEM_PACKET_GROUP_START));
             uint16_t memcpy_len = total_length;
             for(uint8_t i = 0; i != groupe; i++)
             {
@@ -248,15 +253,15 @@ void NBFi_ProcessRxPackets(_Bool external)
                 last_group_iter = (iter + i)&0x1f;
                 if((i == 0)&&(groupe > 1)) {len = nbfi.max_payload_len - 2; first = 2;}
                 else len = (memcpy_len>=nbfi.max_payload_len)?nbfi.max_payload_len:memcpy_len%nbfi.max_payload_len;
-                memcpy(data + i*nbfi.max_payload_len - 2*(i != 0), (void const*)(&nbfi_RX_pktBuf[last_group_iter]->phy_data.payload[first]), len);
+                memcpy(data + i*nbfi.max_payload_len - 2*(i != 0), (void const*)(&NBFi_Get_RX_Packet_Ptr(last_group_iter)->phy_data.payload[first]), len);
                 memcpy_len -= len;
-                if(nbfi_RX_pktBuf[last_group_iter]->phy_data.ACK) nbfi_RX_pktBuf[last_group_iter]->state = PACKET_CLEARED;
-                else nbfi_RX_pktBuf[last_group_iter]->state = PACKET_PROCESSED;
+                if(NBFi_Get_RX_Packet_Ptr(last_group_iter)->phy_data.ACK) NBFi_Get_RX_Packet_Ptr(last_group_iter)->state = PACKET_CLEARED;
+                else NBFi_Get_RX_Packet_Ptr(last_group_iter)->state = PACKET_PROCESSED;
 
                 if((nbfi.mack_mode < MACK_2) && (groupe == 1)) 
                 {
                   //NBFi_RxPacket_Free(nbfi_RX_pktBuf[(iter + i)&0x1f]);
-                  nbfi_RX_pktBuf[last_group_iter]->state = PACKET_PROCESSED;
+                  NBFi_Get_RX_Packet_Ptr(last_group_iter)->state = PACKET_PROCESSED;
                 }
             }
         }

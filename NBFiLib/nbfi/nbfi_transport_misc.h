@@ -4,10 +4,18 @@
 #define NBFI_TX_PKTBUF_SIZE     64
 #define NBFI_RX_PKTBUF_SIZE     32
 
-extern nbfi_transport_packet_t * nbfi_TX_pktBuf[NBFI_TX_PKTBUF_SIZE];
+
+#ifdef NBFI_USE_MALLOC
+extern nbfi_transport_packet_t* nbfi_TX_pktBuf[NBFI_TX_PKTBUF_SIZE];
 extern nbfi_transport_packet_t* nbfi_RX_pktBuf[NBFI_RX_PKTBUF_SIZE];
+#else
+extern nbfi_transport_packet_t  nbfi_TX_pktBuf[NBFI_TX_PKTBUF_SIZE];
+extern nbfi_transport_packet_t  nbfi_RX_pktBuf[NBFI_RX_PKTBUF_SIZE];
+#endif
 
-
+nbfi_transport_packet_t*            NBFi_Get_TX_Packet_Ptr(uint8_t index);
+nbfi_transport_packet_t*            NBFi_Get_RX_Packet_Ptr(uint8_t index);
+//void                                NBFi_Free_Packet(nbfi_transport_packet_t* pkt);
 nbfi_transport_packet_t*            NBFi_AllocateTxPkt(uint8_t payload_length);
 void                                NBFi_TxPacket_Free(nbfi_transport_packet_t* pkt);
 void                                NBFi_RxPacket_Free(nbfi_transport_packet_t* pkt);

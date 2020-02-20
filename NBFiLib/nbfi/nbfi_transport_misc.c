@@ -2,18 +2,56 @@
 #include <stdlib.h>
 #include <string.h>
 
-nbfi_transport_packet_t * nbfi_TX_pktBuf[NBFI_TX_PKTBUF_SIZE];
+#ifdef NBFI_USE_MALLOC
+nbfi_transport_packet_t* nbfi_TX_pktBuf[NBFI_TX_PKTBUF_SIZE];
 nbfi_transport_packet_t* nbfi_RX_pktBuf[NBFI_RX_PKTBUF_SIZE];
+#else
+nbfi_transport_packet_t  nbfi_TX_pktBuf[NBFI_TX_PKTBUF_SIZE];
+nbfi_transport_packet_t  nbfi_RX_pktBuf[NBFI_RX_PKTBUF_SIZE];
+#endif
 
 uint8_t     nbfi_TXbuf_head = 0;
+
+nbfi_transport_packet_t* NBFi_Get_TX_Packet_Ptr(uint8_t index)
+{
+    #ifdef NBFI_USE_MALLOC
+    return nbfi_TX_pktBuf[index];
+    #else
+    if(nbfi_TX_pktBuf[index].state == PACKET_FREE) return 0;
+    else return &nbfi_TX_pktBuf[index];
+    #endif
+}
+
+nbfi_transport_packet_t* NBFi_Get_RX_Packet_Ptr(uint8_t index)
+{
+    #ifdef NBFI_USE_MALLOC
+    return nbfi_RX_pktBuf[index];
+    #else
+    if(nbfi_RX_pktBuf[index].state == PACKET_FREE) return 0;
+    else return &nbfi_RX_pktBuf[index];
+    #endif
+}
+
+/*
+void NBFi_Free_Packet(nbfi_transport_packet_t* pkt)
+{
+    #ifdef NBFI_USE_MALLOC
+    free(pkt);
+    //pkt = 0;
+    #else
+    if(pkt->state = PACKET_FREE);
+    #endif
+}*/
 
 nbfi_transport_packet_t* NBFi_AllocateTxPkt(uint8_t payload_length)
 {
     uint8_t ptr = nbfi_TXbuf_head%NBFI_TX_PKTBUF_SIZE;
-
-    if(nbfi_TX_pktBuf[ptr])
+  
+    nbfi_transport_packet_t* pointer = NBFi_Get_TX_Packet_Ptr(ptr);
+    
+    if(pointer)
     {
-        switch(nbfi_TX_pktBuf[ptr]->state)
+        switch(pointer->state)
         {
         case PACKET_QUEUED:
         case PACKET_QUEUED_AGAIN:
@@ -22,32 +60,44 @@ nbfi_transport_packet_t* NBFi_AllocateTxPkt(uint8_t payload_length)
         case PACKET_SENT_NOACKED:
             return 0;   // tx buffer is full
         }
-        free(nbfi_TX_pktBuf[ptr]);
+        
+        #ifdef NBFI_USE_MALLOC
+        free(pointer);
         nbfi_TX_pktBuf[ptr] = 0;
+        #else
+        pointer->state = PACKET_FREE;
+        #endif        
     }
 
-    nbfi_TX_pktBuf[ptr] = (nbfi_transport_packet_t *) malloc(sizeof(nbfi_transport_packet_t) + payload_length);
+    #ifdef NBFI_USE_MALLOC
+    pointer = (nbfi_transport_packet_t *) malloc(sizeof(nbfi_transport_packet_t) + payload_length);
 
-    if(!nbfi_TX_pktBuf[ptr])
+    if(!pointer)
     {
         return 0;
     }
+    nbfi_TX_pktBuf[ptr] = pointer;
+    #else
+    if(payload_length > NBFI_PACKET_SIZE) return 0;
+    pointer = &nbfi_TX_pktBuf[ptr];
+    #endif
+    
+    
+    pointer->state = PACKET_ALLOCATED;
 
-    nbfi_TX_pktBuf[ptr]->state = PACKET_ALLOCATED;
+    pointer->phy_data_length = payload_length;
 
-    nbfi_TX_pktBuf[ptr]->phy_data_length = payload_length;
+    pointer->handshake = HANDSHAKE_NONE;
 
-    nbfi_TX_pktBuf[ptr]->handshake = HANDSHAKE_NONE;
+    pointer->retry_num = 0;
 
-    nbfi_TX_pktBuf[ptr]->retry_num = 0;
+    pointer->mack_num = 0;
 
-    nbfi_TX_pktBuf[ptr]->mack_num = 0;
-
-    nbfi_TX_pktBuf[ptr]->phy_data.header = 0;
+    pointer->phy_data.header = 0;
 
     nbfi_TXbuf_head++;
 
-    return nbfi_TX_pktBuf[ptr];
+    return pointer;
 
 }
 
@@ -67,68 +117,85 @@ nbfi_transport_packet_t* NBFi_AllocateRxPkt(uint8_t header, uint8_t payload_leng
 
     }
 
-    if(nbfi_RX_pktBuf[ptr])
+    nbfi_transport_packet_t* pointer = NBFi_Get_RX_Packet_Ptr(ptr);
+    
+    if(pointer)
     {
-        free(nbfi_RX_pktBuf[ptr]);
+        //NBFi_Free_Packet(pointer);
+        #ifdef NBFI_USE_MALLOC
+        free(pointer);
+        nbfi_RX_pktBuf[ptr] = 0;
+        #else
+        pointer->state = PACKET_FREE;
+        #endif 
     }
-
-    nbfi_RX_pktBuf[ptr] = (nbfi_transport_packet_t *) malloc(sizeof(nbfi_transport_packet_t) + payload_length);
-
-    if(!nbfi_RX_pktBuf[ptr])
+    
+    #ifdef NBFI_USE_MALLOC
+    pointer = (nbfi_transport_packet_t *) malloc(sizeof(nbfi_transport_packet_t) + payload_length);
+    if(!pointer)
     {
         return 0;
     }
+    nbfi_RX_pktBuf[ptr] = pointer;
+    #else
+    if(payload_length > NBFI_PACKET_SIZE) return 0;
+    pointer = &nbfi_RX_pktBuf[ptr];
+    #endif
 
+    
     nbfi_state.DL_iter = ptr;
 
-    nbfi_RX_pktBuf[ptr]->state = PACKET_ALLOCATED;
+    pointer->state = PACKET_ALLOCATED;
 
-    nbfi_RX_pktBuf[ptr]->phy_data_length = payload_length;
+    pointer->phy_data_length = payload_length;
 
-    nbfi_RX_pktBuf[ptr]->phy_data.header = header;
+    pointer->phy_data.header = header;
 
-    return nbfi_RX_pktBuf[ptr];
+    return pointer;
 
 }
 
 
 nbfi_transport_packet_t* NBFi_GetQueuedTXPkt()
 {
-
+    nbfi_transport_packet_t* pointer;
     for(uint8_t i = nbfi_TXbuf_head - NBFI_TX_PKTBUF_SIZE; i != nbfi_TXbuf_head; i++)
     {
         uint8_t ptr = i%NBFI_TX_PKTBUF_SIZE;
-        if(nbfi_TX_pktBuf[ptr] == 0) continue;
-        switch(nbfi_TX_pktBuf[ptr]->state )
+        pointer = NBFi_Get_TX_Packet_Ptr(ptr);
+        if(pointer == 0) continue;
+        switch(pointer->state )
         {
         case PACKET_NEED_TO_SEND_RIGHT_NOW:
-            return nbfi_TX_pktBuf[ptr];
+            return pointer;
         }
     }
 
     for(uint8_t i = nbfi_TXbuf_head - NBFI_TX_PKTBUF_SIZE; i != nbfi_TXbuf_head; i++)
     {
         uint8_t ptr = i%NBFI_TX_PKTBUF_SIZE;
-        if(nbfi_TX_pktBuf[ptr] == 0) continue;
-        switch(nbfi_TX_pktBuf[ptr]->state )
+        pointer = NBFi_Get_TX_Packet_Ptr(ptr);
+        if(pointer == 0) continue;
+        switch(pointer->state )
         {
         case PACKET_QUEUED_AGAIN:
-            return nbfi_TX_pktBuf[ptr];
+            return pointer;
         }
     }
     
     for(uint8_t i = nbfi_TXbuf_head - NBFI_TX_PKTBUF_SIZE; i != nbfi_TXbuf_head; i++)
     {
         uint8_t ptr = i%NBFI_TX_PKTBUF_SIZE;
-        if(nbfi_TX_pktBuf[ptr] == 0) continue;
-        switch(nbfi_TX_pktBuf[ptr]->state )
+        pointer = NBFi_Get_TX_Packet_Ptr(ptr);
+        if(pointer == 0) continue;
+        switch(pointer->state )
         {
         case PACKET_WAIT_ACK:
-            if(nbfi_TX_pktBuf[ptr] == nbfi_active_pkt) continue;
-             nbfi_TX_pktBuf[ptr]->state = PACKET_QUEUED_AGAIN;
+            if(pointer == nbfi_active_pkt) continue;
+             pointer->state = PACKET_QUEUED_AGAIN;
         case PACKET_QUEUED:
 
-            return nbfi_TX_pktBuf[ptr];
+            return pointer;
         }
     }
     return 0;
@@ -137,44 +204,61 @@ nbfi_transport_packet_t* NBFi_GetQueuedTXPkt()
 
 void NBFi_TxPacket_Free(nbfi_transport_packet_t* pkt)
 {
+    nbfi_transport_packet_t* pointer;
     for(uint8_t i = nbfi_TXbuf_head - NBFI_TX_PKTBUF_SIZE; i != nbfi_TXbuf_head; i++)
     {
         uint8_t ptr = i%NBFI_TX_PKTBUF_SIZE;
-        if(nbfi_TX_pktBuf[ptr] != pkt) continue;
-        free(pkt);
+        pointer = NBFi_Get_TX_Packet_Ptr(ptr);
+        if(pointer != pkt) continue;
+        #ifdef NBFI_USE_MALLOC
+        free(pointer);
         nbfi_TX_pktBuf[ptr] = 0;
-    }
+        #else
+        pkt->state = PACKET_FREE;
+        #endif 
+     }
 
 }
 
 void NBFi_RxPacket_Free(nbfi_transport_packet_t* pkt)
 {
+    nbfi_transport_packet_t* pointer;
     for(uint8_t i = 0; i != NBFI_RX_PKTBUF_SIZE; i++)
     {
-        if(nbfi_RX_pktBuf[i] != pkt) continue;
-        free(pkt);
+        pointer = NBFi_Get_RX_Packet_Ptr(i);
+        if(pointer != pkt) continue;
+        #ifdef NBFI_USE_MALLOC
+        free(pointer);
         nbfi_RX_pktBuf[i] = 0;
+        #else
+        pkt->state = PACKET_FREE;
+        #endif 
     }
 
 }
 
 uint8_t NBFi_Packets_To_Send()
 {
+    nbfi_transport_packet_t* pointer;
+    
     uint8_t packets_free = 0;
-
+    
     for(uint16_t i = nbfi_TXbuf_head; i != (nbfi_TXbuf_head + NBFI_TX_PKTBUF_SIZE); i++)
     {
         uint8_t ptr = i%NBFI_TX_PKTBUF_SIZE;
-        if(nbfi_TX_pktBuf[ptr] == 0)
+        
+        pointer = NBFi_Get_TX_Packet_Ptr(ptr);
+        
+        if(pointer == 0)
         {
             packets_free++;
             continue;
         }
-        switch(nbfi_TX_pktBuf[ptr]->state )
+        switch(pointer->state )
         {
         case PACKET_WAIT_ACK:
-            if(nbfi_TX_pktBuf[ptr] == nbfi_active_pkt) break;
-             nbfi_TX_pktBuf[ptr]->state = PACKET_QUEUED_AGAIN;
+            if(pointer == nbfi_active_pkt) break;
+             pointer->state = PACKET_QUEUED_AGAIN;
         case PACKET_QUEUED:
         case PACKET_QUEUED_AGAIN:
         case PACKET_NEED_TO_SEND_RIGHT_NOW:
@@ -200,39 +284,47 @@ uint8_t NBFi_Packets_To_Send()
 
 void NBFi_Close_Active_Packet()
 {
+  
+    nbfi_transport_packet_t* pointer;
+    
     nbfi_active_pkt->state = PACKET_LOST;
     
     for(uint8_t i = nbfi_TXbuf_head - NBFI_TX_PKTBUF_SIZE; i != nbfi_TXbuf_head; i++)
     {
         uint8_t ptr = i%NBFI_TX_PKTBUF_SIZE;
-        if(nbfi_TX_pktBuf[ptr] == 0) continue;
-        if(nbfi_TX_pktBuf[ptr]->state == PACKET_SENT_NOACKED) nbfi_TX_pktBuf[ptr]->state = PACKET_LOST;
+        pointer = NBFi_Get_TX_Packet_Ptr(ptr);        
+        if(pointer == 0) continue;
+        if(pointer->state == PACKET_SENT_NOACKED) pointer->state = PACKET_LOST;
     }
 }
 
 uint8_t NBFi_Calc_Packets_With_State(uint8_t state)
 {
+    nbfi_transport_packet_t* pointer;
     uint8_t num = 0;
     for(uint8_t i = nbfi_TXbuf_head - NBFI_TX_PKTBUF_SIZE; i != nbfi_TXbuf_head; i++)
     {
         uint8_t ptr = i%NBFI_TX_PKTBUF_SIZE;
-        if(nbfi_TX_pktBuf[ptr] == 0) continue;
-        if(nbfi_TX_pktBuf[ptr]->state == state) num++;
+        pointer = NBFi_Get_TX_Packet_Ptr(ptr); 
+        if(pointer == 0) continue;
+        if(pointer->state == state) num++;
     }
     return num;
 }
 
 uint8_t NBFi_Calc_Queued_Sys_Packets_With_Type(uint8_t type)
 {
+    nbfi_transport_packet_t* pointer;
     uint8_t num = 0;
     for(uint8_t i = nbfi_TXbuf_head - NBFI_TX_PKTBUF_SIZE; i != nbfi_TXbuf_head; i++)
     {
         uint8_t ptr = i%NBFI_TX_PKTBUF_SIZE;
-        if(nbfi_TX_pktBuf[ptr] == 0) continue;
-        if(!nbfi_TX_pktBuf[ptr]->phy_data.SYS) continue;
-        if(nbfi_TX_pktBuf[ptr]->phy_data.payload[0] != type) continue;
+        pointer = NBFi_Get_TX_Packet_Ptr(ptr);
+        if(pointer == 0) continue;
+        if(!pointer->phy_data.SYS) continue;
+        if(pointer->phy_data.payload[0] != type) continue;
 
-        switch(nbfi_TX_pktBuf[ptr]->state )
+        switch(pointer->state )
         {
         case PACKET_WAIT_ACK:
         case PACKET_QUEUED:
@@ -249,25 +341,27 @@ uint8_t NBFi_Calc_Queued_Sys_Packets_With_Type(uint8_t type)
 
 nbfi_transport_packet_t* NBFi_GetSentTXPkt_By_Iter(uint8_t iter)
 {
-
+    nbfi_transport_packet_t* pointer;
+    
     for(uint8_t i = (nbfi_TXbuf_head) - 1; i != (uint8_t)(nbfi_TXbuf_head  - NBFI_TX_PKTBUF_SIZE - 1); i--)
     {
         uint8_t ptr = i%NBFI_TX_PKTBUF_SIZE;
-        if(nbfi_TX_pktBuf[ptr] == 0) continue;
-        if(nbfi_TX_pktBuf[ptr]->phy_data.SYS && (nbfi_TX_pktBuf[ptr]->phy_data.payload[0] != SYSTEM_PACKET_GROUP_START_OLD)&&(nbfi_TX_pktBuf[ptr]->phy_data.payload[0] != SYSTEM_PACKET_GROUP_START)&& !(nbfi_TX_pktBuf[ptr]->phy_data.payload[0] & 0x80))
+        pointer = NBFi_Get_TX_Packet_Ptr(ptr);
+        if(pointer == 0) continue;
+        if(pointer->phy_data.SYS && (pointer->phy_data.payload[0] != SYSTEM_PACKET_GROUP_START_OLD)&&(pointer->phy_data.payload[0] != SYSTEM_PACKET_GROUP_START)&& !(pointer->phy_data.payload[0] & 0x80))
         {
             continue;
         }
-        switch(nbfi_TX_pktBuf[ptr]->state)
+        switch(pointer->state)
         {
         case PACKET_SENT:
         case PACKET_SENT_NOACKED:
         case PACKET_WAIT_ACK:
         case PACKET_LOST:
         case PACKET_DELIVERED:
-            if(nbfi_TX_pktBuf[ptr]->phy_data.ITER == iter)
+            if(pointer->phy_data.ITER == iter)
             {
-                return nbfi_TX_pktBuf[ptr];
+                return pointer;
             }
             break;
         }
@@ -279,12 +373,15 @@ nbfi_transport_packet_t* NBFi_GetSentTXPkt_By_Iter(uint8_t iter)
 
 uint32_t NBFi_Get_RX_ACK_Mask()
 {
+  
+    nbfi_transport_packet_t* pointer;
     uint32_t mask = 0;
     uint32_t one = 1;
     for(uint8_t i = ((nbfi_state.DL_iter - 1)&0x1f); (i&0x1f) != (nbfi_state.DL_iter&0x1f); i-- , one <<= 1 )
     {
-        if(!nbfi_RX_pktBuf[i&0x1f]) continue;
-        switch(nbfi_RX_pktBuf[i&0x1f]->state)
+        pointer = NBFi_Get_RX_Packet_Ptr(i&0x1f);
+        if(!pointer) continue;
+        switch(pointer->state)
         {
             case PACKET_RECEIVED:
             case PACKET_PROCESSED:
@@ -299,7 +396,7 @@ uint32_t NBFi_Get_RX_ACK_Mask()
 
 _Bool NBFi_Check_RX_Packet_Duplicate(nbfi_transport_frame_t * pkt, uint8_t len)
 {
-    nbfi_transport_frame_t *rec_pkt = &nbfi_RX_pktBuf[nbfi_state.DL_iter&0x1f]->phy_data;
+    nbfi_transport_frame_t *rec_pkt = &(NBFi_Get_RX_Packet_Ptr(nbfi_state.DL_iter&0x1f)->phy_data);
 
     for(uint8_t i = 0; i != len; i++)
     {
@@ -320,7 +417,7 @@ nbfi_transport_packet_t* NBFi_Get_QueuedRXPkt(uint8_t *groupe, uint16_t *total_l
         *total_length = 0;
         uint8_t total_groupe_len = 0;
 
-        while((pkt = nbfi_RX_pktBuf[(i + *groupe)&0x1f]) && pkt->state == PACKET_RECEIVED)
+        while((pkt = NBFi_Get_RX_Packet_Ptr((i + *groupe)&0x1f)) && pkt->state == PACKET_RECEIVED)
         {
             if((*groupe) == 0)
             {
@@ -361,9 +458,9 @@ nbfi_transport_packet_t* NBFi_Get_QueuedRXPkt(uint8_t *groupe, uint16_t *total_l
 
         }
 
-        if((*groupe) && (nbfi_RX_pktBuf[(i + (*groupe) - 1)&0x1f]->state == PACKET_PROCESSING))
+        if((*groupe) && (NBFi_Get_RX_Packet_Ptr((i + (*groupe) - 1)&0x1f)->state == PACKET_PROCESSING))
         {
-            return nbfi_RX_pktBuf[i&0x1f];
+            return NBFi_Get_RX_Packet_Ptr(i&0x1f);
         }
 
     }
@@ -374,18 +471,24 @@ void NBFi_Clear_RX_Buffer()
 {
     for(uint8_t i = 0; i != NBFI_RX_PKTBUF_SIZE; i++ )
     {
-        if(nbfi_RX_pktBuf[i]->state != PACKET_RECEIVED) nbfi_RX_pktBuf[i]->state = PACKET_CLEARED;
+        if(NBFi_Get_RX_Packet_Ptr(i)->state != PACKET_RECEIVED) NBFi_Get_RX_Packet_Ptr(i)->state = PACKET_CLEARED;
     }
 }
 
 void NBFi_Clear_TX_Buffer()
 {
+    nbfi_transport_packet_t* pointer;
     for(uint8_t i = 0; i != NBFI_TX_PKTBUF_SIZE; i++ )
-    {
-        if(nbfi_TX_pktBuf[i])
+    {   
+        pointer = NBFi_Get_TX_Packet_Ptr(i);
+        if(pointer)
         {
-            free(nbfi_TX_pktBuf[i]);
+            #ifdef NBFI_USE_MALLOC
+            free(pointer);
             nbfi_TX_pktBuf[i] = 0;
+            #else
+            pointer->state = PACKET_FREE;
+            #endif 
         }
     }
     nbfi_active_pkt = &idle_pkt;

@@ -88,18 +88,21 @@ nbfi_status_t NBFi_Send(uint8_t* payload, uint8_t length)
     uint8_t groupe = 0;
     uint8_t len = length;
 
-    if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(1);
+    nbfi_lock = 1;
+    //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(1);
 
     uint8_t free = NBFI_TX_PKTBUF_SIZE - NBFi_Packets_To_Send();
 
     if((length <= nbfi.max_payload_len) && (free < nbfi.mack_mode + 3 ) ) 
     {
-      if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
+      //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
+      nbfi_lock = 0;
       return ERR_BUFFER_FULL;
     }
     else if((length/nbfi.max_payload_len + 3) > free) 
     {
-      if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
+      //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
+      nbfi_lock = 0;
       return ERR_BUFFER_FULL;
     }
     
@@ -108,7 +111,8 @@ nbfi_status_t NBFi_Send(uint8_t* payload, uint8_t length)
         packet =  NBFi_AllocateTxPkt(length + 1);
         if(!packet)
         {
-            if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
+            //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
+            nbfi_lock = 0;
             return ERR_BUFFER_FULL;
         }
         packet->phy_data.SYS = 1;
@@ -142,7 +146,8 @@ nbfi_status_t NBFi_Send(uint8_t* payload, uint8_t length)
         packet =  NBFi_AllocateTxPkt(l + first);
         if(!packet)
         {
-            if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
+            //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
+            nbfi_lock = 0;
             return ERR_BUFFER_FULL;
         }
         memcpy(packet->phy_data.payload + first, (void const*)&payload[groupe * nbfi.max_payload_len - 3*(groupe != 0)], l);
@@ -193,7 +198,8 @@ nbfi_status_t NBFi_Send(uint8_t* payload, uint8_t length)
     }while(length);
 
     NBFi_Force_process();
-    if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
+    nbfi_lock = 0;
+    //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
     return OK;
 }
 
@@ -211,13 +217,14 @@ void NBFi_ProcessRxPackets(_Bool external)
     while(1)
     {
 
-        if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(1);
-        
+        //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(1);
+        nbfi_lock = 1;
         pkt = NBFi_Get_QueuedRXPkt(&groupe, &total_length);
 
         if(!pkt)    
         {
-          if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
+          //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
+          nbfi_lock = 0;
           return;
         }
 
@@ -262,7 +269,8 @@ void NBFi_ProcessRxPackets(_Bool external)
             if(CRC8((unsigned char*)(&data[1]), (unsigned char)(total_length)) != data[0]) 
             {
                 NBFi_Clear_RX_Buffer();
-                if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
+                nbfi_lock = 0;
+                //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
                 return;
             }
             data_ptr = &data[1];
@@ -271,7 +279,8 @@ void NBFi_ProcessRxPackets(_Bool external)
         
         if(groupe > 1) NBFi_Wait_Extra_Handler(0);
 
-        if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
+        nbfi_lock = 0;
+        //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
 
         if(rx_handler) rx_handler(data_ptr, total_length);
 
@@ -389,10 +398,10 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
                     {
 
                         ack_pkt->phy_data.payload[0] = SYSTEM_PACKET_ACK_ON_SYS; //ACK on SYS
-                        ack_pkt->phy_data.payload[1] = phy_pkt->payload[0];//type of sys packet
-                        ack_pkt->phy_data.payload[2] = 0;
-                        ack_pkt->phy_data.payload[3] = 0;
-                        ack_pkt->phy_data.payload[4] = 0;
+                        ack_pkt->phy_data.payload[1] = (nbfi_state.bs_id >> 8);
+                        ack_pkt->phy_data.payload[2] = (nbfi_state.bs_id & 0xff);
+                        ack_pkt->phy_data.payload[3] = (nbfi_state.server_id >> 8);
+                        ack_pkt->phy_data.payload[4] = (nbfi_state.server_id & 0xff);
                         ack_pkt->phy_data.payload[5] = info->snr;
                         ack_pkt->phy_data.payload[6] = (uint8_t)(noise + 150);
                         ack_pkt->phy_data.payload[7] = you_should_dl_power_step_down + you_should_dl_power_step_up + (nbfi.tx_pwr & 0x3f); 

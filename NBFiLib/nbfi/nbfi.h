@@ -11,6 +11,7 @@
 #include "nbfi_rf.h"
 #include "nbfi_mac.h"
 #include "nbfi_crypto.h"
+#include "wtimer.h"
 
 enum nbfi_func_t
 {
@@ -40,14 +41,16 @@ extern void (* __nbfi_write_flash_settings)(nbfi_settings_t*);
 extern uint32_t (* __nbfi_measure_voltage_or_temperature)(uint8_t);
 extern uint32_t (* __nbfi_update_rtc)(void);
 extern void (* __nbfi_rtc_synchronized)(uint32_t);
-extern void (* __nbfi_lock_unlock_nbfi_irq)(uint8_t);
+//extern void (* __nbfi_lock_unlock_nbfi_irq)(uint8_t);
 extern void (* __nbfi_reset)(void);
 extern void (* __nbfi_get_iterator)(nbfi_crypto_iterator_t*);
 extern void (* __nbfi_set_iterator)(nbfi_crypto_iterator_t*);
 
+extern uint8_t nbfi_lock;
 
 void 	        NBFI_reg_func(uint8_t name, void*);
-void   NBFI_Init();
+void            NBFI_Init();
+void            NBFI_Main_Loop();
 void            NBFi_Go_To_Sleep(_Bool sleep);
 nbfi_status_t   NBFi_Send(uint8_t* payload, uint8_t length);
 void            NBFi_ProcessRxPackets(_Bool external);

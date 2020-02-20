@@ -574,7 +574,8 @@ void NBFi_Config_Set_FastDl(_Bool fast, _Bool save_settings)
   
     static nbfi_settings_t settings;
     static nbfi_state_t state; 
-    if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(1);
+    nbfi_lock = 1;
+    //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(1);
     
     if(fast)
     {
@@ -610,7 +611,8 @@ void NBFi_Config_Set_FastDl(_Bool fast, _Bool save_settings)
 
     if(rf_state == STATE_RX) NBFi_MAC_RX();
     
-    if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
+    nbfi_lock = 0;
+    //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
 }
 
 

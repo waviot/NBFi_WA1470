@@ -74,6 +74,7 @@ typedef enum
 typedef struct
 {
     nbfi_packet_state_t state;              //packet state
+    uint8_t             id;
     nbfi_handshake_t    handshake;          //packet handshake mode
     uint8_t             retry_num;          //retry counter
     uint8_t             mack_num;           //number of packets for multi ack mode
@@ -173,9 +174,7 @@ typedef enum
 {
     OK = 0,
     ERR = 1,
-    ERR_RF_BUSY = 2,
-    ERR_ACK_LOST = 3,
-    ERR_BUFFER_FULL = 4
+    ERR_RF_BUSY = 2
 }nbfi_status_t;
 
 
@@ -254,6 +253,25 @@ typedef struct
   nbfi_freq_plan_t fp;
 } NBFi_station_info_s;
 
-typedef void (*rx_handler_t)(uint8_t*, uint16_t);
+
+typedef enum
+{
+  QUEUED = 1,
+  INPROCESS = 2,
+  DELIVERED = 3,
+  LOST = 4,
+  ERR_BUFFER_FULL = 5,
+  ERR_PACKET_IS_TOO_LONG = 6    
+}nbfi_ul_status_t;
+
+typedef struct
+{
+  uint16_t id;
+  nbfi_ul_status_t status;
+  uint8_t reported;
+}nbfi_ul_sent_status_t;
+
+
+//typedef void (*rx_handler_t)(uint8_t*, uint16_t);
 
 #endif //NBFI_TYPES_H

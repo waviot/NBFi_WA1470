@@ -469,7 +469,9 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         if(buf[2] != 0xff) nbfi.mack_mode = (nbfi_mack_mode_t)buf[2];
                         break;
                     case NBFI_PARAM_MAXLEN:
+                        #ifdef NBFI_USE_MALLOC
                         nbfi.max_payload_len = buf[1];
+                        #endif
                         break;
                     case NBFI_PARAM_TXFREQ:
                         bigendian_cpy(&buf[1], (uint8_t*)&nbfi.tx_freq, 4);
@@ -653,6 +655,10 @@ void NBFi_ReadConfig()
 read_default:
 
 	if(__nbfi_read_default_settings) __nbfi_read_default_settings(&nbfi);
+        
+#ifndef NBFI_USE_MALLOC
+    nbfi.max_payload_len = NBFI_PACKET_SIZE;
+#endif
 
 }
 

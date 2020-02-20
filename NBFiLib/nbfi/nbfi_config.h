@@ -50,7 +50,7 @@ extern uint8_t current_rx_rate;
 
 
 
-extern nbfi_dev_info_t dev_info;
+//extern nbfi_dev_info_t dev_info;
 
 //BAND IDs
 #define UL868800_DL446000            0

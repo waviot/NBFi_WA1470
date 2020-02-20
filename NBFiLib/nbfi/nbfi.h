@@ -19,6 +19,7 @@ enum nbfi_func_t
     NBFI_BEFORE_TX,
     NBFI_BEFORE_RX,
     NBFI_BEFORE_OFF,
+    NBFI_SEND_COMPLETE,
     NBFI_RECEIVE_COMLETE,
     NBFI_READ_DEFAULT_SETTINGS,
     NBFI_READ_FLASH_SETTINGS,
@@ -35,6 +36,8 @@ enum nbfi_func_t
 extern void (* __nbfi_before_tx)();
 extern void (* __nbfi_before_rx)();
 extern void (* __nbfi_before_off)();
+extern void (*__nbfi_send_status_handler)(nbfi_ul_sent_status_t);
+extern void (*__nbfi_rx_handler)(uint8_t*, uint16_t);
 extern void (* __nbfi_read_default_settings)(nbfi_settings_t*);
 extern void (* __nbfi_read_flash_settings)(nbfi_settings_t*);
 extern void (* __nbfi_write_flash_settings)(nbfi_settings_t*);
@@ -50,9 +53,10 @@ extern uint8_t nbfi_lock;
 
 void 	        NBFI_reg_func(uint8_t name, void*);
 void            NBFI_Init();
-void            NBFI_Main_Loop();
+void            NBFI_Main_Level_Loop();
+void            NBFI_Interrupt_Level_Loop();
 void            NBFi_Go_To_Sleep(_Bool sleep);
-nbfi_status_t   NBFi_Send(uint8_t* payload, uint8_t length);
+nbfi_ul_sent_status_t   NBFi_Send(uint8_t* payload, uint8_t length);
 void            NBFi_ProcessRxPackets(_Bool external);
 uint8_t         NBFi_Packets_To_Send();
 nbfi_state_t*   NBFi_get_state();

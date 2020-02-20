@@ -2861,11 +2861,17 @@
         <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470rfe.h</name>
       </file>
     </group>
+    <file>
+      <name>$PROJ_DIR$\..\NBFiLib\nbfi\plot_spectrum.h</name>
+    </file>
   </group>
   <group>
     <name>src</name>
     <file>
       <name>$PROJ_DIR$\Src\main.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\NBFiLib\nbfi\plot_spectrum.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\Src\radio.c</name>

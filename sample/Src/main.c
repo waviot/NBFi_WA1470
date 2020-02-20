@@ -6,10 +6,6 @@
 #include "defines.h"
 
 struct wtimer_desc test_desc;
-struct wtimer_desc spectrum_desc;
-
-extern void (*__wa1470_enable_pin_irq)(void);
-extern void (*__wa1470_disable_pin_irq)(void);
 
 void send_data(struct wtimer_desc *desc) {
  
@@ -65,27 +61,30 @@ void send_data(struct wtimer_desc *desc) {
        
     ScheduleTask(&test_desc, send_data, RELATIVE, SECONDS(1));
 
-
 #endif
 }
 
-#ifdef PLOT_SPECTRUM
-void plot_spectrum(struct wtimer_desc *desc) {
 
-  log_print_spectrum(32); 
-  ScheduleTask(desc, 0, RELATIVE, MILLISECONDS(500));
-}
-#endif
-
-//extern uint8_t nbfi_lock;
-uint32_t systick_timer = 0;
 void HAL_SYSTICK_Callback(void)
 {
-  systick_timer++;
-  NBFI_Main_Loop();
+  NBFI_Interrupt_Level_Loop();
 }
 
-extern uint16_t rfe_rx_total_vga_gain;
+void nbfi_send_complete(nbfi_ul_sent_status_t ul)
+{
+    char log_string[256];
+    sprintf(log_string, "UL #%d %s", ul.id, (ul.status == DELIVERED)?"DELIVERED":"LOST");
+    log_send_str(log_string);   
+}
+
+void nbfi_receive_complete(uint8_t * data, uint16_t length)
+{
+    char log_string[256];
+    sprintf(log_string, "DL of %d bytes received", length);
+    NBFi_Send(data, length); //loopback
+}
+
+
 int main(void)
 {
         
@@ -94,6 +93,7 @@ int main(void)
   SystemClock_Config();
   
   MX_GPIO_Init();
+ 
   ADC_init();
   
   radio_init();
@@ -101,65 +101,18 @@ int main(void)
   log_init();
   
   ScheduleTask(&test_desc, send_data, RELATIVE, SECONDS(1));
-    
-  //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_8, GPIO_PIN_SET);
-  //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_11, GPIO_PIN_RESET);
-  
+     
   
   while (1) 
   {     
       //NBFi_ProcessRxPackets(1);
       
       #ifdef PLOT_SPECTRUM
-      
-      char log_string[256];
-      
-      if(!RS485_UART_is_empty())
-      {
-        switch(RS485_UART_get())
-        {
-        case 0x2c:
-          wa1470rfe_set_rx_gain(rfe_rx_total_vga_gain + 3);
-          sprintf(log_string, "VGA gain increased to %d dB", rfe_rx_total_vga_gain);
-          log_send_str(log_string);
-          break;
-        case 0x1b:
-          wa1470rfe_set_rx_gain(rfe_rx_total_vga_gain - 3);
-          sprintf(log_string, "VGA gain reduced to %d dB", rfe_rx_total_vga_gain);
-          log_send_str(log_string);
-          break;
-        case 's':
-          log_print_spectrum();
-          break;
-        case 'a':
-          ScheduleTask(&spectrum_desc, plot_spectrum, RELATIVE, MILLISECONDS(50));
-          break;
-        case 'z':
-          wtimer0_remove(&spectrum_desc);
-          break;  
-        case '5':
-          wa1470dem_set_bitrate(DBPSK_50_PROT_D);
-          //log_send_str_len("Switched to DBPSK_50_PROT_D\n\r", sizeof("Switched to DBPSK_50_PROT_D\n\r"));          
-          break;
-        case '4':
-          wa1470dem_set_bitrate(DBPSK_400_PROT_D);
-          //log_send_str_len("Switched to DBPSK_400_PROT_D\n\r", sizeof("Switched to DBPSK_400_PROT_D\n\r"));
-          break;
-        case '3':
-          wa1470dem_set_bitrate(DBPSK_3200_PROT_D);
-          //log_send_str_len("Switched to DBPSK_3200_PROT_D\n\r", sizeof("Switched to DBPSK_3200_PROT_D\n\r"));
-          break;
-        case '2':
-          wa1470dem_set_bitrate(DBPSK_25600_PROT_D);
-          //log_send_str_len("Switched to DBPSK_25600_PROT_D\n\r", sizeof("Switched to DBPSK_25600_PROT_D\n\r"));               
-          break;
-        case '1':
-          wa1470dem_set_bitrate(DBPSK_100H_PROT_D);
-         // log_send_str_len("Switched to DBPSK_100H_PROT_D\n\r", sizeof("Switched to DBPSK_100H_PROT_D\n\r"));
-          break;
-        }
-      }
+      plot_spectrum();
       #endif
+      
+     // NBFI_Main_Level_Loop();
+      
       if (wa1470_cansleep()&& NBFi_can_sleep()) 
       {
           //HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_SLEEPENTRY_WFI);

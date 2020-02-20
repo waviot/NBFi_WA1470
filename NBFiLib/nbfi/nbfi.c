@@ -3,6 +3,8 @@
 void (* __nbfi_before_tx)() = 0;
 void (* __nbfi_before_rx)() = 0;
 void (* __nbfi_before_off)() = 0;
+void (*__nbfi_send_status_handler)(nbfi_ul_sent_status_t) = 0;
+void (*__nbfi_rx_handler)(uint8_t*, uint16_t) = 0;
 void (* __nbfi_read_default_settings)(nbfi_settings_t*) = 0;
 void (* __nbfi_read_flash_settings)(nbfi_settings_t*)  = 0;
 void (* __nbfi_write_flash_settings)(nbfi_settings_t*) = 0;
@@ -31,8 +33,11 @@ void NBFI_reg_func(uint8_t name, void* fn)
         case NBFI_BEFORE_OFF:
 		__nbfi_before_off = (void(*)(void))fn;
 		break;
+        case NBFI_SEND_COMPLETE:
+		__nbfi_send_status_handler = (void(*)(nbfi_ul_sent_status_t))fn;
+		break;             
 	case NBFI_RECEIVE_COMLETE:
-		rx_handler = (rx_handler_t)fn;
+		__nbfi_rx_handler = (void(*)(uint8_t*, uint16_t))fn;
 		break;
 	case NBFI_READ_DEFAULT_SETTINGS:
 		__nbfi_read_default_settings = (void(*)(nbfi_settings_t*))fn;
@@ -75,8 +80,26 @@ void NBFI_Init()
     NBFI_Transport_Init();
 }
 
+
+//call this function in main loop 
+void  NBFI_Main_Level_Loop()
+{
+    if(__nbfi_send_status_handler == 0) return;  
+    nbfi_ul_sent_status_t* ul;
+    while(1)
+    {
+      nbfi_lock = 1;
+      ul = NBFi_Get_Next_Unreported_UL(DELIVERED);
+      if(ul == 0) ul = NBFi_Get_Next_Unreported_UL(LOST);
+      nbfi_lock = 0;
+      if(ul) __nbfi_send_status_handler(*ul);
+      else return;
+    }
+}
+
+
 //call this function at least 1 time per 1ms
-void   NBFI_Main_Loop()
+void   NBFI_Interrupt_Level_Loop()
 {
   if(!nbfi_lock) 
   {

@@ -12,7 +12,7 @@ nbfi_state_t nbfi_state = {0,0,0,0,0,0,0,0,0,0,0,0,0};
 #define DRXLISTENAFTERSEND  20
 #define WAITALITTLEBIT  3000
 
-nbfi_transport_packet_t idle_pkt = {PACKET_FREE, HANDSHAKE_NONE, 0, 0, 0, {0,0} };
+nbfi_transport_packet_t idle_pkt = {PACKET_FREE, 0, HANDSHAKE_NONE, 0, 0, 0, {0,0} };
 nbfi_transport_packet_t* nbfi_active_pkt = &idle_pkt;
 nbfi_packet_state_t nbfi_active_pkt_old_state;
 
@@ -22,7 +22,7 @@ struct wtimer_desc dl_drx_desc;
 struct wtimer_desc wait_for_extra_desc;
 struct wtimer_desc nbfi_heartbeat_desc;
 
-rx_handler_t  rx_handler = 0;
+//rx_handler_t  rx_handler = 0;
 
 uint8_t not_acked = 0;
 
@@ -64,6 +64,9 @@ void NBFI_Transport_Init()
     for(uint8_t i = 0; i < NBFI_RX_PKTBUF_SIZE; i++) nbfi_RX_pktBuf[i].state = PACKET_FREE;
     #endif
     
+    for(uint8_t i = 0; i < NBFI_SENT_STATUSES_BUF_SIZE; i++) NBFi_sent_UL_stat_Buf[i].id = 0;
+
+    
     info_timer = dev_info.send_info_interval - 300 - rand()%600;
 
     if(nbfi.additional_flags&NBFI_OFF_MODE_ON_INIT)
@@ -87,39 +90,53 @@ void NBFI_Transport_Init()
 
 }
 
-nbfi_status_t NBFi_Send(uint8_t* payload, uint8_t length)
+nbfi_ul_sent_status_t NBFi_Send(uint8_t* payload, uint8_t length)
 {
     nbfi_transport_packet_t* packet;
     uint8_t groupe = 0;
     uint8_t len = length;
-
+    
+    nbfi_ul_sent_status_t err_status;
+    err_status.id = 0;
+    
+    nbfi_ul_sent_status_t* ul_status;
+    
+    
+       
+    if(length/nbfi.max_payload_len > 30) 
+    {
+      err_status.status = ERR_PACKET_IS_TOO_LONG;
+      return err_status;
+    }
+    
     nbfi_lock = 1;
-    //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(1);
-
     uint8_t free = NBFI_TX_PKTBUF_SIZE - NBFi_Packets_To_Send();
 
     if((length <= nbfi.max_payload_len) && (free < nbfi.mack_mode + 3 ) ) 
     {
-      //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
+      err_status.status = ERR_BUFFER_FULL;
       nbfi_lock = 0;
-      return ERR_BUFFER_FULL;
+      return err_status;
     }
     else if((length/nbfi.max_payload_len + 3) > free) 
     {
-      //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
+      err_status.status = ERR_BUFFER_FULL;
       nbfi_lock = 0;
-      return ERR_BUFFER_FULL;
+      return err_status;
     }
+    
+    ul_status = NBFi_Queue_Next_UL();
     
     if(length < nbfi.max_payload_len)
     {
         packet =  NBFi_AllocateTxPkt(length + 1);
         if(!packet)
         {
-            //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
-            nbfi_lock = 0;
-            return ERR_BUFFER_FULL;
+          err_status.status = ERR_BUFFER_FULL;
+          nbfi_lock = 0;
+          return err_status;
         }
+        packet->id = (ul_status->id&0xff);
         packet->phy_data.SYS = 1;
         packet->phy_data.payload[0] = 0x80 + (length & 0x7f);
         memcpy(&packet->phy_data.payload[1], (void const*)payload, length);
@@ -142,6 +159,7 @@ nbfi_status_t NBFi_Send(uint8_t* payload, uint8_t length)
     {
         uint8_t l;
         uint8_t first = 0;
+        
         if(length > nbfi.max_payload_len)
         {
             first = (groupe == 0)*3;
@@ -151,10 +169,11 @@ nbfi_status_t NBFi_Send(uint8_t* payload, uint8_t length)
         packet =  NBFi_AllocateTxPkt(l + first);
         if(!packet)
         {
-            //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
-            nbfi_lock = 0;
-            return ERR_BUFFER_FULL;
+          err_status.status = ERR_BUFFER_FULL;
+          nbfi_lock = 0;
+          return err_status;
         }
+        packet->id = (ul_status->id&0xff);
         memcpy(packet->phy_data.payload + first, (void const*)&payload[groupe * nbfi.max_payload_len - 3*(groupe != 0)], l);
         packet->state = PACKET_QUEUED;
         packet->handshake = nbfi.handshake_mode;
@@ -204,8 +223,7 @@ nbfi_status_t NBFi_Send(uint8_t* payload, uint8_t length)
 
     NBFi_Force_process();
     nbfi_lock = 0;
-    //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
-    return OK;
+    return *ul_status;
 }
 
 
@@ -287,7 +305,7 @@ void NBFi_ProcessRxPackets(_Bool external)
         nbfi_lock = 0;
         //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
 
-        if(rx_handler) rx_handler(data_ptr, total_length);
+        if(__nbfi_rx_handler) __nbfi_rx_handler(data_ptr, total_length);
 
     }
 
@@ -561,6 +579,7 @@ void NBFi_ProcessTasks(struct wtimer_desc *desc)
                 
 
                 if(wait_RxEnd) {wait_RxEnd = 0; wtimer0_remove(&dl_drx_desc);}
+                NBFi_Set_UL_Status(pkt->id, INPROCESS);
                 NBFi_MAC_TX(pkt);
 #ifdef NBFI_LOG
                 sprintf(log_string, "%05u: DL ", (uint16_t)(NBFi_get_RTC()&0xffff));
@@ -572,6 +591,7 @@ void NBFi_ProcessTasks(struct wtimer_desc *desc)
 
                 if(pkt->state == PACKET_SENT)
                 {
+                    NBFi_Set_UL_Status(pkt->id, DELIVERED);
                     NBFi_TxPacket_Free(pkt);
                     nbfi_active_pkt = &idle_pkt;
                 }
@@ -683,8 +703,9 @@ static void NBFi_Receive_Timeout_cb(struct wtimer_desc *desc)
     if(++nbfi_active_pkt->retry_num > NBFi_Get_Retry_Number())
     {
        //nbfi_active_pkt->state = PACKET_LOST;
+       NBFi_Set_UL_Status(nbfi_active_pkt->id, LOST);
        NBFi_Close_Active_Packet();
-       if(nbfi_active_pkt->phy_data.SYS && (nbfi_active_pkt->phy_data.payload[0] == SYSTEM_PACKET_SYNC)/* && (nbfi_active_pkt->phy_data.payload[1] != RATE_CHANGE_PARAM_CMD)*/)
+       if(nbfi_active_pkt->phy_data.SYS && (nbfi_active_pkt->phy_data.payload[0] == SYSTEM_PACKET_SYNC))
         {
             //NBFi_Mark_Lost_All_Unacked();
             NBFi_Config_Return(); //return to previous work configuration

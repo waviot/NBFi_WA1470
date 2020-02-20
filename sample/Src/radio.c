@@ -565,12 +565,23 @@ void nbfi_rtc_synchronized(uint32_t time)
 }
 
 
-void nbfi_receive_complete(uint8_t * data, uint16_t length)
+__weak void nbfi_send_complete(nbfi_ul_sent_status_t ul)
 {
 
- NBFi_Send(data, length); //loopback
-
+  /* NOTE : This function Should not be modified, when the callback is needed,
+            the nbfi_receive_complete could be implemented in the user file
+   */
 }
+
+__weak void nbfi_receive_complete(uint8_t * data, uint16_t length)
+{
+
+  /* NOTE : This function Should not be modified, when the callback is needed,
+            the nbfi_receive_complete could be implemented in the user file
+   */
+}
+
+
 
 //uint8_t nbfi_lock = 1;
 
@@ -632,6 +643,7 @@ void radio_init(void)
 	NBFI_reg_func(NBFI_BEFORE_TX, (void*)nbfi_before_tx);
 	NBFI_reg_func(NBFI_BEFORE_RX, (void*)nbfi_before_rx);
 	NBFI_reg_func(NBFI_BEFORE_OFF, (void*)nbfi_before_off);
+        NBFI_reg_func(NBFI_SEND_COMPLETE, (void*)nbfi_send_complete);
 	NBFI_reg_func(NBFI_RECEIVE_COMLETE, (void*)nbfi_receive_complete);
 	NBFI_reg_func(NBFI_READ_FLASH_SETTINGS, (void*)nbfi_read_flash_settings);
 	NBFI_reg_func(NBFI_WRITE_FLASH_SETTINGS, (void*)nbfi_write_flash_settings);

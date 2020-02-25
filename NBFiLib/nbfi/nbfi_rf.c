@@ -124,7 +124,7 @@ nbfi_status_t NBFi_RF_Transmit(uint8_t* pkt, uint8_t len, nbfi_phy_channel_t  ph
         while(1) // Wait for TX complete
         {
             if(!transmit) break;
-            wtimer_runcallbacks();
+            scheduler_run_callbacks();
         }
 
     }

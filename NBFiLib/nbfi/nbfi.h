@@ -11,7 +11,7 @@
 #include "nbfi_rf.h"
 #include "nbfi_mac.h"
 #include "nbfi_crypto.h"
-#include "wtimer.h"
+#include "scheduler.h"
 
 enum nbfi_func_t
 {
@@ -19,6 +19,7 @@ enum nbfi_func_t
     NBFI_BEFORE_TX,
     NBFI_BEFORE_RX,
     NBFI_BEFORE_OFF,
+    NBFI_LOCK_UNLOCK_LOOP_IRQ,
     NBFI_SEND_COMPLETE,
     NBFI_RECEIVE_COMLETE,
     NBFI_READ_DEFAULT_SETTINGS,
@@ -27,7 +28,6 @@ enum nbfi_func_t
     NBFI_MEASURE_VOLTAGE_OR_TEMPERATURE,
     NBFI_UPDATE_RTC,
     NBFI_RTC_SYNCHRONIZED,
-    NBFI_LOCKUNLOCKNBFIIRQ,
     NBFI_RESET,
     NBFI_GET_ITERATOR,
     NBFI_SET_ITERATOR,
@@ -36,6 +36,7 @@ enum nbfi_func_t
 extern void (* __nbfi_before_tx)();
 extern void (* __nbfi_before_rx)();
 extern void (* __nbfi_before_off)();
+extern void (* __nbfi_lock_unlock_loop_irq)(uint8_t);
 extern void (*__nbfi_send_status_handler)(nbfi_ul_sent_status_t);
 extern void (*__nbfi_rx_handler)(uint8_t*, uint16_t);
 extern void (* __nbfi_read_default_settings)(nbfi_settings_t*);
@@ -44,12 +45,12 @@ extern void (* __nbfi_write_flash_settings)(nbfi_settings_t*);
 extern uint32_t (* __nbfi_measure_voltage_or_temperature)(uint8_t);
 extern uint32_t (* __nbfi_update_rtc)(void);
 extern void (* __nbfi_rtc_synchronized)(uint32_t);
-//extern void (* __nbfi_lock_unlock_nbfi_irq)(uint8_t);
 extern void (* __nbfi_reset)(void);
 extern void (* __nbfi_get_iterator)(nbfi_crypto_iterator_t*);
 extern void (* __nbfi_set_iterator)(nbfi_crypto_iterator_t*);
 
-extern uint8_t nbfi_lock;
+#define NBFI_LOCK       1
+#define NBFI_UNLOCK     0
 
 void 	        NBFI_reg_func(uint8_t name, void*);
 void            NBFI_Init();

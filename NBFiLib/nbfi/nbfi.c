@@ -3,6 +3,7 @@
 void (* __nbfi_before_tx)() = 0;
 void (* __nbfi_before_rx)() = 0;
 void (* __nbfi_before_off)() = 0;
+void (* __nbfi_lock_unlock_loop_irq)(uint8_t);
 void (*__nbfi_send_status_handler)(nbfi_ul_sent_status_t) = 0;
 void (*__nbfi_rx_handler)(uint8_t*, uint16_t) = 0;
 void (* __nbfi_read_default_settings)(nbfi_settings_t*) = 0;
@@ -11,13 +12,10 @@ void (* __nbfi_write_flash_settings)(nbfi_settings_t*) = 0;
 uint32_t (* __nbfi_measure_voltage_or_temperature)(uint8_t) = 0;
 uint32_t (* __nbfi_update_rtc)(void) = 0;
 void (* __nbfi_rtc_synchronized)(uint32_t) = 0;
-//void (* __nbfi_lock_unlock_nbfi_irq)(uint8_t) = 0;
 void (* __nbfi_reset)(void) = 0;
 void (* __nbfi_get_iterator)(nbfi_crypto_iterator_t*) = 0;
 void (* __nbfi_set_iterator)(nbfi_crypto_iterator_t*) = 0;
 
-
-uint8_t nbfi_lock = 1;
 
 
 void NBFI_reg_func(uint8_t name, void* fn)
@@ -33,6 +31,9 @@ void NBFI_reg_func(uint8_t name, void* fn)
         case NBFI_BEFORE_OFF:
 		__nbfi_before_off = (void(*)(void))fn;
 		break;
+        case NBFI_LOCK_UNLOCK_LOOP_IRQ:
+                __nbfi_lock_unlock_loop_irq = (void(*)(uint8_t))fn;
+                break;
         case NBFI_SEND_COMPLETE:
 		__nbfi_send_status_handler = (void(*)(nbfi_ul_sent_status_t))fn;
 		break;             
@@ -57,9 +58,6 @@ void NBFI_reg_func(uint8_t name, void* fn)
 	case NBFI_RTC_SYNCHRONIZED:
 		__nbfi_rtc_synchronized = (void(*)(uint32_t))fn;
 		break;
-//	case NBFI_LOCKUNLOCKNBFIIRQ:
-//		__nbfi_lock_unlock_nbfi_irq = (void(*)(uint8_t))fn;
-//		break; 
 	case NBFI_RESET:
 		__nbfi_reset = (void(*)(void))fn;
 		break;
@@ -84,14 +82,15 @@ void NBFI_Init()
 //call this function in main loop 
 void  NBFI_Main_Level_Loop()
 {
+    NBFi_ProcessRxPackets(1);
     if(__nbfi_send_status_handler == 0) return;  
     nbfi_ul_sent_status_t* ul;
     while(1)
     {
-      nbfi_lock = 1;
+      __nbfi_lock_unlock_loop_irq(NBFI_LOCK);
       ul = NBFi_Get_Next_Unreported_UL(DELIVERED);
       if(ul == 0) ul = NBFi_Get_Next_Unreported_UL(LOST);
-      nbfi_lock = 0;
+      __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
       if(ul) __nbfi_send_status_handler(*ul);
       else return;
     }
@@ -99,12 +98,15 @@ void  NBFI_Main_Level_Loop()
 
 
 //call this function at least 1 time per 1ms
+
+//#define AX_BPSK_PIN_GPIO_Port 	        GPIOB
+//#define AX_BPSK_PIN_Pin 		GPIO_PIN_12
+
 void   NBFI_Interrupt_Level_Loop()
 {
-  if(!nbfi_lock) 
-  {
-      wtimer_runcallbacks();
-  }
+  //HAL_GPIO_WritePin(AX_BPSK_PIN_GPIO_Port, AX_BPSK_PIN_Pin, GPIO_PIN_SET);
+  scheduler_run_callbacks();
+  //HAL_GPIO_WritePin(AX_BPSK_PIN_GPIO_Port, AX_BPSK_PIN_Pin, GPIO_PIN_RESET);    
 }
 
 void NBFi_Go_To_Sleep(_Bool sleep)
@@ -133,13 +135,9 @@ void NBFi_Go_To_Sleep(_Bool sleep)
 
 uint8_t NBFi_can_sleep()
 {
-  nbfi_lock = 1;
-  //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(1);
-   
+  __nbfi_lock_unlock_loop_irq(NBFI_LOCK);
   uint8_t can = (!rf_busy) && (rf_state == STATE_OFF) && (NBFi_Packets_To_Send() == 0);
-  
-  //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
-  nbfi_lock = 0;
+  __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
   return can;
 }
 

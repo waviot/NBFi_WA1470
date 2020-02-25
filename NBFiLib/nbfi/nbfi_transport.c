@@ -1,6 +1,5 @@
 #include "nbfi.h"
 #include <stdlib.h>
-#include <wtimer.h>
 #include <string.h>
 
 #ifdef NBFI_LOG
@@ -16,13 +15,12 @@ nbfi_transport_packet_t idle_pkt = {PACKET_FREE, 0, HANDSHAKE_NONE, 0, 0, 0, {0,
 nbfi_transport_packet_t* nbfi_active_pkt = &idle_pkt;
 nbfi_packet_state_t nbfi_active_pkt_old_state;
 
-struct wtimer_desc nbfi_processTask_desc;
-struct wtimer_desc dl_receive_desc;
-struct wtimer_desc dl_drx_desc;
-struct wtimer_desc wait_for_extra_desc;
-struct wtimer_desc nbfi_heartbeat_desc;
+struct scheduler_desc nbfi_processTask_desc;
+struct scheduler_desc dl_receive_desc;
+struct scheduler_desc dl_drx_desc;
+struct scheduler_desc wait_for_extra_desc;
+struct scheduler_desc nbfi_heartbeat_desc;
 
-//rx_handler_t  rx_handler = 0;
 
 uint8_t not_acked = 0;
 
@@ -44,14 +42,15 @@ uint32_t nbfi_rtc = 0;
 _Bool process_rx_external = 0;
 
 
-static void    NBFi_Receive_Timeout_cb(struct wtimer_desc *desc);
-static void    NBFi_RX_DL_EndHandler(struct wtimer_desc *desc);
-static void    NBFi_Wait_Extra_Handler(struct wtimer_desc *desc);
-static void    NBFi_SendHeartBeats(struct wtimer_desc *desc);
+static void    NBFi_Receive_Timeout_cb(struct scheduler_desc *desc);
+static void    NBFi_RX_DL_EndHandler(struct scheduler_desc *desc);
+static void    NBFi_Wait_Extra_Handler(struct scheduler_desc *desc);
+static void    NBFi_SendHeartBeats(struct scheduler_desc *desc);
 static nbfi_status_t NBFi_RX_Controller();
 static uint32_t NBFI_PhyToDL_ListenTime(nbfi_phy_channel_t chan);
 static uint32_t NBFI_PhyToDL_Delay(nbfi_phy_channel_t chan);
 static uint32_t NBFI_PhyToDL_AddRndListenTime(nbfi_phy_channel_t chan);
+
 
 void NBFI_Transport_Init()
 {
@@ -72,7 +71,7 @@ void NBFI_Transport_Init()
     if(nbfi.additional_flags&NBFI_OFF_MODE_ON_INIT)
     {
       NBFi_Go_To_Sleep(1);
-      ScheduleTask(&nbfi_heartbeat_desc, NBFi_SendHeartBeats, RELATIVE, SECONDS(60));
+      scheduler_add_task(&nbfi_heartbeat_desc, NBFi_SendHeartBeats, RELATIVE, SECONDS(60));
     }
     else
     {
@@ -85,10 +84,12 @@ void NBFI_Transport_Init()
 
       NBFi_Force_process();
       __nbfi_measure_voltage_or_temperature(1);
-      ScheduleTask(&nbfi_heartbeat_desc, NBFi_SendHeartBeats, RELATIVE, SECONDS(1));
+      scheduler_add_task(&nbfi_heartbeat_desc, NBFi_SendHeartBeats, RELATIVE, SECONDS(1));
     }
 
 }
+
+
 
 nbfi_ul_sent_status_t NBFi_Send(uint8_t* payload, uint8_t length)
 {
@@ -100,8 +101,7 @@ nbfi_ul_sent_status_t NBFi_Send(uint8_t* payload, uint8_t length)
     err_status.id = 0;
     
     nbfi_ul_sent_status_t* ul_status;
-    
-    
+        
        
     if(length/nbfi.max_payload_len > 30) 
     {
@@ -109,19 +109,19 @@ nbfi_ul_sent_status_t NBFi_Send(uint8_t* payload, uint8_t length)
       return err_status;
     }
     
-    nbfi_lock = 1;
+    __nbfi_lock_unlock_loop_irq(NBFI_LOCK);
     uint8_t free = NBFI_TX_PKTBUF_SIZE - NBFi_Packets_To_Send();
 
     if((length <= nbfi.max_payload_len) && (free < nbfi.mack_mode + 3 ) ) 
     {
       err_status.status = ERR_BUFFER_FULL;
-      nbfi_lock = 0;
+      __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
       return err_status;
     }
     else if((length/nbfi.max_payload_len + 3) > free) 
     {
       err_status.status = ERR_BUFFER_FULL;
-      nbfi_lock = 0;
+      __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
       return err_status;
     }
     
@@ -133,7 +133,7 @@ nbfi_ul_sent_status_t NBFi_Send(uint8_t* payload, uint8_t length)
         if(!packet)
         {
           err_status.status = ERR_BUFFER_FULL;
-          nbfi_lock = 0;
+          __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
           return err_status;
         }
         packet->id = (ul_status->id&0xff);
@@ -170,7 +170,7 @@ nbfi_ul_sent_status_t NBFi_Send(uint8_t* payload, uint8_t length)
         if(!packet)
         {
           err_status.status = ERR_BUFFER_FULL;
-          nbfi_lock = 0;
+          __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
           return err_status;
         }
         packet->id = (ul_status->id&0xff);
@@ -222,7 +222,7 @@ nbfi_ul_sent_status_t NBFi_Send(uint8_t* payload, uint8_t length)
     }while(length);
 
     NBFi_Force_process();
-    nbfi_lock = 0;
+    __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
     return *ul_status;
 }
 
@@ -240,14 +240,12 @@ void NBFi_ProcessRxPackets(_Bool external)
     while(1)
     {
 
-        //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(1);
-        nbfi_lock = 1;
+        __nbfi_lock_unlock_loop_irq(NBFI_LOCK);
         pkt = NBFi_Get_QueuedRXPkt(&groupe, &total_length);
 
         if(!pkt)    
         {
-          //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
-          nbfi_lock = 0;
+          __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
           return;
         }
 
@@ -292,8 +290,7 @@ void NBFi_ProcessRxPackets(_Bool external)
             if(CRC8((unsigned char*)(&data[1]), (unsigned char)(total_length)) != data[0]) 
             {
                 NBFi_Clear_RX_Buffer();
-                nbfi_lock = 0;
-                //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
+                __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
                 return;
             }
             data_ptr = &data[1];
@@ -302,9 +299,8 @@ void NBFi_ProcessRxPackets(_Bool external)
         
         if(groupe > 1) NBFi_Wait_Extra_Handler(0);
 
-        nbfi_lock = 0;
-        //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
-
+        __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+       
         if(__nbfi_rx_handler) __nbfi_rx_handler(data_ptr, total_length);
 
     }
@@ -331,7 +327,7 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
 
     if(wait_Extra) 
     {
-      wtimer0_remove(&wait_for_extra_desc);
+      scheduler_remove_task(&wait_for_extra_desc);
       wait_Extra = 0;
     }
 
@@ -353,7 +349,7 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
             case SYSTEM_PACKET_ACK_ON_SYS:    //ACK on system packet received
                 if(((nbfi_active_pkt->state == PACKET_WAIT_ACK) ) && (phy_pkt->ITER == nbfi_active_pkt->phy_data.ITER))
                 {
-                    wtimer0_remove(&dl_receive_desc);
+                    scheduler_remove_task(&dl_receive_desc);
                     wait_Receive = 0;
 
                     if(nbfi_active_pkt->mack_num == 0)
@@ -483,7 +479,7 @@ place_to_stack:
           nbfi_active_pkt_old_state = nbfi_active_pkt->state;
           nbfi_active_pkt->state = PACKET_WAIT_FOR_EXTRA_PACKETS;
         }
-        ScheduleTask(&wait_for_extra_desc, NBFi_Wait_Extra_Handler, RELATIVE, NBFI_PhyToDL_ListenTime(nbfi.rx_phy_channel));
+        scheduler_add_task(&wait_for_extra_desc, NBFi_Wait_Extra_Handler, RELATIVE, NBFI_PhyToDL_ListenTime(nbfi.rx_phy_channel));
         wait_Extra = 1;
     }
     else
@@ -499,7 +495,7 @@ place_to_stack:
         if(nbfi.mode == DRX)
         {
             wait_RxEnd = 1;
-            ScheduleTask(&dl_drx_desc, NBFi_RX_DL_EndHandler, RELATIVE, MILLISECONDS(WAITALITTLEBIT));
+            scheduler_add_task(&dl_drx_desc, NBFi_RX_DL_EndHandler, RELATIVE, MILLISECONDS(WAITALITTLEBIT));
         }
         
         NBFi_RX_Controller();
@@ -507,14 +503,14 @@ place_to_stack:
 
 }
 
-void NBFi_ProcessTasks(struct wtimer_desc *desc)
+void NBFi_ProcessTasks(struct scheduler_desc *desc)
 {
    nbfi_transport_packet_t* pkt;
    if(nbfi.mode == OFF)
    {
         NBFi_RX_Controller();
         NBFi_Clear_TX_Buffer();
-        ScheduleTask(desc, 0, RELATIVE, SECONDS(30));
+        scheduler_add_task(desc, 0, RELATIVE, SECONDS(30));
         return;
    }
    if((rf_busy == 0)&&(transmit == 0))
@@ -524,14 +520,14 @@ void NBFi_ProcessTasks(struct wtimer_desc *desc)
         case PACKET_WAIT_ACK:
             if(!wait_Receive)
             {
-                ScheduleTask(&dl_receive_desc, NBFi_Receive_Timeout_cb, RELATIVE, NBFI_PhyToDL_Delay(nbfi.tx_phy_channel) + NBFI_PhyToDL_ListenTime(nbfi.rx_phy_channel) + rand()%NBFI_PhyToDL_AddRndListenTime(nbfi.rx_phy_channel));
+                scheduler_add_task(&dl_receive_desc, NBFi_Receive_Timeout_cb, RELATIVE, NBFI_PhyToDL_Delay(nbfi.tx_phy_channel) + NBFI_PhyToDL_ListenTime(nbfi.rx_phy_channel) + rand()%NBFI_PhyToDL_AddRndListenTime(nbfi.rx_phy_channel));
                 wait_Receive = 1;
             }
             break;
         case PACKET_WAIT_FOR_EXTRA_PACKETS:
             if(!wait_Extra)
             {
-                ScheduleTask(&wait_for_extra_desc, NBFi_Wait_Extra_Handler, RELATIVE, NBFI_PhyToDL_ListenTime(nbfi.rx_phy_channel));
+                scheduler_add_task(&wait_for_extra_desc, NBFi_Wait_Extra_Handler, RELATIVE, NBFI_PhyToDL_ListenTime(nbfi.rx_phy_channel));
                 wait_Extra = 1;
             }
             break;
@@ -549,7 +545,7 @@ void NBFi_ProcessTasks(struct wtimer_desc *desc)
                         case DRX:
                         case CRX:
                             pkt->state = PACKET_WAIT_ACK;
-                            ScheduleTask(&dl_receive_desc, NBFi_Receive_Timeout_cb, RELATIVE, NBFI_PhyToDL_Delay(nbfi.tx_phy_channel) + NBFI_PhyToDL_ListenTime(nbfi.rx_phy_channel) + rand()%NBFI_PhyToDL_AddRndListenTime(nbfi.rx_phy_channel));                           
+                            scheduler_add_task(&dl_receive_desc, NBFi_Receive_Timeout_cb, RELATIVE, NBFI_PhyToDL_Delay(nbfi.tx_phy_channel) + NBFI_PhyToDL_ListenTime(nbfi.rx_phy_channel) + rand()%NBFI_PhyToDL_AddRndListenTime(nbfi.rx_phy_channel));                           
                             wait_Receive = 1;
                             break;
                         case NRX:
@@ -578,17 +574,18 @@ void NBFi_ProcessTasks(struct wtimer_desc *desc)
                 }
                 
 
-                if(wait_RxEnd) {wait_RxEnd = 0; wtimer0_remove(&dl_drx_desc);}
+                if(wait_RxEnd) {wait_RxEnd = 0; scheduler_remove_task(&dl_drx_desc);}
                 NBFi_Set_UL_Status(pkt->id, INPROCESS);
-                NBFi_MAC_TX(pkt);
+                
 #ifdef NBFI_LOG
-                sprintf(log_string, "%05u: DL ", (uint16_t)(NBFi_get_RTC()&0xffff));
+                sprintf(log_string, "%05u: DL ", (uint16_t)(scheduler_curr_time()&0xffff));
                 sprintf(log_string + strlen(log_string), " %c%c%c - %d - PLD:", pkt->phy_data.SYS?'S':' ', pkt->phy_data.ACK?'A':' ',pkt->phy_data.MULTI?'M':' ', pkt->phy_data.ITER&0x1f);
                 for(uint8_t k = 0; k != 8; k++) sprintf(log_string + strlen(log_string), "%02X", pkt->phy_data.payload[k]);
                 sprintf(log_string + strlen(log_string), " -    - %dBPS", NBFi_Phy_To_Bitrate(nbfi.tx_phy_channel));
                 log_send_str(log_string);
 #endif
-
+                NBFi_MAC_TX(pkt);
+                
                 if(pkt->state == PACKET_SENT)
                 {
                     NBFi_Set_UL_Status(pkt->id, DELIVERED);
@@ -615,10 +612,10 @@ void NBFi_ProcessTasks(struct wtimer_desc *desc)
     if(nbfi.mode <= DRX && !NBFi_GetQueuedTXPkt() && (rf_busy == 0) && (transmit == 0) )
     {
         NBFi_RX_Controller();
-        if(rf_state == STATE_OFF) ScheduleTask(desc, 0, RELATIVE, SECONDS(10));
-        else ScheduleTask(desc, 0, RELATIVE, MILLISECONDS(50));
+        if(rf_state == STATE_OFF) scheduler_add_task(desc, 0, RELATIVE, SECONDS(10));
+        else scheduler_add_task(desc, 0, RELATIVE, MILLISECONDS(50));
     }
-    else ScheduleTask(desc, 0, RELATIVE, MILLISECONDS(50));
+    else scheduler_add_task(desc, 0, RELATIVE, MILLISECONDS(50));
 
 }
 
@@ -634,7 +631,7 @@ void NBFi_TX_Finished()
         if(!nbfi_active_pkt->phy_data.ACK && (nbfi.mode == DRX))
         {
             wait_RxEnd = 1;
-            ScheduleTask(&dl_drx_desc, NBFi_RX_DL_EndHandler, RELATIVE, SECONDS(DRXLISTENAFTERSEND));
+            scheduler_add_task(&dl_drx_desc, NBFi_RX_DL_EndHandler, RELATIVE, SECONDS(DRXLISTENAFTERSEND));
         }
         else NBFI_Config_Check_State();
         NBFi_RX_Controller();
@@ -674,21 +671,21 @@ static nbfi_status_t NBFi_RX_Controller()
     return OK;
 }
 
-static void NBFi_RX_DL_EndHandler(struct wtimer_desc *desc)
+static void NBFi_RX_DL_EndHandler(struct scheduler_desc *desc)
 {
     wait_RxEnd = 0;
     NBFi_RX_Controller();
 }
 
 
-static void NBFi_Receive_Timeout_cb(struct wtimer_desc *desc)
+static void NBFi_Receive_Timeout_cb(struct scheduler_desc *desc)
 {
     if(rf_busy)
     {
-        ScheduleTask(desc, NBFi_Receive_Timeout_cb, RELATIVE, NBFI_PhyToDL_ListenTime(nbfi.rx_phy_channel));
+        scheduler_add_task(desc, NBFi_Receive_Timeout_cb, RELATIVE, NBFI_PhyToDL_ListenTime(nbfi.rx_phy_channel));
         return;
     }
-    wtimer0_remove(&dl_receive_desc);
+    scheduler_remove_task(&dl_receive_desc);
     wait_Receive = 0;
     if(nbfi_active_pkt->state != PACKET_WAIT_ACK)
     {
@@ -739,9 +736,9 @@ static void NBFi_Receive_Timeout_cb(struct wtimer_desc *desc)
     return;
 }
 
-static void NBFi_Wait_Extra_Handler(struct wtimer_desc *desc)
+static void NBFi_Wait_Extra_Handler(struct scheduler_desc *desc)
 {
-    wtimer0_remove(&wait_for_extra_desc);
+    scheduler_remove_task(&wait_for_extra_desc);
     wait_Extra = 0;
     if(nbfi_active_pkt->state == PACKET_WAIT_FOR_EXTRA_PACKETS)     {nbfi_active_pkt->state = nbfi_active_pkt_old_state;}
     if(NBFi_GetQueuedTXPkt()) NBFi_Force_process();
@@ -761,7 +758,7 @@ static void NBFi_update_RTC()
     
     uint32_t delta;
     
-    uint32_t tmp = (wtimer_state[0].time.cur >> 10);
+    uint32_t tmp = (scheduler_current_time() >> 10);
 
     if(old_time_cur <= tmp)
     {
@@ -774,12 +771,11 @@ static void NBFi_update_RTC()
     old_time_cur = tmp;
 }
 
-//extern uint32_t systick_timer;
 uint32_t NBFi_get_RTC()
 {
     NBFi_update_RTC();
     return nbfi_rtc;
-    //return systick_timer;
+    
 }
 
 void NBFi_set_RTC(uint32_t time)
@@ -790,7 +786,7 @@ void NBFi_set_RTC(uint32_t time)
 }
 
 
-static void NBFi_SendHeartBeats(struct wtimer_desc *desc)
+static void NBFi_SendHeartBeats(struct scheduler_desc *desc)
 {
 
     static uint16_t hb_timer = 0;
@@ -801,15 +797,15 @@ static void NBFi_SendHeartBeats(struct wtimer_desc *desc)
 
     if(nbfi.mode == OFF) 
     {
-      ScheduleTask(&nbfi_heartbeat_desc, NBFi_SendHeartBeats, RELATIVE, SECONDS(60));
+      scheduler_add_task(&nbfi_heartbeat_desc, NBFi_SendHeartBeats, RELATIVE, SECONDS(60));
       return;
     }
 
     if(nbfi.mode <= DRX)
     {
-        ScheduleTask(&nbfi_heartbeat_desc, NBFi_SendHeartBeats, RELATIVE, SECONDS(60));
+        scheduler_add_task(&nbfi_heartbeat_desc, NBFi_SendHeartBeats, RELATIVE, SECONDS(60));
     }
-    else ScheduleTask(&nbfi_heartbeat_desc, NBFi_SendHeartBeats, RELATIVE, SECONDS(1));
+    else scheduler_add_task(&nbfi_heartbeat_desc, NBFi_SendHeartBeats, RELATIVE, SECONDS(1));
 
 
     if(++hb_timer >= nbfi.heartbeat_interval + 1)
@@ -862,7 +858,11 @@ static void NBFi_SendHeartBeats(struct wtimer_desc *desc)
 
 void NBFi_Force_process()
 {
-    ScheduleTask(&nbfi_processTask_desc, NBFi_ProcessTasks, RELATIVE, MILLISECONDS(1));
+  #ifdef NBFI_LOG
+                sprintf(log_string, "%05u: Force ", (uint16_t)(scheduler_curr_time()&0xffff));
+                log_send_str(log_string);
+  #endif
+    scheduler_add_task(&nbfi_processTask_desc, NBFi_ProcessTasks, RELATIVE, MILLISECONDS(1));
 }
 
 static uint32_t NBFI_PhyToDL_Delay(nbfi_phy_channel_t chan)

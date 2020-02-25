@@ -1,6 +1,6 @@
 #include "main.h"
 #include "radio.h"
-#include "wtimer.h"
+#include "scheduler.h"
 #include "string.h"
 #include "nbfi.h"
 #include "nbfi_mac.h"
@@ -89,8 +89,8 @@ const nbfi_settings_t nbfi_set_default =
 const nbfi_settings_t nbfi_set_default =
 {
     CRX,//mode;
-    UL_DBPSK_3200_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
-    DL_DBPSK_3200_PROT_D, // rx_phy_channel;
+    UL_DBPSK_25600_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
+    DL_DBPSK_25600_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
     MACK_1,             //mack_mode
     0x82,                  //num_of_retries;
@@ -116,6 +116,8 @@ const nbfi_settings_t nbfi_set_default =
 static SPI_HandleTypeDef hspi;
 
 static LPTIM_HandleTypeDef hlptim;
+static TIM_HandleTypeDef hlooptim;
+
 
 #define SPI_TIMEOUT	1000
 
@@ -159,6 +161,13 @@ static LPTIM_HandleTypeDef hlptim;
   #define AX_LPTIM_IRQn			LPTIM1_IRQn
   #define AX_LPTIM_RCC_ENABLE 	        __HAL_RCC_LPTIM1_CLK_ENABLE
   #define AX_LPTIM_RCC_DISABLE 	        __HAL_RCC_LPTIM1_CLK_DISABLE
+
+  #define AX_LOOPTIM			TIM7
+  #define AX_LOOPTIM_IRQn		TIM7_IRQn
+  #define AX_LOOPTIM_RCC_ENABLE 	__HAL_RCC_TIM7_CLK_ENABLE
+  #define AX_LOOPTIM_RCC_DISABLE 	__HAL_RCC_TIM7_CLK_DISABLE
+  #define AX_LOOPTIM_TIM_FREQ		2000
+
   #define AX_SPI			SPI1
   #define AX_SPI_RCC_ENABLE		__HAL_RCC_SPI1_CLK_ENABLE
   #define AX_SPI_RCC_DISABLE	 	__HAL_RCC_SPI1_CLK_DISABLE
@@ -293,7 +302,7 @@ void RADIO_LPTIM_Init(void)
     hlptim.Init.CounterSource = LPTIM_COUNTERSOURCE_INTERNAL;
     HAL_LPTIM_Init(&hlptim);
     
-    HAL_NVIC_SetPriority(AX_LPTIM_IRQn, 2, 0);
+    HAL_NVIC_SetPriority(AX_LPTIM_IRQn, 1, 0);
     HAL_NVIC_EnableIRQ(AX_LPTIM_IRQn);
 
 }
@@ -301,10 +310,42 @@ void RADIO_LPTIM_Init(void)
 
 void LPTIM1_IRQHandler(void)
 {
+  
   if (__HAL_LPTIM_GET_FLAG(&hlptim, LPTIM_FLAG_CMPM) != RESET) {
 		__HAL_LPTIM_CLEAR_FLAG(&hlptim, LPTIM_FLAG_CMPM);  
-		wtimer_cc0_irq();
+		scheduler_irq();
   }
+}
+
+
+void RADIO_LOOPTIM_Init(void)
+{
+
+    AX_LOOPTIM_RCC_ENABLE();
+
+    hlooptim.Instance = AX_LOOPTIM;
+    hlooptim.Init.Prescaler = SystemCoreClock / AX_LOOPTIM_TIM_FREQ;
+    hlooptim.Init.Period = 1;
+    hlooptim.Init.ClockDivision = 0;
+    hlooptim.Init.CounterMode = TIM_COUNTERMODE_UP;
+   
+    HAL_TIM_Base_Init(&hlooptim);
+    HAL_TIM_Base_Start_IT(&hlooptim);
+        
+    AX_LOOPTIM_RCC_ENABLE();
+    HAL_NVIC_SetPriority(AX_LOOPTIM_IRQn, 2, 0);
+    HAL_NVIC_EnableIRQ(AX_LOOPTIM_IRQn);
+
+}
+
+void TIM7_IRQHandler(void)
+{
+	if(__HAL_TIM_GET_FLAG(&hlooptim, TIM_FLAG_UPDATE) != RESET){
+		if(__HAL_TIM_GET_IT_SOURCE(&hlooptim, TIM_IT_UPDATE) != RESET){
+			__HAL_TIM_CLEAR_IT(&hlooptim, TIM_IT_UPDATE);
+			NBFI_Interrupt_Level_Loop();
+		}
+	}
 }
 
 
@@ -401,7 +442,6 @@ void radio_chip_disable(void)
 uint8_t radio_get_irq_pin_state(void)
 {
   return HAL_GPIO_ReadPin(AX_IRQ_GPIO_Port, AX_IRQ_Pin);
-
 }
 
 void radio_spi_rx(uint8_t *pData, uint16_t Size)
@@ -459,6 +499,8 @@ void wtimer_cc_irq_disable(uint8_t chan)
 	__HAL_LPTIM_DISABLE_IT(&hlptim, LPTIM_IT_CMPM);
 }
 
+
+
 void wtimer_cc_set(uint8_t chan, uint16_t data)
 {
 	hlptim.Instance->CMP = data;
@@ -466,7 +508,7 @@ void wtimer_cc_set(uint8_t chan, uint16_t data)
 
 uint16_t wtimer_cc_get(uint8_t chan)
 {
-	return (uint16_t) hlptim.Instance->CMP;
+	return hlptim.Instance->CMP;
 }
 
 
@@ -485,7 +527,7 @@ uint16_t wtimer_cnt_get(uint8_t chan)
     return prev;
   }
   prev = timer;
-  return timer;
+  return timer; 
 }
 
 
@@ -515,6 +557,11 @@ void nbfi_before_off()
   #endif
 }
 
+void nbfi_lock_unlock_loop_irq(uint8_t lock)
+{
+  if(lock) HAL_NVIC_DisableIRQ(AX_LOOPTIM_IRQn);
+  else   HAL_NVIC_EnableIRQ(AX_LOOPTIM_IRQn);
+}
 
 void nbfi_read_default_settings(nbfi_settings_t* settings)
 {
@@ -582,14 +629,6 @@ __weak void nbfi_receive_complete(uint8_t * data, uint16_t length)
 }
 
 
-
-//uint8_t nbfi_lock = 1;
-
-/*void nbfi_lock_unlock_nbfi_irq(uint8_t lock)
-{
-    nbfi_lock = lock;
-}*/
-
 void nbfi_get_iterator(nbfi_crypto_iterator_t * iter)
 {
 	//	Read iterator from retain storage
@@ -614,8 +653,6 @@ void radio_init(void)
 
 	RADIO_BPSK_PIN_Init();
 
-	//wa1470_reg_func(WARADIO_ENABLE_GLOBAL_IRQ, (void*)radio_enable_global_irq);
-	//wa1470_reg_func(WARADIO_DISABLE_GLOBAL_IRQ, (void*)radio_disable_global_irq);
 	wa1470_reg_func(WARADIO_ENABLE_IRQ_PIN, (void*)radio_enable_pin_irq);
 	wa1470_reg_func(WARADIO_DISABLE_IRQ_PIN, (void*)radio_disable_pin_irq);
 	wa1470_reg_func(WARADIO_CHIP_ENABLE, (void*)radio_chip_enable);
@@ -628,21 +665,21 @@ void radio_init(void)
 	wa1470_reg_func(WARADIO_NOP_DELAY_MS, (void*)NOP_Delay_ms);
 	wa1470_reg_func(WARADIO_SEND_TO_BPSK_PIN, (void*)radio_bpsk_pin_send);
 
-	wtimer_reg_func(WTIMER_GLOBAL_IRQ_ENABLE, (void*)radio_enable_global_irq);
-	wtimer_reg_func(WTIMER_GLOBAL_IRQ_DISABLE, (void*)radio_disable_global_irq);
-	wtimer_reg_func(WTIMER_CC_IRQ_ENABLE, (void*)wtimer_cc_irq_enable);
-	wtimer_reg_func(WTIMER_CC_IRQ_DISABLE, (void*)wtimer_cc_irq_disable);
-	wtimer_reg_func(WTIMER_SET_CC, (void*)wtimer_cc_set);
-	wtimer_reg_func(WTIMER_GET_CC, (void*)wtimer_cc_get);
-	wtimer_reg_func(WTIMER_GET_CNT, (void*)wtimer_cnt_get);
-	wtimer_reg_func(WTIMER_CHECK_CC_IRQ, (void*)wtimer_check_cc_irq);
+	scheduler_reg_func(SCHEDULER_GLOBAL_IRQ_ENABLE, (void*)radio_enable_global_irq);
+	scheduler_reg_func(SCHEDULER_GLOBAL_IRQ_DISABLE, (void*)radio_disable_global_irq);
+	scheduler_reg_func(SCHEDULER_CC_IRQ_ENABLE, (void*)wtimer_cc_irq_enable);
+	scheduler_reg_func(SCHEDULER_CC_IRQ_DISABLE, (void*)wtimer_cc_irq_disable);
+	scheduler_reg_func(SCHEDULER_SET_CC, (void*)wtimer_cc_set);
+	scheduler_reg_func(SCHEDULER_GET_CC, (void*)wtimer_cc_get);
+	scheduler_reg_func(SCHEDULER_GET_CNT, (void*)wtimer_cnt_get);
+	scheduler_reg_func(SCHEDULER_CHECK_CC_IRQ, (void*)wtimer_check_cc_irq);
 
-	wtimer_init();
-	nbfi_lock = 0;
+	scheduler_init();
 
 	NBFI_reg_func(NBFI_BEFORE_TX, (void*)nbfi_before_tx);
 	NBFI_reg_func(NBFI_BEFORE_RX, (void*)nbfi_before_rx);
 	NBFI_reg_func(NBFI_BEFORE_OFF, (void*)nbfi_before_off);
+        NBFI_reg_func(NBFI_LOCK_UNLOCK_LOOP_IRQ, (void*)nbfi_lock_unlock_loop_irq);
         NBFI_reg_func(NBFI_SEND_COMPLETE, (void*)nbfi_send_complete);
 	NBFI_reg_func(NBFI_RECEIVE_COMLETE, (void*)nbfi_receive_complete);
 	NBFI_reg_func(NBFI_READ_FLASH_SETTINGS, (void*)nbfi_read_flash_settings);
@@ -651,7 +688,9 @@ void radio_init(void)
 	NBFI_reg_func(NBFI_MEASURE_VOLTAGE_OR_TEMPERATURE, (void*)nbfi_measure_valtage_or_temperature);
 	NBFI_reg_func(NBFI_GET_ITERATOR, (void*)nbfi_get_iterator);
 	NBFI_reg_func(NBFI_SET_ITERATOR, (void*)nbfi_set_iterator);
-        //NBFI_reg_func(NBFI_LOCKUNLOCKNBFIIRQ, (void*)nbfi_lock_unlock_nbfi_irq);
+        
+        RADIO_LOOPTIM_Init();
+        
         
 	//register callbacks when external RTC used
 	//NBFI_reg_func(NBFI_UPDATE_RTC, (void*)nbfi_update_rtc);
@@ -662,7 +701,6 @@ void radio_init(void)
 	NBFi_Config_Set_Device_Info(&info);
 
 	NBFi_Clear_Saved_Configuration(); //if you need to clear previously saved nbfi configuration in EEPROM
-	//wa1470_set_freq(868800000);
 
 	wa1470_reg_func(WARADIO_DATA_RECEIVED, (void*)NBFi_MAC_RX_ProtocolD);
 	wa1470_reg_func(WARADIO_TX_FINISHED, (void*)NBFi_RF_TX_Finished);

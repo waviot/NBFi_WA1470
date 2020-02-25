@@ -5,7 +5,7 @@
 #include "log.h"
 #include "defines.h"
 
-struct wtimer_desc test_desc;
+/*struct wtimer_desc test_desc;
 
 void send_data(struct wtimer_desc *desc) {
  
@@ -63,24 +63,43 @@ void send_data(struct wtimer_desc *desc) {
 
 #endif
 }
+*/
+
 
 
 void HAL_SYSTICK_Callback(void)
 {
-  NBFI_Interrupt_Level_Loop();
+
 }
+
+
+
+nbfi_ul_sent_status_t last_send_status;
+
 
 void nbfi_send_complete(nbfi_ul_sent_status_t ul)
 {
+  
     char log_string[256];
     sprintf(log_string, "UL #%d %s", ul.id, (ul.status == DELIVERED)?"DELIVERED":"LOST");
     log_send_str(log_string);   
+   
+    //const uint8_t string[] = "Hello, we are testing 3200bps receaiving stability. This huge packet is sending for giving a numerous quantity of packets";
+   
+    const uint8_t string[] = "Hello";
+   
+    if(ul.id == last_send_status.id)
+      last_send_status = NBFi_Send((uint8_t*)string, sizeof(string));
+    
 }
 
 void nbfi_receive_complete(uint8_t * data, uint16_t length)
 {
-    char log_string[256];
+    /*char log_string[256];
     sprintf(log_string, "DL of %d bytes received", length);
+    log_send_str(log_string);   
+    if(stop) stop = 0;
+    else stop = 1;*/
     NBFi_Send(data, length); //loopback
 }
 
@@ -100,8 +119,8 @@ int main(void)
 
   log_init();
   
-  ScheduleTask(&test_desc, send_data, RELATIVE, SECONDS(1));
-     
+  //ScheduleTask(&test_desc, send_data, RELATIVE, SECONDS(1));
+  last_send_status = NBFi_Send("Hello!", sizeof("Hello!"));   
   
   while (1) 
   {     
@@ -111,7 +130,8 @@ int main(void)
       plot_spectrum();
       #endif
       
-     // NBFI_Main_Level_Loop();
+      
+      NBFI_Main_Level_Loop();
       
       if (wa1470_cansleep()&& NBFi_can_sleep()) 
       {

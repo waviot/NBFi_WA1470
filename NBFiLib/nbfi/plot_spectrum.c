@@ -2,12 +2,12 @@
 #include "radio.h"
 #include "log.h"
 
-struct wtimer_desc spectrum_desc;
+struct scheduler_desc spectrum_desc;
 
-void plot_spectrum_task(struct wtimer_desc *desc) {
+void plot_spectrum_task(struct scheduler_desc *desc) {
 
   log_print_spectrum(32); 
-  ScheduleTask(desc, 0, RELATIVE, MILLISECONDS(500));
+  scheduler_add_task(desc, 0, RELATIVE, MILLISECONDS(500));
 }
 
 void plot_spectrum()
@@ -33,10 +33,10 @@ void plot_spectrum()
           log_print_spectrum();
           break;
         case 'a':
-          ScheduleTask(&spectrum_desc, plot_spectrum_task, RELATIVE, MILLISECONDS(50));
+          scheduler_add_task(&spectrum_desc, plot_spectrum_task, RELATIVE, MILLISECONDS(50));
           break;
         case 'z':
-          wtimer0_remove(&spectrum_desc);
+          scheduler_remove_task(&spectrum_desc);
           break;  
         case '5':
           wa1470dem_set_bitrate(DBPSK_50_PROT_D);

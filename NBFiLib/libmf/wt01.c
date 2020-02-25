@@ -1,33 +1,33 @@
 #include "wtimer.h"
 
-extern void (* __wtimer_globla_irq_enable)(void);
-extern void (* __wtimer_globla_irq_disable)(void);
+extern void (* __wtimer_global_irq_enable)(void);
+extern void (* __wtimer_global_irq_disable)(void);
 
 uint8_t wtimer_remove(struct wtimer_desc *desc)
 {
 	uint8_t ret;
 	
-	__wtimer_globla_irq_disable();
+	__wtimer_global_irq_disable();
 	ret = wtimer_removecb_core((struct wtimer_callback *)desc);
 	ret += wtimer0_removecb_core(desc);
-	__wtimer_globla_irq_enable();
+	__wtimer_global_irq_enable();
 	return ret;
 }
 
 void wtimer_add_callback(struct wtimer_callback *desc)
 {
-	__wtimer_globla_irq_disable();
+	__wtimer_global_irq_disable();
 	wtimer_addcb_core(desc);
-	__wtimer_globla_irq_enable();
+	__wtimer_global_irq_enable();
 }
 
 uint8_t wtimer_remove_callback(struct wtimer_callback *desc)
 {
 	uint8_t ret;
 
-	__wtimer_globla_irq_disable();
+	__wtimer_global_irq_disable();
 	ret = wtimer_removecb_core(desc);
-	__wtimer_globla_irq_enable();
+	__wtimer_global_irq_enable();
 	return ret;
 }
 

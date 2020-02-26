@@ -633,6 +633,8 @@ void nbfi_get_iterator(nbfi_crypto_iterator_t * iter)
 {
 	//	Read iterator from retain storage
 	iter->ul = iter->dl = 0;
+        
+        //iter->dl = 260;
 }
 
 void nbfi_set_iterator(nbfi_crypto_iterator_t * iter)

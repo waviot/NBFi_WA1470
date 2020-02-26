@@ -39,7 +39,7 @@ uint32_t MinVoltage = 0;
 
 uint32_t nbfi_rtc = 0;
 
-_Bool process_rx_external = 0;
+//_Bool process_rx_external = 0;
 
 
 static void    NBFi_Receive_Timeout_cb(struct scheduler_desc *desc);
@@ -64,7 +64,15 @@ void NBFI_Transport_Init()
     #endif
     
     for(uint8_t i = 0; i < NBFI_SENT_STATUSES_BUF_SIZE; i++) NBFi_sent_UL_stat_Buf[i].id = 0;
+    
 
+    for(uint8_t i = 0; i < NBFI_RX_PKTBUF_SIZE; i++) 
+    {
+      #ifdef NBFI_USE_MALLOC
+      NBFi_received_DL_Buf[i].payload = 0; 
+      #endif
+      NBFi_received_DL_Buf[i].ready = 0; 
+    }
     
     info_timer = dev_info.send_info_interval - 300 - rand()%600;
 
@@ -227,7 +235,8 @@ nbfi_ul_sent_status_t NBFi_Send(uint8_t* payload, uint8_t length)
 }
 
 
-void NBFi_ProcessRxPackets(_Bool external)
+//void NBFi_ProcessRxPackets(_Bool external)
+void NBFi_ProcessRxPackets()
 {
     nbfi_transport_packet_t* pkt;
     uint8_t data[256];
@@ -235,7 +244,7 @@ void NBFi_ProcessRxPackets(_Bool external)
     uint8_t last_group_iter;
     uint16_t total_length;
     _Bool group_with_crc = 0;
-    process_rx_external = external;
+    //process_rx_external = external;
     
     while(1)
     {
@@ -301,8 +310,8 @@ void NBFi_ProcessRxPackets(_Bool external)
 
         __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
        
-        if(__nbfi_rx_handler) __nbfi_rx_handler(data_ptr, total_length);
-
+        NBFi_Queue_Next_DL(data_ptr, total_length);
+        //if(__nbfi_rx_handler) __nbfi_rx_handler(data_ptr, total_length);
     }
 
 }
@@ -444,7 +453,8 @@ place_to_stack:
             pkt->state = PACKET_RECEIVED;
         }
 
-        if(process_rx_external == 0) NBFi_ProcessRxPackets(0);
+        //if(process_rx_external == 0) NBFi_ProcessRxPackets(0);
+        NBFi_ProcessRxPackets();
         
         if(phy_pkt->ACK && !NBFi_Calc_Queued_Sys_Packets_With_Type(0))
         {
@@ -487,7 +497,6 @@ place_to_stack:
         if(nbfi_active_pkt->state == PACKET_WAIT_FOR_EXTRA_PACKETS) nbfi_active_pkt->state = nbfi_active_pkt_old_state;
 
     }
-   // if(process_rx_external == 0) NBFi_ProcessRxPackets(0);
     if(!phy_pkt->ACK) NBFI_Config_Check_State();
     if(NBFi_GetQueuedTXPkt()) NBFi_Force_process();
     else

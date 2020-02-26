@@ -5,7 +5,7 @@
 #define NBFI_RX_PKTBUF_SIZE     32
 
 #define NBFI_SENT_STATUSES_BUF_SIZE     16
-
+#define NBFI_RECEIVED_BUF_SIZE          4
 
 #ifdef NBFI_USE_MALLOC
 extern nbfi_transport_packet_t* nbfi_TX_pktBuf[NBFI_TX_PKTBUF_SIZE];
@@ -16,6 +16,7 @@ extern nbfi_transport_packet_t  nbfi_RX_pktBuf[NBFI_RX_PKTBUF_SIZE];
 #endif
 
 extern nbfi_ul_sent_status_t NBFi_sent_UL_stat_Buf[NBFI_SENT_STATUSES_BUF_SIZE];
+extern nbfi_dl_received_t NBFi_received_DL_Buf[NBFI_RECEIVED_BUF_SIZE];
 
 nbfi_transport_packet_t*            NBFi_Get_TX_Packet_Ptr(uint8_t index);
 nbfi_transport_packet_t*            NBFi_Get_RX_Packet_Ptr(uint8_t index);
@@ -43,4 +44,6 @@ uint8_t                             NBFi_Get_Retry_Number();
 nbfi_ul_sent_status_t*              NBFi_Queue_Next_UL();
 void                                NBFi_Set_UL_Status(uint8_t id, nbfi_ul_status_t status);
 nbfi_ul_sent_status_t*              NBFi_Get_Next_Unreported_UL(nbfi_ul_status_t status);
+void                                NBFi_Queue_Next_DL(uint8_t* data, uint16_t length);
+uint8_t                             NBFi_Next_Ready_DL(uint8_t* data);
 #endif //NBFI_TRANSPORT_MISC_H

@@ -78,21 +78,42 @@ void NBFI_Init()
     NBFI_Transport_Init();
 }
 
+uint8_t NBFi_Get_Received_Packet(uint8_t * payload)
+{
+  __nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+  uint8_t length = NBFi_Next_Ready_DL(payload);
+  __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+  return length;
+}
 
 //call this function in main loop 
 void  NBFI_Main_Level_Loop()
 {
-    NBFi_ProcessRxPackets(1);
-    if(__nbfi_send_status_handler == 0) return;  
-    nbfi_ul_sent_status_t* ul;
-    while(1)
+
+    if(__nbfi_rx_handler)
     {
-      __nbfi_lock_unlock_loop_irq(NBFI_LOCK);
-      ul = NBFi_Get_Next_Unreported_UL(DELIVERED);
-      if(ul == 0) ul = NBFi_Get_Next_Unreported_UL(LOST);
-      __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
-      if(ul) __nbfi_send_status_handler(*ul);
-      else return;
+      uint8_t payload[256];
+      while(1)
+      {
+        uint8_t length = NBFi_Get_Received_Packet(payload);
+        if(length) __nbfi_rx_handler(payload, length);
+        else break;
+      }
+      
+    }
+    
+    if(__nbfi_send_status_handler)
+    {
+      nbfi_ul_sent_status_t* ul;
+      while(1)
+      {
+        __nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+        ul = NBFi_Get_Next_Unreported_UL(DELIVERED);
+        if(ul == 0) ul = NBFi_Get_Next_Unreported_UL(LOST);
+        __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+        if(ul) __nbfi_send_status_handler(*ul);
+        else return;
+      }
     }
 }
 

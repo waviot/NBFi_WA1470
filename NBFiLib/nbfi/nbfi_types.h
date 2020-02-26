@@ -36,6 +36,7 @@ typedef struct
         };
         uint8_t header;
     };
+
 #ifdef NBFI_USE_MALLOC
     uint8_t payload[0];     //begining of packet payload
 #else
@@ -256,6 +257,7 @@ typedef struct
 
 typedef enum
 {
+  NOTEXIST = 0,
   QUEUED = 1,
   INPROCESS = 2,
   DELIVERED = 3,
@@ -270,6 +272,20 @@ typedef struct
   nbfi_ul_status_t status;
   uint8_t reported;
 }nbfi_ul_sent_status_t;
+
+
+
+typedef struct
+{
+  uint16_t id;
+  uint8_t length;
+  uint8_t ready;
+  #ifdef NBFI_USE_MALLOC
+  uint8_t* payload;     //begining of packet payload
+  #else
+  uint8_t payload[NBFI_PACKET_SIZE*30];     //begining of packet payload
+  #endif
+}nbfi_dl_received_t;
 
 
 //typedef void (*rx_handler_t)(uint8_t*, uint16_t);

@@ -16,6 +16,9 @@ uint16_t sent_id = 0;
 uint8_t     nbfi_sent_buf_head = 0;
 nbfi_ul_sent_status_t NBFi_sent_UL_stat_Buf[NBFI_SENT_STATUSES_BUF_SIZE];
 
+uint16_t receive_id = 0;
+uint8_t  nbfi_receive_buf_head = 0;
+nbfi_dl_received_t NBFi_received_DL_Buf[NBFI_RECEIVED_BUF_SIZE];
 
 nbfi_transport_packet_t* NBFi_Get_TX_Packet_Ptr(uint8_t index)
 {
@@ -703,3 +706,62 @@ nbfi_ul_sent_status_t* NBFi_Get_Next_Unreported_UL(nbfi_ul_status_t status)
   }
   return 0;
 }
+
+nbfi_ul_status_t NBFi_Get_UL_status(uint16_t id)
+{
+  nbfi_ul_status_t status;
+  __nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+  for(uint8_t i = nbfi_sent_buf_head - NBFI_SENT_STATUSES_BUF_SIZE; i != nbfi_sent_buf_head; i++)
+  {
+    nbfi_ul_sent_status_t* ul = &NBFi_sent_UL_stat_Buf[i%NBFI_SENT_STATUSES_BUF_SIZE];
+    if(ul->id == id) 
+    {
+      ul->reported = 1;
+      status = ul->status;
+      __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+      return status;
+    }
+  }
+  __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+  return NOTEXIST;
+}
+
+
+void NBFi_Queue_Next_DL(uint8_t* data, uint16_t length)
+{
+  
+  nbfi_dl_received_t *next = &NBFi_received_DL_Buf[nbfi_receive_buf_head++%NBFI_RECEIVED_BUF_SIZE];
+  next->id = receive_id++;
+  next->length = length;  
+  next->ready = 1;
+  #ifdef NBFI_USE_MALLOC
+  if(next->payload) free(next->payload);
+  next->payload = (uint8_t *) malloc(length);
+  if(!next->payload) 
+  {
+    next->ready = 0;
+    return;
+  }
+  #endif
+  for(uint8_t i = 0; i!= length; i++) next->payload[i] = data[i];
+}
+
+uint8_t NBFi_Next_Ready_DL(uint8_t* data)
+{
+ for(uint8_t i = nbfi_receive_buf_head - NBFI_RECEIVED_BUF_SIZE; i != nbfi_receive_buf_head; i++)
+  {
+    nbfi_dl_received_t* dl = &NBFi_received_DL_Buf[i%NBFI_RECEIVED_BUF_SIZE];
+    if(dl->ready) 
+    {
+      for(uint8_t i = 0; i!= dl->length; i++) data[i] = dl->payload[i];
+      dl->ready = 0;
+      #ifdef NBFI_USE_MALLOC
+      if(dl->payload) {free(dl->payload); dl->payload = 0;}
+      #endif
+      return dl->length;
+    }
+  }
+  return 0;
+}
+
+

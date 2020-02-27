@@ -8,8 +8,8 @@
 struct wtimer_state wtimer_state[2];
 struct wtimer_callback * wtimer_pending;
 
-void (* __wtimer_globla_irq_enable)(void);
-void (* __wtimer_globla_irq_disable)(void);
+void (* __wtimer_global_irq_enable)(void);
+void (* __wtimer_global_irq_disable)(void);
 
 void (* __wtimer_cc_irq_enable)(uint8_t chan);
 void (* __wtimer_cc_irq_disable)(uint8_t chan);
@@ -24,10 +24,10 @@ void wtimer_reg_func(uint8_t name, void *fn)
 	switch(name)
 	{
 	case WTIMER_GLOBAL_IRQ_ENABLE:
-		__wtimer_globla_irq_enable = (void(*)(void))fn;
+		__wtimer_global_irq_enable = (void(*)(void))fn;
 		break;
 	case WTIMER_GLOBAL_IRQ_DISABLE:
-		__wtimer_globla_irq_disable = (void(*)(void))fn;
+		__wtimer_global_irq_disable = (void(*)(void))fn;
 		break;
 	case WTIMER_CC_IRQ_ENABLE:
 		__wtimer_cc_irq_enable = (void(*)(uint8_t))fn;
@@ -196,7 +196,7 @@ uint8_t wtimer_runcallbacks(void)
 {
 	uint8_t ret = 0;
 	for (;;) {
-		__wtimer_globla_irq_disable();
+		__wtimer_global_irq_disable();
 		wtimer0_update();
 		wtimer0_schedq();
 		for (;;) {
@@ -204,16 +204,16 @@ uint8_t wtimer_runcallbacks(void)
 				struct wtimer_callback * d = wtimer_pending;
 				if (d != WTIMER_NULLCB) {
 					wtimer_pending = d->next;
-					__wtimer_globla_irq_enable();
+					__wtimer_global_irq_enable();
 					++ret;
 					((handler_t)(d->handler))(d);
-					__wtimer_globla_irq_disable();
+					__wtimer_global_irq_disable();
 					continue;
 				}
 			}
 			{
 				uint8_t exp = wtimer_checkexpired();
-				__wtimer_globla_irq_enable();
+				__wtimer_global_irq_enable();
 				if (exp)
 					break;
 				return ret;

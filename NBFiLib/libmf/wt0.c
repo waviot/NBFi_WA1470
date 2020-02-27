@@ -1,7 +1,7 @@
 #include "wtimer.h"
 
-extern void (* __wtimer_globla_irq_enable)(void);
-extern void (* __wtimer_globla_irq_disable)(void);
+extern void (* __wtimer_global_irq_enable)(void);
+extern void (* __wtimer_global_irq_disable)(void);
 
 uint8_t wtimer0_removecb_core(struct wtimer_desc *desc)
 {
@@ -26,31 +26,31 @@ uint8_t wtimer0_removecb_core(struct wtimer_desc *desc)
 
 void wtimer0_addabsolute(struct wtimer_desc *desc)
 {
-	__wtimer_globla_irq_disable();
+	__wtimer_global_irq_disable();
 	wtimer0_update();
 	wtimer0_addcore(desc);
 	wtimer0_schedq();
-	__wtimer_globla_irq_enable();
+	__wtimer_global_irq_enable();
 }
 
 void wtimer0_addrelative(struct wtimer_desc *desc)
 {
-	__wtimer_globla_irq_disable();
+	__wtimer_global_irq_disable();
 	wtimer0_update();
 	desc->time += wtimer_state[0].time.cur;
 	wtimer0_addcore(desc);
 	wtimer0_schedq();
-	__wtimer_globla_irq_enable();
+	__wtimer_global_irq_enable();
 }
 
 uint32_t wtimer0_curtime(void)
 {
 	uint32_t r;
 
-	__wtimer_globla_irq_disable();
+	__wtimer_global_irq_disable();
 	wtimer0_update();
 	r = wtimer_state[0].time.cur;
-	__wtimer_globla_irq_enable();
+	__wtimer_global_irq_enable();
 	return r;
 }
 
@@ -58,9 +58,9 @@ uint8_t wtimer0_remove(struct wtimer_desc *desc)
 {
 	uint8_t ret;
 
-	__wtimer_globla_irq_disable();
+	__wtimer_global_irq_disable();
 	ret = wtimer_removecb_core((struct wtimer_callback *)desc);
 	ret += wtimer0_removecb_core(desc);
-	__wtimer_globla_irq_enable();
+	__wtimer_global_irq_enable();
 	return ret;
 }

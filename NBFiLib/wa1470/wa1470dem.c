@@ -1,6 +1,4 @@
 #include "wa1470.h"
-//#include "wa1470dem.h"
-#include "wtimer.h"
 #include <string.h>
 #include <stdio.h>
 #include <log.h>
@@ -22,7 +20,7 @@ dem_packet_info_st dem_info_mas[DEM_MAS_SIZE];
 
 uint8_t	dem_mess_received;
 
-struct wtimer_desc dem_processMessages_desc;
+struct scheduler_desc dem_processMessages_desc;
 
 extern void (*__wa1470_enable_pin_irq)(void);
 extern void (*__wa1470_disable_pin_irq)(void);
@@ -37,13 +35,13 @@ dem_bitrate_s current_rx_phy = DBPSK_100H_PROT_D;
 
 _Bool dem_rx_enabled = 0;
 
-uint8_t current_hop_table[8] = {DEM_MINUS90000,DEM_MINUS40000,DEM_PLUS40000,DEM_PLUS15000,DEM_MINUS15000,DEM_MINUS40000,DEM_MINUS65000,DEM_MINUS90000};
+uint8_t current_hop_table[8] = {DEM_MINUS90000,DEM_MINUS65000,DEM_PLUS40000,DEM_PLUS15000,DEM_MINUS15000,DEM_MINUS40000,DEM_MINUS65000,DEM_MINUS90000};
 
 const int32_t DEM_FREQ_OFFSETS[8] = {90000,65000,40000,15000,-15000,-40000,-65000,-90000};
 
-struct wtimer_desc dem_update_noise_desc;
+struct scheduler_desc dem_update_noise_desc;
 float dem_noise = -150;
-static void wa1470dem_update_noise(struct wtimer_desc *desc);
+static void wa1470dem_update_noise(struct scheduler_desc *desc);
 
 #ifdef DEM_CALC_SPECTRUM
 uint32_t dem_spectrum_mas[32];
@@ -67,7 +65,7 @@ void wa1470dem_init(uint32_t modem_id)
 	uint8_t NB_FI_RX_CRC_POLY[4] = {0xb7, 0x1d, 0xc1, 0x04};
 
 	wa1470_spi_write8(DEM_CONTROL, DEM_CONTROL_RESET);
-	wa1470dem_set_bitrate(DBPSK_50_PROT_D);
+	//wa1470dem_set_bitrate(DBPSK_50_PROT_D);
 	wa1470dem_set_threshold(800); //1024 
 	wa1470dem_set_alpha(128, 5);
 	wa1470dem_set_crc_poly(NB_FI_RX_CRC_POLY);
@@ -110,7 +108,7 @@ static int16_t wa1470dem_get_rssi_logoffset()
 	return DEM_LOGOFFSET + rfe_rx_total_vga_gain - wa1470dem_get_bitrate_gain(current_rx_phy);
 }
 
-static void  wa1470dem_process_messages(struct wtimer_desc *desc)
+static void  wa1470dem_process_messages(struct scheduler_desc *desc)
 {
 	//if(__wa1470_disable_pin_irq) 
 	__wa1470_disable_pin_irq();
@@ -132,7 +130,7 @@ static void  wa1470dem_process_messages(struct wtimer_desc *desc)
 		for(uint8_t i = 0; i != tmp_dem_mess_received; i++) 
 		{
 #ifdef NBFI_LOG
-			sprintf(log_string, "%05u: PLD: ", (uint16_t)(NBFi_get_RTC()&0xffff));
+			sprintf(log_string, "%05u: PLD: ", (uint16_t)(scheduler_curr_time()&0xffff));
 			for(uint8_t k = 0; k != 8; k++) 
 				sprintf(log_string + strlen(log_string), "%02X", tmp_dem_mas[i].packet.payload[k]);
 			sprintf(log_string + strlen(log_string), " IT crypto=%3d COP=%2d(%2d) FREQ=%2d", tmp_dem_mas[i].packet.iter, tmp_dem_info_mas[i].num_of_crc + tmp_dem_info_mas[i].num_of_zigzag, tmp_dem_info_mas[i].num_of_zigzag, tmp_dem_mas[i].freq&0x1f);
@@ -181,7 +179,7 @@ static void  wa1470dem_process_messages(struct wtimer_desc *desc)
 void wa1470dem_isr(void) 
 {
 	uint8_t status;
-
+               
 	wa1470_spi_read(DEM_CONTROL, &status, 1);
 
 	if(!(status&DEM_CONTROL_IRQ_FLAG)) 
@@ -201,8 +199,8 @@ void wa1470dem_isr(void)
 		if(dem_mess_received == (DEM_MAS_SIZE - 1))  
 			return;
 
-		ScheduleTask(&dem_processMessages_desc,  wa1470dem_process_messages, RELATIVE, (current_rx_phy == DBPSK_25600_PROT_D)?MILLISECONDS(10):MILLISECONDS(20));
-                ScheduleTask(&dem_update_noise_desc,  wa1470dem_update_noise, RELATIVE, MILLISECONDS(DEM_NOISE_TICK));
+		scheduler_add_task(&dem_processMessages_desc,  wa1470dem_process_messages, RELATIVE, (current_rx_phy == DBPSK_25600_PROT_D)?MILLISECONDS(10):MILLISECONDS(20));
+                scheduler_add_task(&dem_update_noise_desc,  wa1470dem_update_noise, RELATIVE, MILLISECONDS(DEM_NOISE_TICK));
 		uint8_t i;
 		for(i = 0; i < dem_mess_received; i++)
 		{
@@ -231,7 +229,7 @@ void wa1470dem_isr(void)
 			}
 		}
 	}
-	while (__wa1470_get_irq_pin_state && __wa1470_get_irq_pin_state());
+	while (__wa1470_get_irq_pin_state());
 }
 
 int16_t wa1470dem_get_bitrate_sensitivity(dem_bitrate_s bitrate)
@@ -294,7 +292,7 @@ void wa1470dem_set_bitrate(dem_bitrate_s bitrate)
         
         #ifdef NBFI_LOG       
         //uint16_t NBFi_Phy_To_Bitrate(nbfi_phy_channel_t ch);
-	sprintf(log_string, "%05u: dem_set_bitrate to %d", ((uint16_t)(NBFi_get_RTC()&0xffff)), NBFi_Phy_To_Bitrate((nbfi_phy_channel_t)bitrate)); 
+	sprintf(log_string, "%05u: dem_set_bitrate to %d", ((uint16_t)(scheduler_curr_time()&0xffff)), NBFi_Phy_To_Bitrate((nbfi_phy_channel_t)bitrate)); 
 	log_send_str(log_string); 
         #endif
 }
@@ -379,7 +377,7 @@ void wa1470dem_set_freq(uint32_t freq)
 	}
         #ifdef NBFI_LOG
         //uint32_t        NBFi_get_RTC();
-	sprintf(log_string, "%05u: dem_set_freq to %ld", ((uint16_t)(NBFi_get_RTC()&0xffff)), freq); 
+	sprintf(log_string, "%05u: dem_set_freq to %ld", ((uint16_t)(scheduler_curr_time()&0xffff)), freq); 
 	log_send_str(log_string); 
         #endif
 }
@@ -453,7 +451,7 @@ static uint8_t wa1470dem_get_noise_calc_duration()
     else return NBFI_NOISE_DINAMIC_D[current_rx_phy - DBPSK_50_PROT_D];
 }
 
-static void wa1470dem_update_noise(struct wtimer_desc *desc)
+static void wa1470dem_update_noise(struct scheduler_desc *desc)
 {
         
 	static uint32_t dem_noise_sum;
@@ -492,7 +490,7 @@ static void wa1470dem_update_noise(struct wtimer_desc *desc)
 		dem_noise_cntr++;
 	}
 
-	ScheduleTask(desc, 0, RELATIVE, MILLISECONDS(DEM_NOISE_TICK));
+	if(dem_rx_enabled) scheduler_add_task(desc, 0, RELATIVE, MILLISECONDS(DEM_NOISE_TICK));
 }
 
 void wa1470dem_rx_enable(_Bool en)
@@ -500,8 +498,8 @@ void wa1470dem_rx_enable(_Bool en)
 	dem_rx_enabled = en;
 	if(en) 
 	{
-		ScheduleTask(&dem_update_noise_desc,  wa1470dem_update_noise, RELATIVE, MILLISECONDS(DEM_NOISE_TICK));
+		scheduler_add_task(&dem_update_noise_desc,  wa1470dem_update_noise, RELATIVE, MILLISECONDS(DEM_NOISE_TICK));
 	}
 	else 
-		wtimer0_remove(&dem_update_noise_desc);
+		scheduler_remove_task(&dem_update_noise_desc);
 }

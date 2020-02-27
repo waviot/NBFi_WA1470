@@ -1,5 +1,4 @@
 #include "wa1470.h"
-#include "wtimer.h"
 #include "log.h"
 #include <string.h>
 #include <stdio.h>
@@ -7,7 +6,7 @@
 
 #define MODOSCFREQ			26000000
 
-struct wtimer_desc mod_callTXfinished_desc;
+struct scheduler_desc mod_callTXfinished_desc;
 
 mod_hop_channels_t mod_current_hop_table[8] = {MOD_MINUS97000, MOD_MINUS65000, MOD_MINUS40000, MOD_MINUS15000, MOD_PLUS15000, MOD_PLUS40000, MOD_PLUS65000, MOD_PLUS90000};
 const int32_t MOD_FREQ_OFFSETS[32] = {-97000,-89000,-83000,-90000,-79000,-73000,-59000,-65000,-53000,-47000,-37000,-40000,-29000,-19000,-11000,-15000,15000,11000,19000,29000,40000,37000,47000,53000,65000,59000,73000,79000,90000,83000,89000,97000};
@@ -24,7 +23,7 @@ void wa1470mod_init()
         
 }
 
-static void	wa1470mod_call_TX_finished(struct wtimer_desc *desc)
+static void	wa1470mod_call_TX_finished(struct scheduler_desc *desc)
 {
 	__wa1470_tx_finished();
 }
@@ -32,10 +31,10 @@ static void	wa1470mod_call_TX_finished(struct wtimer_desc *desc)
 void wa1470_tx_finished()
 {
   #ifdef NBFI_LOG
-        sprintf(log_string, "%05u: TX finished ", (uint16_t)(NBFi_get_RTC()&0xffff));
+        sprintf(log_string, "%05u: TX finished ", (uint16_t)(scheduler_curr_time()&0xffff));
 	log_send_str(log_string);
   #endif
- 	ScheduleTask(&mod_callTXfinished_desc,	wa1470mod_call_TX_finished, RELATIVE, MILLISECONDS(1));
+ 	scheduler_add_task(&mod_callTXfinished_desc,	wa1470mod_call_TX_finished, RELATIVE, MILLISECONDS(1));
 }
 
 void wa1470mod_isr(void)
@@ -138,7 +137,7 @@ void wa1470mod_set_bitrate(mod_bitrate_s bitrate)
 void wa1470mod_set_freq(uint32_t freq)
 {
 #ifdef NBFI_LOG
-        sprintf(log_string, "%05u: mod_set_freq to %ld", ((uint16_t)(NBFi_get_RTC()&0xffff)), freq); 
+        sprintf(log_string, "%05u: mod_set_freq to %ld", ((uint16_t)(scheduler_curr_time()&0xffff)), freq); 
 	log_send_str(log_string);
 #endif
 	if(send_by_dbpsk == WA1470_SEND_BY_BPSK_PIN)
@@ -158,4 +157,9 @@ void wa1470mod_set_freq(uint32_t freq)
 			break;
 		}
 	}
+}
+
+_Bool wa1470mod_is_tx_in_progress()
+{
+  return (wa1470_spi_read8(MOD_STATUS)&MOD_STATUS_TX_IN_PROGRESS);
 }

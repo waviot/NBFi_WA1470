@@ -27,12 +27,6 @@ void wa1470_reg_func(uint8_t name, void* fn)
 {
 	switch(name)
 	{
-//	case WARADIO_ENABLE_GLOBAL_IRQ:
-//		__wa1470_enable_global_irq = (void(*)(void))fn;
-//		break;
-//	case WARADIO_DISABLE_GLOBAL_IRQ:
-//		__wa1470_disable_global_irq = (void(*)(void))fn;
-//		break;
 	case WARADIO_ENABLE_IRQ_PIN:
 		__wa1470_enable_pin_irq = (void(*)(void))fn;
 		break;

@@ -35,6 +35,7 @@ nbfi_status_t   NBFi_RF_Init(nbfi_phy_channel_t  phy_channel,
 nbfi_status_t   NBFi_RF_Deinit();
 nbfi_status_t   NBFi_RF_Transmit(uint8_t* pkt, uint8_t len, nbfi_phy_channel_t  phy_channel,  rf_blocking_t blocking);
 void            NBFi_RF_TX_Finished();
+_Bool           NBFi_is_TX_in_progress();
 
 float NBFi_RF_get_noise();
 

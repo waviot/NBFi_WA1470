@@ -1,5 +1,4 @@
 #include "nbfi.h"
-#include <wtimer.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -39,10 +38,7 @@ const nbfi_settings_t nbfi_fastdl =
     MACK_1, 
     1,
     128,
-    {0xFF,0,0},   
-    {0},    
-    {0xFF,0,0},     
-    {0},    
+    {0}, //modem_ID[4]    
     868800000,      
     865000000,      
     PCB,    
@@ -54,17 +50,17 @@ const nbfi_settings_t nbfi_fastdl =
     0,
     0,
     0,
-    0
+    //0
 };
 
 
-NBFi_station_info_s nbfi_station_info = {0,0,0};
+NBFi_station_info_s nbfi_station_info = {0,NBFI_UL_FREQ_PLAN_NO_CHANGE + NBFI_DL_FREQ_PLAN_NO_CHANGE};
 
 extern uint8_t  string[50];
 
 nbfi_settings_t nbfi_prev;
 
-_Bool nbfi_settings_changed = 0;
+_Bool nbfi_settings_need_to_save_to_flash = 0;
 
 
 #define NUM_OF_TX_RATES    4
@@ -75,10 +71,10 @@ const uint8_t TxSNRDegradationTable[NUM_OF_TX_RATES] = {0, 9, 18, 27};
 nbfi_phy_channel_t RxRateTable[NUM_OF_RX_RATES] = {DL_DBPSK_50_PROT_D, DL_DBPSK_400_PROT_D, DL_DBPSK_3200_PROT_D, DL_DBPSK_25600_PROT_D};
 const uint8_t RxSNRDegradationTable[NUM_OF_RX_RATES] = {0, 9, 18, 30};
 
-#define TX_SNRLEVEL_FOR_UP          15//22
+#define TX_SNRLEVEL_FOR_UP          15
 #define TX_SNRLEVEL_FOR_DOWN        10
 
-#define RX_SNRLEVEL_FOR_UP          15//18
+#define RX_SNRLEVEL_FOR_UP          15
 #define RX_SNRLEVEL_FOR_DOWN        10
 
 
@@ -208,7 +204,7 @@ void NBFI_Config_Check_State()
           
 static _Bool NBFi_Config_Check_If_FP_Need_To_Change(nbfi_freq_plan_t current, nbfi_freq_plan_t new_one, uint16_t mask)
 {
-    return ((current.fp&mask)!=(new_one.fp&mask))&&(new_one.fp&mask);
+  return ((current.fp&mask)!=(new_one.fp&mask))&&((new_one.fp&mask) != ((mask==NBFI_UL_FP_MASK)?NBFI_UL_FREQ_PLAN_NO_CHANGE:NBFI_DL_FREQ_PLAN_NO_CHANGE));
 }    
     
 static _Bool NBFi_Config_Rate_Change(uint8_t rx_tx, nbfi_rate_direct_t dir )
@@ -370,11 +366,12 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         buf[3] = nbfi.rx_antenna;
                         break;
                     case NBFI_PARAM_DL_ADD:
-                        for(uint8_t i = 0; i != 3; i++)  buf[1 + i] = nbfi.dl_ID[i];
+                        bigendian_cpy((uint8_t*)&nbfi.dl_ID, &buf[1], 4);
+                        //for(uint8_t i = 0; i != 4; i++)  buf[1 + i] = ((uint8_t*)&nbfi.dl_ID)[i];
                         break;
-                    case NBFI_PARAM_BROADCAST_ADD:
+                    /*case NBFI_PARAM_BROADCAST_ADD:
                         for(uint8_t i = 0; i != 3; i++)  buf[1 + i] = nbfi.broadcast_ID[i];
-                        break;
+                        break;*/
                     case NBFI_PARAM_HEART_BEAT:
                         buf[1] = nbfi.heartbeat_num;
                         buf[2] = nbfi.heartbeat_interval >> 8;
@@ -439,6 +436,7 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
 
             case WRITE_PARAM_AND_SAVE_CMD:
                 NBFi_Config_Set_Default();
+
             case WRITE_PARAM_CMD:
                 memcpy_xdata(&nbfi_prev, &nbfi, sizeof(nbfi));
                 switch(buf[0]&0x3f)
@@ -469,7 +467,9 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         if(buf[2] != 0xff) nbfi.mack_mode = (nbfi_mack_mode_t)buf[2];
                         break;
                     case NBFI_PARAM_MAXLEN:
+                        #ifdef NBFI_USE_MALLOC
                         nbfi.max_payload_len = buf[1];
+                        #endif
                         break;
                     case NBFI_PARAM_TXFREQ:
                         bigendian_cpy(&buf[1], (uint8_t*)&nbfi.tx_freq, 4);
@@ -486,11 +486,12 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         if(buf[3] != 0xff) {nbfi.rx_antenna = buf[3]; rf_state = STATE_CHANGED;}
                         break;
                     case NBFI_PARAM_DL_ADD:
-                        for(uint8_t i = 0; i != 3; i++)  nbfi.dl_ID[i] = buf[1 + i];
+                        bigendian_cpy(&buf[1], (uint8_t*)&nbfi.dl_ID, 4);
+                        //for(uint8_t i = 0; i != 4; i++)  nbfi.dl_ID[i] = buf[1 + i];
                         break;
-                    case NBFI_PARAM_BROADCAST_ADD:
+                    /*case NBFI_PARAM_BROADCAST_ADD:
                         for(uint8_t i = 0; i != 3; i++)  nbfi.broadcast_ID[i] = buf[1 + i];
-                        break;                       
+                        break; */                      
                     case NBFI_PARAM_HEART_BEAT:
                         nbfi.heartbeat_num = buf[1];
                         nbfi.heartbeat_interval  = buf[2];
@@ -507,13 +508,13 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         bigendian_cpy(&buf[1], (uint8_t*)&nbfi.dl_freq_base, 4);
                         break;
                     default:
-                        nbfi_settings_changed = 0;
                         return 0;
                         break;
                 }
                 if(buf[0]>>6 == WRITE_PARAM_AND_SAVE_CMD)
                 {
-                    NBFi_WriteConfig();
+                    //NBFi_WriteConfig();
+                    nbfi_settings_need_to_save_to_flash = 1;
                     NBFi_Config_Send_Sync(0);
                     return 0;
                 }
@@ -534,49 +535,62 @@ void NBFi_Config_Return()
    // if(nbfi.mode == NRX) nbfi.handshake_mode = HANDSHAKE_NONE;
     NBFi_Config_Send_Sync(0);
 }
-
+/*
 void NBFi_Configure_IDs()
 {
-    nbfi.full_ID[0] = FULL_ID[3];
-    nbfi.full_ID[1] = FULL_ID[2];
-    nbfi.full_ID[2] = FULL_ID[1];
-    nbfi.full_ID[3] = FULL_ID[0];
-    nbfi.full_ID[4] = 0;
-    nbfi.full_ID[5] = 0;
-    nbfi.temp_ID[0] = nbfi.full_ID[1];
-    nbfi.temp_ID[1] = nbfi.full_ID[2];
-    nbfi.temp_ID[2] = nbfi.full_ID[3];
+    //nbfi.full_ID[0] = FULL_ID[3];
+    //nbfi.full_ID[1] = FULL_ID[2];
+    //nbfi.full_ID[2] = FULL_ID[1];
+    //nbfi.full_ID[3] = FULL_ID[0];
+    //nbfi.full_ID[4] = 0;
+    //nbfi.full_ID[5] = 0;
+    //nbfi.temp_ID[0] = FULL_ID[2];
+    //nbfi.temp_ID[1] = FULL_ID[1];
+    //nbfi.temp_ID[2] = FULL_ID[0];
 
-}
+}*/
 
 void NBFi_Config_Set_Default()
 {
-    NBFi_ReadConfig();
+    NBFi_ReadConfig(0);
 
-    NBFi_Configure_IDs();
-
-    for(uint8_t i = 0; i != 3; i++) nbfi.dl_ID[i] = nbfi.temp_ID[i];   //default DL address
-
-    srand(nbfi.full_ID[0] ^ nbfi.full_ID[1] ^ nbfi.full_ID[2] ^ nbfi.full_ID[3] ^ nbfi.full_ID[4] ^ nbfi.full_ID[5]);
+    srand(FULL_ID[0] ^ FULL_ID[1] ^ FULL_ID[2] ^ FULL_ID[3]);
 
     NBFi_Config_Set_TX_Chan(nbfi.tx_phy_channel);
     NBFi_Config_Set_RX_Chan(nbfi.rx_phy_channel);
 
     you_should_dl_power_step_down = 0;
-
+   
     if(nbfi_active_pkt->state == PACKET_WAIT_ACK) 
-      NBFi_Close_Active_Packet();//nbfi_active_pkt->state = PACKET_LOST;
-
+      NBFi_Close_Active_Packet();
 }
 
+_Bool NBFi_Config_Try_Alternative()
+{
+  static uint8_t try_counter = 1;
+  for(uint8_t i = 0; i != NBFI_ALTERNATIVES_NUMBER; i++)
+  {
+    if(nbfi.try_alternative[i].try_interval == 0) break;
+    if((try_counter++%nbfi.try_alternative[i].try_interval) == 0)
+    {
+        NBFi_Config_Set_TX_Chan(nbfi.try_alternative[i].try_tx_phy_channel);
+        NBFi_Config_Set_RX_Chan(nbfi.try_alternative[i].try_rx_phy_channel);
+        nbfi.nbfi_freq_plan = nbfi.try_alternative[i].try_nbfi_freq_plan;
+        return 1;
+    }
+  }
+  return 0;
+}
+
+
+/*
 void NBFi_Config_Set_FastDl(_Bool fast, _Bool save_settings)
 {
   
     static nbfi_settings_t settings;
     static nbfi_state_t state; 
-    nbfi_lock = 1;
-    //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(1);
-    
+    __nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+   
     if(fast)
     {
         if(save_settings) 
@@ -611,11 +625,10 @@ void NBFi_Config_Set_FastDl(_Bool fast, _Bool save_settings)
 
     if(rf_state == STATE_RX) NBFi_MAC_RX();
     
-    nbfi_lock = 0;
-    //if(__nbfi_lock_unlock_nbfi_irq) __nbfi_lock_unlock_nbfi_irq(0);
+    __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
 }
 
-
+*/
 
 _Bool NBFi_Config_Tx_Idle()
 {
@@ -630,48 +643,25 @@ _Bool NBFi_Config_Tx_Idle()
         }
 }
 
-void NBFi_Set_Iterator()
-{
-	if (__nbfi_set_iterator)
-		__nbfi_set_iterator(&nbfi_iter);
-}
 
-void NBFi_Get_Iterator()
+void NBFi_ReadConfig(nbfi_settings_t * settings)
 {
-	if (__nbfi_get_iterator)
-		__nbfi_get_iterator(&nbfi_iter);
-}
-
-void NBFi_ReadConfig()
-{
+        if(settings == 0) settings = &nbfi;
 	if(__nbfi_read_flash_settings == 0) goto read_default;
 
-	__nbfi_read_flash_settings(&nbfi);
+	__nbfi_read_flash_settings(settings);
 
-	if((nbfi.tx_phy_channel != 0xff) && (nbfi.tx_phy_channel != 0)) return;
+	if((settings->tx_phy_channel != 0xff) && (settings->tx_phy_channel != 0)) return;
 
 read_default:
 
-	if(__nbfi_read_default_settings) __nbfi_read_default_settings(&nbfi);
+	if(__nbfi_read_default_settings) __nbfi_read_default_settings(settings);
+        
+#ifndef NBFI_USE_MALLOC
+    if((settings == 0) &&(nbfi.max_payload_len > NBFI_PACKET_SIZE)) nbfi.max_payload_len = NBFI_PACKET_SIZE;
+#endif
 
 }
-
-void NBFi_WriteConfig()
-{
-	if(__nbfi_write_flash_settings == 0) 
-		return;
-	__nbfi_write_flash_settings(&nbfi);
-}
-
-void NBFi_Clear_Saved_Configuration()
-{
-	if(__nbfi_write_flash_settings == 0) 
-		return;
-	nbfi_settings_t empty;
-	empty.tx_phy_channel = DL_PSK_200;
-	__nbfi_write_flash_settings(&empty);
-}
-
 
 void NBFi_Config_Set_TX_Chan(nbfi_phy_channel_t ch)
 {
@@ -701,25 +691,12 @@ void NBFi_Config_Set_RX_Chan(nbfi_phy_channel_t ch)
     }
 }
 
-_Bool NBFi_Is_Mode_Normal()
+_Bool NBFi_Config_is_settings_default()
 {
-    return (nbfi.tx_phy_channel != UL_PSK_FASTDL);
-}
-
-extern uint32_t info_timer;
-void NBFi_Config_Set_Device_Info(nbfi_dev_info_t *info)
-{
-	dev_info = *info;
-	if(info->key != 0)
-        {
-          NBFi_Get_Iterator();
-          if(dev_info.key) 
-                  NBFi_Crypto_Set_KEY(dev_info.key, nbfi_iter.ul, nbfi_iter.dl);
-        }
-        info_timer = dev_info.send_info_interval - 300 - rand()%600;
-}
-
-nbfi_settings_t* NBFi_get_settings()
-{
-    return &nbfi;
+  nbfi_settings_t settings;
+  NBFi_ReadConfig(&settings);
+  if((nbfi.rx_phy_channel != settings.rx_phy_channel)) return 0;
+  if((nbfi.tx_phy_channel != settings.tx_phy_channel)) return 0;
+  if((nbfi.nbfi_freq_plan.fp != settings.nbfi_freq_plan.fp)) return 0;
+  return 1;
 }

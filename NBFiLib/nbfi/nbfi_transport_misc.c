@@ -12,6 +12,14 @@ nbfi_transport_packet_t  nbfi_RX_pktBuf[NBFI_RX_PKTBUF_SIZE];
 
 uint8_t     nbfi_TXbuf_head = 0;
 
+uint16_t sent_id = 0;
+uint8_t     nbfi_sent_buf_head = 0;
+nbfi_ul_sent_status_t NBFi_sent_UL_stat_Buf[NBFI_SENT_STATUSES_BUF_SIZE];
+
+uint16_t receive_id = 0;
+uint8_t  nbfi_receive_buf_head = 0;
+nbfi_dl_received_t NBFi_received_DL_Buf[NBFI_RECEIVED_BUF_SIZE];
+
 nbfi_transport_packet_t* NBFi_Get_TX_Packet_Ptr(uint8_t index)
 {
     #ifdef NBFI_USE_MALLOC
@@ -31,17 +39,6 @@ nbfi_transport_packet_t* NBFi_Get_RX_Packet_Ptr(uint8_t index)
     else return &nbfi_RX_pktBuf[index];
     #endif
 }
-
-/*
-void NBFi_Free_Packet(nbfi_transport_packet_t* pkt)
-{
-    #ifdef NBFI_USE_MALLOC
-    free(pkt);
-    //pkt = 0;
-    #else
-    if(pkt->state = PACKET_FREE);
-    #endif
-}*/
 
 nbfi_transport_packet_t* NBFi_AllocateTxPkt(uint8_t payload_length)
 {
@@ -95,6 +92,7 @@ nbfi_transport_packet_t* NBFi_AllocateTxPkt(uint8_t payload_length)
 
     pointer->phy_data.header = 0;
 
+    pointer->id = 0;
     nbfi_TXbuf_head++;
 
     return pointer;
@@ -121,7 +119,6 @@ nbfi_transport_packet_t* NBFi_AllocateRxPkt(uint8_t header, uint8_t payload_leng
     
     if(pointer)
     {
-        //NBFi_Free_Packet(pointer);
         #ifdef NBFI_USE_MALLOC
         free(pointer);
         nbfi_RX_pktBuf[ptr] = 0;
@@ -467,11 +464,13 @@ nbfi_transport_packet_t* NBFi_Get_QueuedRXPkt(uint8_t *groupe, uint16_t *total_l
     return 0;
 }
 
-void NBFi_Clear_RX_Buffer()
+void NBFi_Clear_RX_Buffer(int8_t besides)
 {
     for(uint8_t i = 0; i != NBFI_RX_PKTBUF_SIZE; i++ )
     {
-        if(NBFi_Get_RX_Packet_Ptr(i)->state != PACKET_RECEIVED) NBFi_Get_RX_Packet_Ptr(i)->state = PACKET_CLEARED;
+       // if(NBFi_Get_RX_Packet_Ptr(i)->state != PACKET_RECEIVED) 
+        if ((besides != -1) && (besides == NBFi_Get_RX_Packet_Ptr(i)->phy_data.ITER)) NBFi_Get_RX_Packet_Ptr(i)->state = PACKET_RECEIVED;
+        else NBFi_Get_RX_Packet_Ptr(i)->state = PACKET_CLEARED;
     }
 }
 
@@ -586,6 +585,7 @@ void NBFi_Resend_Pkt(nbfi_transport_packet_t* act_pkt, uint32_t mask)
           mask &= ~one;
           if(++pkt->retry_num > NBFi_Get_Retry_Number()) 
           {
+            NBFi_Set_UL_Status(pkt->id, LOST);
             NBFi_Close_Active_Packet();
             //pkt->state = PACKET_LOST;
           }
@@ -611,10 +611,14 @@ void NBFi_Resend_Pkt(nbfi_transport_packet_t* act_pkt, uint32_t mask)
         if(act_pkt->phy_data.ITER < last_resending_pkt->phy_data.ITER) last_resending_pkt->mack_num += 32;
         last_resending_pkt->mack_num |= 0x80;
     }
-    else if(/*(act_pkt->mack_num > 1) && */(mask == 0))  //all packets delivered, send message to clear receiver's input buffer
+    else 
     {
-         NBFi_Send_Clear_Cmd(nbfi_active_pkt->phy_data.ITER);
-    }
+      if((mask == 0))  //all packets delivered, send message to clear receiver's input buffer
+      {
+           NBFi_Send_Clear_Cmd(nbfi_active_pkt->phy_data.ITER);
+      }
+      NBFi_Set_UL_Status(nbfi_active_pkt->id, DELIVERED);
+   }
 
 }
 
@@ -665,3 +669,101 @@ uint8_t NBFi_Get_Retry_Number()
     return (nbfi.num_of_retries&0x0f) + (nbfi.num_of_retries >> 4);
   else return nbfi.num_of_retries&0x0f;
 }
+
+
+nbfi_ul_sent_status_t* NBFi_Queue_Next_UL()
+{
+  nbfi_ul_sent_status_t* next = &NBFi_sent_UL_stat_Buf[nbfi_sent_buf_head++%NBFI_SENT_STATUSES_BUF_SIZE];
+    
+  next->id = ++sent_id;
+  next->status = QUEUED;
+  next->reported = 0;
+  return next;
+}
+
+void NBFi_Set_UL_Status(uint8_t id, nbfi_ul_status_t status)
+{
+  for(uint8_t i = nbfi_sent_buf_head - NBFI_SENT_STATUSES_BUF_SIZE; i != nbfi_sent_buf_head; i++)
+  {
+    nbfi_ul_sent_status_t* ul = &NBFi_sent_UL_stat_Buf[i%NBFI_SENT_STATUSES_BUF_SIZE];
+    if(ul->id && ((ul->id&0xff) == id)) 
+    {
+      ul->reported = 0;
+      ul->status = status;
+      break;
+    }
+  }
+}
+
+nbfi_ul_sent_status_t* NBFi_Get_Next_Unreported_UL(nbfi_ul_status_t status)
+{
+  for(uint8_t i = nbfi_sent_buf_head - NBFI_SENT_STATUSES_BUF_SIZE; i != nbfi_sent_buf_head; i++)
+  {
+    nbfi_ul_sent_status_t* ul = &NBFi_sent_UL_stat_Buf[i%NBFI_SENT_STATUSES_BUF_SIZE];
+    if(!ul->reported && (ul->status == status)) 
+    {
+      ul->reported = 1;
+      return ul;
+    }
+  }
+  return 0;
+}
+
+nbfi_ul_status_t NBFi_Get_UL_status(uint16_t id)
+{
+  nbfi_ul_status_t status;
+  __nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+  for(uint8_t i = nbfi_sent_buf_head - NBFI_SENT_STATUSES_BUF_SIZE; i != nbfi_sent_buf_head; i++)
+  {
+    nbfi_ul_sent_status_t* ul = &NBFi_sent_UL_stat_Buf[i%NBFI_SENT_STATUSES_BUF_SIZE];
+    if(ul->id == id) 
+    {
+      ul->reported = 1;
+      status = ul->status;
+      __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+      return status;
+    }
+  }
+  __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+  return NOTEXIST;
+}
+
+
+void NBFi_Queue_Next_DL(uint8_t* data, uint16_t length)
+{
+  
+  nbfi_dl_received_t *next = &NBFi_received_DL_Buf[nbfi_receive_buf_head++%NBFI_RECEIVED_BUF_SIZE];
+  next->id = receive_id++;
+  next->length = length;  
+  next->ready = 1;
+  #ifdef NBFI_USE_MALLOC
+  if(next->payload) free(next->payload);
+  next->payload = (uint8_t *) malloc(length);
+  if(!next->payload) 
+  {
+    next->ready = 0;
+    return;
+  }
+  #endif
+  for(uint8_t i = 0; i!= length; i++) next->payload[i] = data[i];
+}
+
+uint8_t NBFi_Next_Ready_DL(uint8_t* data)
+{
+ for(uint8_t i = nbfi_receive_buf_head - NBFI_RECEIVED_BUF_SIZE; i != nbfi_receive_buf_head; i++)
+  {
+    nbfi_dl_received_t* dl = &NBFi_received_DL_Buf[i%NBFI_RECEIVED_BUF_SIZE];
+    if(dl->ready) 
+    {
+      for(uint8_t i = 0; i!= dl->length; i++) data[i] = dl->payload[i];
+      dl->ready = 0;
+      #ifdef NBFI_USE_MALLOC
+      if(dl->payload) {free(dl->payload); dl->payload = 0;}
+      #endif
+      return dl->length;
+    }
+  }
+  return 0;
+}
+
+

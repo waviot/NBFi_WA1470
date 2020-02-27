@@ -34,7 +34,6 @@
 #include "stm32l0xx_hal.h"
 #include "stm32l0xx.h"
 #include "stm32l0xx_it.h"
-#include "wtimer.h"    
 #include "rs485_uart.h"    
 #include "wa1470.h"
 /* External variables --------------------------------------------------------*/

@@ -12,24 +12,23 @@
 uint32_t last_pkt_crc = 0;
 
 void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_packet_t* info);
-void NBFi_Set_Iterator();
-void NBFi_Get_Iterator();
+
+
+static uint32_t NBFi_DL_ID()
+{
+  if(nbfi.dl_ID == 0) return *((uint32_t*)FULL_ID);
+  else return nbfi.dl_ID;
+}
 
 void NBFi_MAC_RX_ProtocolD(nbfi_mac_protd_packet_t* packet, nbfi_mac_info_packet_t* info)
 {
 	if(NBFi_Crypto_Available())
 	{
-		uint32_t modem_id;
-
 		if (!NBFI_Crypto_mic_check(&packet->flags, 9, packet->mic, &nbfi_iter.dl, packet->iter))
 			return;
-		
-		modem_id = nbfi.dl_ID[2];
-		modem_id |= (uint32_t)nbfi.dl_ID[1] << 8;
-		modem_id |= (uint32_t)nbfi.dl_ID[0] << 16;
-
-		NBFi_Crypto_Decode(&packet->flags, modem_id, nbfi_iter.dl, 9);
-		NBFi_Set_Iterator();
+              
+		NBFi_Crypto_Decode(&packet->flags, NBFi_DL_ID(), nbfi_iter.dl, 9);
+		NBFi_MAC_Set_Iterator();
 	}
 
 	NBFi_ParseReceivedPacket((nbfi_transport_frame_t *)(&packet->flags), info);
@@ -42,32 +41,25 @@ static uint32_t NBFi_MAC_get_UL_freq(uint16_t lastcrc, _Bool parity)
 	{
 	case UL_DBPSK_50_PROT_D:
         case UL_DBPSK_400_PROT_D:
-                ul_freq = nbfi.ul_freq_base + (((*((const uint32_t*)FULL_ID)+lastcrc)%226)*100);
+                ul_freq = nbfi.ul_freq_base + (((*((uint32_t*)FULL_ID)+lastcrc)%226)*100);
 		if(parity) ul_freq = ul_freq + 27500;
                 break;
-          //case UL_DBPSK_3200_PROT_E:
 	case UL_DBPSK_3200_PROT_D:
-		ul_freq = nbfi.ul_freq_base + 1600 + (((*((const uint32_t*)FULL_ID)+lastcrc)%210)*100);
+		ul_freq = nbfi.ul_freq_base + 1600 + (((*((uint32_t*)FULL_ID)+lastcrc)%210)*100);
 		if(parity) ul_freq = ul_freq + 27500 - 1600;
-	//	if(nbfi.freq_plan == NBFI_FREQ_PLAN_SHIFTED_HIGHPHY) tx_freq -= 51200;
 		break;
-	//case UL_DBPSK_25600_PROT_E:
 	case UL_DBPSK_25600_PROT_D:
-		ul_freq = nbfi.ul_freq_base + 25600;// + 12800;// + (((*((const uint32_t*)FULL_ID)+lastcrc8)%210)*100);
-		//if(parity) tx_freq = tx_freq + 25600;
-	//	if(nbfi.freq_plan == NBFI_FREQ_PLAN_SHIFTED_HIGHPHY) tx_freq -= 51200;
+		ul_freq = nbfi.ul_freq_base + 25600;
 		break;
 	default:
           {
-		//tx_freq = nbfi.ul_freq_base + (((*((const uint32_t*)FULL_ID)+lastcrc)%226)*100);
-		//if(parity) tx_freq = tx_freq + 27500;
                 uint32_t width = 6400 * (1 << nbfi.nbfi_freq_plan.ul_width);
                 int32_t band_offset = width * nbfi.nbfi_freq_plan.ul_offset;
                 if(nbfi.nbfi_freq_plan.ul_sign) band_offset = -band_offset;
                 uint32_t bitrate = NBFi_Phy_To_Bitrate(nbfi.tx_phy_channel);
                 uint32_t gap = (width > (bitrate*2 + 2000))?(width - bitrate*2 - 2000)/2:0;
                 ul_freq = nbfi.ul_freq_base + band_offset;
-                uint32_t offset = ((*((const uint32_t*)FULL_ID)+lastcrc)%256)*gap/255;
+                uint32_t offset = ((*((uint32_t*)FULL_ID)+lastcrc)%256)*gap/255;
                 if(parity) ul_freq = ul_freq + offset;
                 else ul_freq = ul_freq - offset;
 
@@ -89,10 +81,9 @@ static uint32_t NBFi_MAC_get_DL_freq()
       uint32_t bitrate = NBFi_Phy_To_Bitrate(nbfi.rx_phy_channel);
       uint32_t gap = (width > (bitrate*2 + 2000))?(width - bitrate*2 - 2000)/2:0;
       dl_freq = nbfi.dl_freq_base + band_offset;
-      uint32_t offset = ((*((const uint32_t*)FULL_ID))%256)*gap/255;
-      if((*((const uint32_t*)FULL_ID))%2) dl_freq = dl_freq + offset;
+      uint32_t offset = (NBFi_DL_ID()%256)*gap/255;
+      if(NBFi_DL_ID()%2) dl_freq = dl_freq + offset;
                 else dl_freq = dl_freq - offset;
-      //dl_freq = nbfi.dl_freq_base + ((*((const uint32_t*)FULL_ID)%276)*363);
   }  
   else 
 	dl_freq = nbfi.rx_freq;
@@ -118,22 +109,22 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 	{
 		ul_buf[len++] = protD_preambula[i];
 	}
-
+        uint32_t *dl_id = &nbfi.dl_ID;
 	switch(nbfi.tx_phy_channel)
 	{
 	case DL_DBPSK_50_PROT_D:
 	case DL_DBPSK_400_PROT_D:
 	case DL_DBPSK_3200_PROT_D:
 	case DL_DBPSK_25600_PROT_D:
-		ul_buf[len++] = nbfi.dl_ID[0];
-		ul_buf[len++] = nbfi.dl_ID[1];
-		ul_buf[len++] = nbfi.dl_ID[2];
+		ul_buf[len++] = dl_id[2];
+		ul_buf[len++] = dl_id[1];
+		ul_buf[len++] = dl_id[0];
 		downlink = 1;
 		break;
 	default:
-		ul_buf[len++] = nbfi.temp_ID[0];
-		ul_buf[len++] = nbfi.temp_ID[1];
-		ul_buf[len++] = nbfi.temp_ID[2];
+		ul_buf[len++] = FULL_ID[2];
+		ul_buf[len++] = FULL_ID[1];
+		ul_buf[len++] = FULL_ID[0];
 		downlink = 0;
 		break;
 
@@ -156,11 +147,7 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 
 	if(NBFi_Crypto_Available())
 	{
-		uint32_t modem_id;
-		modem_id = nbfi.dl_ID[2];
-		modem_id |= (uint32_t)nbfi.dl_ID[1] << 8;
-		modem_id |= (uint32_t)nbfi.dl_ID[0] << 16;
-		NBFi_Crypto_Encode(&ul_buf[len], modem_id, 0, 8);
+		NBFi_Crypto_Encode(&ul_buf[len], *((uint32_t*)FULL_ID), 0, 8);
 	}
 	
 	len += 8;
@@ -223,10 +210,10 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 	static _Bool parity = 0;
 	uint32_t tx_freq;
 
-	ul_buf[len++] = nbfi.full_ID[0];
-	ul_buf[len++] = nbfi.full_ID[1];
-	ul_buf[len++] = nbfi.full_ID[2];
-	ul_buf[len++] = nbfi.full_ID[3];
+	ul_buf[len++] = FULL_ID[3];
+	ul_buf[len++] = FULL_ID[2];
+	ul_buf[len++] = FULL_ID[1];
+	ul_buf[len++] = FULL_ID[0];
 
 	if(nbfi.tx_phy_channel == DL_DBPSK_50_PROT_E)
 		nbfi.tx_phy_channel = UL_DBPSK_50_PROT_E;
@@ -244,11 +231,11 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 
 	if(NBFi_Crypto_Available())
 	{
-		uint32_t modem_id;		
-		modem_id = nbfi.dl_ID[2];
-		modem_id |= (uint32_t)nbfi.dl_ID[1] << 8;
-		modem_id |= (uint32_t)nbfi.dl_ID[0] << 16;
-		NBFi_Crypto_Encode(&ul_buf[len - 1], modem_id, nbfi_iter.ul, 9);
+		//uint32_t modem_id;		
+		//modem_id = FULL_ID[0];
+		//modem_id |= (uint32_t)FULL_ID[1] << 8;
+		//modem_id |= (uint32_t)FULL_ID[2] << 16;
+		NBFi_Crypto_Encode(&ul_buf[len - 1], *((uint32_t*)FULL_ID), nbfi_iter.ul, 9);
 		len += 8;
 	
 		uint32_t mic = NBFi_Crypto_UL_MIC(&ul_buf[len - 9], 9);
@@ -302,11 +289,12 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 
 	nbfi_state.UL_total++;
 
-	NBFi_Set_Iterator();
+	NBFi_MAC_Set_Iterator();
 
 	return OK;
 }
 
+/*
 _Bool NBFi_MAC_Match_ID(uint8_t * addr)
 {
 	uint8_t i;
@@ -323,7 +311,7 @@ _Bool NBFi_MAC_Match_ID(uint8_t * addr)
 		return 1;
 
 	return 0;
-}
+}*/
 
 nbfi_status_t NBFi_MAC_TX(nbfi_transport_packet_t* pkt)
 {
@@ -360,4 +348,16 @@ nbfi_status_t NBFi_MAC_TX(nbfi_transport_packet_t* pkt)
 nbfi_status_t NBFi_MAC_RX()
 {
 	return NBFi_RF_Init(nbfi.rx_phy_channel, (nbfi_rf_antenna_t)nbfi.rx_antenna, 0, NBFi_MAC_get_DL_freq());
+}
+
+void NBFi_MAC_Set_Iterator()
+{
+	if (__nbfi_set_iterator)
+		__nbfi_set_iterator(&nbfi_iter);
+}
+
+void NBFi_MAC_Get_Iterator()
+{
+	if (__nbfi_get_iterator)
+		__nbfi_get_iterator(&nbfi_iter);
 }

@@ -5,102 +5,32 @@
 #include "log.h"
 #include "defines.h"
 
-/*struct wtimer_desc test_desc;
-
-void send_data(struct wtimer_desc *desc) {
- 
-  const uint8_t string[] = "Hello, we are testing 3200bps receaiving stability. This huge packet is sending for giving a numerous quantity of packets";
-  NBFi_Send((uint8_t*)string, sizeof(string));
-  
-#ifdef BANKA
-    #include "nbfi.h"
-    #include "nbfi_config.h"
-    static uint32_t counter = 0;
-
-    uint8_t packet[8] = {0,0,0,0,0,0,0,0};
-
-    ScheduleTask(&test_desc, send_data, RELATIVE, SECONDS(1));
-   
-    if(NBFi_GetQueuedTXPkt()) return;
-
-    packet[0] = (counter/5)>>8;
-    packet[1] = (counter/5)&0xff;
-
-    if(counter > 2000) return;
-    if(counter == 0)
-    {
-        packet[2] = nbfi.tx_pwr;
-        NBFi_Send(packet, 8);
-        NBFi_Send(packet, 8);
-        counter = 1;
-    }
-
-    switch(counter++%5)
-    {
-         case 0:
-            if(--nbfi.tx_pwr < -9) nbfi.tx_pwr = 16;
-            nbfi.tx_phy_channel = UL_DBPSK_50_PROT_E;
-            break;
-        case 1:
-            nbfi.tx_phy_channel = UL_DBPSK_400_PROT_E;
-            break;
-        case 2:
-            nbfi.tx_phy_channel = UL_DBPSK_3200_PROT_E;
-            break;
-        case 3:
-            nbfi.tx_phy_channel = UL_DBPSK_25600_PROT_E;
-            break;
-        default:
-            ScheduleTask(&test_desc, send_data, RELATIVE, SECONDS(3));
-            return;
-            break;
-    }
-    packet[2] = nbfi.tx_pwr;
-    NBFi_Send(packet, 8);
-#else
-       
-    ScheduleTask(&test_desc, send_data, RELATIVE, SECONDS(1));
-
-#endif
-}
-*/
-
-
-
 void HAL_SYSTICK_Callback(void)
 {
 
 }
 
 
-
-nbfi_ul_sent_status_t last_send_status;
+//nbfi_ul_sent_status_t last_send_status;
 
 
 void nbfi_send_complete(nbfi_ul_sent_status_t ul)
 {
-  
-    char log_string[256];
-    sprintf(log_string, "UL #%d %s", ul.id, (ul.status == DELIVERED)?"DELIVERED":"LOST");
-    log_send_str(log_string);   
    
-    //const uint8_t string[] = "Hello, we are testing 3200bps receaiving stability. This huge packet is sending for giving a numerous quantity of packets";
-   
-    const uint8_t string[] = "Hello";
-   
+   /* uint8_t string[] = "Hello, we are testing 25600bps receiving stability. This huge packet is sending for giving a numerous quantity of packets";
+      
     if(ul.id == last_send_status.id)
+    {
+      string[0] = (ul.id>>8);
+      string[1] = (ul.id & 0xff);
       last_send_status = NBFi_Send((uint8_t*)string, sizeof(string));
+    }*/
     
 }
 
 void nbfi_receive_complete(uint8_t * data, uint16_t length)
 {
-    /*char log_string[256];
-    sprintf(log_string, "DL of %d bytes received", length);
-    log_send_str(log_string);   
-    if(stop) stop = 0;
-    else stop = 1;*/
-    NBFi_Send(data, length); //loopback
+
 }
 
 
@@ -119,18 +49,15 @@ int main(void)
 
   log_init();
   
-  //ScheduleTask(&test_desc, send_data, RELATIVE, SECONDS(1));
-  last_send_status = NBFi_Send("Hello!", sizeof("Hello!"));   
+  //last_send_status = NBFi_Send("Hello!", sizeof("Hello!"));   
   
   while (1) 
   {     
-      //NBFi_ProcessRxPackets(1);
-      
+     
       #ifdef PLOT_SPECTRUM
       plot_spectrum();
       #endif
-      
-      
+            
       NBFI_Main_Level_Loop();
       
       if (wa1470_cansleep()&& NBFi_can_sleep()) 

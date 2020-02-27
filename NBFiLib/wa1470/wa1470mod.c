@@ -1,5 +1,4 @@
 #include "wa1470.h"
-#include "scheduler.h"
 #include "log.h"
 #include <string.h>
 #include <stdio.h>
@@ -158,4 +157,9 @@ void wa1470mod_set_freq(uint32_t freq)
 			break;
 		}
 	}
+}
+
+_Bool wa1470mod_is_tx_in_progress()
+{
+  return (wa1470_spi_read8(MOD_STATUS)&MOD_STATUS_TX_IN_PROGRESS);
 }

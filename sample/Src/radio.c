@@ -68,10 +68,7 @@ const nbfi_settings_t nbfi_set_default =
     MACK_1,             //mack_mode
     2,                  //num_of_retries;
     8,                  //max_payload_len;
-    {0},                //dl_ID[3];
-    {0},                //temp_ID[3];
-    {0xFF,0,0},         //broadcast_ID[3];
-    {0},                //full_ID[6];
+    0,                  //dl_ID[4];
     868800000 + 20000,                  //tx_freq;
     0,//858090000,//868791000,//0,//868790000,//0,//868735500,//868710000,//868800000,                  //rx_freq;
     PCB,                //tx_antenna;
@@ -82,23 +79,30 @@ const nbfi_settings_t nbfi_set_default =
     NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
     NBFI_UL_FREQ_BASE,
     NBFI_DL_FREQ_BASE,
-    NBFI_FREQ_PLAN_DEFAULT//NBFI_FREQ_PLAN_SHIFTED_HIGHPHY
+    NBFI_FREQ_PLAN_DEFAULT,
+    {
+      NBFI_VOID_ALTERNATIVE,
+      NBFI_VOID_ALTERNATIVE,
+      NBFI_VOID_ALTERNATIVE,
+      NBFI_VOID_ALTERNATIVE
+    }
 };
 #else
+
+#define TRY_LOW_PHY_ALTERNATIVE   {4, UL_DBPSK_50_PROT_E, DL_DBPSK_50_PROT_D, NBFI_UL_FREQ_PLAN_NO_CHANGE + NBFI_DL_FREQ_PLAN_NO_CHANGE} 
+
+#define TRY_MINIMAL_UL_BAND_AND_LOW_PHY_ALTERNATIVE   {8, UL_DBPSK_50_PROT_E, DL_DBPSK_50_PROT_D, NBFI_FREQ_PLAN_MINIMAL + NBFI_DL_FREQ_PLAN_NO_CHANGE}
 
 const nbfi_settings_t nbfi_set_default =
 {
     CRX,//mode;
-    UL_DBPSK_25600_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
-    DL_DBPSK_25600_PROT_D, // rx_phy_channel;
+    UL_DBPSK_400_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
+    DL_DBPSK_400_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
     MACK_1,             //mack_mode
     0x82,                  //num_of_retries;
     8,                  //max_payload_len;
-    {0},                //dl_ID[3];
-    {0},                //temp_ID[3];
-    {0xFF,0,0},         //broadcast_ID[3];
-    {0},                //full_ID[6];
+    0,                  //dl_ID;
     0,                  //tx_freq;
     0,//858090000,//868791000,//0,//868790000,//0,//868735500,//868710000,//868800000,                  //rx_freq;
     PCB,                //tx_antenna;
@@ -109,7 +113,13 @@ const nbfi_settings_t nbfi_set_default =
     0,//NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
     NBFI_UL_FREQ_BASE,
     NBFI_DL_FREQ_BASE,
-    NBFI_UL_FREQ_PLAN_51200_0 + NBFI_FREQ_PLAN_MINIMAL
+    NBFI_UL_FREQ_PLAN_51200_0 + NBFI_FREQ_PLAN_MINIMAL,
+    {
+      TRY_MINIMAL_UL_BAND_AND_LOW_PHY_ALTERNATIVE,
+      TRY_LOW_PHY_ALTERNATIVE,
+      NBFI_VOID_ALTERNATIVE,
+      NBFI_VOID_ALTERNATIVE
+    }
 };
 #endif
 
@@ -700,9 +710,9 @@ void radio_init(void)
 
 	nbfi_dev_info_t info = {MODEM_ID, (uint32_t*)KEY, TX_MIN_POWER, TX_MAX_POWER, MANUFACTURER_ID, HARDWARE_TYPE_ID, PROTOCOL_ID, BAND, SEND_INFO_PERIOD};
 
-	NBFi_Config_Set_Device_Info(&info);
+	NBFi_set_Device_Info(&info);
 
-	NBFi_Clear_Saved_Configuration(); //if you need to clear previously saved nbfi configuration in EEPROM
+	NBFi_clear_Saved_Configuration(); //if you need to clear previously saved nbfi configuration in EEPROM
 
 	wa1470_reg_func(WARADIO_DATA_RECEIVED, (void*)NBFi_MAC_RX_ProtocolD);
 	wa1470_reg_func(WARADIO_TX_FINISHED, (void*)NBFi_RF_TX_Finished);

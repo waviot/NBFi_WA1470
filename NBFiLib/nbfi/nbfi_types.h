@@ -22,6 +22,8 @@
 
 #define NBFI_PACKET_SIZE        8 //neccessary if no malloc used
 
+#define NBFI_ALTERNATIVES_NUMBER    4
+
 /*NBFi transport layer frame struct*/
 typedef struct
 {
@@ -170,6 +172,14 @@ typedef union
   };
 } nbfi_freq_plan_t;
 
+typedef struct
+{
+    uint8_t try_interval;
+    nbfi_phy_channel_t	try_tx_phy_channel;
+    nbfi_phy_channel_t 	try_rx_phy_channel;
+    nbfi_freq_plan_t try_nbfi_freq_plan;
+}nbfi_try_alternative_t;
+
 
 typedef enum
 {
@@ -185,33 +195,30 @@ typedef enum
     SMA = 1        //SMA or ANT 2
 }nbfi_rf_antenna_t;
 
-
 typedef struct
 {
-    nbfi_mode_t 		mode;
+    nbfi_mode_t 	mode;
     nbfi_phy_channel_t	tx_phy_channel;
     nbfi_phy_channel_t 	rx_phy_channel;
     nbfi_handshake_t	handshake_mode;
     nbfi_mack_mode_t	mack_mode;
-    uint8_t     num_of_retries;
-    uint8_t     max_payload_len;
-    uint8_t     dl_ID[3];
-    uint8_t     temp_ID[3];
-    uint8_t     broadcast_ID[3];
-    uint8_t     full_ID[6];
-    uint32_t    tx_freq;
-    uint32_t    rx_freq;
-    uint8_t     tx_antenna;
-    uint8_t     rx_antenna;
-    int8_t      tx_pwr;
-    uint16_t    heartbeat_interval;
-    uint8_t     heartbeat_num;
-    uint8_t     additional_flags;
-    uint32_t    ul_freq_base;
-    uint32_t    dl_freq_base;
-    nbfi_freq_plan_t     nbfi_freq_plan;
-    uint8_t     reserved[1];
+    uint8_t             num_of_retries;
+    uint8_t             max_payload_len;
+    uint32_t            dl_ID;
+    uint32_t            tx_freq;
+    uint32_t            rx_freq;
+    uint8_t             tx_antenna;
+    uint8_t             rx_antenna;
+    int8_t              tx_pwr;
+    uint16_t            heartbeat_interval;
+    uint8_t             heartbeat_num;
+    uint8_t             additional_flags;
+    uint32_t            ul_freq_base;
+    uint32_t            dl_freq_base;
+    nbfi_freq_plan_t    nbfi_freq_plan;
+    nbfi_try_alternative_t try_alternative[NBFI_ALTERNATIVES_NUMBER];
 }nbfi_settings_t;
+
 
 typedef struct
 {
@@ -241,15 +248,16 @@ typedef enum
 
 typedef struct
 {
+
   union
   {
+          uint8_t byte;
           struct
           {
               uint8_t RTC_MSB          : 6;//LSB
               uint8_t DL_SPEED_NOT_MAX : 1;
               uint8_t UL_SPEED_NOT_MAX : 1;
           };
-          uint8_t byte;
   } info;
   nbfi_freq_plan_t fp;
 } NBFi_station_info_s;

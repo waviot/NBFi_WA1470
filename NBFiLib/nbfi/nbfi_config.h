@@ -37,6 +37,7 @@ extern uint8_t you_should_dl_power_step_down;
 extern uint8_t current_tx_rate;
 extern uint8_t current_rx_rate;
 
+extern _Bool nbfi_settings_need_to_save_to_flash;
 //aditional flags:
 #define NBFI_FLG_FIXED_BAUD_RATE                0x01
 #define NBFI_FLG_NO_RESET_TO_DEFAULTS           0x02
@@ -69,20 +70,28 @@ extern uint8_t current_rx_rate;
 #define UL866975_DL865000            13 //INDIA
 
 //FREQENCY PLANS
+#define NBFI_UL_FREQ_PLAN_NO_CHANGE             (64<<6)
+#define NBFI_DL_FREQ_PLAN_NO_CHANGE             8
 #define NBFI_FREQ_PLAN_MINIMAL                  0
+#define NBFI_DL_FREQ_PLAN_FAULT                 7
 #define NBFI_UL_FREQ_PLAN_51200_0               (384<<6)
+
+#define NBFI_VOID_ALTERNATIVE   {0, UNDEFINED, UNDEFINED, NBFI_UL_FREQ_PLAN_NO_CHANGE + NBFI_DL_FREQ_PLAN_NO_CHANGE}
+
+
 
 #define FULL_ID     ((uint8_t*)(&dev_info.modem_id))
 
 extern NBFi_station_info_s nbfi_station_info;
 
-void NBFI_Config_Check_State();
-_Bool NBFi_Config_Tx_Power_Change(nbfi_rate_direct_t dir);
-void NBFi_Config_Return();
-void NBFi_Config_Set_Default();
-void NBFi_ReadConfig();
-void NBFi_WriteConfig();
-void NBFi_Config_Set_TX_Chan(nbfi_phy_channel_t ch);
-void NBFi_Config_Set_RX_Chan(nbfi_phy_channel_t ch);
-
+void    NBFI_Config_Check_State();
+_Bool   NBFi_Config_Tx_Power_Change(nbfi_rate_direct_t dir);
+void    NBFi_Config_Return();
+void    NBFi_Config_Set_Default();
+_Bool   NBFi_Config_Parser(uint8_t* buf);
+void    NBFi_ReadConfig(nbfi_settings_t * settings);
+void    NBFi_Config_Set_TX_Chan(nbfi_phy_channel_t ch);
+void    NBFi_Config_Set_RX_Chan(nbfi_phy_channel_t ch);
+_Bool   NBFi_Config_is_settings_default();
+_Bool   NBFi_Config_Try_Alternative();
 #endif // NBFI_CONFIG_H

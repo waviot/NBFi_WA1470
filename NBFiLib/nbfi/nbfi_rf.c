@@ -70,6 +70,7 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
     case DL_DBPSK_400_PROT_D:
     case DL_DBPSK_3200_PROT_D:
     case DL_DBPSK_25600_PROT_D:
+    case DL_DBPSK_100H_PROT_D:
         if(__nbfi_before_rx) __nbfi_before_rx();
         wa1470dem_rx_enable(1);
         
@@ -140,6 +141,10 @@ void NBFi_RF_TX_Finished()
   NBFi_TX_Finished();
 }
 
+_Bool NBFi_is_TX_in_progress()
+{
+  return wa1470mod_is_tx_in_progress();
+}  
 
 float NBFi_RF_get_noise()
 {

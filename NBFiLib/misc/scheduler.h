@@ -1,8 +1,6 @@
 #ifndef _scheduler_H
 #define _scheduler_H
 
-#include "defines.h"
-
 #ifdef WTIMER
 #include "wtimer.h"
 #define scheduler_desc wtimer_desc

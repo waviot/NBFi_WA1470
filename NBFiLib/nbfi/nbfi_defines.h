@@ -6,9 +6,11 @@
 
 //#define NBFI_NO_CRYPTO
 
-#define NBFI_LOG
+//#define NBFI_LOG
 
 //#define NBFI_USE_MALLOC
+
+//#define WTIMER
 
 #define NBFI_DEFAULT_MANUFACTURER_ID		        0x8888     //Waviot
 #define NBFI_DEFAULT_HARDWARE_TYPE_ID		        0 //UNDEFINED

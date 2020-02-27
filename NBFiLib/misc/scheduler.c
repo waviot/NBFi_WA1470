@@ -1,7 +1,5 @@
+#include "nbfi_defines.h"
 #include "scheduler.h"
-
-
-
 
 void scheduler_reg_func(uint8_t name, void *fn)
 {

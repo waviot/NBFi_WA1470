@@ -31,7 +31,7 @@
 #define MOD_TX_LAST_BIT			(MOD_SPI_OFFSET + 0x5)
 
 #define MOD_STATUS_TX_IN_PROGRESS		0x80
-#define MOD_STATUS_HOP_REPEAT_WARNING	0x40
+#define MOD_STATUS_HOP_REPEAT_WARNING	        0x40
 #define MOD_STATUS_IRQ_ON_TX_FLAG		0x10
 
 typedef enum
@@ -91,7 +91,7 @@ uint16_t wa1470mod_phy_to_bitrate(mod_bitrate_s bitrate);
 void wa1470mod_set_bitrate(mod_bitrate_s bitrate);
 void wa1470mod_send(uint8_t* data, mod_bitrate_s bitrate);
 void wa1470mod_set_freq(uint32_t freq);
-
+_Bool wa1470mod_is_tx_in_progress();
 #define wa1470_bpsk_pin_tx_finished wa1470_tx_finished
 
 #endif

@@ -1,4 +1,6 @@
 #include "nbfi.h"
+#include <string.h>
+#include <stdlib.h>
 
 void (* __nbfi_before_tx)() = 0;
 void (* __nbfi_before_rx)() = 0;
@@ -16,7 +18,7 @@ void (* __nbfi_reset)(void) = 0;
 void (* __nbfi_get_iterator)(nbfi_crypto_iterator_t*) = 0;
 void (* __nbfi_set_iterator)(nbfi_crypto_iterator_t*) = 0;
 
-
+_Bool switched_to_custom_settings = 0;
 
 void NBFI_reg_func(uint8_t name, void* fn)
 {
@@ -78,7 +80,7 @@ void NBFI_Init()
     NBFI_Transport_Init();
 }
 
-uint8_t NBFi_Get_Received_Packet(uint8_t * payload)
+uint8_t NBFi_get_Received_Packet(uint8_t * payload)
 {
   __nbfi_lock_unlock_loop_irq(NBFI_LOCK);
   uint8_t length = NBFi_Next_Ready_DL(payload);
@@ -95,7 +97,7 @@ void  NBFI_Main_Level_Loop()
       uint8_t payload[256];
       while(1)
       {
-        uint8_t length = NBFi_Get_Received_Packet(payload);
+        uint8_t length = NBFi_get_Received_Packet(payload);
         if(length) __nbfi_rx_handler(payload, length);
         else break;
       }
@@ -115,22 +117,32 @@ void  NBFI_Main_Level_Loop()
         else return;
       }
     }
+    
+   if(rtc_synchronised && __nbfi_rtc_synchronized) 
+   {
+     rtc_synchronised = 0;
+     __nbfi_rtc_synchronized(nbfi_rtc);
+   }
+   
+     if(nbfi_settings_need_to_save_to_flash && (__nbfi_write_flash_settings != 0)) 
+     {
+        __nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+        __nbfi_write_flash_settings(&nbfi);
+        nbfi_settings_need_to_save_to_flash = 0;
+        __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+     }
+   
 }
 
-
-//call this function at least 1 time per 1ms
-
-//#define AX_BPSK_PIN_GPIO_Port 	        GPIOB
-//#define AX_BPSK_PIN_Pin 		GPIO_PIN_12
 
 void   NBFI_Interrupt_Level_Loop()
 {
-  //HAL_GPIO_WritePin(AX_BPSK_PIN_GPIO_Port, AX_BPSK_PIN_Pin, GPIO_PIN_SET);
+
   scheduler_run_callbacks();
-  //HAL_GPIO_WritePin(AX_BPSK_PIN_GPIO_Port, AX_BPSK_PIN_Pin, GPIO_PIN_RESET);    
+ 
 }
 
-void NBFi_Go_To_Sleep(_Bool sleep)
+void NBFi_go_to_Sleep(_Bool sleep)
 {
     static _Bool old_state = 1;
     if(sleep)
@@ -162,8 +174,107 @@ uint8_t NBFi_can_sleep()
   return can;
 }
 
-nbfi_state_t* NBFi_get_state()
+void NBFi_get_state(nbfi_state_t * state)
 {
-    return &nbfi_state;
+  __nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+    memcpy(state, &nbfi_state , sizeof(nbfi_state_t));
+  __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
 }
 
+uint32_t NBFi_get_RTC()
+{
+  __nbfi_lock_unlock_loop_irq(NBFI_LOCK);    
+    NBFi_update_RTC();
+    uint32_t rtc = nbfi_rtc;
+  __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);    
+    return rtc;
+}
+
+void NBFi_set_RTC(uint32_t time)
+{
+    __nbfi_lock_unlock_loop_irq(NBFI_LOCK);    
+      NBFi_set_RTC_irq(time);
+    __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);    
+}
+
+void NBFi_set_Device_Info(nbfi_dev_info_t *info)
+{
+    __nbfi_lock_unlock_loop_irq(NBFI_LOCK);  
+    dev_info = *info;
+    if(info->key != 0)
+    {
+      NBFi_MAC_Get_Iterator();
+      NBFi_Crypto_Set_KEY(dev_info.key, nbfi_iter.ul, nbfi_iter.dl);
+    }
+    info_timer = dev_info.send_info_interval - 300 - rand()%600;
+    __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK); 
+}
+
+void NBFi_get_Settings(nbfi_settings_t* settings)
+{
+    __nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+    memcpy(settings, &nbfi , sizeof(nbfi_settings_t));
+  __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+}
+
+void NBFi_set_Settings(nbfi_settings_t* settings)
+{
+    __nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+    memcpy(&nbfi, settings , sizeof(nbfi_settings_t));
+  __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+}
+
+_Bool NBFi_send_Packet_to_Config_Parser(uint8_t* buf)
+{
+    __nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+    _Bool has_request = NBFi_Config_Parser(buf);
+    __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+    return has_request;
+}
+
+void NBFi_clear_Saved_Configuration()
+{
+	if(__nbfi_write_flash_settings == 0) 
+		return;
+	nbfi_settings_t empty;
+	empty.tx_phy_channel = DL_PSK_200;
+	__nbfi_write_flash_settings(&empty);
+}
+        
+void    NBFi_switch_to_another_settings(nbfi_settings_t* settings, _Bool to_or_from)
+{
+    static nbfi_settings_t old_settings;
+    static nbfi_state_t state; 
+    __nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+   
+    if(to_or_from)
+    {
+      memcpy(&old_settings, &nbfi, sizeof(nbfi_settings_t));
+      memcpy(&state, &nbfi_state, sizeof(nbfi_state_t));
+      
+      NBFi_Clear_TX_Buffer();
+           
+      memcpy(&nbfi, settings, sizeof(nbfi_settings_t));
+
+    }
+    else
+    {
+        NBFi_Clear_TX_Buffer();
+        memcpy(&nbfi_state, &state, sizeof(nbfi_state_t));
+        memcpy(&nbfi, &old_settings, sizeof(nbfi_settings_t));
+        NBFi_Config_Set_TX_Chan(old_settings.tx_phy_channel);
+        NBFi_Config_Set_RX_Chan(old_settings.rx_phy_channel);
+        rf_state = STATE_CHANGED;
+    }
+
+    if(rf_state == STATE_RX) NBFi_MAC_RX();
+    
+    switched_to_custom_settings = to_or_from;
+    
+    __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+}
+
+_Bool   NBFi_is_Switched_to_Custom_Settings()
+{
+  return switched_to_custom_settings;
+}

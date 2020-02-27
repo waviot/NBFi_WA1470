@@ -464,11 +464,13 @@ nbfi_transport_packet_t* NBFi_Get_QueuedRXPkt(uint8_t *groupe, uint16_t *total_l
     return 0;
 }
 
-void NBFi_Clear_RX_Buffer()
+void NBFi_Clear_RX_Buffer(int8_t besides)
 {
     for(uint8_t i = 0; i != NBFI_RX_PKTBUF_SIZE; i++ )
     {
-        if(NBFi_Get_RX_Packet_Ptr(i)->state != PACKET_RECEIVED) NBFi_Get_RX_Packet_Ptr(i)->state = PACKET_CLEARED;
+       // if(NBFi_Get_RX_Packet_Ptr(i)->state != PACKET_RECEIVED) 
+        if ((besides != -1) && (besides == NBFi_Get_RX_Packet_Ptr(i)->phy_data.ITER)) NBFi_Get_RX_Packet_Ptr(i)->state = PACKET_RECEIVED;
+        else NBFi_Get_RX_Packet_Ptr(i)->state = PACKET_CLEARED;
     }
 }
 

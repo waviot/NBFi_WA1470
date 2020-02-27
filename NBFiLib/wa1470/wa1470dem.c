@@ -1,5 +1,4 @@
 #include "wa1470.h"
-#include "scheduler.h"
 #include <string.h>
 #include <stdio.h>
 #include <log.h>
@@ -36,7 +35,7 @@ dem_bitrate_s current_rx_phy = DBPSK_100H_PROT_D;
 
 _Bool dem_rx_enabled = 0;
 
-uint8_t current_hop_table[8] = {DEM_MINUS90000,DEM_MINUS40000,DEM_PLUS40000,DEM_PLUS15000,DEM_MINUS15000,DEM_MINUS40000,DEM_MINUS65000,DEM_MINUS90000};
+uint8_t current_hop_table[8] = {DEM_MINUS90000,DEM_MINUS65000,DEM_PLUS40000,DEM_PLUS15000,DEM_MINUS15000,DEM_MINUS40000,DEM_MINUS65000,DEM_MINUS90000};
 
 const int32_t DEM_FREQ_OFFSETS[8] = {90000,65000,40000,15000,-15000,-40000,-65000,-90000};
 
@@ -180,7 +179,7 @@ static void  wa1470dem_process_messages(struct scheduler_desc *desc)
 void wa1470dem_isr(void) 
 {
 	uint8_t status;
-
+               
 	wa1470_spi_read(DEM_CONTROL, &status, 1);
 
 	if(!(status&DEM_CONTROL_IRQ_FLAG)) 

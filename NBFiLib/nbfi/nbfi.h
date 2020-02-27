@@ -52,26 +52,29 @@ extern void (* __nbfi_set_iterator)(nbfi_crypto_iterator_t*);
 #define NBFI_LOCK       1
 #define NBFI_UNLOCK     0
 
-void 	        NBFI_reg_func(uint8_t name, void*);
-void            NBFI_Init();
-void            NBFI_Main_Level_Loop();
-void            NBFI_Interrupt_Level_Loop();
-void            NBFi_Go_To_Sleep(_Bool sleep);
+void 	                NBFI_reg_func(uint8_t name, void*);
+void                    NBFI_Init();
+void                    NBFI_Main_Level_Loop();
+void                    NBFI_Interrupt_Level_Loop();
+void                    NBFi_go_to_Sleep(_Bool sleep);
 nbfi_ul_sent_status_t   NBFi_Send(uint8_t* payload, uint8_t length);
-nbfi_ul_status_t        NBFi_Get_UL_status(uint16_t id);
-uint8_t         NBFi_Get_Received_Packet(uint8_t * payload);
-void            NBFi_ProcessRxPackets();
-uint8_t         NBFi_Packets_To_Send();
-nbfi_state_t*   NBFi_get_state();
-uint8_t         NBFi_can_sleep();
-uint32_t        NBFi_get_RTC();
-void            NBFi_set_RTC(uint32_t time);
+nbfi_ul_status_t        NBFi_get_UL_status(uint16_t id);
+uint8_t                 NBFi_get_Received_Packet(uint8_t * payload);
 
-void            NBFi_Config_Set_Device_Info(nbfi_dev_info_t *);
-nbfi_settings_t* NBFi_get_settings();
-_Bool           NBFi_Config_Parser(uint8_t* buf);
-void            NBFi_Clear_Saved_Configuration();
-void            NBFi_Config_Set_FastDl(_Bool, _Bool);
-_Bool           NBFi_Is_Mode_Normal();
+uint8_t                 NBFi_Packets_To_Send();
+void                    NBFi_get_state(nbfi_state_t * state);
+uint8_t                 NBFi_can_sleep();
+uint32_t                NBFi_get_RTC();
+void                    NBFi_set_RTC(uint32_t time);
+
+void                    NBFi_set_Device_Info(nbfi_dev_info_t *);
+void                    NBFi_get_Settings(nbfi_settings_t*);
+void                    NBFi_set_Settings(nbfi_settings_t*);
+
+_Bool                   NBFi_send_Packet_to_Config_Parser(uint8_t* buf);
+
+void                    NBFi_clear_Saved_Configuration();
+void                    NBFi_switch_to_another_settings(nbfi_settings_t* settings, _Bool to_or_from);
+_Bool                   NBFi_is_Switched_to_Custom_Settings();
 
 #endif // NBFI_H

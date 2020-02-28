@@ -35,7 +35,7 @@ dem_bitrate_s current_rx_phy = DBPSK_100H_PROT_D;
 
 _Bool dem_rx_enabled = 0;
 
-uint8_t current_hop_table[8] = {DEM_MINUS90000,DEM_MINUS65000,DEM_PLUS40000,DEM_PLUS15000,DEM_MINUS15000,DEM_MINUS40000,DEM_MINUS65000,DEM_MINUS90000};
+uint8_t current_hop_table[8] = {DEM_MINUS90000,DEM_MINUS40000,DEM_PLUS40000,DEM_PLUS15000,DEM_MINUS15000,DEM_MINUS40000,DEM_MINUS65000,DEM_MINUS90000};
 
 const int32_t DEM_FREQ_OFFSETS[8] = {90000,65000,40000,15000,-15000,-40000,-65000,-90000};
 
@@ -276,7 +276,7 @@ void wa1470dem_set_bitrate(dem_bitrate_s bitrate)
 	break;
 	case DBPSK_25600_PROT_D:
 		wa1470_spi_write8(DEM_RX_MODE, 3);
-		wa1470rfe_set_rx_gain(RFE_DEFAULT_VGA_GAIN + 18);
+		wa1470rfe_set_rx_gain(RFE_DEFAULT_VGA_GAIN + 24);
 	break;
 	case DBPSK_100H_PROT_D:
 		wa1470_spi_write8(DEM_RX_MODE, 4);

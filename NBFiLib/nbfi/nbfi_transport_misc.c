@@ -675,7 +675,7 @@ nbfi_ul_sent_status_t* NBFi_Queue_Next_UL()
 {
   nbfi_ul_sent_status_t* next = &NBFi_sent_UL_stat_Buf[nbfi_sent_buf_head++%NBFI_SENT_STATUSES_BUF_SIZE];
     
-  next->id = ++sent_id;
+  next->id = (++sent_id)?sent_id:(++sent_id);
   next->status = QUEUED;
   next->reported = 0;
   return next;

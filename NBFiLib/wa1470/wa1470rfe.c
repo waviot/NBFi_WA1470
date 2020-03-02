@@ -1,32 +1,14 @@
 #include "wa1470rfe.h"
 #include "wa1470.h"
 
-//#define RFE_KOSTYL
-
-
 uint16_t rfe_rx_total_vga_gain;
 _Bool rfe_pll_mode_fractional = 0;
-extern void (*__wa1470_chip_enable)(void);
-extern void (*__wa1470_chip_disable)(void);
-extern void (*__wa1470_nop_dalay_ms)(uint32_t);
 
 void wa1470rfe_init()
 {
-	__wa1470_chip_enable();
+	wa1470_hal->__wa1470_chip_enable();
 	
         wa1470_spi_wait_for(RFE_INIT_DONE, 1, 0x01);
-
-#ifdef RFE_KOSTYL
-	///////////Kostyl/////////
-	HAL_GPIO_WritePin(GPIOB, GPIO_PIN_14, GPIO_PIN_RESET);
-	GPIO_InitTypeDef GPIO_InitStruct;
-	GPIO_InitStruct.Pin = GPIO_PIN_14;
-	GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-	GPIO_InitStruct.Pull = GPIO_NOPULL;
-	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
-	/////////////////////////
-#endif	
 
 	wa1470rfe_set_mode(RFE_MODE_IDLE);
 	wa1470_spi_write8(RFE_RX_MX_CTRL, 87);
@@ -42,22 +24,11 @@ void wa1470rfe_init()
 	wa1470_spi_write8(RFE_CLKGEN_SETTING_2, 100);
 	wa1470_spi_write8(RFE_ADC_Q_SETTINGS, 1);
 	wa1470_spi_write8(RFE_TX_DAC_CLK, 107);
-	wa1470_spi_write8(RFE_LOW_POWER, 16);
-
-#ifndef RFE_KOSTYL        
+	wa1470_spi_write8(RFE_LOW_POWER, 16);  
         wa1470_spi_write8(RFE_PLL_LOCK, 251);
         wa1470_spi_write8(RFE_POWER_CONTROL, 0xE0);
-#endif
-	wa1470_spi_write8(RFE_BB_TUNER, 127);
-      
-#ifdef RFE_KOSTYL
-       wa1470_spi_write8(RFE_POWER_CONTROL, 0x40); 
-       wa1470_spi_write8(RFE_CLOSE_PLL_LOOP, 226);
-       wa1470_spi_write8( ADDR_1_8_V_FRACTIONAL_PLL_MODE, 72);
-#endif
 
 	wa1470rfe_set_pll_mode(RFE_PLL_MODE_FRACTIONAL);
-        //wa1470rfe_set_pll_mode(RFE_PLL_MODE_INTEGER);
 	
 	if(send_by_dbpsk)
 		wa1470rfe_set_tx_mode(RFE_TX_MODE_BPSK);
@@ -75,8 +46,7 @@ void wa1470rfe_init()
 
 void wa1470rfe_deinit()
 {
-	if(__wa1470_chip_disable)
-		__wa1470_chip_disable();
+	wa1470_hal->__wa1470_chip_disable();
 }
 
 void wa1470rfe_set_mode(rfe_mode_s mode)

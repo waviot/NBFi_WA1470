@@ -134,13 +134,13 @@ void  NBFI_Main_Level_Loop()
    
 }
 
-
+/*
 void   NBFI_Interrupt_Level_Loop()
 {
 
   scheduler_run_callbacks();
  
-}
+}*/
 
 void NBFi_go_to_Sleep(_Bool sleep)
 {

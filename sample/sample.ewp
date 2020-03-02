@@ -321,6 +321,7 @@
           <state>$PROJ_DIR$\Drivers\STM32L0xx_HAL_Driver\Inc\Legacy</state>
           <state>$PROJ_DIR$\..\NBFiLib\gost_crypto\crypto</state>
           <state>$PROJ_DIR$\..\NBFiLib\preambula\preambula</state>
+          <state>$PROJ_DIR$\Drivers\Radio_HAL</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -2875,6 +2876,21 @@
     </group>
     <file>
       <name>$PROJ_DIR$\..\NBFiLib\nbfi\plot_spectrum.h</name>
+    </file>
+  </group>
+  <group>
+    <name>Radio_HAL</name>
+    <file>
+      <name>$PROJ_DIR$\Drivers\Radio_HAL\scheduler_hal.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Drivers\Radio_HAL\scheduler_hal.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Drivers\Radio_HAL\wa1470_hal.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Drivers\Radio_HAL\wa1470_hal.h</name>
     </file>
   </group>
   <group>

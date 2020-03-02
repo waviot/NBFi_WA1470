@@ -2744,6 +2744,21 @@
     </file>
   </group>
   <group>
+    <name>Radio_HAL</name>
+    <file>
+      <name>$PROJ_DIR$\Drivers\Radio_HAL\scheduler_hal.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Drivers\Radio_HAL\scheduler_hal.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Drivers\Radio_HAL\wa1470_hal.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Drivers\Radio_HAL\wa1470_hal.h</name>
+    </file>
+  </group>
+  <group>
     <name>src</name>
     <file>
       <name>$PROJ_DIR$\Src\main.c</name>

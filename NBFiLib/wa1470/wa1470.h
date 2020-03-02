@@ -6,27 +6,29 @@
 #include "wa1470mod.h"
 #include "nbfi_defines.h"
 
-#define WA1470_SEND_BY_I_Q_MODULATOR	0
+#define WA1470_SEND_BY_I_Q_MODULATOR	        0
 #define WA1470_SEND_BY_BPSK_PIN			1
 
-enum wa1470_func_name_t
+typedef struct 
 {
-	WARADIO_ENABLE_IRQ_PIN,
-	WARADIO_DISABLE_IRQ_PIN,
-	WARADIO_CHIP_ENABLE,
-	WARADIO_CHIP_DISABLE,
-	WARADIO_GET_IRQ_PIN,
-	WARADIO_SPI_RX,
-	WARADIO_SPI_TX,
-	WARADIO_SPI_TX_RX,
-	WARADIO_SPI_CS_WRITE,
-	WARADIO_DATA_RECEIVED,
-	WARADIO_TX_FINISHED,
-	WARADIO_NOP_DELAY_MS,
-	WARADIO_SEND_TO_BPSK_PIN
-};
+  void (*__wa1470_enable_pin_irq)(void);
+  void (*__wa1470_disable_pin_irq)(void);
+  void (*__wa1470_chip_enable)(void);
+  void (*__wa1470_chip_disable)(void);
+  uint8_t (*__wa1470_get_irq_pin_state)(void);
+  void (*__spi_rx)(uint8_t *, uint16_t);
+  void (*__spi_tx)(uint8_t *, uint16_t);
+  void (*__spi_cs_set)(uint8_t);
+  void (*__wa1470_data_received)(uint8_t *, uint8_t *);
+  void (*__wa1470_tx_finished)(void);
+  void (*__wa1470_nop_dalay_ms)(uint32_t);
+  void (*__wa1470_send_to_bpsk_pin)(uint8_t *, uint16_t, uint16_t);
+}wa1470_HAL_st;
 
-void wa1470_reg_func(uint8_t name, void * fn);
+
+extern wa1470_HAL_st *wa1470_hal;
+
+void wa1470_set_HAL(wa1470_HAL_st *);
 void wa1470_init(_Bool send_by_bpsk_pin, uint32_t modem_id);
 void wa1470_reinit();
 void wa1470_spi_write(uint16_t address, uint8_t *data, uint8_t length);

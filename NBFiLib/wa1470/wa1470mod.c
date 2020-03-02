@@ -13,8 +13,6 @@ const int32_t MOD_FREQ_OFFSETS[32] = {-97000,-89000,-83000,-90000,-79000,-73000,
 
 mod_bitrate_s current_tx_phy;
 
-extern void (*__wa1470_tx_finished)(void);
-extern void (*__wa1470_nop_dalay_ms)(uint32_t);
 void wa1470_bpsk_pin_send(uint8_t* data, mod_bitrate_s bitrate);
 void wa1470mod_init()
 {
@@ -25,7 +23,7 @@ void wa1470mod_init()
 
 static void	wa1470mod_call_TX_finished(struct scheduler_desc *desc)
 {
-	__wa1470_tx_finished();
+	if(wa1470_hal->__wa1470_tx_finished) wa1470_hal->__wa1470_tx_finished();
 }
 
 void wa1470_tx_finished()

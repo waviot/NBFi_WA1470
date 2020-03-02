@@ -1,6 +1,5 @@
 #include "wa1470.h"
 
-extern void (*__wa1470_send_to_bpsk_pin)(uint8_t *, uint16_t, uint16_t);
 void wa1470_bpsk_pin_send(uint8_t* data, mod_bitrate_s bitrate)
 {
 	uint8_t len; 
@@ -17,6 +16,6 @@ void wa1470_bpsk_pin_send(uint8_t* data, mod_bitrate_s bitrate)
 		len = 40;
 		break;
 	}
-	if(__wa1470_send_to_bpsk_pin)
-		__wa1470_send_to_bpsk_pin(data, len, wa1470mod_phy_to_bitrate(bitrate));
+	if(wa1470_hal->__wa1470_send_to_bpsk_pin)
+		wa1470_hal->__wa1470_send_to_bpsk_pin(data, len, wa1470mod_phy_to_bitrate(bitrate));
 }

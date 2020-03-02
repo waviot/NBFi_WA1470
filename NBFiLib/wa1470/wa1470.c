@@ -5,8 +5,7 @@
 
 #define SPI_WAIT_TIMEOUT		100000
 
-//void (*__wa1470_enable_global_irq)(void) = 0;
-//void (*__wa1470_disable_global_irq)(void) = 0;
+/*
 void (*__wa1470_enable_pin_irq)(void) = 0;
 void (*__wa1470_disable_pin_irq)(void) = 0;
 void (*__wa1470_chip_enable)(void) = 0;
@@ -20,10 +19,15 @@ void (*__wa1470_data_received)(uint8_t *, uint8_t *) = 0;
 void (*__wa1470_tx_finished)(void) = 0;
 void (*__wa1470_nop_dalay_ms)(uint32_t) = 0;
 void (*__wa1470_send_to_bpsk_pin)(uint8_t *, uint16_t, uint16_t) = 0;
+*/
+
+wa1470_HAL_st *wa1470_hal = 0;
+
 
 _Bool send_by_dbpsk;
 uint32_t wa1470_modem_id;
-void wa1470_reg_func(uint8_t name, void* fn)
+
+/*void wa1470_reg_func(uint8_t name, void* fn)
 {
 	switch(name)
 	{
@@ -69,36 +73,35 @@ void wa1470_reg_func(uint8_t name, void* fn)
 	default:
 		break;
 	}
+}*/
+
+void wa1470_set_HAL(wa1470_HAL_st *hal_ptr)
+{
+  wa1470_hal = hal_ptr;
 }
 
 void wa1470_spi_write(uint16_t address, uint8_t *data, uint8_t length)
 {
-        __wa1470_disable_pin_irq();
-	if(__spi_tx && __spi_cs_set)
-	{
-		__spi_cs_set(0);
-		address |= 0x8000;
-		__spi_tx(((uint8_t*)(&address)) + 1, 1);
-		__spi_tx(((uint8_t*)(&address)), 1);
-		__spi_tx(data, length);
-		__spi_cs_set(1);
-	}
-        __wa1470_enable_pin_irq();
+        wa1470_hal->__wa1470_disable_pin_irq();
+        wa1470_hal->__spi_cs_set(0);
+	address |= 0x8000;
+	wa1470_hal->__spi_tx(((uint8_t*)(&address)) + 1, 1);
+	wa1470_hal->__spi_tx(((uint8_t*)(&address)), 1);
+	wa1470_hal->__spi_tx(data, length);
+	wa1470_hal->__spi_cs_set(1);
+        wa1470_hal->__wa1470_enable_pin_irq();
 }
 
 void wa1470_spi_read(uint16_t address, uint8_t *data, uint8_t length)
 {
-        __wa1470_disable_pin_irq();
-	if(__spi_tx && __spi_rx && __spi_cs_set)
-	{
-		__spi_cs_set(0);
-		address &= 0x7fff;
-		__spi_tx(((uint8_t*)(&address)) + 1, 1);
-		__spi_tx(((uint8_t*)(&address)), 1);
-		__spi_rx(data, length);
-		__spi_cs_set(1);
-	}
-        __wa1470_enable_pin_irq();
+        wa1470_hal->__wa1470_disable_pin_irq();
+	wa1470_hal->__spi_cs_set(0);
+	address &= 0x7fff;
+	wa1470_hal->__spi_tx(((uint8_t*)(&address)) + 1, 1);
+	wa1470_hal->__spi_tx(((uint8_t*)(&address)), 1);
+	wa1470_hal->__spi_rx(data, length);
+	wa1470_hal->__spi_cs_set(1);
+	wa1470_hal->__wa1470_enable_pin_irq();
 }
 
 
@@ -127,6 +130,7 @@ _Bool wa1470_spi_wait_for(uint16_t address, uint8_t value, uint8_t mask)
 
 void wa1470_init(_Bool send_by_bpsk_pin, uint32_t modem_id)
 {
+        if(wa1470_hal == 0) while(1);  //HAL struct must be configured before library usage 
         send_by_dbpsk = send_by_bpsk_pin;
 	wa1470rfe_init();
 	wa1470dem_init(wa1470_modem_id = modem_id);
@@ -136,7 +140,7 @@ void wa1470_init(_Bool send_by_bpsk_pin, uint32_t modem_id)
 void wa1470_reinit()
 {
         wa1470rfe_deinit();
-        __wa1470_nop_dalay_ms(1);
+        wa1470_hal->__wa1470_nop_dalay_ms(1);
         wa1470rfe_init();
         wa1470dem_init(wa1470_modem_id);
   	wa1470mod_init(send_by_dbpsk); 

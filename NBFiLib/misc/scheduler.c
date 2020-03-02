@@ -1,6 +1,7 @@
 #include "nbfi_defines.h"
 #include "scheduler.h"
 
+/*
 void scheduler_reg_func(uint8_t name, void *fn)
 {
   #ifdef WTIMER  
@@ -64,6 +65,16 @@ void scheduler_reg_func(uint8_t name, void *fn)
 		break;
 	}
 #endif
+}
+*/
+
+void scheduler_set_HAL(scheduler_HAL_st *ptr)
+{
+  #ifdef WTIMER
+  wtimer_set_HAL(ptr);
+  #else 
+  watimer_set_HAL(ptr);
+  #endif
 }
 
 void scheduler_init()

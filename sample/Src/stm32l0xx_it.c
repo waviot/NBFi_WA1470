@@ -96,18 +96,6 @@ void SysTick_Handler(void)
 /* please refer to the startup file (startup_stm32l0xx.s).                    */
 /******************************************************************************/
 
-/**
-* @brief This function handles EXTI line 0 and line 1 interrupts.
-*/
-void EXTI0_1_IRQHandler(void)
-{
-  
-  HAL_GPIO_EXTI_IRQHandler(GPIO_PIN_0);
-  
-  wa1470_isr();
- 
-
-}
 
 void USART2_IRQHandler(void)
 {

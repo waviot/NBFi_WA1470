@@ -534,7 +534,7 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
         return;
    }
    //if((rf_busy == 0)&&(transmit == 0))
-   if((rf_busy == 0)&&!NBFi_is_TX_in_progress())
+   if((rf_busy == 0)&&!NBFi_RF_is_TX_in_Progress())
    {
         switch(nbfi_active_pkt->state)
         {
@@ -630,7 +630,7 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
 
     if(rf_state == STATE_CHANGED)  NBFi_RX_Controller();
   
-    if(nbfi.mode <= DRX && !NBFi_GetQueuedTXPkt() && (rf_busy == 0) && !NBFi_is_TX_in_progress() /*(transmit == 0)*/ )
+    if(nbfi.mode <= DRX && !NBFi_GetQueuedTXPkt() && (rf_busy == 0) && !NBFi_RF_is_TX_in_Progress())
     {
         NBFi_RX_Controller();
         if(rf_state == STATE_OFF) scheduler_add_task(desc, 0, RELATIVE, SECONDS(10));

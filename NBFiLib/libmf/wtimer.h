@@ -9,6 +9,7 @@
 #define ABSOLUTE    0
 #define RELATIVE    1
 
+
 uint8_t CheckTask(struct wtimer_desc *desc);
 void ScheduleTask(struct wtimer_desc *desc, wtimer_desc_handler_t handler, uint8_t relative, uint32_t time);
 
@@ -38,6 +39,7 @@ extern void wtimer0_addcore(struct wtimer_desc *desc);
 extern uint8_t wtimer0_removecb_core(struct wtimer_desc *desc);
 uint8_t wtimer_idle(uint8_t flags);
 
+/*
 enum wtimer_func_t
 {
 	WTIMER_GLOBAL_IRQ_ENABLE,
@@ -48,9 +50,29 @@ enum wtimer_func_t
 	WTIMER_GET_CC,
 	WTIMER_GET_CNT,
 	WTIMER_CHECK_CC_IRQ,
-};
+};*/
+
+
+typedef struct 
+{
+  void (* __global_irq_enable)(void);
+  void (* __global_irq_disable)(void);
+  void (* __cc_irq_enable)(uint8_t chan);
+  void (* __cc_irq_disable)(uint8_t chan);
+  void (* __loop_irq_enable)(void);
+  void (* __loop_irq_disable)(void); 
+  void (* __cc_set)(uint8_t chan, uint16_t data);
+  uint16_t (* __cc_get)(uint8_t chan);
+  uint16_t (* __cnt_get)(uint8_t chan);
+  uint8_t (* __check_cc_irq)(uint8_t chan);
+}wtimer_HAL_st;
+
+extern wtimer_HAL_st *wtimer_hal;
+
+void wtimer_set_HAL(wtimer_HAL_st *);
 
 void wtimer_cc0_irq(void);
-void wtimer_reg_func(uint8_t name, void *fn);
+
+//void wtimer_reg_func(uint8_t name, void *fn);
 
 #endif /* WTIMER_H */

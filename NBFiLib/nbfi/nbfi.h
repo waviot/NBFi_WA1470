@@ -7,8 +7,8 @@
 #include "nbfi_transport.h"
 #include "nbfi_transport_misc.h"
 #include "nbfi_crc.h"
-#include "nbfi_config.h"
 #include "nbfi_rf.h"
+#include "nbfi_config.h"
 #include "nbfi_mac.h"
 #include "nbfi_crypto.h"
 #include "scheduler.h"
@@ -55,7 +55,7 @@ extern void (* __nbfi_set_iterator)(nbfi_crypto_iterator_t*);
 void 	                NBFI_reg_func(uint8_t name, void*);
 void                    NBFI_Init();
 void                    NBFI_Main_Level_Loop();
-void                    NBFI_Interrupt_Level_Loop();
+//void                    NBFI_Interrupt_Level_Loop();
 void                    NBFi_go_to_Sleep(_Bool sleep);
 nbfi_ul_sent_status_t   NBFi_Send(uint8_t* payload, uint8_t length);
 nbfi_ul_status_t        NBFi_get_UL_status(uint16_t id);

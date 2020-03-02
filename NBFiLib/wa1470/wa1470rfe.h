@@ -46,13 +46,6 @@
 #define RFE_PLL_LOCK	        	0x401F
 
 
-
-/*#define	MODE_DEEP_SLEEP	(uint8_t) 128
-#define	MODE_SLEEP	 (uint8_t)64
-#define	MODE_IDLE	(uint8_t)32
-#define	MODE_TX (uint8_t) 16
-#define	MODE_RX	(uint8_t) 0*/
-
 typedef enum
 {
 	RFE_MODE_RX				= 0,
@@ -90,9 +83,6 @@ typedef enum
 
 void wa1470rfe_init();
 void wa1470rfe_deinit();
-//void wa1470rfe_reset();
-//void wa1470rfe_enable();
-//void wa1470rfe_disable();
 void wa1470rfe_set_mode(rfe_mode_s mode);
 void wa1470rfe_set_pll_mode(rfe_pll_mode_s mode);
 void wa1470rfe_set_tx_mode(rfe_tx_mode_s mode);
@@ -103,6 +93,5 @@ _Bool wa1470rfe_set_freq(uint32_t freq);
 
 void wa1470rfe_set_rx_gain(uint8_t gain);
 extern uint16_t rfe_rx_total_vga_gain;
-//extern uint32_t rfe_logoffset;
 
 #endif

@@ -17,4 +17,5 @@ void            NBFi_Force_process();
 void            NBFi_ProcessRxPackets();
 void            NBFi_update_RTC();
 void            NBFi_set_RTC_irq(uint32_t time);
+void            NBFi_TX_Finished();
 #endif // NBFI_TRANSPORT_H

@@ -133,15 +133,12 @@ nbfi_status_t NBFi_RF_Transmit(uint8_t* pkt, uint8_t len, nbfi_phy_channel_t  ph
     return OK;
 }
 
-
-void NBFi_TX_Finished();
-
 void NBFi_RF_TX_Finished()
 {
   NBFi_TX_Finished();
 }
 
-_Bool NBFi_is_TX_in_progress()
+_Bool NBFi_RF_is_TX_in_Progress()
 {
   return wa1470mod_is_tx_in_progress();
 }  

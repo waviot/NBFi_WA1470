@@ -315,13 +315,15 @@
           <state>$PROJ_DIR$\Drivers\CMSIS\Device\ST\STM32L0xx\Include</state>
           <state>$PROJ_DIR$\Drivers\CMSIS\Include</state>
           <state>$PROJ_DIR$\..\NBFiLib\wa1470</state>
-          <state>$PROJ_DIR$\..\NBFiLib\libmf</state>
           <state>$PROJ_DIR$\..\NBFiLib\misc</state>
           <state>$PROJ_DIR$\..\NBFiLib\nbfi</state>
           <state>$PROJ_DIR$\Drivers\STM32L0xx_HAL_Driver\Inc\Legacy</state>
           <state>$PROJ_DIR$\..\NBFiLib\gost_crypto\crypto</state>
           <state>$PROJ_DIR$\..\NBFiLib\preambula\preambula</state>
           <state>$PROJ_DIR$\Drivers\Radio_HAL</state>
+          <state>$PROJ_DIR$\..\scheduler</state>
+          <state>$PROJ_DIR$\..\scheduler\libmf</state>
+          <state>$PROJ_DIR$\..\scheduler\watimer</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -2212,21 +2214,6 @@
       </file>
     </group>
     <group>
-      <name>libmf</name>
-      <file>
-        <name>$PROJ_DIR$\..\NBFiLib\libmf\wt0.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\NBFiLib\libmf\wt01.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\NBFiLib\libmf\wtimer.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\NBFiLib\libmf\wtimer.h</name>
-      </file>
-    </group>
-    <group>
       <name>misc</name>
       <file>
         <name>$PROJ_DIR$\..\NBFiLib\misc\log.c</name>
@@ -2769,18 +2756,6 @@
         <name>$PROJ_DIR$\..\NBFiLib\preambula\preambula\preambula.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\misc\scheduler.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\NBFiLib\misc\scheduler.h</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\NBFiLib\misc\watimer.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\NBFiLib\misc\watimer.h</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\NBFiLib\misc\zcode.c</name>
       </file>
       <file>
@@ -2891,6 +2866,39 @@
     </file>
     <file>
       <name>$PROJ_DIR$\Drivers\Radio_HAL\wa1470_hal.h</name>
+    </file>
+  </group>
+  <group>
+    <name>scheduler</name>
+    <group>
+      <name>libmf</name>
+      <file>
+        <name>$PROJ_DIR$\..\scheduler\libmf\wt0.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\scheduler\libmf\wt01.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\scheduler\libmf\wtimer.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\scheduler\libmf\wtimer.h</name>
+      </file>
+    </group>
+    <group>
+      <name>watimer</name>
+      <file>
+        <name>$PROJ_DIR$\..\scheduler\watimer\watimer.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\scheduler\watimer\watimer.h</name>
+      </file>
+    </group>
+    <file>
+      <name>$PROJ_DIR$\..\scheduler\scheduler.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\..\scheduler\scheduler.h</name>
     </file>
   </group>
   <group>

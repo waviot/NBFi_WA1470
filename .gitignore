@@ -8,3 +8,5 @@ stm32l0x/sample/Debug/Exe/
 stm32l0x/sample/Debug/List/
 
 stm32l0x/sample/Debug/Obj/
+
+stm32l0x/sample/Release/Obj/

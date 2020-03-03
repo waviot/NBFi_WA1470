@@ -22,13 +22,13 @@ void nbfi_send_complete(nbfi_ul_sent_status_t ul)
     {
       string[0] = (ul.id>>8);
       string[1] = (ul.id & 0xff);
-      last_send_status = NBFi_Send((uint8_t*)string, sizeof(string));
+      last_send_status = NBFi_Send5((uint8_t*)string, sizeof(string));
     }   
 }
 
 void nbfi_receive_complete(uint8_t * data, uint16_t length)
 {
-  NBFi_Send(data, length);  //echo
+  NBFi_Send5(data, length);  //echo
 }
 
 
@@ -45,7 +45,7 @@ int main(void)
 
   log_init();
   
-  last_send_status = NBFi_Send("Hello!", sizeof("Hello!"));   
+  last_send_status = NBFi_Send5("Hello!", sizeof("Hello!"));   
   
   while (1) 
   {     

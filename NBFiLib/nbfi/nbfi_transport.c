@@ -94,7 +94,7 @@ void NBFI_Transport_Init()
 
 
 
-nbfi_ul_sent_status_t NBFi_Send(uint8_t* payload, uint8_t length)
+nbfi_ul_sent_status_t NBFi_Send5(uint8_t* payload, uint8_t length)
 {
     nbfi_transport_packet_t* packet;
     uint8_t groupe = 0;
@@ -229,6 +229,10 @@ nbfi_ul_sent_status_t NBFi_Send(uint8_t* payload, uint8_t length)
     return *ul_status;
 }
 
+nbfi_status_t  NBFi_Send(uint8_t* payload, uint8_t length)
+{
+  return (NBFi_Send5(payload, length).status <= ERR_BUFFER_FULL)?OK:ERR_BUFFER_FULL_v4;
+}
 
 void NBFi_ProcessRxPackets()
 {
@@ -322,7 +326,7 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
     rx_complete = 1;
 
     nbfi_state.DL_total++;
-    
+    nbfi_state.DL_last_time = NBFi_get_RTC();
 
     nbfi_state.aver_rx_snr = (((uint16_t)nbfi_state.aver_rx_snr)*3 + info->snr)>>2;
     nbfi_last_snr = info->snr;  

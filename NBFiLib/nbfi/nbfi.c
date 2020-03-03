@@ -79,14 +79,15 @@ void  NBFI_Main_Level_Loop()
 }
 
 
-void NBFi_go_to_Sleep(_Bool sleep)
+nbfi_status_t NBFi_go_to_Sleep(_Bool sleep)
 {
     static _Bool old_state = 1;
+    nbfi_status_t res = OK;
     if(sleep)
     {
         nbfi.mode = OFF;
         NBFi_Clear_TX_Buffer();
-        NBFi_RF_Deinit();
+        res = NBFi_RF_Deinit();
     }
     else
     {
@@ -101,6 +102,7 @@ void NBFi_go_to_Sleep(_Bool sleep)
         }
     }
     old_state = sleep;
+    return res;
 }
 
 uint8_t NBFi_can_sleep()

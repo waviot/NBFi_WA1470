@@ -153,6 +153,7 @@ typedef struct
     int16_t last_rssi;
     uint8_t UL_rating;
     uint8_t DL_rating;
+    uint32_t DL_last_time;
     uint32_t bs_id;
     uint32_t server_id;
 }nbfi_state_t;
@@ -185,7 +186,8 @@ typedef enum
 {
     OK = 0,
     ERR = 1,
-    ERR_RF_BUSY = 2
+    ERR_RF_BUSY = 2,
+    ERR_BUFFER_FULL_v4 = 4
 }nbfi_status_t;
 
 

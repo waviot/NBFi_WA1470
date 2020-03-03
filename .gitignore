@@ -3,3 +3,8 @@ sample/settings/
 settings/
 sample/Release/
 *.dep
+stm32l0x/sample/Debug/Exe/
+
+stm32l0x/sample/Debug/List/
+
+stm32l0x/sample/Debug/Obj/

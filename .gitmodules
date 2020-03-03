@@ -7,3 +7,6 @@
 [submodule "scheduler"]
 	path = scheduler
 	url = https://github.com/waviot/scheduler
+[submodule "NBFiLib/wa1470"]
+	path = NBFiLib/wa1470
+	url = https://github.com/waviot/wa1470

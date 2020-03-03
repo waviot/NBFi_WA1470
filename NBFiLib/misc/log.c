@@ -19,7 +19,7 @@ void log_send_str(const char *str)
 	uint16_t ptr = 0;
 	char c;
 	while(c = str[ptr++])
-		RS485_UART_send(c);
+	RS485_UART_send(c);
 	RS485_UART_send(0x0A);
 	RS485_UART_send(0x0D); 
 }

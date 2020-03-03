@@ -314,7 +314,7 @@
           <state>$PROJ_DIR$\Drivers\STM32L0xx_HAL_Driver\Inc</state>
           <state>$PROJ_DIR$\Drivers\CMSIS\Device\ST\STM32L0xx\Include</state>
           <state>$PROJ_DIR$\Drivers\CMSIS\Include</state>
-          <state>$PROJ_DIR$\..\NBFiLib\wa1470</state>
+          <state>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470</state>
           <state>$PROJ_DIR$\..\NBFiLib\misc</state>
           <state>$PROJ_DIR$\..\NBFiLib\nbfi</state>
           <state>$PROJ_DIR$\Drivers\STM32L0xx_HAL_Driver\Inc\Legacy</state>
@@ -2820,31 +2820,34 @@
     <group>
       <name>wa1470</name>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470.c</name>
+        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470\wa1470.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470.h</name>
+        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470\wa1470.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470dem.c</name>
+        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470\wa1470_defines.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470dem.h</name>
+        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470\wa1470dem.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470mod.c</name>
+        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470\wa1470dem.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470mod.h</name>
+        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470\wa1470mod.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470mod_bpsk_pin.c</name>
+        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470\wa1470mod.h</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470rfe.c</name>
+        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470\wa1470mod_bpsk_pin.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470rfe.h</name>
+        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470\wa1470rfe.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\NBFiLib\wa1470\wa1470\wa1470rfe.h</name>
       </file>
     </group>
     <file>

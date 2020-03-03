@@ -1,7 +1,6 @@
 #ifndef NBFI_TRANSPORT_H
 #define NBFI_TRANSPORT_H
 
-//extern rx_handler_t  rx_handler;
 
 extern nbfi_state_t nbfi_state;
 extern nbfi_transport_packet_t* nbfi_active_pkt;

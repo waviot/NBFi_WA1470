@@ -466,7 +466,6 @@ void NBFi_Clear_RX_Buffer(int8_t besides)
 {
     for(uint8_t i = 0; i != NBFI_RX_PKTBUF_SIZE; i++ )
     {
-       // if(NBFi_Get_RX_Packet_Ptr(i)->state != PACKET_RECEIVED) 
         if ((besides != -1) && (besides == NBFi_Get_RX_Packet_Ptr(i)->phy_data.ITER)) NBFi_Get_RX_Packet_Ptr(i)->state = PACKET_RECEIVED;
         else NBFi_Get_RX_Packet_Ptr(i)->state = PACKET_CLEARED;
     }
@@ -710,7 +709,7 @@ nbfi_ul_sent_status_t* NBFi_Get_Next_Unreported_UL(nbfi_ul_status_t status)
 nbfi_ul_status_t NBFi_Get_UL_status(uint16_t id)
 {
   nbfi_ul_status_t status;
-  __nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+  nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
   for(uint8_t i = nbfi_sent_buf_head - NBFI_SENT_STATUSES_BUF_SIZE; i != nbfi_sent_buf_head; i++)
   {
     nbfi_ul_sent_status_t* ul = &NBFi_sent_UL_stat_Buf[i%NBFI_SENT_STATUSES_BUF_SIZE];
@@ -718,11 +717,11 @@ nbfi_ul_status_t NBFi_Get_UL_status(uint16_t id)
     {
       ul->reported = 1;
       status = ul->status;
-      __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+      nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
       return status;
     }
   }
-  __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+  nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
   return NOTEXIST;
 }
 

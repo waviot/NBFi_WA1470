@@ -25,7 +25,6 @@
 #define NBFI_PARAM_BROADCAST_ADD        0x10
 #define NBFI_PARAM_APP_IDS              0x11
 #define NBFI_PARAM_BSANDSERVER_IDS      0x12
-//#define NBFI_PARAM_MODE_V5              0x13
 
 
 extern nbfi_settings_t nbfi;
@@ -38,20 +37,16 @@ extern uint8_t current_tx_rate;
 extern uint8_t current_rx_rate;
 
 extern _Bool nbfi_settings_need_to_save_to_flash;
+
 //aditional flags:
 #define NBFI_FLG_FIXED_BAUD_RATE                0x01
 #define NBFI_FLG_NO_RESET_TO_DEFAULTS           0x02
 #define NBFI_FLG_NO_SENDINFO                    0x04
 #define NBFI_FLG_SEND_ALOHA                     0x08
-//#define NBFI_FLG_NO_CRYPTO                      0x08
-//#define NBFI_FLG_DO_OSCCAL                      0x10
 #define NBFI_FLG_NO_REDUCE_TX_PWR               0x20
 #define NBFI_OFF_MODE_ON_INIT                   0x40
 #define NBFI_FLG_DO_NOT_SEND_PKTS_ON_START      0x80
 
-
-
-//extern nbfi_dev_info_t dev_info;
 
 //BAND IDs
 #define UL868800_DL446000            0
@@ -66,8 +61,9 @@ extern _Bool nbfi_settings_need_to_save_to_flash;
 #define UL868100_DL869550            9
 #define UL868500_DL864000            10
 #define UL864000_DL864000            11 //KAZ
-#define UL868800_DL869100            12 //NEWRU
+#define UL868800_DL869150            12 //NEWRU
 #define UL866975_DL865000            13 //INDIA
+
 
 //FREQENCY PLANS
 #define NBFI_UL_FREQ_PLAN_NO_CHANGE             (64<<6)

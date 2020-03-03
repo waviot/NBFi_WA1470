@@ -1,0 +1,1020 @@
+###############################################################################
+#
+# IAR ELF Linker V7.80.4.12462/W32 for ARM                03/Mar/2020  16:34:51
+# Copyright 2007-2017 IAR Systems AB.
+#
+#    Output file  =  
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Exe\sample.out
+#    Map file     =  
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\List\sample.map
+#    Command line =  
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\log.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\magma.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\main.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\nbfi.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\nbfi_config.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\nbfi_crc.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\nbfi_crypto.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\nbfi_hal.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\nbfi_mac.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\nbfi_rf.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\nbfi_transport.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\nbfi_transport_misc.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\pcode.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\plot_spectrum.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\preambula.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\radio.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\rs485_uart.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\scheduler.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\scheduler_hal.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\startup_stm32l071xx.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32_init.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_adc.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_adc_ex.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_cortex.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_dma.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_flash.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_flash_ex.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_flash_ramfunc.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_gpio.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_i2c.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_i2c_ex.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_lptim.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_msp.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_pwr.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_pwr_ex.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_rcc.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_rcc_ex.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_spi.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_tim.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_tim_ex.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_uart.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_uart_ex.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_hal_usart.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_it.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\stm32l0xx_ll_adc.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\system_stm32l0xx.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\wa1470.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\wa1470_hal.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\wa1470dem.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\wa1470mod.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\wa1470mod_bpsk_pin.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\wa1470rfe.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\watimer.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\wt0.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\wt01.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\wtimer.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\xbuf.o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj\zcode.o
+#        -o
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Exe\sample.out
+#        --map
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\List\sample.map
+#        --config
+#        C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Src\stm32l071xx_flash.icf
+#        --semihosting --entry __iar_program_start --vfe
+#
+###############################################################################
+
+*******************************************************************************
+*** RUNTIME MODEL ATTRIBUTES
+***
+
+CppFlavor       = *
+__SystemLibrary = DLib
+
+
+*******************************************************************************
+*** PLACEMENT SUMMARY
+***
+
+"A0":  place at 0x08000000 { ro section .intvec };
+"P1":  place in [from 0x08000000 to 0x0802ffff] { ro };
+"P2":  place in [from 0x20000000 to 0x20004fff] { rw, block CSTACK, block HEAP };
+initialize by copy { rw };
+
+  Section             Kind        Address    Size  Object
+  -------             ----        -------    ----  ------
+"A0":                                        0xc0
+  .intvec             ro code  0x08000000    0xc0  startup_stm32l071xx.o [1]
+                             - 0x080000c0    0xc0
+
+"P1":                                      0x7452
+  .text               ro code  0x080000c0   0xfac  nbfi_transport.o [1]
+  .text               ro code  0x0800106c    0xcc  rand.o [3]
+  .text               ro code  0x08001138    0xe0  I32DivModFast.o [5]
+  .text               ro code  0x08001218   0x21c  nbfi.o [1]
+  .text               ro code  0x08001434   0x84c  nbfi_transport_misc.o [1]
+  .text               ro code  0x08001c80    0x5c  ABImemcpy.o [5]
+  .text               ro code  0x08001cdc    0xc2  nbfi_crc.o [1]
+  .text               ro code  0x08001d9e     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x08001da0   0x7ec  nbfi_config.o [1]
+  .text               ro code  0x0800258c   0x1a4  nbfi_rf.o [1]
+  .text               ro code  0x08002730   0x544  nbfi_mac.o [1]
+  .text               ro code  0x08002c74   0x120  FltAddSub.o [4]
+  .text               ro code  0x08002d94    0x3a  FltToS32.o [4]
+  .text               ro code  0x08002dce     0x2  xtls.o [3]
+  .text               ro code  0x08002dd0     0x2  IntDivZer.o [5]
+  .text               ro code  0x08002dd2     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x08002dd4   0x2a8  nbfi_crypto.o [1]
+  .text               ro code  0x0800307c    0x64  ABImemset.o [5]
+  .text               ro code  0x080030e0    0x20  srand.o [3]
+  .text               ro code  0x08003100    0xb6  preambula.o [1]
+  .text               ro code  0x080031b6     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x080031b8   0x136  wa1470.o [1]
+  .text               ro code  0x080032ee     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x080032f0   0x5ec  wa1470dem.o [1]
+  .text               ro code  0x080038dc   0x284  wa1470mod.o [1]
+  .text               ro code  0x08003b60   0x340  wa1470rfe.o [1]
+  .text               ro code  0x08003ea0    0x26  FltCmpLe.o [4]
+  .text               ro code  0x08003ec6     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x08003ec8   0x2e4  zcode.o [1]
+  .text               ro code  0x080041ac   0x1b8  pcode.o [1]
+  .text               ro code  0x08004364   0x3e0  magma.o [1]
+  .text               ro code  0x08004744    0x16  uread4.o [5]
+  .text               ro code  0x0800475a     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x0800475c    0x30  I64ToFlt.o [4]
+  .text               ro code  0x0800478c   0x1ac  xflog.o [4]
+  .text               ro code  0x08004938    0xb0  FltMul.o [4]
+  .text               ro code  0x080049e8    0x36  I32ToFlt.o [4]
+  .text               ro code  0x08004a1e     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x08004a20    0x40  wa1470mod_bpsk_pin.o [1]
+  .text               ro code  0x08004a60    0x6a  I64DivMod.o [5]
+  .text               ro code  0x08004aca     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x08004acc    0x22  I64Shl.o [5]
+  .text               ro code  0x08004aee     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x08004af0    0x1e  U64Shr.o [5]
+  .text               ro code  0x08004b0e     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x08004b10    0x10  errno.o [3]
+  .text               ro code  0x08004b20    0xaa  FltDiv.o [4]
+  .text               ro code  0x08004bca     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x08004bcc     0x2  I64DivZer.o [5]
+  .text               ro code  0x08004bce     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x08004bd0   0x67c  stm32l0xx_hal_rcc.o [1]
+  .text               ro code  0x0800524c     0xc  stm32l0xx_hal.o [1]
+  .text               ro code  0x08005258    0x28  stm32l0xx_hal.o [1]
+  .text               ro code  0x08005280    0xb4  stm32l0xx_hal_cortex.o [1]
+  .text               ro code  0x08005334   0x110  main.o [1]
+  .text               ro code  0x08005444    0x20  stm32l0xx_hal.o [1]
+  .text               ro code  0x08005464    0xe0  stm32_init.o [1]
+  .text               ro code  0x08005544    0xa0  radio.o [1]
+  .text               ro code  0x080055e4    0x2c  log.o [1]
+  .text               ro code  0x08005610    0x74  stm32l0xx_hal_pwr.o [1]
+  .text               ro code  0x08005684    0x9c  stm32l0xx_hal_msp.o [1]
+  .text               ro code  0x08005720   0x2e4  stm32l0xx_hal_rcc_ex.o [1]
+  .text               ro code  0x08005a04   0x1e4  scheduler_hal.o [1]
+  .text               ro code  0x08005be8   0x350  wa1470_hal.o [1]
+  .text               ro code  0x08005f38   0x228  nbfi_hal.o [1]
+  .text               ro code  0x08006160   0x106  rs485_uart.o [1]
+  .text               ro code  0x08006266     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x08006268   0x1e6  stm32l0xx_hal_gpio.o [1]
+  .text               ro code  0x0800644e     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x08006450    0xd0  stm32l0xx_hal_lptim.o [1]
+  .text               ro code  0x08006520    0x5c  scheduler.o [1]
+  .text               ro code  0x0800657c    0xaa  stm32l0xx_hal_tim.o [1]
+  .text               ro code  0x08006626     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x08006628    0x84  stm32l0xx_hal_spi.o [1]
+  .text               ro code  0x080066ac    0x84  stm32l0xx_hal_flash_ex.o [1]
+  .text               ro code  0x08006730   0x2a6  stm32l0xx_hal_adc.o [1]
+  .text               ro code  0x080069d6     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x080069d8    0xac  stm32l0xx_hal_adc_ex.o [1]
+  .text               ro code  0x08006a84    0x64  xbuf.o [1]
+  .text               ro code  0x08006ae8   0x48a  stm32l0xx_hal_uart.o [1]
+  .text               ro code  0x08006f72     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x08006f74   0x24c  watimer.o [1]
+  .text               ro code  0x080071c0   0x11c  stm32l0xx_hal_flash.o [1]
+  .text               ro code  0x080072dc    0x74  system_stm32l0xx.o [1]
+  .text               ro code  0x08007350    0x3c  zero_init3.o [5]
+  .text               ro code  0x0800738c    0x3c  packbits_init_single.o [5]
+  .text               ro code  0x080073c8    0x28  data_init.o [5]
+  .iar.init_table     const    0x080073f0    0x20  - Linker created -
+  .text               ro code  0x08007410    0x1c  stm32l0xx_it.o [1]
+  .text               ro code  0x0800742c    0x10  stm32l0xx_hal.o [1]
+  .text               ro code  0x0800743c    0x1a  cmain.o [5]
+  .text               ro code  0x08007456     0x4  low_level_init.o [3]
+  .text               ro code  0x0800745a     0x8  exit.o [3]
+  .text               ro code  0x08007462     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x08007464     0xa  cexit.o [5]
+  .text               ro code  0x0800746e     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x08007470    0x14  exit.o [6]
+  .text               ro code  0x08007484    0x10  startup_stm32l071xx.o [1]
+  .text               ro code  0x08007494     0xc  cstartup_M.o [5]
+  .rodata             const    0x080074a0     0x8  system_stm32l0xx.o [1]
+  .text               ro code  0x080074a8     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x080074aa     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x080074ac     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x080074ae     0x2  startup_stm32l071xx.o [1]
+  .text               ro code  0x080074b0     0x2  startup_stm32l071xx.o [1]
+  .rodata             const    0x080074b2     0x0  zero_init3.o [5]
+  .rodata             const    0x080074b2     0x0  packbits_init_single.o [5]
+  Initializer bytes   const    0x080074b2    0x60  <for P2-1>
+                             - 0x08007512  0x7452
+
+"P2", part 1 of 3:                          0x1e2
+  P2-1                         0x20000000   0x1e2  <Init block>
+    .data             inited   0x20000000    0x18  nbfi_config.o [1]
+    .data             inited   0x20000018    0x58  nbfi_config.o [1]
+    .data             inited   0x20000070    0x14  nbfi_rf.o [1]
+    .data             inited   0x20000084    0x78  nbfi_transport.o [1]
+    .data             inited   0x200000fc     0x4  system_stm32l0xx.o [1]
+    .data             inited   0x20000100    0x44  wa1470dem.o [1]
+    .data             inited   0x20000144     0xc  wa1470mod.o [1]
+    __DLIB_PERTHREAD  inited   0x20000150    0x8c  rand.o [3]
+    __DLIB_PERTHREAD  inited   0x200001dc     0x4  errno.o [3]
+    .data             inited   0x200001e0     0x1  nbfi.o [1]
+    .data             inited   0x200001e1     0x1  nbfi_config.o [1]
+                             - 0x200001e2   0x1e2
+
+"P2", part 2 of 3:                          0xa00
+  CSTACK                       0x200001e8   0xa00  <Block>
+    CSTACK            uninit   0x200001e8   0xa00  <Block tail>
+                             - 0x20000be8   0xa00
+
+"P2", part 3 of 3:                         0x1688
+  .bss                zero     0x20000be8   0x780  nbfi_transport_misc.o [1]
+  .bss                zero     0x20001368   0x3d4  nbfi_transport_misc.o [1]
+  .bss                zero     0x2000173c   0x1e0  nbfi_transport_misc.o [1]
+  .bss                zero     0x2000191c   0x18c  nbfi_crypto.o [1]
+  .bss                zero     0x20001aa8   0x178  rs485_uart.o [1]
+  .bss                zero     0x20001c20   0x141  wa1470dem.o [1]
+  .bss                zero     0x20001d62     0x2  wa1470rfe.o [1]
+  .bss                zero     0x20001d64   0x100  wa1470dem.o [1]
+  .bss                zero     0x20001e64    0x6c  nbfi.o [1]
+  .bss                zero     0x20001ed0    0x68  nbfi_hal.o [1]
+  .bss                zero     0x20001f38    0x60  scheduler_hal.o [1]
+  .bss                zero     0x20001f98    0x60  watimer.o [1]
+  .bss                zero     0x20001ff8    0x58  wa1470_hal.o [1]
+  .bss                zero     0x20002050    0x44  nbfi_hal.o [1]
+  .bss                zero     0x20002094    0x44  nbfi_transport_misc.o [1]
+  .bss                zero     0x200020d8    0x40  nbfi_config.o [1]
+  .bss                zero     0x20002118    0x40  wa1470dem.o [1]
+  .bss                zero     0x20002158    0x38  scheduler_hal.o [1]
+  .bss                zero     0x20002190    0x34  wa1470_hal.o [1]
+  .bss                zero     0x200021c4    0x24  nbfi_transport.o [1]
+  .bss                zero     0x200021e8    0x18  stm32l0xx_hal_flash.o [1]
+  .bss                zero     0x20002200    0x14  nbfi_transport.o [1]
+  .bss                zero     0x20002214    0x14  wa1470mod.o [1]
+  .bss                zero     0x20002228    0x10  scheduler.o [1]
+  .bss                zero     0x20002238     0xc  nbfi_transport.o [1]
+  .bss                zero     0x20002244     0xc  wa1470.o [1]
+  .bss                zero     0x20002250     0x8  nbfi_config.o [1]
+  .bss                zero     0x20002258     0x8  nbfi_mac.o [1]
+  .bss                zero     0x20002260     0x4  main.o [1]
+  .bss                zero     0x20002264     0x4  preambula.o [1]
+  .bss                zero     0x20002268     0x4  stm32l0xx_hal.o [1]
+  .bss                zero     0x2000226c     0x1  nbfi_transport.o [1]
+  .bss                zero     0x2000226d     0x1  nbfi_transport_misc.o [1]
+  .bss                zero     0x2000226e     0x1  wa1470rfe.o [1]
+                             - 0x2000226f  0x1687
+
+
+*******************************************************************************
+*** INIT TABLE
+***
+
+          Address     Size
+          -------     ----
+Zero (__iar_zero_init3)
+    1 destination range, total size 0x1687:
+          0x20000be8  0x1687
+
+Copy/packbits (__iar_packbits_init_single3)
+    1 source range, total size 0x60 (19% of destination):
+          0x080074b2    0x60
+    1 destination range, total size 0x1e2:
+          0x20000000   0x1e2
+
+
+
+*******************************************************************************
+*** MODULE SUMMARY
+***
+
+    Module                    ro code  ro data  rw data
+    ------                    -------  -------  -------
+C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj: [1]
+    log.o                          44
+    magma.o                       992
+    main.o                        272                 4
+    nbfi.o                        540               109
+    nbfi_config.o               2 028       23      185
+    nbfi_crc.o                    194
+    nbfi_crypto.o                 680               396
+    nbfi_hal.o                    552               172
+    nbfi_mac.o                  1 348                 8
+    nbfi_rf.o                     420        4       20
+    nbfi_transport.o            4 012       24      189
+    nbfi_transport_misc.o       2 124             3 449
+    pcode.o                       440
+    preambula.o                   182                 4
+    radio.o                       160
+    rs485_uart.o                  262               376
+    scheduler.o                    92                16
+    scheduler_hal.o               484               152
+    startup_stm32l071xx.o         256
+    stm32_init.o                  224
+    stm32l0xx_hal.o               100                 4
+    stm32l0xx_hal_adc.o           678
+    stm32l0xx_hal_adc_ex.o        172
+    stm32l0xx_hal_cortex.o        180
+    stm32l0xx_hal_flash.o         284                24
+    stm32l0xx_hal_flash_ex.o      132
+    stm32l0xx_hal_gpio.o          486
+    stm32l0xx_hal_lptim.o         208
+    stm32l0xx_hal_msp.o           156
+    stm32l0xx_hal_pwr.o           116
+    stm32l0xx_hal_rcc.o         1 660
+    stm32l0xx_hal_rcc_ex.o        740
+    stm32l0xx_hal_spi.o           132
+    stm32l0xx_hal_tim.o           170
+    stm32l0xx_hal_uart.o        1 162
+    stm32l0xx_it.o                 28
+    system_stm32l0xx.o            116        8        4
+    wa1470.o                      310                12
+    wa1470_hal.o                  848               140
+    wa1470dem.o                 1 516       14      709
+    wa1470mod.o                   644        2       32
+    wa1470mod_bpsk_pin.o           64
+    wa1470rfe.o                   832                 3
+    watimer.o                     588                96
+    xbuf.o                        100
+    zcode.o                       740
+    ---------------------------------------------------
+    Total:                     27 468       75    6 104
+
+command line: [2]
+    ---------------------------------------------------
+    Total:
+
+dl6M_tlf.a: [3]
+    errno.o                        16        1        4
+    exit.o                          8
+    low_level_init.o                4
+    rand.o                        204       28      140
+    srand.o                        32
+    xtls.o                          2
+    ---------------------------------------------------
+    Total:                        266       29      144
+
+m6M_tl.a: [4]
+    FltAddSub.o                   288
+    FltCmpLe.o                     38
+    FltDiv.o                      170
+    FltMul.o                      176
+    FltToS32.o                     58
+    I32ToFlt.o                     54
+    I64ToFlt.o                     48
+    xflog.o                       428
+    ---------------------------------------------------
+    Total:                      1 260
+
+rt6M_tl.a: [5]
+    ABImemcpy.o                    92
+    ABImemset.o                   100
+    I32DivModFast.o               224
+    I64DivMod.o                   106
+    I64DivZer.o                     2
+    I64Shl.o                       34
+    IntDivZer.o                     2
+    U64Shr.o                       30
+    cexit.o                        10
+    cmain.o                        26
+    cstartup_M.o                   12
+    data_init.o                    40
+    packbits_init_single.o         60
+    uread4.o                       22
+    zero_init3.o                   60
+    ---------------------------------------------------
+    Total:                        820
+
+shb_l.a: [6]
+    exit.o                         20
+    ---------------------------------------------------
+    Total:                         20
+
+    Gaps                                              1
+    Linker created                          32    2 560
+-------------------------------------------------------
+    Grand Total:               29 834      136    8 809
+
+
+*******************************************************************************
+*** ENTRY LIST
+***
+
+Entry                      Address   Size  Type      Object
+-----                      -------   ----  ----      ------
+.iar.init_table$$Base   0x080073f0          --   Gb  - Linker created -
+.iar.init_table$$Limit  0x08007410          --   Gb  - Linker created -
+?main                   0x0800743d         Code  Gb  cmain.o [5]
+ADC_DelayMicroSecond    0x08006995   0x24  Code  Lc  stm32l0xx_hal_adc.o [1]
+AHBPrescTable           0x08007334   0x10  Data  Gb  system_stm32l0xx.o [1]
+APBPrescTable           0x080074a0    0x8  Data  Gb  system_stm32l0xx.o [1]
+AdcHandle               0x20001ed0   0x60  Data  Lc  nbfi_hal.o [1]
+CRC32                   0x08001d89   0x16  Code  Gb  nbfi_crc.o [1]
+CRC8                    0x08001cdd   0x6a  Code  Gb  nbfi_crc.o [1]
+CSTACK$$Base            0x200001e8          --   Gb  - Linker created -
+CSTACK$$Limit           0x20000be8          --   Gb  - Linker created -
+CompVersion             0x080020f1   0x20  Code  Gb  nbfi_config.o [1]
+DEM_FREQ_OFFSETS        0x080038bc   0x20  Data  Gb  wa1470dem.o [1]
+EXTI0_1_IRQHandler      0x08005d0d    0xe  Code  Gb  wa1470_hal.o [1]
+FLASH_SetErrorCode      0x0800722f   0xa4  Code  Lc  stm32l0xx_hal_flash.o [1]
+FLASH_WaitForLastOperation
+                        0x080071c1   0x6c  Code  Gb  stm32l0xx_hal_flash.o [1]
+G                       0x080043f7   0x42  Code  Lc  magma.o [1]
+G_Fin                   0x08004439   0x40  Code  Lc  magma.o [1]
+HAL_ADCEx_Calibration_Start
+                        0x080069d9   0xa8  Code  Gb  stm32l0xx_hal_adc_ex.o [1]
+HAL_ADC_ConfigChannel   0x080068f1   0xa4  Code  Gb  stm32l0xx_hal_adc.o [1]
+HAL_ADC_Init            0x08006731  0x1a4  Code  Gb  stm32l0xx_hal_adc.o [1]
+HAL_ADC_MspInit         0x080069d5    0x2  Code  Wk  stm32l0xx_hal_adc.o [1]
+HAL_FLASHEx_DATAEEPROM_Lock
+                        0x080066c5    0xe  Code  Gb  stm32l0xx_hal_flash_ex.o [1]
+HAL_FLASHEx_DATAEEPROM_Program
+                        0x080066d3   0x48  Code  Gb  stm32l0xx_hal_flash_ex.o [1]
+HAL_FLASHEx_DATAEEPROM_Unlock
+                        0x080066ad   0x18  Code  Gb  stm32l0xx_hal_flash_ex.o [1]
+HAL_GPIO_EXTI_Callback  0x0800644d    0x2  Code  Wk  stm32l0xx_hal_gpio.o [1]
+HAL_GPIO_EXTI_IRQHandler
+                        0x08006415   0x14  Code  Gb  stm32l0xx_hal_gpio.o [1]
+HAL_GPIO_Init           0x08006269  0x190  Code  Gb  stm32l0xx_hal_gpio.o [1]
+HAL_GPIO_ReadPin        0x080063fd    0xc  Code  Gb  stm32l0xx_hal_gpio.o [1]
+HAL_GPIO_WritePin       0x08006409    0xc  Code  Gb  stm32l0xx_hal_gpio.o [1]
+HAL_GetTick             0x0800524d    0xc  Code  Wk  stm32l0xx_hal.o [1]
+HAL_IncTick             0x0800742d   0x10  Code  Wk  stm32l0xx_hal.o [1]
+HAL_Init                0x08005445   0x1a  Code  Gb  stm32l0xx_hal.o [1]
+HAL_InitTick            0x08005259   0x28  Code  Wk  stm32l0xx_hal.o [1]
+HAL_LPTIM_Counter_Start
+                        0x080064f9   0x24  Code  Gb  stm32l0xx_hal_lptim.o [1]
+HAL_LPTIM_Init          0x08006451   0x7a  Code  Gb  stm32l0xx_hal_lptim.o [1]
+HAL_LPTIM_MspInit       0x080056c1   0x16  Code  Gb  stm32l0xx_hal_msp.o [1]
+HAL_MspInit             0x08005685   0x3c  Code  Gb  stm32l0xx_hal_msp.o [1]
+HAL_NVIC_DisableIRQ     0x080052cb    0xe  Code  Gb  stm32l0xx_hal_cortex.o [1]
+HAL_NVIC_EnableIRQ      0x080052bd    0xe  Code  Gb  stm32l0xx_hal_cortex.o [1]
+HAL_NVIC_SetPriority    0x080052b5    0x8  Code  Gb  stm32l0xx_hal_cortex.o [1]
+HAL_PWR_EnableBkUpAccess
+                        0x08005611    0x8  Code  Gb  stm32l0xx_hal_pwr.o [1]
+HAL_PWR_EnterSLEEPMode  0x08005619   0x28  Code  Gb  stm32l0xx_hal_pwr.o [1]
+HAL_PWR_EnterSTOPMode   0x08005641   0x30  Code  Gb  stm32l0xx_hal_pwr.o [1]
+HAL_RCCEx_GetPeriphCLKFreq
+                        0x080058a5  0x124  Code  Gb  stm32l0xx_hal_rcc_ex.o [1]
+HAL_RCCEx_PeriphCLKConfig
+                        0x08005721  0x17a  Code  Gb  stm32l0xx_hal_rcc_ex.o [1]
+HAL_RCC_ClockConfig     0x08004fb1  0x15e  Code  Gb  stm32l0xx_hal_rcc.o [1]
+HAL_RCC_GetHCLKFreq     0x0800518d    0x6  Code  Gb  stm32l0xx_hal_rcc.o [1]
+HAL_RCC_GetPCLK1Freq    0x08005193    0xe  Code  Gb  stm32l0xx_hal_rcc.o [1]
+HAL_RCC_GetPCLK2Freq    0x080051ad    0xc  Code  Gb  stm32l0xx_hal_rcc.o [1]
+HAL_RCC_GetSysClockFreq
+                        0x08005121   0x6c  Code  Gb  stm32l0xx_hal_rcc.o [1]
+HAL_RCC_OscConfig       0x08004bd1  0x3ca  Code  Gb  stm32l0xx_hal_rcc.o [1]
+HAL_SPI_Init            0x08006629   0x80  Code  Gb  stm32l0xx_hal_spi.o [1]
+HAL_SPI_MspInit         0x080056d7   0x38  Code  Gb  stm32l0xx_hal_msp.o [1]
+HAL_SYSTICK_CLKSourceConfig
+                        0x08005301   0x18  Code  Gb  stm32l0xx_hal_cortex.o [1]
+HAL_SYSTICK_Callback    0x08005335    0x2  Code  Gb  main.o [1]
+HAL_SYSTICK_Config      0x080052d9   0x28  Code  Gb  stm32l0xx_hal_cortex.o [1]
+HAL_SYSTICK_IRQHandler  0x08005319    0x8  Code  Gb  stm32l0xx_hal_cortex.o [1]
+HAL_TIM_Base_Init       0x0800657d   0x1e  Code  Gb  stm32l0xx_hal_tim.o [1]
+HAL_TIM_Base_MspInit    0x08006625    0x2  Code  Wk  stm32l0xx_hal_tim.o [1]
+HAL_TIM_Base_Start_IT   0x0800659b   0x14  Code  Gb  stm32l0xx_hal_tim.o [1]
+HAL_UART_Init           0x08006ae9   0x66  Code  Gb  stm32l0xx_hal_uart.o [1]
+HAL_UART_MspInit        0x08006f71    0x2  Code  Wk  stm32l0xx_hal_uart.o [1]
+HardFault_Handler       0x08007413    0x2  Code  Gb  stm32l0xx_it.o [1]
+LPTIM1_IRQHandler       0x08005a45   0x18  Code  Gb  scheduler_hal.o [1]
+MOD_FREQ_OFFSETS        0x08003ae0   0x80  Data  Gb  wa1470mod.o [1]
+MX_GPIO_Init            0x080054fd   0x38  Code  Gb  stm32_init.o [1]
+Magma_CTR               0x08004593   0x76  Code  Gb  magma.o [1]
+Magma_ECB_enc           0x08004555   0x2c  Code  Gb  magma.o [1]
+Magma_Init              0x080044c7   0x76  Code  Gb  magma.o [1]
+Magma_KEY_mesh          0x0800468b   0x38  Code  Gb  magma.o [1]
+Magma_MIC               0x08004609   0x82  Code  Gb  magma.o [1]
+MinVoltage              0x20000098    0x4  Data  Gb  nbfi_transport.o [1]
+NBFI_Config_Check_State
+                        0x08001df5   0xfa  Code  Gb  nbfi_config.o [1]
+NBFI_Config_is_high_SNR_for_UP
+                        0x08001da1   0x52  Code  Lc  nbfi_config.o [1]
+NBFI_Crypto_inc_iter    0x08002f63   0x6a  Code  Gb  nbfi_crypto.o [1]
+NBFI_Crypto_mic_check   0x08002e55  0x10e  Code  Gb  nbfi_crypto.o [1]
+NBFI_Init               0x08001219   0x22  Code  Gb  nbfi.o [1]
+NBFI_Main_Level_Loop    0x08001251   0xa8  Code  Gb  nbfi.o [1]
+NBFI_PhyToDL_AddRndListenTime
+                        0x08000fc9    0xa  Code  Lc  nbfi_transport.o [1]
+NBFI_PhyToDL_Delay      0x08000f79   0x42  Code  Lc  nbfi_transport.o [1]
+NBFI_PhyToDL_ListenTime
+                        0x08000fbd    0xc  Code  Lc  nbfi_transport.o [1]
+NBFI_Transport_Init     0x080000c1   0xac  Code  Gb  nbfi_transport.o [1]
+NBFi_AllocateRxPkt      0x0800149f   0x4a  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_AllocateTxPkt      0x0800144b   0x54  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_Calc_Queued_Sys_Packets_With_Type
+                        0x08001629   0x4a  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_Check_RX_Packet_Duplicate
+                        0x08001729   0x30  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_Clear_RX_Buffer    0x08001831   0x3a  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_Clear_TX_Buffer    0x0800186b   0x20  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_Close_Active_Packet
+                        0x080015f3   0x32  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_Config_Check_If_FP_Need_To_Change
+                        0x08001ef9   0x30  Code  Lc  nbfi_config.o [1]
+NBFi_Config_Parser      0x0800211d  0x2b0  Code  Gb  nbfi_config.o [1]
+NBFi_Config_Rate_Change
+                        0x08001f2d  0x134  Code  Lc  nbfi_config.o [1]
+NBFi_Config_Return      0x080023cd   0x22  Code  Gb  nbfi_config.o [1]
+NBFi_Config_Send_Mode   0x080018df   0x52  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_Config_Send_Sync   0x08001935   0x5a  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_Config_Set_Default
+                        0x080023f5   0x40  Code  Gb  nbfi_config.o [1]
+NBFi_Config_Set_RX_Chan
+                        0x08002503   0x3a  Code  Gb  nbfi_config.o [1]
+NBFi_Config_Set_TX_Chan
+                        0x080024c9   0x3a  Code  Gb  nbfi_config.o [1]
+NBFi_Config_Try_Alternative
+                        0x0800243d   0x48  Code  Gb  nbfi_config.o [1]
+NBFi_Config_Try_Alternative::try_counter
+                        0x200001e1    0x1  Data  Lc  nbfi_config.o [1]
+NBFi_Config_Tx_Power_Change
+                        0x08002065   0x5c  Code  Gb  nbfi_config.o [1]
+NBFi_Config_is_settings_default
+                        0x08002545   0x30  Code  Gb  nbfi_config.o [1]
+NBFi_Crypto_Available   0x08002e4f    0x6  Code  Gb  nbfi_crypto.o [1]
+NBFi_Crypto_DL_MIC      0x08002e41    0xe  Code  Gb  nbfi_crypto.o [1]
+NBFi_Crypto_Decode      0x08002e0d   0x1e  Code  Gb  nbfi_crypto.o [1]
+NBFi_Crypto_Encode      0x08002ded   0x20  Code  Gb  nbfi_crypto.o [1]
+NBFi_Crypto_MIC         0x08002dd5   0x18  Code  Lc  nbfi_crypto.o [1]
+NBFi_Crypto_Set_KEY     0x08002fcd   0x9c  Code  Gb  nbfi_crypto.o [1]
+NBFi_Crypto_UL_MIC      0x08002e33    0xe  Code  Gb  nbfi_crypto.o [1]
+NBFi_DL_ID              0x08002731    0xe  Code  Lc  nbfi_mac.o [1]
+NBFi_Force_process      0x08000f33   0x14  Code  Gb  nbfi_transport.o [1]
+NBFi_GetQueuedTXPkt     0x080014e9   0x78  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_GetSentTXPkt_By_Iter
+                        0x0800167d   0x5a  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_Get_Next_Unreported_UL
+                        0x08001bb5   0x36  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_Get_QueuedRXPkt    0x0800175d   0xd0  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_Get_RX_ACK_Mask    0x080016e5   0x44  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_Get_RX_Packet_Ptr  0x08001439    0x2  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_Get_Retry_Number   0x08001aff   0x32  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_Get_TX_Packet_Ptr  0x08001435    0x4  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_MAC_Get_Iterator   0x08002c45   0x14  Code  Gb  nbfi_mac.o [1]
+NBFi_MAC_RX             0x08002baf   0x7c  Code  Gb  nbfi_mac.o [1]
+NBFi_MAC_RX_ProtocolD   0x0800273f   0x46  Code  Gb  nbfi_mac.o [1]
+NBFi_MAC_Set_Iterator   0x08002c2b   0x14  Code  Gb  nbfi_mac.o [1]
+NBFi_MAC_TX             0x08002b75   0x3a  Code  Gb  nbfi_mac.o [1]
+NBFi_MAC_TX_ProtocolD   0x08002851  0x1c2  Code  Gb  nbfi_mac.o [1]
+NBFi_MAC_TX_ProtocolD::parity
+                        0x20002258    0x1  Data  Lc  nbfi_mac.o [1]
+NBFi_MAC_TX_ProtocolE   0x08002a2d  0x144  Code  Gb  nbfi_mac.o [1]
+NBFi_MAC_TX_ProtocolE::parity
+                        0x20002259    0x1  Data  Lc  nbfi_mac.o [1]
+NBFi_MAC_get_UL_freq    0x08002785   0xca  Code  Lc  nbfi_mac.o [1]
+NBFi_Next_Ready_DL      0x08001c2f   0x46  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_Packets_To_Send    0x08001589   0x6a  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_ParseReceivedPacket
+                        0x0800058d  0x396  Code  Gb  nbfi_transport.o [1]
+NBFi_Phy_To_Bitrate     0x08001aa5   0x5a  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_ProcessRxPackets   0x080003e5  0x196  Code  Gb  nbfi_transport.o [1]
+NBFi_ProcessTasks       0x08000941  0x21e  Code  Gb  nbfi_transport.o [1]
+NBFi_Queue_Next_DL      0x08001bf5   0x3a  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_Queue_Next_UL      0x08001b31   0x30  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_RF_Deinit          0x0800268d   0x28  Code  Gb  nbfi_rf.o [1]
+NBFi_RF_Init            0x0800258d  0x100  Code  Gb  nbfi_rf.o [1]
+NBFi_RF_Init::_preambule
+                        0x20000070    0x4  Data  Lc  nbfi_rf.o [1]
+NBFi_RF_Init::last_phy  0x20000077    0x1  Data  Lc  nbfi_rf.o [1]
+NBFi_RF_Init::last_rx_freq
+                        0x20000080    0x4  Data  Lc  nbfi_rf.o [1]
+NBFi_RF_Init::last_tx_freq
+                        0x2000007c    0x4  Data  Lc  nbfi_rf.o [1]
+NBFi_RF_Init::last_tx_prw
+                        0x20000078    0x1  Data  Lc  nbfi_rf.o [1]
+NBFi_RF_TX_Finished     0x080026eb    0x8  Code  Gb  nbfi_rf.o [1]
+NBFi_RF_Transmit        0x080026b5   0x36  Code  Gb  nbfi_rf.o [1]
+NBFi_RF_can_Sleep       0x08002729    0x8  Code  Gb  nbfi_rf.o [1]
+NBFi_RF_get_noise       0x080026fb   0x1a  Code  Gb  nbfi_rf.o [1]
+NBFi_RF_is_TX_in_Progress
+                        0x080026f3    0x8  Code  Gb  nbfi_rf.o [1]
+NBFi_RX_Controller      0x08000bd5   0x4c  Code  Lc  nbfi_transport.o [1]
+NBFi_RX_DL_EndHandler   0x08000c21    0xe  Code  Lc  nbfi_transport.o [1]
+NBFi_ReadConfig         0x08002485   0x3e  Code  Gb  nbfi_config.o [1]
+NBFi_Receive_Timeout_cb
+                        0x08000c39   0xb6  Code  Lc  nbfi_transport.o [1]
+NBFi_Resend_Pkt         0x08001995  0x10e  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_Send               0x08000175  0x242  Code  Gb  nbfi_transport.o [1]
+NBFi_SendHeartBeats     0x08000d9d  0x196  Code  Lc  nbfi_transport.o [1]
+NBFi_SendHeartBeats::hb_timer
+                        0x2000008e    0x2  Data  Lc  nbfi_transport.o [1]
+NBFi_Send_Clear_Cmd     0x0800188b   0x54  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_Set_UL_Status      0x08001b69   0x32  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_TX_Finished        0x08000b65   0x56  Code  Gb  nbfi_transport.o [1]
+NBFi_TxPacket_Free      0x08001561   0x28  Code  Gb  nbfi_transport_misc.o [1]
+NBFi_Wait_Extra_Handler
+                        0x08000cef   0x2e  Code  Lc  nbfi_transport.o [1]
+NBFi_can_sleep          0x0800133b   0x30  Code  Gb  nbfi.o [1]
+NBFi_clear_Saved_Configuration
+                        0x080013e1   0x1e  Code  Gb  nbfi.o [1]
+NBFi_get_RTC            0x0800136b   0x16  Code  Gb  nbfi.o [1]
+NBFi_get_Received_Packet
+                        0x0800123b   0x16  Code  Gb  nbfi.o [1]
+NBFi_go_to_Sleep        0x080012f9   0x42  Code  Gb  nbfi.o [1]
+NBFi_go_to_Sleep::old_state
+                        0x200001e0    0x1  Data  Lc  nbfi.o [1]
+NBFi_received_DL_Buf    0x2000136c  0x3d0  Data  Gb  nbfi_transport_misc.o [1]
+NBFi_sent_UL_stat_Buf   0x20002098   0x40  Data  Gb  nbfi_transport_misc.o [1]
+NBFi_set_Device_Info    0x08001381   0x52  Code  Gb  nbfi.o [1]
+NBFi_set_RTC_irq        0x08000d55   0x20  Code  Gb  nbfi_transport.o [1]
+NBFi_switch_to_another_settings::old_settings
+                        0x20001e64   0x40  Data  Lc  nbfi.o [1]
+NBFi_switch_to_another_settings::state
+                        0x20001eac   0x24  Data  Lc  nbfi.o [1]
+NBFi_update_RTC         0x08000d21   0x34  Code  Gb  nbfi_transport.o [1]
+NBFi_update_RTC::old_time_cur
+                        0x20002240    0x4  Data  Lc  nbfi_transport.o [1]
+NMI_Handler             0x08007411    0x2  Code  Gb  stm32l0xx_it.o [1]
+NOP_Delay               0x08005e65    0xe  Code  Gb  wa1470_hal.o [1]
+NOP_Delay_ms            0x08005e73   0x18  Code  Gb  wa1470_hal.o [1]
+NVIC_SetPriority        0x08005281   0x34  Code  Lc  stm32l0xx_hal_cortex.o [1]
+PCODE_encode            0x080041ad  0x116  Code  Gb  pcode.o [1]
+PCODE_indexes           0x080042c4   0xa0  Data  Gb  pcode.o [1]
+PLLMulTable             0x08007344    0xc  Data  Gb  system_stm32l0xx.o [1]
+PendSV_Handler          0x08007417    0x2  Code  Gb  stm32l0xx_it.o [1]
+Pi                      0x080046c4   0x80  Data  Lc  magma.o [1]
+RCC_SetFlashLatencyFromMSIRange
+                        0x080051c5   0x5e  Code  Lc  stm32l0xx_hal_rcc.o [1]
+RS485_UART_IRQ          0x08006173   0x56  Code  Gb  rs485_uart.o [1]
+RS485_UART_init         0x080061c9   0x86  Code  Gb  rs485_uart.o [1]
+RS485_UART_rx           0x20001b18   0x84  Data  Lc  rs485_uart.o [1]
+RS485_UART_send         0x08006161   0x12  Code  Gb  rs485_uart.o [1]
+RS485_UART_tx           0x20001b9c   0x84  Data  Lc  rs485_uart.o [1]
+Region$$Table$$Base     0x080073f0          --   Gb  - Linker created -
+Region$$Table$$Limit    0x08007410          --   Gb  - Linker created -
+RxRateTable             0x2000002c    0x4  Data  Gb  nbfi_config.o [1]
+RxSNRDegradationTable   0x08001ef4    0x4  Data  Gb  nbfi_config.o [1]
+SPI_RX                  0x08005d87   0x5a  Code  Gb  wa1470_hal.o [1]
+SPI_TX                  0x08005de1   0x5c  Code  Gb  wa1470_hal.o [1]
+SVC_Handler             0x08007415    0x2  Code  Gb  stm32l0xx_it.o [1]
+SysTick_Handler         0x08007419    0xc  Code  Gb  stm32l0xx_it.o [1]
+SystemClock_Config      0x08005465   0x98  Code  Gb  stm32_init.o [1]
+SystemCoreClock         0x200000fc    0x4  Data  Gb  system_stm32l0xx.o [1]
+SystemInit              0x080072dd   0x40  Code  Gb  system_stm32l0xx.o [1]
+TIM7_IRQHandler         0x08005aab   0x22  Code  Gb  scheduler_hal.o [1]
+TIM_Base_SetConfig      0x080065c3   0x50  Code  Lc  stm32l0xx_hal_tim.o [1]
+TxRateTable             0x20000028    0x4  Data  Gb  nbfi_config.o [1]
+TxSNRDegradationTable   0x08001ef0    0x4  Data  Gb  nbfi_config.o [1]
+UART_AdvFeatureConfig   0x08006d95   0xc8  Code  Gb  stm32l0xx_hal_uart.o [1]
+UART_CheckIdleState     0x08006e61   0x64  Code  Gb  stm32l0xx_hal_uart.o [1]
+UART_SetConfig          0x08006b55  0x21c  Code  Gb  stm32l0xx_hal_uart.o [1]
+UART_WaitOnFlagUntilTimeout
+                        0x08006ec9   0x62  Code  Gb  stm32l0xx_hal_uart.o [1]
+USART2_IRQHandler       0x08007425    0x8  Code  Gb  stm32l0xx_it.o [1]
+Xor_32                  0x08004365   0x14  Code  Lc  magma.o [1]
+Xor_64                  0x08004379   0x14  Code  Lc  magma.o [1]
+ZCODE_Append            0x08003ec9   0xe4  Code  Gb  zcode.o [1]
+_Rand_idx               0x20000158    0x4  Data  Lc  rand.o [3]
+_Rand_rv                0x2000015c   0x80  Data  Lc  rand.o [3]
+_Randinit               0x20000150    0x1  Data  Gb  rand.o [3]
+_Randseed               0x20000154    0x4  Data  Gb  rand.o [3]
+__aeabi_cfcmple         0x08003ea1         Code  Gb  FltCmpLe.o [4]
+__aeabi_errno_addr      0x08004b11    0xa  Code  Gb  errno.o [3]
+__aeabi_f2iz            0x08002d95         Code  Gb  FltToS32.o [4]
+__aeabi_fadd            0x08002c75         Code  Gb  FltAddSub.o [4]
+__aeabi_fdiv            0x08004b21         Code  Gb  FltDiv.o [4]
+__aeabi_fmul            0x08004939         Code  Gb  FltMul.o [4]
+__aeabi_fsub            0x08002ce5         Code  Gb  FltAddSub.o [4]
+__aeabi_i2f             0x080049e9         Code  Gb  I32ToFlt.o [4]
+__aeabi_idiv            0x08001165         Code  Gb  I32DivModFast.o [5]
+__aeabi_idiv0           0x08002dd1         Code  Gb  IntDivZer.o [5]
+__aeabi_idivmod         0x08001165         Code  Gb  I32DivModFast.o [5]
+__aeabi_ldiv0           0x08004bcd         Code  Gb  I64DivZer.o [5]
+__aeabi_llsl            0x08004acd         Code  Gb  I64Shl.o [5]
+__aeabi_llsr            0x08004af1         Code  Gb  U64Shr.o [5]
+__aeabi_memclr          0x080030d9         Code  Gb  ABImemset.o [5]
+__aeabi_memclr4         0x080030dd         Code  Gb  ABImemset.o [5]
+__aeabi_memclr8         0x080030dd         Code  Gb  ABImemset.o [5]
+__aeabi_memcpy          0x08001c81         Code  Gb  ABImemcpy.o [5]
+__aeabi_memcpy4         0x08001ca9         Code  Wk  ABImemcpy.o [5]
+__aeabi_memset          0x0800307d         Code  Gb  ABImemset.o [5]
+__aeabi_memset4         0x0800309d         Code  Gb  ABImemset.o [5]
+__aeabi_memset8         0x0800309d         Code  Gb  ABImemset.o [5]
+__aeabi_ui2f            0x08004a01         Code  Gb  I32ToFlt.o [4]
+__aeabi_uidiv           0x0800116b         Code  Gb  I32DivModFast.o [5]
+__aeabi_uidivmod        0x0800116b         Code  Gb  I32DivModFast.o [5]
+__aeabi_ul2f            0x0800475d         Code  Gb  I64ToFlt.o [4]
+__aeabi_uldivmod        0x08004a61         Code  Gb  I64DivMod.o [5]
+__aeabi_uread4          0x08004745         Code  Gb  uread4.o [5]
+__cmain                 0x0800743d         Code  Gb  cmain.o [5]
+__exit                  0x08007471   0x14  Code  Gb  exit.o [6]
+__iar_Errno             0x200001dc    0x4  Data  Gb  errno.o [3]
+__iar_FLog              0x0800478d  0x168  Code  Gb  xflog.o [4]
+__iar_Memset4_word      0x080030a9         Code  Gb  ABImemset.o [5]
+__iar_Memset_word       0x08003089         Code  Gb  ABImemset.o [5]
+__iar_data_init3        0x080073c9   0x28  Code  Gb  data_init.o [5]
+__iar_dlib_perthread_access
+                        0x08002dcf    0x2  Code  Gb  xtls.o [3]
+__iar_packbits_init_single3
+                        0x0800738d   0x3c  Code  Gb  packbits_init_single.o [5]
+__iar_program_start     0x08007495         Code  Gb  cstartup_M.o [5]
+__iar_ui2f              0x08004a05         Code  Gb  I32ToFlt.o [4]
+__iar_ul2f              0x08004761         Code  Gb  I64ToFlt.o [4]
+__iar_zero_init3        0x08007351   0x3c  Code  Gb  zero_init3.o [5]
+__low_level_init        0x08007457    0x4  Code  Gb  low_level_init.o [3]
+__vector_table          0x08000000         Data  Gb  startup_stm32l071xx.o [1]
+_alu                    0x08003101   0x1e  Code  Lc  preambula.o [1]
+_call_main              0x08007449         Code  Gb  cmain.o [5]
+_default_settings       0x20002090    0x4  Data  Gb  nbfi_hal.o [1]
+_exit                   0x08007465         Code  Gb  cexit.o [5]
+_main                   0x08007453         Code  Gb  cmain.o [5]
+_random                 0x0800311f   0x18  Code  Lc  preambula.o [1]
+_random::_seed          0x20002264    0x4  Data  Lc  preambula.o [1]
+_scheduler              0x20001f94    0x4  Data  Gb  scheduler_hal.o [1]
+bigendian_cpy           0x080020d5   0x1a  Code  Gb  nbfi_config.o [1]
+callbacks_num           0x20001f98    0x1  Data  Gb  watimer.o [1]
+crc_table               0x08001d47   0x18  Code  Gb  nbfi_crc.o [1]
+current_hop_table       0x20000100    0x8  Data  Gb  wa1470dem.o [1]
+current_rx_phy          0x20000109    0x1  Data  Gb  wa1470dem.o [1]
+current_rx_rate         0x2000001e    0x1  Data  Gb  nbfi_config.o [1]
+current_tx_phy          0x20000144    0x1  Data  Gb  wa1470mod.o [1]
+current_tx_rate         0x2000001d    0x1  Data  Gb  nbfi_config.o [1]
+dem_info_mas            0x20002118   0x40  Data  Gb  wa1470dem.o [1]
+dem_mas                 0x20001d64  0x100  Data  Gb  wa1470dem.o [1]
+dem_mess_received       0x20000108    0x1  Data  Gb  wa1470dem.o [1]
+dem_noise               0x20000110    0x4  Data  Gb  wa1470dem.o [1]
+dem_processMessages_desc
+                        0x2000011c   0x14  Data  Gb  wa1470dem.o [1]
+dem_rx_enabled          0x2000010a    0x1  Data  Gb  wa1470dem.o [1]
+dem_update_noise_desc   0x20000130   0x14  Data  Gb  wa1470dem.o [1]
+dev_info                0x20000000   0x18  Data  Gb  nbfi_config.o [1]
+digital_update_crc32    0x08001d65   0x24  Code  Gb  nbfi_crc.o [1]
+dl_drx_desc             0x200000c0   0x14  Data  Gb  nbfi_transport.o [1]
+dl_receive_desc         0x200000ac   0x14  Data  Gb  nbfi_transport.o [1]
+exit                    0x0800745b    0x8  Code  Gb  exit.o [3]
+g                       0x0800438d   0x6a  Code  Lc  magma.o [1]
+get_iter_key            0x0800453d   0x18  Code  Lc  magma.o [1]
+hlooptim                0x20002158   0x38  Data  Lc  scheduler_hal.o [1]
+hlptim                  0x20001f3c   0x30  Data  Lc  scheduler_hal.o [1]
+hspi                    0x20001ff8   0x58  Data  Lc  wa1470_hal.o [1]
+huart                   0x20001aa8   0x70  Data  Lc  rs485_uart.o [1]
+idle_pkt                0x2000009c   0x10  Data  Gb  nbfi_transport.o [1]
+info_timer              0x20000094    0x4  Data  Gb  nbfi_transport.o [1]
+inited                  0x2000191c    0x1  Data  Gb  nbfi_crypto.o [1]
+key_dl_master_ctx       0x20001a00   0x38  Data  Lc  nbfi_crypto.o [1]
+key_dl_mic_ctx          0x20001a38   0x38  Data  Lc  nbfi_crypto.o [1]
+key_dl_work_ctx         0x20001a70   0x38  Data  Lc  nbfi_crypto.o [1]
+key_root_ctx            0x20001920   0x38  Data  Lc  nbfi_crypto.o [1]
+key_ul_master_ctx       0x20001958   0x38  Data  Lc  nbfi_crypto.o [1]
+key_ul_mic_ctx          0x20001990   0x38  Data  Lc  nbfi_crypto.o [1]
+key_ul_work_ctx         0x200019c8   0x38  Data  Lc  nbfi_crypto.o [1]
+last_pkt_crc            0x2000225c    0x4  Data  Gb  nbfi_mac.o [1]
+last_send_status        0x20002260    0x4  Data  Gb  main.o [1]
+log_init                0x080055e5    0x8  Code  Gb  log.o [1]
+log_send_str            0x080055ed   0x24  Code  Gb  log.o [1]
+main                    0x0800537d   0x40  Code  Gb  main.o [1]
+mod_callTXfinished_desc
+                        0x20002214   0x14  Data  Gb  wa1470mod.o [1]
+mod_current_hop_table   0x20000148    0x8  Data  Gb  wa1470mod.o [1]
+n                       0x08003fac  0x200  Data  Gb  zcode.o [1]
+nbfi                    0x200020d8   0x40  Data  Gb  nbfi_config.o [1]
+nbfi_HAL_ADC_get        0x08005fef   0x9e  Code  Gb  nbfi_hal.o [1]
+nbfi_HAL_ADC_init       0x08005f91   0x5e  Code  Gb  nbfi_hal.o [1]
+nbfi_HAL_before_off     0x08005f3d    0x2  Code  Gb  nbfi_hal.o [1]
+nbfi_HAL_before_rx      0x08005f3b    0x2  Code  Gb  nbfi_hal.o [1]
+nbfi_HAL_before_tx      0x08005f39    0x2  Code  Gb  nbfi_hal.o [1]
+nbfi_HAL_get_iterator   0x080060ab    0x8  Code  Gb  nbfi_hal.o [1]
+nbfi_HAL_init           0x080060b5   0x4e  Code  Gb  nbfi_hal.o [1]
+nbfi_HAL_lock_unlock_loop_irq
+                        0x08005f3f    0x8  Code  Gb  nbfi_hal.o [1]
+nbfi_HAL_measure_valtage_or_temperature
+                        0x0800608d   0x1e  Code  Gb  nbfi_hal.o [1]
+nbfi_HAL_read_default_settings
+                        0x08005f47   0x12  Code  Gb  nbfi_hal.o [1]
+nbfi_HAL_read_flash_settings
+                        0x08005f59    0xc  Code  Gb  nbfi_hal.o [1]
+nbfi_HAL_set_iterator   0x080060b3    0x2  Code  Gb  nbfi_hal.o [1]
+nbfi_HAL_write_flash_settings
+                        0x08005f65   0x2c  Code  Gb  nbfi_hal.o [1]
+nbfi_RX_pktBuf          0x2000173c  0x1e0  Data  Gb  nbfi_transport_misc.o [1]
+nbfi_TX_pktBuf          0x20000be8  0x780  Data  Gb  nbfi_transport_misc.o [1]
+nbfi_TXbuf_head         0x2000226d    0x1  Data  Gb  nbfi_transport_misc.o [1]
+nbfi_active_pkt         0x20000090    0x4  Data  Gb  nbfi_transport.o [1]
+nbfi_active_pkt_old_state
+                        0x20000084    0x1  Data  Gb  nbfi_transport.o [1]
+nbfi_hal                0x20001ea4    0x4  Data  Gb  nbfi.o [1]
+nbfi_hal_struct         0x20002050   0x40  Data  Gb  nbfi_hal.o [1]
+nbfi_heartbeat_desc     0x200000e8   0x14  Data  Gb  nbfi_transport.o [1]
+nbfi_iter               0x20002250    0x8  Data  Gb  nbfi_config.o [1]
+nbfi_last_snr           0x20000085    0x1  Data  Gb  nbfi_transport.o [1]
+nbfi_prev               0x20000030   0x40  Data  Gb  nbfi_config.o [1]
+nbfi_processTask_desc   0x20002200   0x14  Data  Gb  nbfi_transport.o [1]
+nbfi_receive_buf_head   0x20001368    0x1  Data  Gb  nbfi_transport_misc.o [1]
+nbfi_receive_complete   0x08005371    0xa  Code  Gb  main.o [1]
+nbfi_rtc                0x2000223c    0x4  Data  Gb  nbfi_transport.o [1]
+nbfi_scheduler          0x20001ea8    0x4  Data  Gb  nbfi.o [1]
+nbfi_send_complete      0x08005339   0x38  Code  Gb  main.o [1]
+nbfi_sent_buf_head      0x20002094    0x1  Data  Gb  nbfi_transport_misc.o [1]
+nbfi_set_default        0x0800558c   0x40  Data  Gb  radio.o [1]
+nbfi_settings_need_to_save_to_flash
+                        0x2000001c    0x1  Data  Gb  nbfi_config.o [1]
+nbfi_state              0x200021c4   0x24  Data  Gb  nbfi_transport.o [1]
+nbfi_station_info       0x20000018    0x4  Data  Gb  nbfi_config.o [1]
+noise                   0x2000008c    0x2  Data  Gb  nbfi_transport.o [1]
+not_acked               0x2000226c    0x1  Data  Gb  nbfi_transport.o [1]
+pFlash                  0x200021e8   0x18  Data  Gb  stm32l0xx_hal_flash.o [1]
+preambula               0x08003141   0x76  Code  Gb  preambula.o [1]
+prev_rx_rate            0x20000020    0x1  Data  Gb  nbfi_config.o [1]
+prev_tx_rate            0x2000001f    0x1  Data  Gb  nbfi_config.o [1]
+radio_init              0x08005545   0x3a  Code  Gb  radio.o [1]
+rand                    0x0800106d   0xcc  Code  Gb  rand.o [3]
+receive_id              0x2000136a    0x2  Data  Gb  nbfi_transport_misc.o [1]
+rf_busy                 0x20000074    0x1  Data  Gb  nbfi_rf.o [1]
+rf_state                0x20000076    0x1  Data  Gb  nbfi_rf.o [1]
+rfe_pll_mode_fractional
+                        0x2000226e    0x1  Data  Gb  wa1470rfe.o [1]
+rfe_rx_total_vga_gain   0x20001d62    0x2  Data  Gb  wa1470rfe.o [1]
+rtc_synchronised        0x20002238    0x1  Data  Gb  nbfi_transport.o [1]
+rx_complete             0x20000089    0x1  Data  Gb  nbfi_transport.o [1]
+rx_delta                0x20000023    0x1  Data  Gb  nbfi_config.o [1]
+sConfig                 0x20001f30    0x8  Data  Lc  nbfi_hal.o [1]
+scheduler_HAL_LOOPTIM_Init
+                        0x08005a5d   0x4e  Code  Gb  scheduler_hal.o [1]
+scheduler_HAL_LPTIM_Init
+                        0x08005a05   0x40  Code  Gb  scheduler_hal.o [1]
+scheduler_HAL_cc_get    0x08005b0d    0xa  Code  Gb  scheduler_hal.o [1]
+scheduler_HAL_cc_irq_disable
+                        0x08005ae3    0xe  Code  Gb  scheduler_hal.o [1]
+scheduler_HAL_cc_irq_enable
+                        0x08005ad5    0xe  Code  Gb  scheduler_hal.o [1]
+scheduler_HAL_cc_set    0x08005b05    0x8  Code  Gb  scheduler_hal.o [1]
+scheduler_HAL_check_cc_irq
+                        0x08005b37    0xc  Code  Gb  scheduler_hal.o [1]
+scheduler_HAL_cnt_get   0x08005b17   0x20  Code  Gb  scheduler_hal.o [1]
+scheduler_HAL_cnt_get::prev
+                        0x20001f38    0x2  Data  Lc  scheduler_hal.o [1]
+scheduler_HAL_disable_global_irq
+                        0x08005ad1    0x4  Code  Gb  scheduler_hal.o [1]
+scheduler_HAL_enable_global_irq
+                        0x08005acd    0x4  Code  Gb  scheduler_hal.o [1]
+scheduler_HAL_init      0x08005b43   0x48  Code  Gb  scheduler_hal.o [1]
+scheduler_HAL_lock_unlock
+                        0x08005b8b   0x14  Code  Gb  scheduler_hal.o [1]
+scheduler_HAL_loop_irq_disable
+                        0x08005afb    0xa  Code  Gb  scheduler_hal.o [1]
+scheduler_HAL_loop_irq_enable
+                        0x08005af1    0xa  Code  Gb  scheduler_hal.o [1]
+scheduler_add_task      0x08006539    0x8  Code  Gb  scheduler.o [1]
+scheduler_curr_time     0x08006531    0x8  Code  Gb  scheduler.o [1]
+scheduler_hal_struct    0x20001f6c   0x28  Data  Gb  scheduler_hal.o [1]
+scheduler_init          0x08006549   0x1e  Code  Gb  scheduler.o [1]
+scheduler_inst          0x20002228   0x10  Data  Gb  scheduler.o [1]
+scheduler_irq           0x08006521    0x8  Code  Gb  scheduler.o [1]
+scheduler_remove_task   0x08006541    0x8  Code  Gb  scheduler.o [1]
+scheduler_run_callbacks
+                        0x08006529    0x8  Code  Gb  scheduler.o [1]
+send_by_dbpsk           0x20002244    0x1  Data  Gb  wa1470.o [1]
+sent_id                 0x20002096    0x2  Data  Gb  nbfi_transport_misc.o [1]
+shl_64                  0x08004481   0x46  Code  Lc  magma.o [1]
+srand                   0x080030e1   0x20  Code  Gb  srand.o [3]
+tmp_dem_info_mas        0x20001d20   0x40  Data  Gb  wa1470dem.o [1]
+tmp_dem_mas             0x20001c20  0x100  Data  Gb  wa1470dem.o [1]
+tmp_dem_mess_received   0x20001d60    0x1  Data  Gb  wa1470dem.o [1]
+transmit                0x20000075    0x1  Data  Gb  nbfi_rf.o [1]
+tx_delta                0x20000024    0x1  Data  Gb  nbfi_config.o [1]
+uwTick                  0x20002268    0x4  Data  Gb  stm32l0xx_hal.o [1]
+wa1470_HAL_GPIO_Init    0x08005be9   0x68  Code  Gb  wa1470_hal.o [1]
+wa1470_HAL_SPI_Init     0x08005c51   0x9a  Code  Gb  wa1470_hal.o [1]
+wa1470_HAL_bpsk_pin_init
+                        0x08005ceb   0x22  Code  Gb  wa1470_hal.o [1]
+wa1470_HAL_bpsk_pin_send
+                        0x08005e8b    0x8  Code  Gb  wa1470_hal.o [1]
+wa1470_HAL_chip_disable
+                        0x08005d4f   0x22  Code  Gb  wa1470_hal.o [1]
+wa1470_HAL_chip_enable  0x08005d2f   0x20  Code  Gb  wa1470_hal.o [1]
+wa1470_HAL_disable_pin_irq
+                        0x08005d25    0xa  Code  Gb  wa1470_hal.o [1]
+wa1470_HAL_enable_pin_irq
+                        0x08005d1b    0xa  Code  Gb  wa1470_hal.o [1]
+wa1470_HAL_get_irq_pin_state
+                        0x08005d7b    0xc  Code  Gb  wa1470_hal.o [1]
+wa1470_HAL_init         0x08005eb5   0x4a  Code  Gb  wa1470_hal.o [1]
+wa1470_HAL_reg_data_received_callback
+                        0x08005e93    0x6  Code  Gb  wa1470_hal.o [1]
+wa1470_HAL_reg_tx_finished_callback
+                        0x08005e99    0x6  Code  Gb  wa1470_hal.o [1]
+wa1470_HAL_spi_rx       0x08005e3d    0x8  Code  Gb  wa1470_hal.o [1]
+wa1470_HAL_spi_tx       0x08005e45    0x8  Code  Gb  wa1470_hal.o [1]
+wa1470_HAL_spi_write_cs
+                        0x08005e4d   0x18  Code  Gb  wa1470_hal.o [1]
+wa1470_bpsk_pin_send    0x08004a21   0x40  Code  Gb  wa1470mod_bpsk_pin.o [1]
+wa1470_cansleep         0x080032eb    0x4  Code  Gb  wa1470.o [1]
+wa1470_hal              0x20002248    0x4  Data  Gb  wa1470.o [1]
+wa1470_hal_struct       0x20002190   0x34  Data  Gb  wa1470_hal.o [1]
+wa1470_init             0x08003293   0x18  Code  Gb  wa1470.o [1]
+wa1470_isr              0x080032df    0xc  Code  Gb  wa1470.o [1]
+wa1470_reinit           0x080032b5   0x18  Code  Gb  wa1470.o [1]
+wa1470_scheduler        0x2000224c    0x4  Data  Gb  wa1470.o [1]
+wa1470_spi_read         0x08003201   0x44  Code  Gb  wa1470.o [1]
+wa1470_spi_read8        0x08003261   0x10  Code  Gb  wa1470.o [1]
+wa1470_spi_wait_for     0x08003271   0x22  Code  Gb  wa1470.o [1]
+wa1470_spi_write        0x080031b9   0x48  Code  Gb  wa1470.o [1]
+wa1470_spi_write8       0x08003255    0xc  Code  Gb  wa1470.o [1]
+wa1470_tx_finished      0x08003903   0x14  Code  Gb  wa1470mod.o [1]
+wa1470dem_get_bitrate_sensitivity
+                        0x08003585   0x26  Code  Gb  wa1470dem.o [1]
+wa1470dem_get_noise     0x08003793    0x6  Code  Gb  wa1470dem.o [1]
+wa1470dem_get_noise_calc_duration
+                        0x080037a9   0x2e  Code  Lc  wa1470dem.o [1]
+wa1470dem_get_rssi_int  0x08003721   0x72  Code  Lc  wa1470dem.o [1]
+wa1470dem_get_rssi_logoffset
+                        0x08003365   0x3a  Code  Lc  wa1470dem.o [1]
+wa1470dem_init          0x080032f1   0x5c  Code  Gb  wa1470dem.o [1]
+wa1470dem_isr           0x08003493   0xec  Code  Gb  wa1470dem.o [1]
+wa1470dem_process_messages
+                        0x0800339f   0xf4  Code  Lc  wa1470dem.o [1]
+wa1470dem_reset         0x08003351   0x14  Code  Gb  wa1470dem.o [1]
+wa1470dem_rx_enable     0x0800387d   0x28  Code  Gb  wa1470dem.o [1]
+wa1470dem_set_alpha     0x08003645   0x16  Code  Gb  wa1470dem.o [1]
+wa1470dem_set_bitrate   0x080035ab   0x7e  Code  Gb  wa1470dem.o [1]
+wa1470dem_set_crc_poly  0x0800366f    0xe  Code  Gb  wa1470dem.o [1]
+wa1470dem_set_freq      0x080036f1   0x2c  Code  Gb  wa1470dem.o [1]
+wa1470dem_set_hop_len   0x0800367d    0xc  Code  Gb  wa1470dem.o [1]
+wa1470dem_set_hop_table
+                        0x08003697   0x54  Code  Gb  wa1470dem.o [1]
+wa1470dem_set_preambule
+                        0x08003689    0xe  Code  Gb  wa1470dem.o [1]
+wa1470dem_set_threshold
+                        0x0800365b   0x14  Code  Gb  wa1470dem.o [1]
+wa1470dem_update_noise  0x080037d7   0xa6  Code  Lc  wa1470dem.o [1]
+wa1470dem_update_noise::dem_noise_cntr
+                        0x2000010b    0x1  Data  Lc  wa1470dem.o [1]
+wa1470dem_update_noise::dem_noise_min
+                        0x20000118    0x4  Data  Lc  wa1470dem.o [1]
+wa1470dem_update_noise::dem_noise_min_cntr
+                        0x2000010c    0x1  Data  Lc  wa1470dem.o [1]
+wa1470dem_update_noise::dem_noise_sum
+                        0x20000114    0x4  Data  Lc  wa1470dem.o [1]
+wa1470mod_call_TX_finished
+                        0x080038f1   0x12  Code  Lc  wa1470mod.o [1]
+wa1470mod_init          0x080038dd   0x14  Code  Gb  wa1470mod.o [1]
+wa1470mod_is_tx_in_progress
+                        0x08003ad5    0xc  Code  Gb  wa1470mod.o [1]
+wa1470mod_isr           0x08003917   0x2c  Code  Gb  wa1470mod.o [1]
+wa1470mod_phy_to_bitrate
+                        0x080039ed   0x38  Code  Gb  wa1470mod.o [1]
+wa1470mod_send          0x08003943   0x86  Code  Gb  wa1470mod.o [1]
+wa1470mod_set_bitrate   0x08003a25   0x66  Code  Gb  wa1470mod.o [1]
+wa1470mod_set_freq      0x08003a8d   0x24  Code  Gb  wa1470mod.o [1]
+wa1470mod_set_hop_table
+                        0x080039c9   0x24  Code  Gb  wa1470mod.o [1]
+wa1470rfe_deinit        0x08003c21    0xc  Code  Gb  wa1470rfe.o [1]
+wa1470rfe_init          0x08003b61   0xc0  Code  Gb  wa1470rfe.o [1]
+wa1470rfe_set_band      0x08003d51   0x26  Code  Gb  wa1470rfe.o [1]
+wa1470rfe_set_freq      0x08003d95   0x9e  Code  Gb  wa1470rfe.o [1]
+wa1470rfe_set_lna_current
+                        0x08003c43   0x22  Code  Lc  wa1470rfe.o [1]
+wa1470rfe_set_mode      0x08003c2d   0x16  Code  Gb  wa1470rfe.o [1]
+wa1470rfe_set_pll_mode  0x08003ce3   0x1e  Code  Gb  wa1470rfe.o [1]
+wa1470rfe_set_rx_gain   0x08003c65   0x7e  Code  Gb  wa1470rfe.o [1]
+wa1470rfe_set_rx_mode   0x08003d0d   0x18  Code  Gb  wa1470rfe.o [1]
+wa1470rfe_set_tx_mode   0x08003d01    0xc  Code  Gb  wa1470rfe.o [1]
+wa1470rfe_set_tx_power  0x08003d25   0x2c  Code  Gb  wa1470rfe.o [1]
+wait_Extra              0x20000087    0x1  Data  Gb  nbfi_transport.o [1]
+wait_Receive            0x20000086    0x1  Data  Gb  nbfi_transport.o [1]
+wait_RxEnd              0x20000088    0x1  Data  Gb  nbfi_transport.o [1]
+wait_for_extra_desc     0x200000d4   0x14  Data  Gb  nbfi_transport.o [1]
+was_not_cleared_after_groupe
+                        0x2000008a    0x1  Data  Gb  nbfi_transport.o [1]
+watimer_add_callback    0x080070f1   0x8a  Code  Gb  watimer.o [1]
+watimer_callbacks       0x20001fa0   0x50  Data  Gb  watimer.o [1]
+watimer_configure_next_irq_time
+                        0x08006fad   0x7e  Code  Lc  watimer.o [1]
+watimer_hal             0x20001ff0    0x4  Data  Gb  watimer.o [1]
+watimer_init            0x0800702b   0x24  Code  Gb  watimer.o [1]
+watimer_irq             0x0800704f    0x8  Code  Gb  watimer.o [1]
+watimer_remove_callback
+                        0x0800717b   0x42  Code  Gb  watimer.o [1]
+watimer_run_callbacks   0x08007057   0x9a  Code  Gb  watimer.o [1]
+watimer_set_HAL         0x08006f75    0x6  Code  Gb  watimer.o [1]
+watimer_time            0x20001f9c    0x4  Data  Gb  watimer.o [1]
+watimer_update_time     0x08006f7b   0x32  Code  Gb  watimer.o [1]
+watimer_update_time::old_watimer_time
+                        0x20001ff4    0x4  Data  Lc  watimer.o [1]
+xbuf_get                0x08006a97   0x28  Code  Gb  xbuf.o [1]
+xbuf_is_empty           0x08006a85   0x12  Code  Gb  xbuf.o [1]
+xbuf_send               0x08006abf   0x2a  Code  Gb  xbuf.o [1]
+you_should_dl_power_step_down
+                        0x20000022    0x1  Data  Gb  nbfi_config.o [1]
+you_should_dl_power_step_up
+                        0x20000021    0x1  Data  Gb  nbfi_config.o [1]
+
+
+[1] = C:\Waviot\Software\STM\NBFi_WA1470\stm32l0x\sample\Debug\Obj
+[2] = command line
+[3] = dl6M_tlf.a
+[4] = m6M_tl.a
+[5] = rt6M_tl.a
+[6] = shb_l.a
+
+  29 834 bytes of readonly  code memory
+     136 bytes of readonly  data memory
+   8 809 bytes of readwrite data memory
+
+Errors: none
+Warnings: none

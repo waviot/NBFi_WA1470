@@ -1,0 +1,5 @@
+log jlinklog.txt
+loadfile tmp.hex
+r
+g
+q

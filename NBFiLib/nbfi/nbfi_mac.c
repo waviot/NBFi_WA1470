@@ -229,10 +229,6 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 
 	if(NBFi_Crypto_Available())
 	{
-		//uint32_t modem_id;		
-		//modem_id = FULL_ID[0];
-		//modem_id |= (uint32_t)FULL_ID[1] << 8;
-		//modem_id |= (uint32_t)FULL_ID[2] << 16;
 		NBFi_Crypto_Encode(&ul_buf[len - 1], *((uint32_t*)FULL_ID), nbfi_iter.ul, 9);
 		len += 8;
 	
@@ -292,24 +288,6 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 	return OK;
 }
 
-/*
-_Bool NBFi_MAC_Match_ID(uint8_t * addr)
-{
-	uint8_t i;
-	for( i = 0; i != 3; i++)
-		if(nbfi.temp_ID[i] != addr[i])
-			break;
-	if(i == 3)
-		return 1;
-
-	for(i = 0; i != 3; i++) 
-		if(nbfi.broadcast_ID[i] != addr[i])
-			break;
-	if(i == 3)
-		return 1;
-
-	return 0;
-}*/
 
 nbfi_status_t NBFi_MAC_TX(nbfi_transport_packet_t* pkt)
 {
@@ -350,12 +328,12 @@ nbfi_status_t NBFi_MAC_RX()
 
 void NBFi_MAC_Set_Iterator()
 {
-	if (__nbfi_set_iterator)
-		__nbfi_set_iterator(&nbfi_iter);
+	if (nbfi_hal->__nbfi_set_iterator)
+		nbfi_hal->__nbfi_set_iterator(&nbfi_iter);
 }
 
 void NBFi_MAC_Get_Iterator()
 {
-	if (__nbfi_get_iterator)
-		__nbfi_get_iterator(&nbfi_iter);
+	if (nbfi_hal->__nbfi_get_iterator)
+		nbfi_hal->__nbfi_get_iterator(&nbfi_iter);
 }

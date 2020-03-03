@@ -1,0 +1,10 @@
+¬т май 8 18:51:19 2018 - ID = 0x71c5c4:
+¬т май 8 18:51:19 2018 - Current ID is already used before, are you sure to use it? y/n
+¬т май 8 18:51:22 2018 - YES
+¬т май 8 18:51:22 2018 - KEY = DEC9BFA27ECC4DDE3B9A48855EAF05A032279882D4C41AE72AC832F999109B75
+¬т май 8 18:51:23 2018 - FAULT
+¬т май 8 18:51:36 2018 - ID = 0x71c5c4:
+¬т май 8 18:51:36 2018 - Current ID is already used before, are you sure to use it? y/n
+¬т май 8 18:51:37 2018 - YES
+¬т май 8 18:51:38 2018 - KEY = DEC9BFA27ECC4DDE3B9A48855EAF05A032279882D4C41AE72AC832F999109B75
+¬т май 8 18:51:59 2018 - DONE

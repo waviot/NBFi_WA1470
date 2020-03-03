@@ -533,20 +533,7 @@ void NBFi_Config_Return()
    // if(nbfi.mode == NRX) nbfi.handshake_mode = HANDSHAKE_NONE;
     NBFi_Config_Send_Sync(0);
 }
-/*
-void NBFi_Configure_IDs()
-{
-    //nbfi.full_ID[0] = FULL_ID[3];
-    //nbfi.full_ID[1] = FULL_ID[2];
-    //nbfi.full_ID[2] = FULL_ID[1];
-    //nbfi.full_ID[3] = FULL_ID[0];
-    //nbfi.full_ID[4] = 0;
-    //nbfi.full_ID[5] = 0;
-    //nbfi.temp_ID[0] = FULL_ID[2];
-    //nbfi.temp_ID[1] = FULL_ID[1];
-    //nbfi.temp_ID[2] = FULL_ID[0];
 
-}*/
 
 void NBFi_Config_Set_Default()
 {
@@ -645,15 +632,15 @@ _Bool NBFi_Config_Tx_Idle()
 void NBFi_ReadConfig(nbfi_settings_t * settings)
 {
         if(settings == 0) settings = &nbfi;
-	if(__nbfi_read_flash_settings == 0) goto read_default;
+	if(nbfi_hal->__nbfi_read_flash_settings == 0) goto read_default;
 
-	__nbfi_read_flash_settings(settings);
+	nbfi_hal->__nbfi_read_flash_settings(settings);
 
 	if((settings->tx_phy_channel != 0xff) && (settings->tx_phy_channel != 0)) return;
 
 read_default:
 
-	if(__nbfi_read_default_settings) __nbfi_read_default_settings(settings);
+	if(nbfi_hal->__nbfi_read_default_settings) nbfi_hal->__nbfi_read_default_settings(settings);
         
 #ifndef NBFI_USE_MALLOC
     if((settings == 0) &&(nbfi.max_payload_len > NBFI_PACKET_SIZE)) nbfi.max_payload_len = NBFI_PACKET_SIZE;

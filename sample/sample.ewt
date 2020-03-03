@@ -2738,37 +2738,10 @@
     <name>scheduler</name>
     <group>
       <name>libmf</name>
-      <file>
-        <name>$PROJ_DIR$\..\scheduler\libmf\wt0.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\scheduler\libmf\wt01.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\scheduler\libmf\wtimer.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\scheduler\libmf\wtimer.h</name>
-      </file>
     </group>
     <group>
       <name>watimer</name>
-      <file>
-        <name>$PROJ_DIR$\..\scheduler\watimer\watimer.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\scheduler\watimer\watimer.h</name>
-      </file>
     </group>
-    <file>
-      <name>$PROJ_DIR$\..\scheduler\ischeduler.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\scheduler\scheduler.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\..\scheduler\scheduler.h</name>
-    </file>
   </group>
   <group>
     <name>src</name>

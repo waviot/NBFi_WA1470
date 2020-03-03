@@ -1,5 +1,4 @@
 #include "nbfi.h"
-#include <string.h>
 #include "magma.h"
 
 uint8_t inited;

@@ -1,5 +1,6 @@
 #include "nbfi.h"
-#include <libmfwtimer.h>
+#include "preambula.h"
+
 
 _Bool rf_busy = 0;
 _Bool transmit = 0;
@@ -9,6 +10,12 @@ nbfi_rf_state_s rf_state = STATE_OFF;
 
 nbfi_phy_channel_t nbfi_phy_channel;
 
+
+static void _memcpy(uint8_t *dst, const uint8_t *src, uint8_t len)
+{
+	for(uint8_t i = 0; i < len; i++)
+		dst[len - i - 1] = src[i];
+}
 
 nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
                         nbfi_rf_antenna_t        antenna,
@@ -21,13 +28,20 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
     static uint32_t last_tx_freq;
     static uint32_t last_rx_freq;
     
+    static uint32_t _preambule = 0;
+    if(!_preambule)
+    {
+		uint32_t preambule_tmp = preambula(*((uint32_t*)FULL_ID), (uint32_t *)0, (uint32_t *)0);
+		_memcpy((uint8_t *)&_preambule, (uint8_t *)&preambule_tmp, 4);
+    }
+        
     if(rf_busy) return ERR_RF_BUSY;
 
     rf_busy = 1;
 
     if(last_phy != phy_channel)
     {
-      wa1470_reinit();
+      wa1470_reinit(_preambule);
       last_tx_prw = 100;
       last_tx_freq = 0;
       last_rx_freq = 0;

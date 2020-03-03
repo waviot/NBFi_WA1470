@@ -1,7 +1,5 @@
 #include "nbfi.h"
-#include <stdlib.h>
-#include <string.h>
-
+#include <stdio.h>
 #ifdef NBFI_LOG
 #include "log.h"
 #endif
@@ -301,7 +299,7 @@ void NBFi_ProcessRxPackets()
             {
                 NBFi_Clear_RX_Buffer(nbfi_state.DL_iter&0x1f);
                 #ifdef NBFI_LOG
-                sprintf(log_string, "%05u: CRC mismatch ", (uint16_t)(scheduler_curr_time()&0xffff));
+                sprintf(log_string, "%05u: CRC mismatch ", (uint16_t)(wa1470_scheduler->__scheduler_curr_time()&0xffff));
                 log_send_str(log_string);
                 #endif
                 
@@ -599,7 +597,7 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
                 NBFi_Set_UL_Status(pkt->id, INPROCESS);
                 
 #ifdef NBFI_LOG
-                sprintf(log_string, "%05u: DL ", (uint16_t)(scheduler_curr_time()&0xffff));
+                sprintf(log_string, "%05u: DL ", (uint16_t)(wa1470_scheduler->__scheduler_curr_time()&0xffff));
                 sprintf(log_string + strlen(log_string), " %c%c%c - %d - PLD:", pkt->phy_data.SYS?'S':' ', pkt->phy_data.ACK?'A':' ',pkt->phy_data.MULTI?'M':' ', pkt->phy_data.ITER&0x1f);
                 for(uint8_t k = 0; k != 8; k++) sprintf(log_string + strlen(log_string), "%02X", pkt->phy_data.payload[k]);
                 sprintf(log_string + strlen(log_string), " -    - %dBPS", NBFi_Phy_To_Bitrate(nbfi.tx_phy_channel));
@@ -873,7 +871,7 @@ static void NBFi_SendHeartBeats(struct scheduler_desc *desc)
 void NBFi_Force_process()
 {
   #ifdef NBFI_LOG
-                sprintf(log_string, "%05u: Force ", (uint16_t)(scheduler_curr_time()&0xffff));
+                sprintf(log_string, "%05u: Force ", (uint16_t)(wa1470_scheduler->__scheduler_curr_time()&0xffff));
                 log_send_str(log_string);
   #endif
     scheduler_add_task(&nbfi_processTask_desc, NBFi_ProcessTasks, RELATIVE, MILLISECONDS(1));

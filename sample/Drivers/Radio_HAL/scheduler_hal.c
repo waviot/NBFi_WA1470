@@ -19,6 +19,9 @@ static TIM_HandleTypeDef hlooptim;
 #define AX_LOOPTIM_TIM_FREQ		2000
 #define AX_LOOPTIM_IRQHandler           TIM7_IRQHandler
 
+ischeduler_st* _scheduler = 0;
+
+
 void scheduler_HAL_LPTIM_Init(void)
 {
 
@@ -158,10 +161,8 @@ void scheduler_HAL_init()
   scheduler_hal_struct.__cc_get = (uint16_t(*)(uint8_t))scheduler_HAL_cc_get;
   scheduler_hal_struct.__cnt_get = (uint16_t(*)(uint8_t))scheduler_HAL_cnt_get;
   scheduler_hal_struct.__check_cc_irq = (uint8_t(*)(uint8_t))scheduler_HAL_check_cc_irq;
-  
-  scheduler_set_HAL(&scheduler_hal_struct);
-  
-  scheduler_init();
+   
+  _scheduler = scheduler_init(&scheduler_hal_struct);
   
   scheduler_HAL_LPTIM_Init(); 
   HAL_LPTIM_Counter_Start(&hlptim, 0xffff);

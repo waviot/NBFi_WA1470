@@ -2,6 +2,8 @@
 #define NBFI_H
 
 #include "wa1470.h"
+#include <string.h>
+#include <stdlib.h>
 #include "nbfi_defines.h"
 #include "nbfi_types.h"
 #include "nbfi_transport.h"

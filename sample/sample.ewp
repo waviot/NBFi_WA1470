@@ -322,8 +322,6 @@
           <state>$PROJ_DIR$\..\NBFiLib\preambula\preambula</state>
           <state>$PROJ_DIR$\Drivers\Radio_HAL</state>
           <state>$PROJ_DIR$\..\scheduler</state>
-          <state>$PROJ_DIR$\..\scheduler\libmf</state>
-          <state>$PROJ_DIR$\..\scheduler\watimer</state>
         </option>
         <option>
           <name>CCStdIncCheck</name>
@@ -2894,6 +2892,9 @@
         <name>$PROJ_DIR$\..\scheduler\watimer\watimer.h</name>
       </file>
     </group>
+    <file>
+      <name>$PROJ_DIR$\..\scheduler\ischeduler.h</name>
+    </file>
     <file>
       <name>$PROJ_DIR$\..\scheduler\scheduler.c</name>
     </file>

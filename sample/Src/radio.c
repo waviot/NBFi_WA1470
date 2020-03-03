@@ -1,3 +1,4 @@
+#include <stm32l0xx_hal.h>
 #include "main.h"
 #include "radio.h"
 #include "wa1470_hal.h"
@@ -282,9 +283,8 @@ void radio_init(void)
 	//wa1470_reg_func(WARADIO_TX_FINISHED, (void*)NBFi_RF_TX_Finished);
         
         WA1470_HAL_reg_data_received_callback((void*)NBFi_MAC_RX_ProtocolD);
-        WA1470_HAL_reg_tx_finished_callback((void*)NBFi_RF_TX_Finished);
-        
-        WA1470_HAL_init(MODEM_ID);
+        WA1470_HAL_reg_tx_finished_callback((void*)NBFi_RF_TX_Finished);       
+        WA1470_HAL_init();
         
 	//wa1470_init(WA1470_SEND_BY_BPSK_PIN/*WA1470_SEND_BY_I_Q_MODULATOR*/, MODEM_ID);
         //wa1470_init(WA1470_SEND_BY_I_Q_MODULATOR, MODEM_ID);

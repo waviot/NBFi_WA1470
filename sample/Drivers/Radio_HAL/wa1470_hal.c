@@ -1,5 +1,7 @@
 #include "stm32l0xx_hal_conf.h"
 #include "wa1470.h"
+#include "scheduler_hal.h"
+#include "log.h"
 
 #define SPI_TIMEOUT	1000
 
@@ -255,7 +257,7 @@ void WA1470_HAL_bpsk_pin_send(uint8_t* data, uint16_t len, uint16_t bitrate)
 
 
 
-wa1470_HAL_st wa1470_hal_struct = {0,0,0,0,0,0,0,0,0,0,0,0};
+wa1470_HAL_st wa1470_hal_struct = {0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 
 void WA1470_HAL_reg_data_received_callback(void* fn)
@@ -269,7 +271,7 @@ void WA1470_HAL_reg_tx_finished_callback(void* fn)
 }
 
 
-void WA1470_HAL_init(uint32_t modem_id)
+void WA1470_HAL_init()
 {
   
   WA1470_HAL_GPIO_Init();
@@ -278,20 +280,19 @@ void WA1470_HAL_init(uint32_t modem_id)
   
   WA1470_HAL_bpsk_pin_init();
   
-  wa1470_hal_struct.__wa1470_enable_pin_irq = (void(*)(void))WA1470_HAL_enable_pin_irq;
-  wa1470_hal_struct.__wa1470_disable_pin_irq = (void(*)(void))WA1470_HAL_disable_pin_irq;
-  wa1470_hal_struct.__wa1470_chip_enable = (void(*)(void))WA1470_HAL_chip_enable;
-  wa1470_hal_struct.__wa1470_chip_disable = (void(*)(void))WA1470_HAL_chip_disable;
-  wa1470_hal_struct.__wa1470_get_irq_pin_state = (uint8_t(*)(void))WA1470_HAL_get_irq_pin_state;
-  wa1470_hal_struct.__spi_rx = (void(*)(uint8_t*,uint16_t))WA1470_HAL_spi_rx;
-  wa1470_hal_struct.__spi_tx = (void(*)(uint8_t*,uint16_t))WA1470_HAL_spi_tx;
- // wa1470_hal_struct.__spi_tx_rx = (void(*)(uint8_t*,uint8_t*,uint16_t))WA1470_HAL_spi_tx_rx;
-  wa1470_hal_struct.__spi_cs_set = (void(*)(uint8_t))WA1470_HAL_spi_write_cs;
-  wa1470_hal_struct.__wa1470_nop_dalay_ms = (void(*)(uint32_t))NOP_Delay_ms;
-  wa1470_hal_struct.__wa1470_send_to_bpsk_pin = (void(*)(uint8_t*,uint16_t,uint16_t))WA1470_HAL_bpsk_pin_send;
+  wa1470_hal_struct.__wa1470_enable_pin_irq = &WA1470_HAL_enable_pin_irq;
+  wa1470_hal_struct.__wa1470_disable_pin_irq = &WA1470_HAL_disable_pin_irq;
+  wa1470_hal_struct.__wa1470_chip_enable = &WA1470_HAL_chip_enable;
+  wa1470_hal_struct.__wa1470_chip_disable = &WA1470_HAL_chip_disable;
+  wa1470_hal_struct.__wa1470_get_irq_pin_state = &WA1470_HAL_get_irq_pin_state;
+  wa1470_hal_struct.__spi_rx = &WA1470_HAL_spi_rx;
+  wa1470_hal_struct.__spi_tx = &WA1470_HAL_spi_tx;
+  wa1470_hal_struct.__spi_cs_set = &WA1470_HAL_spi_write_cs;
+  wa1470_hal_struct.__wa1470_nop_dalay_ms = &NOP_Delay_ms;
+  wa1470_hal_struct.__wa1470_send_to_bpsk_pin = &WA1470_HAL_bpsk_pin_send;
+  wa1470_hal_struct.__wa1470_log_send_str = &log_send_str;
   
-  wa1470_set_HAL(&wa1470_hal_struct);
-  
-  wa1470_init(WA1470_SEND_BY_I_Q_MODULATOR, modem_id);
+  wa1470_init(WA1470_SEND_BY_I_Q_MODULATOR, 0, &wa1470_hal_struct, _scheduler);
+
 }
 

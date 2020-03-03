@@ -1,8 +1,6 @@
 #include "nbfi.h"
 #include "zcode.h"
 #include "pcode.h"
-#include <string.h>
-#include <stdlib.h> 
 
 #define memset_xdata memset
 #define memcpy_xdata memcpy

@@ -1,6 +1,4 @@
 #include "nbfi.h"
-#include <stdlib.h>
-#include <string.h>
 
 #ifdef NBFI_USE_MALLOC
 nbfi_transport_packet_t* nbfi_TX_pktBuf[NBFI_TX_PKTBUF_SIZE];

@@ -111,8 +111,8 @@ nbfi_status_t NBFi_RF_Deinit()
     if(rf_busy) return ERR_RF_BUSY;
     nbfi_hal->__nbfi_before_off();    
     rf_busy = 1;
-    wa1470rfe_set_mode(RFE_MODE_DEEP_SLEEP);
-    wa1470rfe_deinit();
+    //wa1470rfe_set_mode(RFE_MODE_DEEP_SLEEP);
+    wa1470_deinit();
     rf_busy = 0;
     transmit = 0;
     rf_state = STATE_OFF;

@@ -2,7 +2,7 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\sample\sample.ewp</path>
+    <path>$WS_DIR$\ChipTestBoard\ChipTestBoard.ewp</path>
   </project>
   <batchBuild/>
 </workspace>

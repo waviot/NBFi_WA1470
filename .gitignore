@@ -16,3 +16,13 @@ stm32l0x/ChipTestBoard/Debug/Exe/
 stm32l0x/ChipTestBoard/Debug/List/
 
 stm32l0x/ChipTestBoard/Debug/Obj/
+
+*.PcbDocPreview
+
+*.SchDocPreview
+
+stm32l0x/WRM1470DevKit/Debug/Exe/
+
+stm32l0x/WRM1470DevKit/Debug/List/
+
+stm32l0x/WRM1470DevKit/Debug/Obj/

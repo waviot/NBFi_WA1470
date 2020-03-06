@@ -31,7 +31,8 @@ void nbfi_receive_complete(uint8_t * data, uint16_t length)
   NBFi_Send5(data, length);  //echo
 }
 
-
+//#define NO_OPT #pragma  optimize=none
+//float rssi;
 int main(void)
 {
         
@@ -56,6 +57,11 @@ int main(void)
       #endif
             
       NBFI_Main_Level_Loop();
+      
+      
+      //rssi = wa1470dem_get_rssi();
+      
+      
       
       if (NBFi_can_sleep()) 
       {

@@ -46,7 +46,7 @@ int main(void)
 
   log_init();
   
-  last_send_status = NBFi_Send5("Hello!", sizeof("Hello!"));   
+  //last_send_status = NBFi_Send5("Hello!", sizeof("Hello!"));   
   
   while (1) 
   {     

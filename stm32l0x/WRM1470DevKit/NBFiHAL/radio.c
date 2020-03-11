@@ -57,7 +57,7 @@
 const nbfi_settings_t nbfi_set_default =
 {
     CRX,//mode;
-    UL_DBPSK_400_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
+    UL_DBPSK_50_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
     DL_DBPSK_400_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
     MACK_1,             //mack_mode
@@ -66,15 +66,15 @@ const nbfi_settings_t nbfi_set_default =
     0,                  //dl_ID;
     0,                  //tx_freq;
     0,//858090000,//868791000,//0,//868790000,//0,//868735500,//868710000,//868800000,                  //rx_freq;
-    PCB,                //tx_antenna;
-    PCB,                //rx_antenna;
+    SMA,                //tx_antenna;
+    SMA,                //rx_antenna;
     TX_MAX_POWER,       //tx_pwr;
     30,//3600*6,             //heartbeat_interval
-    255,                //heartbeat_num
+    0,                //heartbeat_num
     0,//NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
     NBFI_UL_FREQ_BASE,
     NBFI_DL_FREQ_BASE,
-    NBFI_UL_FREQ_PLAN_51200_0 + NBFI_FREQ_PLAN_MINIMAL,
+    NBFI_FREQ_PLAN_MINIMAL,//NBFI_UL_FREQ_PLAN_51200_0 + NBFI_FREQ_PLAN_MINIMAL,
     {
       TRY_MINIMAL_UL_BAND_AND_LOW_PHY_ALTERNATIVE,
       TRY_LOW_PHY_ALTERNATIVE,

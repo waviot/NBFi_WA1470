@@ -11,6 +11,11 @@
 #define WA_TXNEN_GPIO_Port 	GPIOA
 #define WA_TXNEN_Pin 		GPIO_PIN_11
 
+#define WA_EXTANT_GPIO_Port 	GPIOB
+#define WA_EXTANT_Pin 		GPIO_PIN_7
+#define WA_PCBANT_GPIO_Port 	GPIOA
+#define WA_PCBANT_Pin 		GPIO_PIN_1
+
 
 static void nbfi_HAL_GPIO_Init()
 {
@@ -28,6 +33,19 @@ static void nbfi_HAL_GPIO_Init()
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(WA_TXNEN_GPIO_Port, &GPIO_InitStruct);
 
+  
+  GPIO_InitStruct.Pin = WA_EXTANT_Pin;    
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(WA_EXTANT_GPIO_Port, &GPIO_InitStruct);
+  
+  GPIO_InitStruct.Pin = WA_PCBANT_Pin;    
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(WA_PCBANT_GPIO_Port, &GPIO_InitStruct);
+  
 }
 
 
@@ -36,12 +54,35 @@ void nbfi_HAL_before_tx()
 {
   HAL_GPIO_WritePin(WA_TXEN_GPIO_Port, WA_TXEN_Pin,  GPIO_PIN_SET);
   HAL_GPIO_WritePin(WA_TXEN_GPIO_Port, WA_TXNEN_Pin,  GPIO_PIN_RESET);
+  
+ if(nbfi.tx_antenna == PCB)
+  {
+      HAL_GPIO_WritePin(WA_PCBANT_GPIO_Port, WA_PCBANT_Pin,  GPIO_PIN_SET);
+      HAL_GPIO_WritePin(WA_EXTANT_GPIO_Port, WA_EXTANT_Pin,  GPIO_PIN_RESET);
+  }
+  else
+  {
+      HAL_GPIO_WritePin(WA_PCBANT_GPIO_Port, WA_PCBANT_Pin,  GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(WA_EXTANT_GPIO_Port, WA_EXTANT_Pin,  GPIO_PIN_SET);
+  }
+  
 }
 
 void nbfi_HAL_before_rx()
 {
   HAL_GPIO_WritePin(WA_TXEN_GPIO_Port, WA_TXEN_Pin,  GPIO_PIN_RESET);
   HAL_GPIO_WritePin(WA_TXEN_GPIO_Port, WA_TXNEN_Pin,  GPIO_PIN_SET);
+  
+ if(nbfi.rx_antenna == PCB)
+  {
+      HAL_GPIO_WritePin(WA_PCBANT_GPIO_Port, WA_PCBANT_Pin,  GPIO_PIN_SET);
+      HAL_GPIO_WritePin(WA_EXTANT_GPIO_Port, WA_EXTANT_Pin,  GPIO_PIN_RESET);
+  }
+  else
+  {
+      HAL_GPIO_WritePin(WA_PCBANT_GPIO_Port, WA_PCBANT_Pin,  GPIO_PIN_RESET);
+      HAL_GPIO_WritePin(WA_EXTANT_GPIO_Port, WA_EXTANT_Pin,  GPIO_PIN_SET);
+  }
 }
 
 void nbfi_HAL_before_off()

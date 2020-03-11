@@ -40,12 +40,12 @@ int main(void)
   SystemClock_Config();
   
   MX_GPIO_Init();
- 
+   
   radio_init();
 
   log_init();
   
-  last_send_status = NBFi_Send5("Hello!", sizeof("Hello!"));   
+  //last_send_status = NBFi_Send5("Hello!", sizeof("Hello!"));   
   
   while (1) 
   {     

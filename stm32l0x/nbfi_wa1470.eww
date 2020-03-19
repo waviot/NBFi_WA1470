@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+
+<workspace>
+  <project>
+    <path>$WS_DIR$\ChipTestBoard\ChipTestBoard.ewp</path>
+  </project>
+  <project>
+    <path>$WS_DIR$\WRM1470DevKit\WRM1470DevKit.ewp</path>
+  </project>
+  <batchBuild/>
+</workspace>
+
+

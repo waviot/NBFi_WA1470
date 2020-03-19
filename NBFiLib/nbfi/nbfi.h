@@ -1,147 +1,74 @@
 #ifndef NBFI_H
 #define NBFI_H
 
+#include "nbfi_defines.h"
 #include "wa1470.h"
+#include <string.h>
+#include <stdlib.h>
+#include <stdio.h>
+#include "nbfi_types.h"
+#include "nbfi_transport.h"
+#include "nbfi_transport_misc.h"
+#include "nbfi_crc.h"
+#include "nbfi_rf.h"
+#include "nbfi_config.h"
+#include "nbfi_mac.h"
+#include "nbfi_crypto.h"
+#include "ischeduler.h"
 
-#define FULL_ID     ((uint8_t*)(&dev_info.modem_id))
-
-#define NBFI_TX_PKTBUF_SIZE     64
-#define NBFI_RX_PKTBUF_SIZE     32
-
-//#define NBFI_OLD_PROTE
-
-typedef enum
-{   
-    NRX         =   0,
-    DRX         =   1,
-    CRX         =   2,
-    TRANSPARENT =   3,
-    OFF         =   4
-}nbfi_mode_t;
-
-typedef enum
+typedef struct 
 {
-    MACK_0      = 0,//no ack
-    MACK_1      = 1,//0x1,
-    MACK_2      = 2,//0x3,
-    MACK_4      = 4,//0x0f,
-    MACK_8      = 8,//0xff,
-    MACK_16     = 16,//0xffff,
-    MACK_32     = 32,//0,
-}nbfi_mack_mode_t;
+  void (* __nbfi_before_tx)();
+  void (* __nbfi_before_rx)();
+  void (* __nbfi_before_off)();
+  void (* __nbfi_lock_unlock_loop_irq)(uint8_t);
+  void (*__nbfi_send_status_handler)(nbfi_ul_sent_status_t);
+  void (*__nbfi_rx_handler)(uint8_t*, uint16_t);
+  void (* __nbfi_read_default_settings)(nbfi_settings_t*);
+  void (* __nbfi_read_flash_settings)(nbfi_settings_t*);
+  void (* __nbfi_write_flash_settings)(nbfi_settings_t*);
+  uint32_t (* __nbfi_measure_voltage_or_temperature)(uint8_t);
+  uint32_t (* __nbfi_update_rtc)(void);
+  void (* __nbfi_rtc_synchronized)(uint32_t);
+  void (* __nbfi_reset)(void);
+  void (* __nbfi_get_iterator)(nbfi_crypto_iterator_t*);
+  void (* __nbfi_set_iterator)(nbfi_crypto_iterator_t*);
+  void (*__nbfi_log_send_str)(const char *str);
+}nbfi_HAL_st;
 
-typedef enum
-{
-	DL_PSK_200              = 0,
-	DL_PSK_500              = 1,
-	DL_PSK_5000             = 2,
-	DL_PSK_FASTDL           = 3,
-	DL_DBPSK_50_PROT_D      = 10,
-	DL_DBPSK_400_PROT_D	    = 11,
-	DL_DBPSK_3200_PROT_D	= 12,
-	DL_DBPSK_25600_PROT_D	= 13,
-	DL_DBPSK_50_PROT_E	    = 14,
-	DL_DBPSK_400_PROT_E	    = 15,
-	DL_DBPSK_3200_PROT_E	= 16,
-	DL_DBPSK_25600_PROT_E	= 17,
-	DL_DBPSK_100H_PROT_D    = 18,
-	UL_DBPSK_50_PROT_C      = 20,
-	UL_DBPSK_50_PROT_D      = 21,
-	UL_PSK_200              = 22,
-	UL_DBPSK_400_PROT_C     = 23,
-	UL_DBPSK_400_PROT_D     = 24,
-	UL_PSK_500              = 25,
-	UL_DBPSK_3200_PROT_D    = 26,
-	UL_PSK_5000             = 27,
-	UL_DBPSK_25600_PROT_D   = 28,
-	UL_PSK_FASTDL           = 29,
-	UL_DBPSK_50_PROT_E	    = 30,
-	UL_DBPSK_400_PROT_E	    = 31,
-	UL_DBPSK_3200_PROT_E	= 32,
-	UL_DBPSK_25600_PROT_E	= 33,
-	UL_DBPSK_100H_PROT_D    = 34,
-	UL_DBPSK_100H_PROT_E    = 35,
-	UL_CARRIER              = 50,
-	OSC_CAL                 = 51
-}nbfi_phy_channel_t;
+extern nbfi_HAL_st* nbfi_hal;
+extern ischeduler_st* nbfi_scheduler;
 
 
-typedef enum
-{
-    HANDSHAKE_NONE      = 0,
-    HANDSHAKE_SIMPLE    = 1
-}nbfi_handshake_t;
+#ifdef NBFI_LOG
+extern char nbfi_log_string[];
+#endif
 
+#define NBFI_LOCK       1
+#define NBFI_UNLOCK     0
 
+void                    NBFI_Init(nbfi_HAL_st *, ischeduler_st*, nbfi_dev_info_t* info);
+void                    NBFI_Main_Level_Loop();
+nbfi_status_t           NBFi_go_to_Sleep(_Bool sleep);
+nbfi_ul_sent_status_t   NBFi_Send5(uint8_t* payload, uint8_t length);
+nbfi_status_t           NBFi_Send(uint8_t* payload, uint8_t length);
+nbfi_ul_status_t        NBFi_get_UL_status(uint16_t id);
+uint8_t                 NBFi_get_Received_Packet(uint8_t * payload);
 
-typedef struct
-{
-    uint32_t UL_total;
-    uint32_t UL_iter;
-    uint32_t DL_total;
-    uint32_t DL_iter;
-    uint8_t  aver_rx_snr;
-    uint8_t  aver_tx_snr;
-    int16_t success_total;
-    int16_t fault_total;
-    int16_t last_rssi;
-    uint8_t UL_rating;
-    uint8_t DL_rating;
-    uint32_t bs_id;
-    uint32_t server_id;
-}nbfi_state_t;
+uint8_t                 NBFi_Packets_To_Send();
+void                    NBFi_get_state(nbfi_state_t * state);
+uint8_t                 NBFi_can_sleep();
+uint32_t                NBFi_get_RTC();
+void                    NBFi_set_RTC(uint32_t time);
 
-typedef enum
-{
-    OK = 0,
-    ERR = 1,
-    ERR_RF_BUSY = 2,
-    ERR_ACK_LOST = 3,
-    ERR_BUFFER_FULL = 4
-}nbfi_status_t;
+void                    NBFi_set_Device_Info(nbfi_dev_info_t *);
+void                    NBFi_get_Settings(nbfi_settings_t*);
+void                    NBFi_set_Settings(nbfi_settings_t*);
 
-// NB-Fi header
-#define SYS_FLAG        (1<<7)
-#define ACK_FLAG        (1<<6)
-#define MULTI_FLAG      (1<<5)
+_Bool                   NBFi_send_Packet_to_Config_Parser(uint8_t* buf);
 
+void                    NBFi_clear_Saved_Configuration();
+void                    NBFi_switch_to_another_settings(nbfi_settings_t* settings, _Bool to_or_from);
+_Bool                   NBFi_is_Switched_to_Custom_Settings();
 
-typedef enum
-{
-    PCB = 0,       //PCB or ANT 1
-    SMA = 1        //SMA or ANT 2
-}nbfi_rf_antenna_t;
-
-
-typedef void (*rx_handler_t)(uint8_t*, uint16_t);
-
-enum nbfi_func_t
-{
-    NBFI_ON_OFF_PWR,
-    NBFI_BEFORE_TX,
-    NBFI_BEFORE_RX,
-    NBFI_BEFORE_OFF,
-    NBFI_RECEIVE_COMLETE,
-    NBFI_READ_DEFAULT_SETTINGS,
-    NBFI_READ_FLASH_SETTINGS,
-    NBFI_WRITE_FLASH_SETTINGS,
-    NBFI_MEASURE_VOLTAGE_OR_TEMPERATURE,
-    NBFI_UPDATE_RTC,
-    NBFI_RTC_SYNCHRONIZED,
-    NBFI_LOCKUNLOCKNBFIIRQ,
-    NBFI_RESET,
-    NBFI_GET_ITERATOR,
-    NBFI_SET_ITERATOR,
-};
-
-void 	        NBFI_reg_func(uint8_t name, void*);
-nbfi_status_t   NBFI_Init();
-void            NBFi_Go_To_Sleep(_Bool sleep);
-nbfi_status_t   NBFi_Send(uint8_t* payload, uint8_t length);
-void            NBFi_ProcessRxPackets(_Bool external);
-uint8_t         NBFi_Packets_To_Send();
-nbfi_state_t*   NBFi_get_state();
-uint8_t         NBFi_can_sleep();
-uint32_t        NBFi_get_RTC();
-void            NBFi_set_RTC(uint32_t time);
 #endif // NBFI_H

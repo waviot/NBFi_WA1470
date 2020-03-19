@@ -1,6 +1,4 @@
-#include "nbfi_crypto.h"
-#include "nbfi_defines.h"
-#include <string.h>
+#include "nbfi.h"
 #include "magma.h"
 
 uint8_t inited;

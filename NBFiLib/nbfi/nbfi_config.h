@@ -25,67 +25,28 @@
 #define NBFI_PARAM_BROADCAST_ADD        0x10
 #define NBFI_PARAM_APP_IDS              0x11
 #define NBFI_PARAM_BSANDSERVER_IDS      0x12
-#define NBFI_PARAM_MODE_V5              0x13
 
-typedef struct
-{
-    nbfi_mode_t 		mode;
-    nbfi_phy_channel_t	tx_phy_channel;
-    nbfi_phy_channel_t 	rx_phy_channel;
-    nbfi_handshake_t	handshake_mode;
-    nbfi_mack_mode_t	mack_mode;
-    uint8_t     num_of_retries;
-    uint8_t     max_payload_len;
-    uint8_t     dl_ID[3];
-    uint8_t     temp_ID[3];
-    uint8_t     broadcast_ID[3];
-    uint8_t     full_ID[6];
-    uint32_t    tx_freq;
-    uint32_t    rx_freq;
-    uint8_t     tx_antenna;
-    uint8_t     rx_antenna;
-    int8_t      tx_pwr;
-    uint16_t    heartbeat_interval;
-    uint8_t     heartbeat_num;
-    uint8_t     additional_flags;
-    uint32_t    ul_freq_base;
-    uint32_t    dl_freq_base;
-    uint8_t     freq_plan;
-    uint8_t     reserved[2];
-}nbfi_settings_t;
-
-typedef struct
-{
-	uint32_t ul;
-	uint32_t dl;
-}nbfi_crypto_iterator_t;
 
 extern nbfi_settings_t nbfi;
+extern nbfi_dev_info_t dev_info;
 extern nbfi_crypto_iterator_t nbfi_iter;
+
+extern uint8_t you_should_dl_power_step_up;
+extern uint8_t you_should_dl_power_step_down;
+extern uint8_t current_tx_rate;
+extern uint8_t current_rx_rate;
+
+extern _Bool nbfi_settings_need_to_save_to_flash;
 
 //aditional flags:
 #define NBFI_FLG_FIXED_BAUD_RATE                0x01
 #define NBFI_FLG_NO_RESET_TO_DEFAULTS           0x02
 #define NBFI_FLG_NO_SENDINFO                    0x04
-//#define NBFI_FLG_NO_CRYPTO                      0x08
-//#define NBFI_FLG_DO_OSCCAL                      0x10
+#define NBFI_FLG_SEND_ALOHA                     0x08
 #define NBFI_FLG_NO_REDUCE_TX_PWR               0x20
 #define NBFI_OFF_MODE_ON_INIT                   0x40
 #define NBFI_FLG_DO_NOT_SEND_PKTS_ON_START      0x80
 
-typedef struct
-{
-	uint32_t modem_id;
-	uint32_t* key;
-	uint8_t tx_min_pwr;
-	uint8_t tx_max_pwr;
-	uint16_t manufacturer_id;
-	uint16_t hardware_type_id;
-	uint16_t protocol_id;
-	uint8_t band_id;
-	uint32_t send_info_interval;
-}nbfi_dev_info_t;
-extern nbfi_dev_info_t dev_info;
 
 //BAND IDs
 #define UL868800_DL446000            0
@@ -100,41 +61,33 @@ extern nbfi_dev_info_t dev_info;
 #define UL868100_DL869550            9
 #define UL868500_DL864000            10
 #define UL864000_DL864000            11 //KAZ
-#define UL868800_DL869100            12 //NEWRU
+#define UL868800_DL869150            12 //NEWRU
 #define UL866975_DL865000            13 //INDIA
 
+
 //FREQENCY PLANS
-#define NBFI_FREQ_PLAN_DEFAULT                  0
-#define NBFI_FREQ_PLAN_SHIFTED_HIGHPHY          1
+#define NBFI_UL_FREQ_PLAN_NO_CHANGE             (64<<6)
+#define NBFI_DL_FREQ_PLAN_NO_CHANGE             8
+#define NBFI_FREQ_PLAN_MINIMAL                  0
+#define NBFI_DL_FREQ_PLAN_FAULT                 7
+#define NBFI_UL_FREQ_PLAN_51200_0               (384<<6)
+
+#define NBFI_VOID_ALTERNATIVE   {0, UNDEFINED, UNDEFINED, NBFI_UL_FREQ_PLAN_NO_CHANGE + NBFI_DL_FREQ_PLAN_NO_CHANGE}
 
 
-typedef enum
-{
-    DOWN = 0,     // data rate change down direction
-    UP = 1        // data rate change up direction
-}nbfi_rate_direct_t;
 
-
-typedef union
-{
-        struct
-        {
-            uint8_t RTC_MSB          : 6;//LSB
-            uint8_t DL_SPEED_NOT_MAX : 1;
-            uint8_t UL_SPEED_NOT_MAX : 1;
-        };
-        uint8_t info;
-}NBFi_station_info_s;
-
- 
+#define FULL_ID     ((uint8_t*)(&dev_info.modem_id))
 
 extern NBFi_station_info_s nbfi_station_info;
 
-void NBFi_Config_Set_Device_Info(nbfi_dev_info_t *);
-nbfi_settings_t* NBFi_get_settings();
-_Bool NBFi_Config_Parser(uint8_t* buf);
-void NBFi_Clear_Saved_Configuration();
-void NBFi_Config_Set_FastDl(_Bool, _Bool);
-_Bool NBFi_Is_Mode_Normal();
-
+void    NBFI_Config_Check_State();
+_Bool   NBFi_Config_Tx_Power_Change(nbfi_rate_direct_t dir);
+void    NBFi_Config_Return();
+void    NBFi_Config_Set_Default();
+_Bool   NBFi_Config_Parser(uint8_t* buf);
+void    NBFi_ReadConfig(nbfi_settings_t * settings);
+void    NBFi_Config_Set_TX_Chan(nbfi_phy_channel_t ch);
+void    NBFi_Config_Set_RX_Chan(nbfi_phy_channel_t ch);
+_Bool   NBFi_Config_is_settings_default();
+_Bool   NBFi_Config_Try_Alternative();
 #endif // NBFI_CONFIG_H

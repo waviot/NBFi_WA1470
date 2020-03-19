@@ -1,8 +1,5 @@
 #include "nbfi.h"
-#include "nbfi_config.h"
-#include "nbfi_rf.h"
-#include "nbfi_misc.h"
-#include <libmfwtimer.h>
+#include "preambula.h"
 
 _Bool rf_busy = 0;
 _Bool transmit = 0;
@@ -12,16 +9,12 @@ nbfi_rf_state_s rf_state = STATE_OFF;
 
 nbfi_phy_channel_t nbfi_phy_channel;
 
-//uint8_t PSK_BAND;
 
-//void    NBFi_TX_Finished();
-//void    wa1470_set_constants(void);
-
-
-extern void (* __nbfi_before_tx)();
-extern void (* __nbfi_before_rx)();
-extern void (* __nbfi_before_off)();
-
+static void _memcpy(uint8_t *dst, const uint8_t *src, uint8_t len)
+{
+	for(uint8_t i = 0; i < len; i++)
+		dst[len - i - 1] = src[i];
+}
 
 nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
                         nbfi_rf_antenna_t        antenna,
@@ -29,10 +22,30 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
                         uint32_t            freq)
 {
 
+    static nbfi_phy_channel_t last_phy = UNDEFINED;
+    static int8_t last_tx_prw;
+    static uint32_t last_tx_freq;
+    static uint32_t last_rx_freq;
+    
+    static uint32_t _preambule = 0;
+    if(!_preambule)
+    {
+		uint32_t preambule_tmp = preambula(*((uint32_t*)FULL_ID), (uint32_t *)0, (uint32_t *)0);
+		_memcpy((uint8_t *)&_preambule, (uint8_t *)&preambule_tmp, 4);
+    }
+        
     if(rf_busy) return ERR_RF_BUSY;
 
     rf_busy = 1;
 
+    if(last_phy != phy_channel)
+    {
+      wa1470_reinit(_preambule);
+      last_tx_prw = 100;
+      last_tx_freq = 0;
+      last_rx_freq = 0;
+    }
+    
     switch(phy_channel)
     {
       
@@ -45,30 +58,49 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
     case UL_DBPSK_3200_PROT_E:
     case UL_DBPSK_25600_PROT_E:
         wa1470dem_rx_enable(0);
-        if(__nbfi_before_tx) __nbfi_before_tx();
-                 
-        //wa1470mod_set_bitrate((mod_bitrate_s)phy_channel);
+        nbfi_hal->__nbfi_before_tx();
+                        
+        if(freq != last_tx_freq)
+        {
+          last_tx_freq = freq;
+          wa1470mod_set_freq(freq);
+        }
+                
+        if(power != last_tx_prw)
+        {
+          last_tx_prw = power;
+          wa1470rfe_set_tx_power(power);
+        }
         
-        wa1470mod_set_freq(freq);
-        wa1470rfe_set_tx_power(power);
         wa1470rfe_set_mode(RFE_MODE_TX);           
                      
         rf_busy = 0;
         rf_state = STATE_TX;
+        last_phy = phy_channel;
         return OK;
        
     case DL_DBPSK_50_PROT_D:
     case DL_DBPSK_400_PROT_D:
     case DL_DBPSK_3200_PROT_D:
     case DL_DBPSK_25600_PROT_D:
-        if(__nbfi_before_rx) __nbfi_before_rx();
+    case DL_DBPSK_100H_PROT_D:
+        nbfi_hal->__nbfi_before_rx();
         wa1470dem_rx_enable(1);
-        wa1470dem_set_bitrate((dem_bitrate_s)phy_channel);
+        
+        if(last_phy != phy_channel)
+          wa1470dem_set_bitrate((dem_bitrate_s)phy_channel);
+        
         wa1470rfe_set_mode(RFE_MODE_RX);
+        
+        if(freq != last_rx_freq)
+        {
+          last_rx_freq = freq;
+          wa1470mod_set_freq(freq);
+        }
         wa1470dem_set_freq(freq);
         rf_busy = 0;
         rf_state = STATE_RX;
-        return OK;
+        last_phy = phy_channel;
     }
     rf_busy = 0;
     return ERR;
@@ -77,10 +109,10 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
 nbfi_status_t NBFi_RF_Deinit()
 {
     if(rf_busy) return ERR_RF_BUSY;
-    if(__nbfi_before_off)   __nbfi_before_off();    
+    nbfi_hal->__nbfi_before_off();    
     rf_busy = 1;
-    wa1470rfe_set_mode(RFE_MODE_DEEP_SLEEP);
-    void wa1470rfe_deinit();
+    //wa1470rfe_set_mode(RFE_MODE_DEEP_SLEEP);
+    wa1470_deinit();
     rf_busy = 0;
     transmit = 0;
     rf_state = STATE_OFF;
@@ -106,7 +138,7 @@ nbfi_status_t NBFi_RF_Transmit(uint8_t* pkt, uint8_t len, nbfi_phy_channel_t  ph
         while(1) // Wait for TX complete
         {
             if(!transmit) break;
-            wtimer_runcallbacks();
+            nbfi_scheduler->__scheduler_run_callbacks();
         }
 
     }
@@ -114,14 +146,15 @@ nbfi_status_t NBFi_RF_Transmit(uint8_t* pkt, uint8_t len, nbfi_phy_channel_t  ph
     return OK;
 }
 
-
-void NBFi_TX_Finished();
-
 void NBFi_RF_TX_Finished()
 {
   NBFi_TX_Finished();
 }
 
+_Bool NBFi_RF_is_TX_in_Progress()
+{
+  return wa1470mod_is_tx_in_progress();
+}  
 
 float NBFi_RF_get_noise()
 {
@@ -129,4 +162,8 @@ float NBFi_RF_get_noise()
   else return wa1470dem_get_noise();
 }
 
+_Bool NBFi_RF_can_Sleep()
+{
+  return wa1470_cansleep();
+}  
 

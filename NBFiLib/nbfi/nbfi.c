@@ -143,7 +143,7 @@ void NBFi_set_Device_Info(nbfi_dev_info_t *info)
     if(info->key != 0)
     {
       NBFi_MAC_Get_Iterator();
-      NBFi_Crypto_Set_KEY(dev_info.key, nbfi_iter.ul, nbfi_iter.dl);
+      NBFi_Crypto_Set_KEY(dev_info.key, &nbfi_iter.ul, &nbfi_iter.dl);
     }
     info_timer = dev_info.send_info_interval - 300 - rand()%600;
     nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK); 

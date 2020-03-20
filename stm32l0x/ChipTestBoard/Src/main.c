@@ -33,6 +33,7 @@ void nbfi_receive_complete(uint8_t * data, uint16_t length)
 
 //#define NO_OPT #pragma  optimize=none
 //float rssi;
+
 int main(void)
 {
         
@@ -60,12 +61,11 @@ int main(void)
       
       
       //rssi = wa1470dem_get_rssi();
-      
-      
-      
+            
       if (NBFi_can_sleep()) 
       {
-          HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+          //HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+        HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
       }
       else HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
   }

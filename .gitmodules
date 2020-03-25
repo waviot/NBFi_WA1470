@@ -4,3 +4,9 @@
 [submodule "NBFiLib/preambula"]
 	path = NBFiLib/preambula
 	url = https://github.com/waviot/preambula.git
+[submodule "NBFiLib/scheduler"]
+	path = NBFiLib/scheduler
+	url = https://github.com/waviot/scheduler
+[submodule "NBFiLib/wa1470"]
+	path = NBFiLib/wa1470
+	url = https://github.com/waviot/wa1470

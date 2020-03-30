@@ -524,6 +524,7 @@ _Bool NBFi_Config_Send_Mode(_Bool ack, uint8_t param)
         ack_pkt->phy_data.header |= ACK_FLAG;
     }
     ack_pkt->state = PACKET_NEED_TO_SEND_RIGHT_NOW;
+    NBFi_Force_process();
     return 1;
 }
 

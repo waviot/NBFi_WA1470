@@ -2193,6 +2193,9 @@
       <name>$PROJ_DIR$\Inc\main.h</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\Inc\pca9454.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\Inc\plot_spectrum.h</name>
     </file>
     <file>
@@ -2407,6 +2410,9 @@
     </file>
     <file>
       <name>$PROJ_DIR$\Src\main.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Src\pca9454.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\Src\plot_spectrum.c</name>

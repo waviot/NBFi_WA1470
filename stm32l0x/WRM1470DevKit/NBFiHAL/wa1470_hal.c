@@ -68,6 +68,8 @@ void wa1470_HAL_GPIO_Init()
   
 }
 
+
+
 void wa1470_HAL_SPI_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStruct;
@@ -148,13 +150,13 @@ void wa1470_HAL_chip_enable(void)
 {
   HAL_GPIO_WritePin(WA_CS_GPIO_Port, WA_CS_Pin, GPIO_PIN_SET);
  // HAL_GPIO_WritePin(WA_DFT_EN_GPIO_Port, WA_DFT_EN_Pin,  GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(WA_CHIP_EN_GPIO_Port, WA_CHIP_EN_Pin,  GPIO_PIN_SET);
+  HAL_GPIO_WritePin(WA_CHIP_EN_GPIO_Port, WA_CHIP_EN_Pin,  GPIO_PIN_RESET);
  // HAL_GPIO_WritePin(WA_TCXO_GPIO_Port, WA_TCXO_Pin,  GPIO_PIN_SET);
 }
 
 void wa1470_HAL_chip_disable(void)
 {
-  HAL_GPIO_WritePin(WA_CHIP_EN_GPIO_Port, WA_CHIP_EN_Pin,  GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(WA_CHIP_EN_GPIO_Port, WA_CHIP_EN_Pin,  GPIO_PIN_SET);
   //HAL_GPIO_WritePin(WA_DFT_EN_GPIO_Port, WA_DFT_EN_Pin,  GPIO_PIN_RESET);
   //HAL_GPIO_WritePin(WA_TCXO_GPIO_Port, WA_TCXO_Pin,  GPIO_PIN_RESET);
   HAL_GPIO_WritePin(WA_CS_GPIO_Port, WA_CS_Pin, GPIO_PIN_RESET);

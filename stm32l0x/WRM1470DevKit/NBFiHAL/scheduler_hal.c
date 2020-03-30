@@ -41,15 +41,16 @@ void scheduler_HAL_LPTIM_Init(void)
 
 }
 
-
+#include "pca9454.h"
 void WA_LPTIM_IRQHandler(void)
 {
   
   if (__HAL_LPTIM_GET_FLAG(&hlptim, LPTIM_FLAG_CMPM) != RESET) {
 		__HAL_LPTIM_CLEAR_FLAG(&hlptim, LPTIM_FLAG_CMPM);  
-		scheduler_irq();
+                scheduler_irq();
   }
 }
+
 
 
 void scheduler_HAL_LOOPTIM_Init(void)
@@ -74,9 +75,12 @@ void scheduler_HAL_LOOPTIM_Init(void)
 
 void WA_LOOPTIM_IRQHandler(void)
 {
+    static uint8_t timer = 0;
 	if(__HAL_TIM_GET_FLAG(&hlooptim, TIM_FLAG_UPDATE) != RESET){
 		if(__HAL_TIM_GET_IT_SOURCE(&hlooptim, TIM_IT_UPDATE) != RESET){
 			__HAL_TIM_CLEAR_IT(&hlooptim, TIM_IT_UPDATE);
+                      if(timer++%2)   PCA9454_set_out_pin(EXT_OUTPIN_NBACKLIGHT);
+                      else   PCA9454_reset_out_pin(EXT_OUTPIN_NBACKLIGHT);
                         scheduler_run_callbacks();
 		}
 	}
@@ -132,6 +136,7 @@ uint16_t scheduler_HAL_cnt_get(uint8_t chan)
 {
   static uint16_t prev = 0; 
   uint16_t timer = (uint16_t) hlptim.Instance->CNT;
+    
   if((timer < prev) && ((prev - timer) < 10000))
   {
     return prev;
@@ -149,6 +154,7 @@ scheduler_HAL_st scheduler_hal_struct = {0,0,0,0,0,0,0,0,0,0};
 
 void scheduler_HAL_init()
 {
+    
   scheduler_hal_struct.__global_irq_enable = (void(*)(void))scheduler_HAL_enable_global_irq;
   scheduler_hal_struct.__global_irq_disable = (void(*)(void))scheduler_HAL_disable_global_irq;
   scheduler_hal_struct.__cc_irq_enable = (void(*)(uint8_t))scheduler_HAL_cc_irq_enable;
@@ -161,11 +167,10 @@ void scheduler_HAL_init()
   scheduler_hal_struct.__check_cc_irq = (uint8_t(*)(uint8_t))scheduler_HAL_check_cc_irq;
    
   _scheduler = scheduler_init(&scheduler_hal_struct);
-  
+ 
   scheduler_HAL_LPTIM_Init(); 
   HAL_LPTIM_Counter_Start(&hlptim, 0xffff);
-  scheduler_HAL_LOOPTIM_Init();   
-  
+  scheduler_HAL_LOOPTIM_Init();    
 }
 
 

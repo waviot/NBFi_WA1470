@@ -528,8 +528,8 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
         nbfi_scheduler->__scheduler_add_task(desc, 0, RELATIVE, SECONDS(30));
         return;
    }
-   //if((rf_busy == 0)&&(transmit == 0))
-   if((rf_busy == 0)&&!NBFi_RF_is_TX_in_Progress())
+   if((rf_busy == 0)&&(transmit == 0))
+   //if((rf_busy == 0)&&!NBFi_RF_is_TX_in_Progress())
    {
         switch(nbfi_active_pkt->state)
         {
@@ -620,7 +620,7 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
     {
           uint32_t t = nbfi_hal->__nbfi_measure_voltage_or_temperature(1);
           if(t < MinVoltage || !MinVoltage) MinVoltage = t;
-
+          if((rf_busy == 0)&&!NBFi_RF_is_TX_in_Progress()) NBFi_TX_Finished();
     }
 
     if(rf_state == STATE_CHANGED)  NBFi_RX_Controller();
@@ -628,7 +628,7 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
     if(nbfi.mode <= DRX && !NBFi_GetQueuedTXPkt() && (rf_busy == 0) && !NBFi_RF_is_TX_in_Progress())
     {
         NBFi_RX_Controller();
-        if(rf_state == STATE_OFF) nbfi_scheduler->__scheduler_add_task(desc, 0, RELATIVE, SECONDS(10));
+        if(rf_state == STATE_OFF) ;//nbfi_scheduler->__scheduler_add_task(desc, 0, RELATIVE, SECONDS(10));
         else nbfi_scheduler->__scheduler_add_task(desc, 0, RELATIVE, MILLISECONDS(50));
     }
     else nbfi_scheduler->__scheduler_add_task(desc, 0, RELATIVE, MILLISECONDS(50));
@@ -637,6 +637,7 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
 
 void NBFi_TX_Finished()
 {
+    if(transmit == 0) return;
     transmit = 0;
     if(!nbfi_active_pkt->phy_data.ACK && NBFi_GetQueuedTXPkt())
     {
@@ -818,7 +819,10 @@ static void NBFi_SendHeartBeats(struct scheduler_desc *desc)
         hb_timer = 1;
         if(nbfi.heartbeat_num == 0) return;
         if(nbfi.heartbeat_num != 0xff) nbfi.heartbeat_num--;
-        if(NBFi_Calc_Queued_Sys_Packets_With_Type(SYSTEM_PACKET_HERTBEAT)) return;
+        if(NBFi_Calc_Queued_Sys_Packets_With_Type(SYSTEM_PACKET_HERTBEAT)) 
+        {
+          return;
+        }
         nbfi_transport_packet_t* ack_pkt =  NBFi_AllocateTxPkt(8);
         if(!ack_pkt)   return;
         ack_pkt->phy_data.payload[0] = SYSTEM_PACKET_HERTBEAT;
@@ -842,6 +846,7 @@ static void NBFi_SendHeartBeats(struct scheduler_desc *desc)
           }
         }
         ack_pkt->state = PACKET_QUEUED;
+        NBFi_Force_process();
     }
 
     if(!(nbfi.additional_flags&NBFI_FLG_NO_SENDINFO))

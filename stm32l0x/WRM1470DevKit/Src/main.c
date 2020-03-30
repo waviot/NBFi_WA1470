@@ -4,6 +4,7 @@
 #include "radio.h"
 #include "log.h"
 #include "defines.h"
+#include "pca9454.h"
 
 void HAL_SYSTICK_Callback(void)
 {
@@ -32,6 +33,8 @@ void nbfi_receive_complete(uint8_t * data, uint16_t length)
 }
 
 
+uint8_t conf;
+
 int main(void)
 {
         
@@ -40,13 +43,17 @@ int main(void)
   SystemClock_Config();
   
   MX_GPIO_Init();
-   
+  
+  PCA9454_init();
+    
   radio_init();
 
   log_init();
   
   //last_send_status = NBFi_Send5("Hello!", sizeof("Hello!"));   
   
+  PCA9454_set_out_pin(EXT_OUTPIN_POWER_LED);
+  PCA9454_set_out_pin(EXT_OUTPIN_NBACKLIGHT);
   while (1) 
   {     
      
@@ -54,12 +61,11 @@ int main(void)
       #include "plot_spectrum.h"
       plot_spectrum();
       #endif
-            
       NBFI_Main_Level_Loop();
-      
-      if (NBFi_can_sleep()) 
+      if (NBFi_can_sleep() && scheduler_can_sleep()) 
       {
-          HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+        HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+        //HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
       }
       else HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
   }

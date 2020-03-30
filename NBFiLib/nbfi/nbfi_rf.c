@@ -109,6 +109,7 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
 nbfi_status_t NBFi_RF_Deinit()
 {
     if(rf_busy) return ERR_RF_BUSY;
+    wa1470dem_rx_enable(0);
     nbfi_hal->__nbfi_before_off();    
     rf_busy = 1;
     //wa1470rfe_set_mode(RFE_MODE_DEEP_SLEEP);

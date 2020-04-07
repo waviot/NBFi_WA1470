@@ -15,8 +15,8 @@ nbfi_crypto_iterator_t nbfi_iter;
 
 nbfi_dev_info_t dev_info =
 {
-    0x700000,
-    0,
+  //  0,
+  //  0,
     NBFI_DEFAULT_RF_MIN_POWER,
     NBFI_DEFAULT_RF_MAX_POWER,
     NBFI_DEFAULT_MANUFACTURER_ID,
@@ -26,9 +26,10 @@ nbfi_dev_info_t dev_info =
     NBFI_DEFAULT_SEND_INFO_INTERVAL
 };
 
-
+/*
 const nbfi_settings_t nbfi_fastdl =
 {
+    
     CRX,
     UL_PSK_FASTDL,  
     DL_PSK_FASTDL,  
@@ -50,7 +51,7 @@ const nbfi_settings_t nbfi_fastdl =
     0,
     //0
 };
-
+*/
 
 NBFi_station_info_s nbfi_station_info = {0,NBFI_UL_FREQ_PLAN_NO_CHANGE + NBFI_DL_FREQ_PLAN_NO_CHANGE};
 
@@ -363,10 +364,9 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         buf[2] = nbfi.tx_antenna;
                         buf[3] = nbfi.rx_antenna;
                         break;
-                    case NBFI_PARAM_DL_ADD:
+                   /* case NBFI_PARAM_DL_ADD:
                         bigendian_cpy((uint8_t*)&nbfi.dl_ID, &buf[1], 4);
-                        //for(uint8_t i = 0; i != 4; i++)  buf[1 + i] = ((uint8_t*)&nbfi.dl_ID)[i];
-                        break;
+                        break;*/
                     /*case NBFI_PARAM_BROADCAST_ADD:
                         for(uint8_t i = 0; i != 3; i++)  buf[1 + i] = nbfi.broadcast_ID[i];
                         break;*/
@@ -419,6 +419,7 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         break;
                     case NBFI_ADD_FLAGS:
                         buf[1] = nbfi.additional_flags;
+                        buf[2] = (nbfi.additional_flags>>8);
                         break;
                     case NBFI_UL_BASE_FREQ:
                         bigendian_cpy((uint8_t*)&nbfi.ul_freq_base, &buf[1], 4);
@@ -483,10 +484,9 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         if(buf[2] != 0xff) nbfi.tx_antenna = buf[2];
                         if(buf[3] != 0xff) {nbfi.rx_antenna = buf[3]; rf_state = STATE_CHANGED;}
                         break;
-                    case NBFI_PARAM_DL_ADD:
+                   /* case NBFI_PARAM_DL_ADD:
                         bigendian_cpy(&buf[1], (uint8_t*)&nbfi.dl_ID, 4);
-                        //for(uint8_t i = 0; i != 4; i++)  nbfi.dl_ID[i] = buf[1 + i];
-                        break;
+                        break;*/
                     /*case NBFI_PARAM_BROADCAST_ADD:
                         for(uint8_t i = 0; i != 3; i++)  nbfi.broadcast_ID[i] = buf[1 + i];
                         break; */                      
@@ -497,7 +497,9 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         nbfi.heartbeat_interval += buf[3];
                         break;
                     case NBFI_ADD_FLAGS:
-                        nbfi.additional_flags = buf[1];
+                        nbfi.additional_flags = buf[2];
+                        nbfi.additional_flags <<= 8;
+                        nbfi.additional_flags += buf[1];
                         break;
                     case NBFI_UL_BASE_FREQ:
                         bigendian_cpy(&buf[1], (uint8_t*)&nbfi.ul_freq_base, 4);

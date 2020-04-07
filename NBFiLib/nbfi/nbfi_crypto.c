@@ -43,7 +43,7 @@ uint32_t NBFi_Crypto_DL_MIC(const uint8_t *buf, const uint8_t len)
 
 uint8_t NBFi_Crypto_Available()
 {
-	return inited;
+	return inited&&(nbfi.master_key != 0);
 }
 
 uint8_t NBFI_Crypto_mic_check(uint8_t *buf, uint8_t len, uint8_t *mic, uint32_t *iter_int, uint8_t iter)

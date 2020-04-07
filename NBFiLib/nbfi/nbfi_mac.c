@@ -2,20 +2,16 @@
 #include "zcode.h"
 #include "pcode.h"
 
-#define memset_xdata memset
-#define memcpy_xdata memcpy
-#define memcpy_xdatageneric memcpy
-#define memcpy_genericxdata memcpy
-
-uint32_t last_pkt_crc = 0;
+//uint32_t last_pkt_crc = 0;
 
 void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_packet_t* info);
 
 
 static uint32_t NBFi_DL_ID()
 {
-  if(nbfi.dl_ID == 0) return *((uint32_t*)FULL_ID);
-  else return nbfi.dl_ID;
+  return *((uint32_t*)FULL_ID);
+  //if(nbfi.dl_ID == 0) return *((uint32_t*)FULL_ID);
+  //else return nbfi.dl_ID;
 }
 
 void NBFi_MAC_RX_ProtocolD(nbfi_mac_protd_packet_t* packet, nbfi_mac_info_packet_t* info)
@@ -97,75 +93,107 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 	uint8_t len = 0;
 	static _Bool parity = 0;
 	uint8_t lastcrc8;
+        uint32_t mic_or_crc32;
+        
 	_Bool downlink;
 	uint32_t tx_freq;
 
-	memset_xdata(ul_buf,0,sizeof(ul_buf));
+        static uint32_t preamble;
+        static uint32_t last_dl_add = 0;
+        
+	memset(ul_buf,0,sizeof(ul_buf));
 
-
-	for(int i=0; i<sizeof(protD_preambula); i++)
-	{
-		ul_buf[len++] = protD_preambula[i];
-	}
-        uint32_t *dl_id = &nbfi.dl_ID;
 	switch(nbfi.tx_phy_channel)
 	{
 	case DL_DBPSK_50_PROT_D:
 	case DL_DBPSK_400_PROT_D:
 	case DL_DBPSK_3200_PROT_D:
 	case DL_DBPSK_25600_PROT_D:
-		ul_buf[len++] = dl_id[2];
-		ul_buf[len++] = dl_id[1];
-		ul_buf[len++] = dl_id[0];
-		downlink = 1;
+                downlink = 1;
+                if(last_dl_add != NBFi_DL_ID())
+                {
+                  last_dl_add = NBFi_DL_ID();
+                  preamble = preambula(NBFi_DL_ID(), (uint32_t *)0, (uint32_t *)0);
+                }
+                
+                for(int i=0; i<sizeof(protD_preambula); i++)
+                {
+                  ul_buf[len++] = ((uint8_t *)&preamble)[sizeof(protD_preambula) - 1 - i];
+                }
+		                               
+                ul_buf[len++] = nbfi_iter.ul;
+                ul_buf[len++] = pkt->phy_data.header;
+                memcpy(&ul_buf[len], pkt->phy_data.payload, pkt->phy_data_length);
+                
+                if(NBFi_Crypto_Available())
+                {
+                  NBFi_Crypto_Encode(&ul_buf[len - 1], NBFi_DL_ID(), nbfi_iter.ul, 9);
+                  len += 8;
+                  mic_or_crc32 = NBFi_Crypto_UL_MIC(&ul_buf[len - 9], 9);
+                  nbfi_iter.ul = NBFI_Crypto_inc_iter(nbfi_iter.ul);
+                }
+                else
+                {
+                        len += 8;
+                        mic_or_crc32 = CRC32(&ul_buf[len - 9], 9);
+                }
+                ul_buf[len++] = (uint8_t)(mic_or_crc32 >> 16);
+                ul_buf[len++] = (uint8_t)(mic_or_crc32 >> 8);
+                ul_buf[len++] = (uint8_t)(mic_or_crc32);
+                                
 		break;
 	default:
+          	downlink = 0;
+                for(int i=0; i<sizeof(protD_preambula); i++)
+                {
+                  ul_buf[len++] = protD_preambula[i];
+                }
 		ul_buf[len++] = FULL_ID[2];
 		ul_buf[len++] = FULL_ID[1];
 		ul_buf[len++] = FULL_ID[0];
-		downlink = 0;
-		break;
+		
+                ul_buf[len++] = pkt->phy_data.header;
 
+                memcpy(&ul_buf[len], pkt->phy_data.payload, pkt->phy_data_length);
+
+                lastcrc8 = CRC8(&ul_buf[len], 8);
+
+                if(NBFi_Crypto_Available())
+                {
+                        NBFi_Crypto_Encode(&ul_buf[len], *((uint32_t*)FULL_ID), 0, 8);
+                }
+                
+                len += 8;
+                
+                ul_buf[len++] = lastcrc8;
+                
+                break;
 	}
-
-	if(nbfi.tx_phy_channel == DL_DBPSK_50_PROT_D) 
-		nbfi.tx_phy_channel = UL_DBPSK_50_PROT_D;
-	else if(nbfi.tx_phy_channel == DL_DBPSK_400_PROT_D) 
-		nbfi.tx_phy_channel = UL_DBPSK_400_PROT_D;
-	else if(nbfi.tx_phy_channel == DL_DBPSK_3200_PROT_D) 
-		nbfi.tx_phy_channel = UL_DBPSK_3200_PROT_D;
-	else if(nbfi.tx_phy_channel == DL_DBPSK_25600_PROT_D) 
-		nbfi.tx_phy_channel = UL_DBPSK_25600_PROT_D;
-
-	ul_buf[len++] = pkt->phy_data.header;
-
-	memcpy_xdatageneric(&ul_buf[len], pkt->phy_data.payload, pkt->phy_data_length);
-
-	lastcrc8 = CRC8(&ul_buf[len], 8);
-
-	if(NBFi_Crypto_Available())
-	{
-		NBFi_Crypto_Encode(&ul_buf[len], *((uint32_t*)FULL_ID), 0, 8);
-	}
-	
-	len += 8;
-
-        ul_buf[len++] = lastcrc8;
-
-	last_pkt_crc = CRC32(ul_buf + 4, 13); 
-
-	ul_buf[len++] = (uint8_t)(last_pkt_crc >> 16);
-	ul_buf[len++] = (uint8_t)(last_pkt_crc >> 8);
-	ul_buf[len++] = (uint8_t)(last_pkt_crc);
+        	
+	mic_or_crc32 = CRC32(ul_buf + 4, 13); 
+        
+	ul_buf[len++] = (uint8_t)(mic_or_crc32 >> 16);
+	ul_buf[len++] = (uint8_t)(mic_or_crc32 >> 8);
+	ul_buf[len++] = (uint8_t)(mic_or_crc32);
 
 	if(nbfi.tx_freq)
 	{
 		tx_freq = nbfi.tx_freq ;
-		//parity = (nbfi.tx_freq > (nbfi.ul_freq_base));
 	}
 	else
 		tx_freq = NBFi_MAC_get_UL_freq(lastcrc8, parity);
 
+        
+        if(nbfi.tx_phy_channel == DL_DBPSK_50_PROT_D) 
+          nbfi.tx_phy_channel = UL_DBPSK_50_PROT_D;
+	else if(nbfi.tx_phy_channel == DL_DBPSK_400_PROT_D) 
+          nbfi.tx_phy_channel = UL_DBPSK_400_PROT_D;
+	else if(nbfi.tx_phy_channel == DL_DBPSK_3200_PROT_D) 
+          nbfi.tx_phy_channel = UL_DBPSK_3200_PROT_D;
+	else if(nbfi.tx_phy_channel == DL_DBPSK_25600_PROT_D) 
+          nbfi.tx_phy_channel = UL_DBPSK_25600_PROT_D;
+        
+        
 	if((nbfi.tx_phy_channel < UL_DBPSK_3200_PROT_D) && !downlink)
 	{
 		ZCODE_Append(&ul_buf[4], &ul_buf[len], (tx_freq > (nbfi.ul_freq_base)));
@@ -207,6 +235,7 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 	uint8_t len = 0;
 	static _Bool parity = 0;
 	uint32_t tx_freq;
+        uint32_t mic_or_crc32;
 
 	ul_buf[len++] = FULL_ID[3];
 	ul_buf[len++] = FULL_ID[2];
@@ -232,20 +261,20 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 		NBFi_Crypto_Encode(&ul_buf[len - 1], *((uint32_t*)FULL_ID), nbfi_iter.ul, 9);
 		len += 8;
 	
-		uint32_t mic = NBFi_Crypto_UL_MIC(&ul_buf[len - 9], 9);
+		mic_or_crc32 = NBFi_Crypto_UL_MIC(&ul_buf[len - 9], 9);
 		nbfi_iter.ul = NBFI_Crypto_inc_iter(nbfi_iter.ul);
-		ul_buf[len++] = (uint8_t)(mic >> 16);
-		ul_buf[len++] = (uint8_t)(mic >> 8);
-		ul_buf[len++] = (uint8_t)(mic);
+		ul_buf[len++] = (uint8_t)(mic_or_crc32 >> 16);
+		ul_buf[len++] = (uint8_t)(mic_or_crc32 >> 8);
+		ul_buf[len++] = (uint8_t)(mic_or_crc32);
 	}
 	else
-		len += 11;
+          len += 11;
         
-	last_pkt_crc = CRC32(ul_buf, 17); 
+	mic_or_crc32 = CRC32(ul_buf, 17); 
 
-	ul_buf[len++] = (uint8_t)(last_pkt_crc >> 16);
-	ul_buf[len++] = (uint8_t)(last_pkt_crc >> 8);
-	ul_buf[len++] = (uint8_t)(last_pkt_crc);
+	ul_buf[len++] = (uint8_t)(mic_or_crc32 >> 16);
+	ul_buf[len++] = (uint8_t)(mic_or_crc32 >> 8);
+	ul_buf[len++] = (uint8_t)(mic_or_crc32);
 
 	if(nbfi.tx_freq)
 	{

@@ -707,7 +707,7 @@ nbfi_ul_sent_status_t* NBFi_Get_Next_Unreported_UL(nbfi_ul_status_t status)
   return 0;
 }
 
-nbfi_ul_status_t NBFi_Get_UL_status(uint16_t id)
+nbfi_ul_status_t NBFi_get_UL_status(uint16_t id)
 {
   nbfi_ul_status_t status;
   nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);

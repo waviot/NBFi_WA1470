@@ -245,6 +245,7 @@ void nbfi_HAL_init(const nbfi_settings_t* settings, nbfi_dev_info_t* info)
   nbfi_hal_struct.__nbfi_set_iterator = &nbfi_HAL_set_iterator; 
   nbfi_hal_struct.__nbfi_log_send_str = &log_send_str;
   
+  
   //register this callbacks when external RTC used
   //nbfi_hal_struct.__nbfi_update_rtc = &nbfi_HAL_update_rtc;
   //nbfi_hal_struct.__nbfi_rtc_synchronized = &nbfi_HAL_rtc_synchronized;  

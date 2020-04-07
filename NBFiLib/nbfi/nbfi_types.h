@@ -199,6 +199,8 @@ typedef enum
 
 typedef struct
 {
+    uint32_t            *modem_id;
+    uint32_t            *master_key;
     nbfi_mode_t 	mode;
     nbfi_phy_channel_t	tx_phy_channel;
     nbfi_phy_channel_t 	rx_phy_channel;
@@ -206,7 +208,8 @@ typedef struct
     nbfi_mack_mode_t	mack_mode;
     uint8_t             num_of_retries;
     uint8_t             max_payload_len;
-    uint32_t            dl_ID;
+    //uint32_t            dl_ID;
+    uint16_t            wait_ack_timeout;
     uint32_t            tx_freq;
     uint32_t            rx_freq;
     uint8_t             tx_antenna;
@@ -214,7 +217,7 @@ typedef struct
     int8_t              tx_pwr;
     uint16_t            heartbeat_interval;
     uint8_t             heartbeat_num;
-    uint8_t             additional_flags;
+    uint16_t            additional_flags;
     uint32_t            ul_freq_base;
     uint32_t            dl_freq_base;
     nbfi_freq_plan_t    nbfi_freq_plan;
@@ -230,8 +233,8 @@ typedef struct
 
 typedef struct
 {
-	uint32_t modem_id;
-	uint32_t* key;
+	//uint32_t* modem_id;
+	//uint32_t* key;
 	int8_t tx_min_pwr;
 	int8_t tx_max_pwr;
 	uint16_t manufacturer_id;

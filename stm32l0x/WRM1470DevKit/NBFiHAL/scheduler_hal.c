@@ -36,12 +36,13 @@ void scheduler_HAL_LPTIM_Init(void)
     hlptim.Init.CounterSource = LPTIM_COUNTERSOURCE_INTERNAL;
     HAL_LPTIM_Init(&hlptim);
     
-    HAL_NVIC_SetPriority(WA_LPTIM_IRQn, 1, 0);
+    HAL_NVIC_SetPriority(WA_LPTIM_IRQn, 2, 0);
     HAL_NVIC_EnableIRQ(WA_LPTIM_IRQn);
 
 }
 
-#include "pca9454.h"
+//#include "pca9454.h"
+
 void WA_LPTIM_IRQHandler(void)
 {
   
@@ -75,12 +76,12 @@ void scheduler_HAL_LOOPTIM_Init(void)
 
 void WA_LOOPTIM_IRQHandler(void)
 {
-    static uint8_t timer = 0;
+    //static uint8_t timer = 0;
 	if(__HAL_TIM_GET_FLAG(&hlooptim, TIM_FLAG_UPDATE) != RESET){
 		if(__HAL_TIM_GET_IT_SOURCE(&hlooptim, TIM_IT_UPDATE) != RESET){
 			__HAL_TIM_CLEAR_IT(&hlooptim, TIM_IT_UPDATE);
-                      if(timer++%2)   PCA9454_set_out_pin(EXT_OUTPIN_NBACKLIGHT);
-                      else   PCA9454_reset_out_pin(EXT_OUTPIN_NBACKLIGHT);
+                     // if(timer++%2)   PCA9454_set_out_pin(EXT_OUTPIN_NBACKLIGHT);
+                     // else   PCA9454_reset_out_pin(EXT_OUTPIN_NBACKLIGHT);
                         scheduler_run_callbacks();
 		}
 	}

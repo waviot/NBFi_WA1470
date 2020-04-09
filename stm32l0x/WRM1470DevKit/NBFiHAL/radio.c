@@ -64,7 +64,7 @@ const nbfi_settings_t nbfi_default_settings =
 {      
     MODEM_ID, 
     KEY,
-    DRX,//mode;
+    CRX,//mode;
     UL_DBPSK_400_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
     DL_DBPSK_400_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
@@ -78,7 +78,7 @@ const nbfi_settings_t nbfi_default_settings =
     PCB,                //tx_antenna;
     PCB,                //rx_antenna;
     TX_MAX_POWER,       //tx_pwr;
-    1,//3600*6,             //heartbeat_interval
+    30,//3600*6,             //heartbeat_interval
     255,                //heartbeat_num
     0,//NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
     NBFI_UL_FREQ_BASE,
@@ -100,14 +100,14 @@ const nbfi_settings_t nbfi_short_range_settings =
     MODEM_ID, 
     0,
     CRX,//mode;
-    DL_DBPSK_25600_PROT_E, // tx_phy_channel;
-    DL_DBPSK_25600_PROT_E, // rx_phy_channel;
+    DL_DBPSK_25600_PROT_D, // tx_phy_channel;
+    DL_DBPSK_25600_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
     MACK_1,             //mack_mode
     0,                  //num_of_retries;
     8,                  //max_payload_len;
     //0,                  //dl_ID;
-    100,                //wait_ack_timeout
+    120,                //wait_ack_timeout
     0,                  //tx_freq;
     0,                  //rx_freq;
     PCB,                //tx_antenna;
@@ -118,7 +118,7 @@ const nbfi_settings_t nbfi_short_range_settings =
     NBFI_FLG_FIXED_BAUD_RATE|NBFI_FLG_NO_RESET_TO_DEFAULTS|NBFI_FLG_NO_SENDINFO|NBFI_FLG_NO_REDUCE_TX_PWR,                  //additional_flags
     NBFI_UL_FREQ_BASE,
     NBFI_DL_FREQ_BASE,
-    NBFI_UL_FREQ_PLAN_51200_0 + NBFI_FREQ_PLAN_MINIMAL,
+    NBFI_FREQ_PLAN_MINIMAL + NBFI_DL_FREQ_PLAN_819200_M2457600,
     {
       NBFI_VOID_ALTERNATIVE,
       NBFI_VOID_ALTERNATIVE,

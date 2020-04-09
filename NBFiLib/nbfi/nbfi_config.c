@@ -570,53 +570,6 @@ _Bool NBFi_Config_Try_Alternative()
 }
 
 
-/*
-void NBFi_Config_Set_FastDl(_Bool fast, _Bool save_settings)
-{
-  
-    static nbfi_settings_t settings;
-    static nbfi_state_t state; 
-    __nbfi_lock_unlock_loop_irq(NBFI_LOCK);
-   
-    if(fast)
-    {
-        if(save_settings) 
-        {
-          memcpy(&settings, &nbfi, sizeof(nbfi_settings_t));
-          memcpy(&state, &nbfi_state, sizeof(nbfi_state_t));
-        }
-        NBFi_Clear_TX_Buffer();
-        uint32_t dl_base_freq = nbfi.dl_freq_base;
-		memcpy(&nbfi, &nbfi_fastdl, sizeof(nbfi_settings_t));
-
-
-
-        nbfi.tx_freq = nbfi.rx_freq = dl_base_freq + 1000000;
-        NBFi_Configure_IDs();
-        for(uint8_t i = 0; i != 3; i++) nbfi.dl_ID[i] = nbfi.temp_ID[i];   //default DL address
-
-    }
-    else
-    {
-        if(save_settings) 
-        {
-                NBFi_Clear_TX_Buffer();
-                memcpy(&nbfi_state, &state, sizeof(nbfi_state_t));
-                memcpy(&nbfi, &settings, sizeof(nbfi_settings_t));
-                NBFi_Config_Set_TX_Chan(settings.tx_phy_channel);
-                NBFi_Config_Set_RX_Chan(settings.rx_phy_channel);
-                rf_state = STATE_CHANGED;
-        }
-        else NBFi_Config_Set_Default();
-    }
-
-    if(rf_state == STATE_RX) NBFi_MAC_RX();
-    
-    __nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
-}
-
-*/
-
 _Bool NBFi_Config_Tx_Idle()
 {
         switch(nbfi_active_pkt->state)

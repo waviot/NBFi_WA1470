@@ -36,7 +36,7 @@ void scheduler_HAL_LPTIM_Init(void)
     hlptim.Init.CounterSource = LPTIM_COUNTERSOURCE_INTERNAL;
     HAL_LPTIM_Init(&hlptim);
     
-    HAL_NVIC_SetPriority(WA_LPTIM_IRQn, 1, 0);
+    HAL_NVIC_SetPriority(WA_LPTIM_IRQn, 2, 0);
     HAL_NVIC_EnableIRQ(WA_LPTIM_IRQn);
 
 }

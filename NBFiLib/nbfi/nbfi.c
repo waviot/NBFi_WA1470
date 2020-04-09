@@ -118,8 +118,42 @@ uint8_t NBFi_can_sleep()
 {
   nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
   uint8_t can = (!rf_busy) && (rf_state == STATE_OFF) && (NBFi_Packets_To_Send() == 0) && NBFi_RF_can_Sleep();
+  can = can && !(last_ack_send_ts &&  ((nbfi_scheduler->__scheduler_curr_time() - last_ack_send_ts) < WAITALITTLEBIT));
   nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
   return can;
+}
+
+uint8_t NBFi_get_Packets_to_Send()
+{
+    uint8_t n;
+    nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+    n = NBFi_Packets_To_Send();
+    nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+    return n;
+}
+
+nbfi_ul_sent_status_t  NBFi_get_UL_status(uint16_t id)
+{
+  nbfi_ul_sent_status_t ret;
+  nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+  nbfi_ul_sent_status_t *status = NBFi_Get_UL_status(id, 0);
+  if(status)
+  {
+      ret = *status;
+  }else   ret.id = 0;
+  nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);  
+  return ret;
+}
+
+_Bool  NBFi_is_Idle()
+{
+  _Bool idle = 1;
+  nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+  if(NBFi_Packets_To_Send()) idle = 0;
+  else if(last_ack_send_ts &&  ((nbfi_scheduler->__scheduler_curr_time() - last_ack_send_ts) < WAITALITTLEBIT)) idle = 0;
+  else if(nbfi_active_pkt->state == PACKET_WAIT_FOR_EXTRA_PACKETS) idle = 0;
+  nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+  return idle;
 }
 
 void NBFi_get_state(nbfi_state_t * state)
@@ -180,7 +214,7 @@ void NBFi_clear_Saved_Configuration()
 	if(nbfi_hal->__nbfi_write_flash_settings == 0) 
 		return;
 	nbfi_settings_t empty;
-	empty.tx_phy_channel = DL_PSK_200;
+        memset(&empty, 0, sizeof(nbfi_settings_t));
 	nbfi_hal->__nbfi_write_flash_settings(&empty);
 }
         

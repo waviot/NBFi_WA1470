@@ -2,6 +2,9 @@
 #define NBFI_TRANSPORT_H
 
 
+#define DRXLISTENAFTERSEND  20
+#define WAITALITTLEBIT  3000
+
 extern nbfi_state_t nbfi_state;
 extern nbfi_transport_packet_t* nbfi_active_pkt;
 extern nbfi_transport_packet_t idle_pkt;
@@ -10,6 +13,8 @@ extern int16_t noise;
 extern uint32_t nbfi_rtc;
 extern _Bool rtc_synchronised;
 extern uint32_t info_timer;
+extern _Bool uplink_received_after_send;
+extern uint32_t last_ack_send_ts;
 
 void            NBFI_Transport_Init();
 void            NBFi_Force_process();

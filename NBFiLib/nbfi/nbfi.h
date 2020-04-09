@@ -50,12 +50,13 @@ extern char nbfi_log_string[];
 void                    NBFI_Init(nbfi_HAL_st *, ischeduler_st*, nbfi_dev_info_t* info);
 void                    NBFI_Main_Level_Loop();
 nbfi_status_t           NBFi_go_to_Sleep(_Bool sleep);
-nbfi_ul_sent_status_t   NBFi_Send5(uint8_t* payload, uint8_t length);
+nbfi_ul_sent_status_t   NBFi_Send5(uint8_t* payload, uint8_t length, uint8_t flags);
 nbfi_status_t           NBFi_Send(uint8_t* payload, uint8_t length);
-nbfi_ul_status_t        NBFi_get_UL_status(uint16_t id);
+nbfi_ul_sent_status_t   NBFi_get_UL_status(uint16_t id);
 uint8_t                 NBFi_get_Received_Packet(uint8_t * payload);
 
-uint8_t                 NBFi_Packets_To_Send();
+uint8_t                 NBFi_get_Packets_to_Send();
+_Bool                   NBFi_is_Idle();
 void                    NBFi_get_state(nbfi_state_t * state);
 uint8_t                 NBFi_can_sleep();
 uint32_t                NBFi_get_RTC();

@@ -16,23 +16,26 @@ nbfi_ul_sent_status_t last_send_status;
 
 void nbfi_send_complete(nbfi_ul_sent_status_t ul)
 {
-   
-    uint8_t string[] = "Hello, we are testing 25600bps receiving stability. This huge packet is sending for giving a numerous quantity of packets";     
+ /*  
+    uint8_t string[] = "Hello";//"Hello, we are testing 25600bps receiving stability. This huge packet is sending for giving a numerous quantity of packets";     
     if(ul.id == last_send_status.id)
     {
       string[0] = (ul.id>>8);
       string[1] = (ul.id & 0xff);
-      last_send_status = NBFi_Send5((uint8_t*)string, sizeof(string));
-    }   
+      last_send_status = NBFi_Send5(string, sizeof(string));
+    }  */
 }
 
 void nbfi_receive_complete(uint8_t * data, uint16_t length)
 {
-  NBFi_Send5(data, length);  //echo
+  //NBFi_Send5(data, length);  //echo
+ /* if(length == sizeof("Hello"))
+  {
+    uint8_t payload[] = {0xaa};
+    NBFi_Send5(payload, sizeof(payload));
+  }*/
 }
 
-//#define NO_OPT #pragma  optimize=none
-//float rssi;
 
 int main(void)
 {
@@ -47,7 +50,11 @@ int main(void)
 
   log_init();
   
-  //last_send_status = NBFi_Send5("Hello!", sizeof("Hello!"));   
+  radio_switch_to_from_short_range(1);
+  
+  //last_send_status = NBFi_Send5({0xaa}, 1);   
+  //uint8_t payload[] = {0xaa};
+  //last_send_status = NBFi_Send5(payload, sizeof(payload));
   
   while (1) 
   {     
@@ -59,7 +66,12 @@ int main(void)
             
       NBFI_Main_Level_Loop();
       
-      
+      if( NBFi_is_Idle() )
+      {
+        uint8_t payload[] = {0xaa};
+        last_send_status = NBFi_Send5(payload, sizeof(payload),0);
+      }
+             
       //rssi = wa1470dem_get_rssi();
             
       if (NBFi_can_sleep()) 

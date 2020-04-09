@@ -1,18 +1,12 @@
 #include "nbfi.h"
 #include "zcode.h"
 #include "pcode.h"
+#include "preambula.h"
 
-//uint32_t last_pkt_crc = 0;
 
 void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_packet_t* info);
 
 
-static uint32_t NBFi_DL_ID()
-{
-  return *((uint32_t*)FULL_ID);
-  //if(nbfi.dl_ID == 0) return *((uint32_t*)FULL_ID);
-  //else return nbfi.dl_ID;
-}
 
 void NBFi_MAC_RX_ProtocolD(nbfi_mac_protd_packet_t* packet, nbfi_mac_info_packet_t* info)
 {
@@ -24,6 +18,12 @@ void NBFi_MAC_RX_ProtocolD(nbfi_mac_protd_packet_t* packet, nbfi_mac_info_packet
 		NBFi_Crypto_Decode(&packet->flags, NBFi_DL_ID(), nbfi_iter.dl, 9);
 		NBFi_MAC_Set_Iterator();
 	}
+        else
+        {
+                uint32_t crc32 = CRC32(&packet->flags, 9);
+                for(uint8_t i = 0; i != 3; i++)
+                  if(((uint8_t*)&crc32)[i] != packet->mic[2-i]) return;
+        }
 
 	NBFi_ParseReceivedPacket((nbfi_transport_frame_t *)(&packet->flags), info);
 }
@@ -31,6 +31,8 @@ void NBFi_MAC_RX_ProtocolD(nbfi_mac_protd_packet_t* packet, nbfi_mac_info_packet
 static uint32_t NBFi_MAC_get_UL_freq(uint16_t lastcrc, _Bool parity)
 {
 	uint32_t ul_freq;
+        
+        
 	switch(nbfi.tx_phy_channel)
 	{
 	case UL_DBPSK_50_PROT_D:
@@ -95,14 +97,22 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 	uint8_t lastcrc8;
         uint32_t mic_or_crc32;
         
+        nbfi_phy_channel_t phy;
+        
 	_Bool downlink;
 	uint32_t tx_freq;
-
+        
         static uint32_t preamble;
         static uint32_t last_dl_add = 0;
         
 	memset(ul_buf,0,sizeof(ul_buf));
-
+        
+        
+        nbfi_ul_sent_status_t *pkt_status = NBFi_Get_UL_status(pkt->id, 1);
+        uint8_t pkt_flags;
+        if(pkt_status) pkt_flags = pkt_status->flags;
+        else pkt_flags = 0;
+                       
 	switch(nbfi.tx_phy_channel)
 	{
 	case DL_DBPSK_50_PROT_D:
@@ -115,17 +125,22 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
                   last_dl_add = NBFi_DL_ID();
                   preamble = preambula(NBFi_DL_ID(), (uint32_t *)0, (uint32_t *)0);
                 }
-                
-                for(int i=0; i<sizeof(protD_preambula); i++)
+                if(pkt_flags&NBFI_UL_FLAG_DEFAULT_PREAMBLE)
                 {
-                  ul_buf[len++] = ((uint8_t *)&preamble)[sizeof(protD_preambula) - 1 - i];
+                  for(int i=0; i<sizeof(protD_preambula); i++)
+                    ul_buf[len++] = protD_preambula[i];
                 }
-		                               
+                else
+                {
+                  for(int i=0; i<sizeof(protD_preambula); i++)
+                    ul_buf[len++] = ((uint8_t *)&preamble)[sizeof(protD_preambula) - 1 - i];               
+                }
+                		                               
                 ul_buf[len++] = nbfi_iter.ul;
                 ul_buf[len++] = pkt->phy_data.header;
                 memcpy(&ul_buf[len], pkt->phy_data.payload, pkt->phy_data_length);
                 
-                if(NBFi_Crypto_Available())
+                if(NBFi_Crypto_Available()&&!(pkt_flags&NBFI_UL_FLAG_UNENCRYPTED))
                 {
                   NBFi_Crypto_Encode(&ul_buf[len - 1], NBFi_DL_ID(), nbfi_iter.ul, 9);
                   len += 8;
@@ -158,7 +173,7 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 
                 lastcrc8 = CRC8(&ul_buf[len], 8);
 
-                if(NBFi_Crypto_Available())
+                if(NBFi_Crypto_Available()&&!(pkt_flags&NBFI_UL_FLAG_UNENCRYPTED))
                 {
                         NBFi_Crypto_Encode(&ul_buf[len], *((uint32_t*)FULL_ID), 0, 8);
                 }
@@ -180,18 +195,29 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 	{
 		tx_freq = nbfi.tx_freq ;
 	}
-	else
-		tx_freq = NBFi_MAC_get_UL_freq(lastcrc8, parity);
+	else 
+        {
+          if(!downlink) 
+          {
+            if(pkt_flags&NBFI_UL_FLAG_SEND_ON_CENTRAL_FREQ) tx_freq = nbfi.ul_freq_base;
+            else tx_freq = NBFi_MAC_get_UL_freq(lastcrc8, parity);
+          }
+          else 
+          {
+            if(pkt_flags&NBFI_UL_FLAG_SEND_ON_CENTRAL_FREQ) tx_freq = nbfi.dl_freq_base;
+            else tx_freq = NBFi_MAC_get_DL_freq();
+          }
+        }
 
-        
-        if(nbfi.tx_phy_channel == DL_DBPSK_50_PROT_D) 
-          nbfi.tx_phy_channel = UL_DBPSK_50_PROT_D;
-	else if(nbfi.tx_phy_channel == DL_DBPSK_400_PROT_D) 
-          nbfi.tx_phy_channel = UL_DBPSK_400_PROT_D;
-	else if(nbfi.tx_phy_channel == DL_DBPSK_3200_PROT_D) 
-          nbfi.tx_phy_channel = UL_DBPSK_3200_PROT_D;
-	else if(nbfi.tx_phy_channel == DL_DBPSK_25600_PROT_D) 
-          nbfi.tx_phy_channel = UL_DBPSK_25600_PROT_D;
+        phy = nbfi.tx_phy_channel;
+        if(phy == DL_DBPSK_50_PROT_D) 
+          phy = UL_DBPSK_50_PROT_D;
+	else if(phy == DL_DBPSK_400_PROT_D) 
+          phy = UL_DBPSK_400_PROT_D;
+	else if(phy == DL_DBPSK_3200_PROT_D) 
+          phy = UL_DBPSK_3200_PROT_D;
+	else if(phy == DL_DBPSK_25600_PROT_D) 
+          phy = UL_DBPSK_25600_PROT_D;
         
         
 	if((nbfi.tx_phy_channel < UL_DBPSK_3200_PROT_D) && !downlink)
@@ -209,18 +235,18 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 	if((nbfi.additional_flags&NBFI_FLG_SEND_ALOHA) && parity) // For NRX send in ALOHA mode
 	{
 
-		NBFi_RF_Init(nbfi.tx_phy_channel, (nbfi_rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
+		NBFi_RF_Init(phy, (nbfi_rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
 
-		NBFi_RF_Transmit(ul_buf, len + ZCODE_LEN, nbfi.tx_phy_channel, BLOCKING);
+		NBFi_RF_Transmit(ul_buf, len + ZCODE_LEN, phy, BLOCKING);
 
 		nbfi_state.UL_total++;
 
 		return NBFi_MAC_TX_ProtocolD(pkt);
 	}
 	
-	NBFi_RF_Init(nbfi.tx_phy_channel, (nbfi_rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
+	NBFi_RF_Init(phy, (nbfi_rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
 
-	NBFi_RF_Transmit(ul_buf, len + ZCODE_LEN, nbfi.tx_phy_channel, NONBLOCKING);
+	NBFi_RF_Transmit(ul_buf, len + ZCODE_LEN, phy, NONBLOCKING);
 
 	nbfi_state.UL_total++;
 
@@ -237,38 +263,40 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 	uint32_t tx_freq;
         uint32_t mic_or_crc32;
 
+        nbfi_ul_sent_status_t *pkt_status = NBFi_Get_UL_status(pkt->id, 1);
+        uint8_t pkt_flags;
+        if(pkt_status) pkt_flags = pkt_status->flags;
+        else pkt_flags = 0;
+        
+        
 	ul_buf[len++] = FULL_ID[3];
 	ul_buf[len++] = FULL_ID[2];
 	ul_buf[len++] = FULL_ID[1];
 	ul_buf[len++] = FULL_ID[0];
 
-	if(nbfi.tx_phy_channel == DL_DBPSK_50_PROT_E)
-		nbfi.tx_phy_channel = UL_DBPSK_50_PROT_E;
-	else if(nbfi.tx_phy_channel == DL_DBPSK_400_PROT_E)
-		nbfi.tx_phy_channel = UL_DBPSK_400_PROT_E;
-	else if(nbfi.tx_phy_channel == DL_DBPSK_3200_PROT_E)
-		nbfi.tx_phy_channel = UL_DBPSK_3200_PROT_E;
-	else if(nbfi.tx_phy_channel == DL_DBPSK_25600_PROT_E)
-		nbfi.tx_phy_channel = UL_DBPSK_25600_PROT_E;
-	
+
 	ul_buf[len++] = nbfi_iter.ul;
 	ul_buf[len++] = pkt->phy_data.header;
 
 	memcpy(&ul_buf[len], pkt->phy_data.payload, pkt->phy_data_length);
 
-	if(NBFi_Crypto_Available())
+	if(NBFi_Crypto_Available()&&!(pkt_flags&NBFI_UL_FLAG_UNENCRYPTED))
 	{
 		NBFi_Crypto_Encode(&ul_buf[len - 1], *((uint32_t*)FULL_ID), nbfi_iter.ul, 9);
 		len += 8;
 	
 		mic_or_crc32 = NBFi_Crypto_UL_MIC(&ul_buf[len - 9], 9);
 		nbfi_iter.ul = NBFI_Crypto_inc_iter(nbfi_iter.ul);
-		ul_buf[len++] = (uint8_t)(mic_or_crc32 >> 16);
-		ul_buf[len++] = (uint8_t)(mic_or_crc32 >> 8);
-		ul_buf[len++] = (uint8_t)(mic_or_crc32);
 	}
 	else
-          len += 11;
+        {
+            len += 8;
+            mic_or_crc32 = CRC32(&ul_buf[len - 9], 9);
+        
+        }
+        ul_buf[len++] = (uint8_t)(mic_or_crc32 >> 16);
+	ul_buf[len++] = (uint8_t)(mic_or_crc32 >> 8);
+	ul_buf[len++] = (uint8_t)(mic_or_crc32);
         
 	mic_or_crc32 = CRC32(ul_buf, 17); 
 
@@ -282,8 +310,10 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 		parity = (nbfi.tx_freq > (nbfi.ul_freq_base));
 	}
 	else
-		tx_freq = NBFi_MAC_get_UL_freq(ul_buf[len - 4], parity);
-
+        {
+            if(pkt_flags&NBFI_UL_FLAG_SEND_ON_CENTRAL_FREQ) tx_freq = nbfi.ul_freq_base;
+            else tx_freq = NBFi_MAC_get_UL_freq(ul_buf[len - 4], parity);
+        }
 
 	for(int i=0; i<sizeof(protE_preambula); i++)
 	{

@@ -279,11 +279,18 @@ typedef enum
   ERR_PACKET_IS_TOO_LONG = 6    
 }nbfi_ul_status_t;
 
+//ULAPP flags:
+#define NBFI_UL_FLAG_NOACK                      0x01
+#define NBFI_UL_FLAG_UNENCRYPTED                0x02
+#define NBFI_UL_FLAG_DEFAULT_PREAMBLE           0x04
+#define NBFI_UL_FLAG_SEND_ON_CENTRAL_FREQ       0x08
+
 typedef struct
 {
   uint16_t id;
   nbfi_ul_status_t status;
   uint8_t reported;
+  uint8_t flags;
 }nbfi_ul_sent_status_t;
 
 

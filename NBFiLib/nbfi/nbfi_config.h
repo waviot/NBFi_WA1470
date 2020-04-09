@@ -38,12 +38,12 @@ extern uint8_t current_rx_rate;
 
 extern _Bool nbfi_settings_need_to_save_to_flash;
 
-//aditional flags:
+//NBFi flags:
 #define NBFI_FLG_FIXED_BAUD_RATE                0x01
 #define NBFI_FLG_NO_RESET_TO_DEFAULTS           0x02
 #define NBFI_FLG_NO_SENDINFO                    0x04
 #define NBFI_FLG_SEND_ALOHA                     0x08
-//#define NBFI_FLG_NO_CRYPTO                      0x10
+#define NBFI_FLG_SEND_IN_RESPONSE               0x10
 #define NBFI_FLG_NO_REDUCE_TX_PWR               0x20
 #define NBFI_OFF_MODE_ON_INIT                   0x40
 #define NBFI_FLG_DO_NOT_SEND_PKTS_ON_START      0x80
@@ -72,6 +72,7 @@ extern _Bool nbfi_settings_need_to_save_to_flash;
 #define NBFI_FREQ_PLAN_MINIMAL                  0
 #define NBFI_DL_FREQ_PLAN_FAULT                 7
 #define NBFI_UL_FREQ_PLAN_51200_0               (384<<6)
+#define NBFI_DL_FREQ_PLAN_819200_M2457600       59
 
 #define NBFI_VOID_ALTERNATIVE   {0, UNDEFINED, UNDEFINED, NBFI_UL_FREQ_PLAN_NO_CHANGE + NBFI_DL_FREQ_PLAN_NO_CHANGE}
 

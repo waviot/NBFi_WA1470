@@ -7,7 +7,7 @@
 extern "C" {
 #endif
 
-#define OPTO_BUFFER_SIZE (128)
+#define OPTO_BUFFER_SIZE (1024)
 
 typedef struct {
 	uint8_t buf[OPTO_BUFFER_SIZE];

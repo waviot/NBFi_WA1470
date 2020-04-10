@@ -37,6 +37,8 @@ nbfi_status_t   NBFi_RF_Transmit(uint8_t* pkt, uint8_t len, nbfi_phy_channel_t  
 void            NBFi_RF_TX_Finished();
 _Bool           NBFi_RF_is_TX_in_Progress();
 _Bool           NBFi_RF_can_Sleep();
+uint32_t        NBFi_DL_ID();
+
 
 float NBFi_RF_get_noise();
 

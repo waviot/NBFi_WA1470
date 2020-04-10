@@ -16,6 +16,11 @@ static void _memcpy(uint8_t *dst, const uint8_t *src, uint8_t len)
 		dst[len - i - 1] = src[i];
 }
 
+uint32_t NBFi_DL_ID()
+{
+  return *((uint32_t*)FULL_ID);
+}
+
 nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
                         nbfi_rf_antenna_t        antenna,
                         int8_t              power,
@@ -28,9 +33,12 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
     static uint32_t last_rx_freq;
     
     static uint32_t _preambule = 0;
-    if(!_preambule)
-    {
-		uint32_t preambule_tmp = preambula(*((uint32_t*)FULL_ID), (uint32_t *)0, (uint32_t *)0);
+    static uint32_t last_dl_add = 0;
+
+    if(!_preambule || (last_dl_add != NBFi_DL_ID()))
+    {           
+                last_dl_add = NBFi_DL_ID();
+		uint32_t preambule_tmp = preambula(NBFi_DL_ID(), (uint32_t *)0, (uint32_t *)0);
 		_memcpy((uint8_t *)&_preambule, (uint8_t *)&preambule_tmp, 4);
     }
         
@@ -41,6 +49,7 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
     if(last_phy != phy_channel)
     {
       wa1470_reinit(_preambule);
+      //wa1470_reinit(0);
       last_tx_prw = 100;
       last_tx_freq = 0;
       last_rx_freq = 0;
@@ -95,9 +104,9 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
         if(freq != last_rx_freq)
         {
           last_rx_freq = freq;
-          wa1470mod_set_freq(freq);
+          wa1470dem_set_freq(freq);
         }
-        wa1470dem_set_freq(freq);
+        //wa1470dem_set_freq(freq);
         rf_busy = 0;
         rf_state = STATE_RX;
         last_phy = phy_channel;

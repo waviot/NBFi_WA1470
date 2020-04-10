@@ -21,7 +21,16 @@ void NBFI_Init(nbfi_HAL_st* ptr, ischeduler_st* scheduler, nbfi_dev_info_t* info
     if((nbfi_hal == 0) || (nbfi_scheduler == 0)) while(1); //HAL and scheduler pointers must be provided 
     NBFi_set_Device_Info(info); 
     NBFi_Config_Set_Default();	
+
+    if(nbfi.master_key != 0)
+    {
+      NBFi_MAC_Get_Iterator();
+      NBFi_Crypto_Set_KEY(nbfi.master_key, &nbfi_iter.ul, &nbfi_iter.dl);
+    }
+    
     NBFI_Transport_Init();
+    
+    
 }
 
 uint8_t NBFi_get_Received_Packet(uint8_t * payload)
@@ -109,8 +118,42 @@ uint8_t NBFi_can_sleep()
 {
   nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
   uint8_t can = (!rf_busy) && (rf_state == STATE_OFF) && (NBFi_Packets_To_Send() == 0) && NBFi_RF_can_Sleep();
+  can = can && !(last_ack_send_ts &&  ((nbfi_scheduler->__scheduler_curr_time() - last_ack_send_ts) < WAITALITTLEBIT));
   nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
   return can;
+}
+
+uint8_t NBFi_get_Packets_to_Send()
+{
+    uint8_t n;
+    nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+    n = NBFi_Packets_To_Send();
+    nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+    return n;
+}
+
+nbfi_ul_sent_status_t  NBFi_get_UL_status(uint16_t id)
+{
+  nbfi_ul_sent_status_t ret;
+  nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+  nbfi_ul_sent_status_t *status = NBFi_Get_UL_status(id, 0);
+  if(status)
+  {
+      ret = *status;
+  }else   ret.id = 0;
+  nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);  
+  return ret;
+}
+
+_Bool  NBFi_is_Idle()
+{
+  _Bool idle = 1;
+  nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+  if(NBFi_Packets_To_Send()) idle = 0;
+  else if(last_ack_send_ts &&  ((nbfi_scheduler->__scheduler_curr_time() - last_ack_send_ts) < WAITALITTLEBIT)) idle = 0;
+  else if(nbfi_active_pkt->state == PACKET_WAIT_FOR_EXTRA_PACKETS) idle = 0;
+  nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+  return idle;
 }
 
 void NBFi_get_state(nbfi_state_t * state)
@@ -140,11 +183,6 @@ void NBFi_set_Device_Info(nbfi_dev_info_t *info)
 {
     nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);  
     dev_info = *info;
-    if(info->key != 0)
-    {
-      NBFi_MAC_Get_Iterator();
-      NBFi_Crypto_Set_KEY(dev_info.key, &nbfi_iter.ul, &nbfi_iter.dl);
-    }
     info_timer = dev_info.send_info_interval - 300 - rand()%600;
     nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK); 
 }
@@ -176,13 +214,14 @@ void NBFi_clear_Saved_Configuration()
 	if(nbfi_hal->__nbfi_write_flash_settings == 0) 
 		return;
 	nbfi_settings_t empty;
-	empty.tx_phy_channel = DL_PSK_200;
+        memset(&empty, 0, sizeof(nbfi_settings_t));
 	nbfi_hal->__nbfi_write_flash_settings(&empty);
 }
         
-void    NBFi_switch_to_another_settings(nbfi_settings_t* settings, _Bool to_or_from)
+void NBFi_switch_to_another_settings(nbfi_settings_t* settings, nbfi_crypto_iterator_t* it, _Bool to_or_from)
 {
     static nbfi_settings_t old_settings;
+    static nbfi_crypto_iterator_t old_iter;
     static nbfi_state_t state; 
     nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
    
@@ -190,22 +229,28 @@ void    NBFi_switch_to_another_settings(nbfi_settings_t* settings, _Bool to_or_f
     {
       memcpy(&old_settings, &nbfi, sizeof(nbfi_settings_t));
       memcpy(&state, &nbfi_state, sizeof(nbfi_state_t));
-      
+      old_iter = nbfi_iter;
       NBFi_Clear_TX_Buffer();
            
       memcpy(&nbfi, settings, sizeof(nbfi_settings_t));
-
+      nbfi_iter = *it;
     }
     else
     {
         NBFi_Clear_TX_Buffer();
         memcpy(&nbfi_state, &state, sizeof(nbfi_state_t));
+        nbfi_iter = old_iter;
         memcpy(&nbfi, &old_settings, sizeof(nbfi_settings_t));
         NBFi_Config_Set_TX_Chan(old_settings.tx_phy_channel);
         NBFi_Config_Set_RX_Chan(old_settings.rx_phy_channel);
         rf_state = STATE_CHANGED;
     }
 
+    if(nbfi.master_key != 0)
+    {
+      NBFi_Crypto_Set_KEY(nbfi.master_key, &nbfi_iter.ul, &nbfi_iter.dl);
+    }
+    
     if(rf_state == STATE_RX) NBFi_MAC_RX();
     
     switched_to_custom_settings = to_or_from;

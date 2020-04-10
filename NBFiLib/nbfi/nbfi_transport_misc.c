@@ -174,7 +174,7 @@ nbfi_transport_packet_t* NBFi_GetQueuedTXPkt()
         switch(pointer->state )
         {
         case PACKET_QUEUED_AGAIN:
-            return pointer;
+            goto end;
         }
     }
     
@@ -189,11 +189,17 @@ nbfi_transport_packet_t* NBFi_GetQueuedTXPkt()
             if(pointer == nbfi_active_pkt) continue;
              pointer->state = PACKET_QUEUED_AGAIN;
         case PACKET_QUEUED:
-
-            return pointer;
+            goto end;
         }
     }
     return 0;
+    
+end:
+   if((nbfi.additional_flags&NBFI_FLG_SEND_IN_RESPONSE))
+   {
+    if(!uplink_received_after_send) return 0; 
+   }
+   return pointer;
 }
 
 
@@ -307,7 +313,7 @@ uint8_t NBFi_Calc_Packets_With_State(uint8_t state)
     return num;
 }
 
-uint8_t NBFi_Calc_Queued_Sys_Packets_With_Type(uint8_t type)
+uint8_t NBFi_Calc_Queued_Sys_Packets_With_Type(uint8_t type, _Bool clean)
 {
     nbfi_transport_packet_t* pointer;
     uint8_t num = 0;
@@ -327,6 +333,7 @@ uint8_t NBFi_Calc_Queued_Sys_Packets_With_Type(uint8_t type)
         case PACKET_NEED_TO_SEND_RIGHT_NOW:
         case PACKET_SENT_NOACKED:
             num++;
+            if(clean) NBFi_TxPacket_Free(pointer);
             break;
         }
     }
@@ -502,6 +509,13 @@ void NBFi_Send_Clear_Cmd(uint8_t iter)
     pkt->phy_data.header |= SYS_FLAG;
     pkt->handshake = HANDSHAKE_NONE;
     pkt->state = PACKET_NEED_TO_SEND_RIGHT_NOW;
+    
+    #ifdef NBFI_LOG
+                sprintf(nbfi_log_string, "%05u: Send clear packet ", (uint16_t)(nbfi_scheduler->__scheduler_curr_time()&0xffff));
+                nbfi_hal->__nbfi_log_send_str(nbfi_log_string);
+#endif
+    
+    
 }
 
 
@@ -530,6 +544,8 @@ _Bool NBFi_Config_Send_Mode(_Bool ack, uint8_t param)
 
 _Bool NBFi_Config_Send_Sync(_Bool ack)
 {
+  
+    NBFi_Calc_Queued_Sys_Packets_With_Type(SYSTEM_PACKET_SYNC, 1); //clean previously queued sync packets
     nbfi_transport_packet_t* ack_pkt =  NBFi_AllocateTxPkt(8);
 
     if(!ack_pkt)
@@ -669,13 +685,14 @@ uint8_t NBFi_Get_Retry_Number()
 }
 
 
-nbfi_ul_sent_status_t* NBFi_Queue_Next_UL()
+nbfi_ul_sent_status_t* NBFi_Queue_Next_UL(uint8_t flags)
 {
   nbfi_ul_sent_status_t* next = &NBFi_sent_UL_stat_Buf[nbfi_sent_buf_head++%NBFI_SENT_STATUSES_BUF_SIZE];
     
   next->id = (++sent_id)?sent_id:(++sent_id);
   next->status = QUEUED;
   next->reported = 0;
+  next->flags = flags;
   return next;
 }
 
@@ -707,23 +724,17 @@ nbfi_ul_sent_status_t* NBFi_Get_Next_Unreported_UL(nbfi_ul_status_t status)
   return 0;
 }
 
-nbfi_ul_status_t NBFi_Get_UL_status(uint16_t id)
+nbfi_ul_sent_status_t* NBFi_Get_UL_status(uint16_t id, _Bool eight_bits_id)
 {
-  nbfi_ul_status_t status;
-  nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
   for(uint8_t i = nbfi_sent_buf_head - NBFI_SENT_STATUSES_BUF_SIZE; i != nbfi_sent_buf_head; i++)
   {
     nbfi_ul_sent_status_t* ul = &NBFi_sent_UL_stat_Buf[i%NBFI_SENT_STATUSES_BUF_SIZE];
-    if(ul->id == id) 
+    if((ul->id == id)||(eight_bits_id&&((ul->id&0xff) == id))) 
     {
-      ul->reported = 1;
-      status = ul->status;
-      nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
-      return status;
+      return ul;
     }
   }
-  nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
-  return NOTEXIST;
+  return 0;
 }
 
 

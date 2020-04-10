@@ -8,4 +8,6 @@
 
 void radio_init(void);
 
+void radio_switch_to_from_short_range(_Bool en);
+
 #endif /* RADIO_H_ */

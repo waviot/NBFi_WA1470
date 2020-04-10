@@ -51,54 +51,71 @@ uint8_t NBFI_Crypto_mic_check(uint8_t *buf, uint8_t len, uint8_t *mic, uint32_t 
 	magma_ctx_t tmp_ctx_mic, tmp_ctx_master;
 	uint32_t mic_calced;
 
-	if ((*iter_int == 0) || (((*iter_int) & 0xFF) < iter))
-	{
-		mic_calced = NBFi_Crypto_DL_MIC(buf, len);
+        if(nbfi.additional_flags&&NBFI_FLG_SHORT_RANGE_CRYPTO)
+        {
+                  *iter_int = iter;
+                  mic_calced = NBFi_Crypto_DL_MIC(buf, len);
 
-		if (((uint8_t *)&mic_calced)[2] == mic[0] &&
-			((uint8_t *)&mic_calced)[1] == mic[1] &&
-			((uint8_t *)&mic_calced)[0] == mic[2])
-		{
-			*iter_int &= 0xFFFFFF00;
-			*iter_int += iter;
-			
-			return 1;
-		}
-	}
+                  if (((uint8_t *)&mic_calced)[2] == mic[0] &&
+                          ((uint8_t *)&mic_calced)[1] == mic[1] &&
+                          ((uint8_t *)&mic_calced)[0] == mic[2])
+                  {
 
-	Magma_Init(&tmp_ctx_master, key_dl_master_ctx.key_orig);
+                          return 1;
+                  }
+        }
+        else
+        {        
+          if ((*iter_int == 0) || (((*iter_int) & 0xFF) < iter))
+          {
+                  mic_calced = NBFi_Crypto_DL_MIC(buf, len);
 
-	for (uint32_t i = 0; i < KEY_SCAN_DEPTH; i++)
-	{
-		if ((i + 1) + (*iter_int >> 8) == (1 << (CRYPTO_ITER_SIZE - 8)))
-			Magma_KEY_mesh(&key_root_ctx, &tmp_ctx_master, 0xFF);
-		else
-			Magma_KEY_mesh(&tmp_ctx_master, &tmp_ctx_master, 0x0F);
-		Magma_KEY_mesh(&tmp_ctx_master, &tmp_ctx_mic, 0x00);
+                  if (((uint8_t *)&mic_calced)[2] == mic[0] &&
+                          ((uint8_t *)&mic_calced)[1] == mic[1] &&
+                          ((uint8_t *)&mic_calced)[0] == mic[2])
+                  {
+                          *iter_int &= 0xFFFFFF00;
+                          *iter_int += iter;
+                          
+                          return 1;
+                  }
+          }
 
-		mic_calced = NBFi_Crypto_MIC(&tmp_ctx_mic, buf, len);
-		if (((uint8_t *)&mic_calced)[2] == mic[0] &&
-			((uint8_t *)&mic_calced)[1] == mic[1] &&
-			((uint8_t *)&mic_calced)[0] == mic[2])
-		{
-			Magma_Init(&key_dl_master_ctx, tmp_ctx_master.key_orig);
-			Magma_Init(&key_dl_mic_ctx, tmp_ctx_mic.key_orig);
-			Magma_KEY_mesh(&key_dl_master_ctx, &key_dl_work_ctx, 0xFF);
+          Magma_Init(&tmp_ctx_master, key_dl_master_ctx.key_orig);
 
-			*iter_int &= 0xFFFFFF00;
-			*iter_int += ((i + 1) << 8) + iter;
-			*iter_int &= (1 << CRYPTO_ITER_SIZE) - 1;
-			
-			return 1;
-		}
-	}
+          for (uint32_t i = 0; i < KEY_SCAN_DEPTH; i++)
+          {
+                  if ((i + 1) + (*iter_int >> 8) == (1 << (CRYPTO_ITER_SIZE - 8)))
+                          Magma_KEY_mesh(&key_root_ctx, &tmp_ctx_master, 0xFF);
+                  else
+                          Magma_KEY_mesh(&tmp_ctx_master, &tmp_ctx_master, 0x0F);
+                  Magma_KEY_mesh(&tmp_ctx_master, &tmp_ctx_mic, 0x00);
 
+                  mic_calced = NBFi_Crypto_MIC(&tmp_ctx_mic, buf, len);
+                  if (((uint8_t *)&mic_calced)[2] == mic[0] &&
+                          ((uint8_t *)&mic_calced)[1] == mic[1] &&
+                          ((uint8_t *)&mic_calced)[0] == mic[2])
+                  {
+                          Magma_Init(&key_dl_master_ctx, tmp_ctx_master.key_orig);
+                          Magma_Init(&key_dl_mic_ctx, tmp_ctx_mic.key_orig);
+                          Magma_KEY_mesh(&key_dl_master_ctx, &key_dl_work_ctx, 0xFF);
+
+                          *iter_int &= 0xFFFFFF00;
+                          *iter_int += ((i + 1) << 8) + iter;
+                          *iter_int &= (1 << CRYPTO_ITER_SIZE) - 1;
+                          
+                          return 1;
+                  }
+          }
+        }
 	return 0;
 }
 
 uint32_t NBFI_Crypto_inc_iter(uint32_t iter)
 {
 	iter++;
+        if(nbfi.additional_flags&&NBFI_FLG_SHORT_RANGE_CRYPTO) return iter&0xff;
+        
 	if (iter >> CRYPTO_ITER_SIZE)
 	{
 		Magma_KEY_mesh(&key_root_ctx, &key_ul_master_ctx, 0xFF);
@@ -126,7 +143,8 @@ void NBFi_Crypto_Set_KEY(uint32_t *key, uint32_t *ul_iter, uint32_t *dl_iter)
 	Magma_Init(&key_root_ctx, (uint8_t *)key);
 
 	Magma_KEY_mesh(&key_root_ctx, &key_ul_master_ctx, 0x00);
-	Magma_KEY_mesh(&key_root_ctx, &key_dl_master_ctx, 0xFF);
+
+        Magma_KEY_mesh(&key_root_ctx, &key_dl_master_ctx, (nbfi.additional_flags&&NBFI_FLG_SHORT_RANGE_CRYPTO)?0x00:0xFF);
 	
 	for (uint32_t i = 0; i < (*ul_iter >> 8); i++)
 		Magma_KEY_mesh(&key_ul_master_ctx, &key_ul_master_ctx, 0x0F);

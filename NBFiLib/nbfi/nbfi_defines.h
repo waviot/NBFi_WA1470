@@ -6,7 +6,7 @@
 
 //#define NBFI_NO_CRYPTO
 
-#define NBFI_LOG
+//#define NBFI_LOG
 
 //#define NBFI_USE_MALLOC
 

@@ -2,17 +2,26 @@
 #include "defines.h"
 #include "radio.h"
 
-#define MODEM_ID  ((uint32_t *)0x0801ff80)
-#define KEY  ((uint32_t *)0x0801ff84)               
 
-#define AUX_MODEM_ID  8121343
-#define AUX_MODEM_ID_ADD 0x20001000
-#define AUX_MODEM_ID_PTR  ((uint32_t *)AUX_MODEM_ID_ADD)
+#define MODEM_ID_AND_KEY_ADD    0x0801ff80
 
-uint32_t sr_modem_id @AUX_MODEM_ID_ADD;
+#define MODEM_ID  ((uint32_t *)MODEM_ID_AND_KEY_ADD)
+#define KEY  ((uint32_t *)(MODEM_ID_AND_KEY_ADD+4))               
 
 
-//const uint32_t * const sr_modem_id_ptr = (const uint32_t *)sizeof(sr_modem_id);
+#define AUX_MODEM_ID_AND_KEY_ADD    0x20001000
+
+nbfi_device_id_and_key_st aux_modem_id_and_key @AUX_MODEM_ID_AND_KEY_ADD;
+
+//#define AUX_MODEM_ID_ADD 0x20001000
+#define AUX_MODEM_ID_PTR  ((uint32_t *)AUX_MODEM_ID_AND_KEY_ADD)
+#define AUX_KEY_PTR  ((uint32_t *)(AUX_MODEM_ID_AND_KEY_ADD + 4))
+//#define AUX_KEY_ADD     0x20001004
+
+
+
+//uint32_t sr_modem_id @AUX_MODEM_ID_ADD;
+//uint32_t sr_key[8] @AUX_KEY_ADD;
 
 
 #define MANUFACTURER_ID         0x8888 //Waviot
@@ -69,7 +78,7 @@ const nbfi_settings_t nbfi_default_settings =
 {      
     MODEM_ID, 
     KEY,
-    DRX,//mode;
+    CRX,//mode;
     UL_DBPSK_400_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
     DL_DBPSK_400_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
@@ -83,7 +92,7 @@ const nbfi_settings_t nbfi_default_settings =
     PCB,                //tx_antenna;
     PCB,                //rx_antenna;
     TX_MAX_POWER,       //tx_pwr;
-    1,//3600*6,             //heartbeat_interval
+    30,//3600*6,             //heartbeat_interval
     255,                //heartbeat_num
     0,//NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
     NBFI_UL_FREQ_BASE,
@@ -103,7 +112,7 @@ const nbfi_dev_info_t nbfi_info = {TX_MIN_POWER, TX_MAX_POWER, MANUFACTURER_ID, 
 const nbfi_settings_t nbfi_short_range_settings =
 {      
     AUX_MODEM_ID_PTR, 
-    0,
+    AUX_KEY_PTR,
     CRX,//mode;
     DL_DBPSK_25600_PROT_D, // tx_phy_channel;
     DL_DBPSK_25600_PROT_D, // rx_phy_channel;
@@ -120,7 +129,7 @@ const nbfi_settings_t nbfi_short_range_settings =
     TX_MAX_POWER,       //tx_pwr;
     1,//3600*6,         //heartbeat_interval
     0,                  //heartbeat_num
-    NBFI_FLG_SEND_IN_RESPONSE|NBFI_FLG_FIXED_BAUD_RATE|NBFI_FLG_NO_RESET_TO_DEFAULTS|NBFI_FLG_NO_SENDINFO|NBFI_FLG_NO_REDUCE_TX_PWR,                  //additional_flags
+    NBFI_FLG_SEND_IN_RESPONSE|NBFI_FLG_SHORT_RANGE_CRYPTO|NBFI_FLG_FIXED_BAUD_RATE|NBFI_FLG_NO_RESET_TO_DEFAULTS|NBFI_FLG_NO_SENDINFO|NBFI_FLG_NO_REDUCE_TX_PWR,                  //additional_flags
     NBFI_UL_FREQ_BASE,
     NBFI_DL_FREQ_BASE,
     NBFI_FREQ_PLAN_MINIMAL + NBFI_DL_FREQ_PLAN_819200_M2457600,
@@ -139,10 +148,29 @@ void radio_switch_to_from_short_range(_Bool en)
 }
 
 
+#define EEPROM_INT_aux_modem_data (DATA_EEPROM_BASE + 1024*5 + 128)
+
+ 
+void radio_load_id_and_key_of_aux_device(nbfi_device_id_and_key_st *data) 
+{
+	memcpy((void*)data, ((const void*)EEPROM_INT_aux_modem_data), sizeof(nbfi_device_id_and_key_st));
+}
+
+void radio_save_id_and_key_of_aux_device(nbfi_device_id_and_key_st *data)
+{	
+    if(HAL_FLASHEx_DATAEEPROM_Unlock() != HAL_OK) return;
+    for(uint8_t i = 0; i != sizeof(nbfi_device_id_and_key_st); i++)
+    {
+	if(HAL_FLASHEx_DATAEEPROM_Program(FLASH_TYPEPROGRAMDATA_BYTE, EEPROM_INT_aux_modem_data + i, ((uint8_t *)data)[i]) != HAL_OK) break;
+    }
+    HAL_FLASHEx_DATAEEPROM_Lock(); 
+}
+
+
 void radio_init(void)
 {
   
-        sr_modem_id = AUX_MODEM_ID;
+        //sr_modem_id = AUX_MODEM_ID;
         scheduler_HAL_init();
         wa1470_HAL_reg_data_received_callback((void*)NBFi_MAC_RX_ProtocolD);
         wa1470_HAL_reg_tx_finished_callback((void*)NBFi_RF_TX_Finished);       

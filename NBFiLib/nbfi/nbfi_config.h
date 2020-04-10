@@ -47,6 +47,8 @@ extern _Bool nbfi_settings_need_to_save_to_flash;
 #define NBFI_FLG_NO_REDUCE_TX_PWR               0x20
 #define NBFI_OFF_MODE_ON_INIT                   0x40
 #define NBFI_FLG_DO_NOT_SEND_PKTS_ON_START      0x80
+#define NBFI_FLG_SHORT_RANGE_CRYPTO           0x0100
+
 
 
 //BAND IDs

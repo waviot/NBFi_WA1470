@@ -98,7 +98,7 @@ const nbfi_dev_info_t nbfi_info = {TX_MIN_POWER, TX_MAX_POWER, MANUFACTURER_ID, 
 const nbfi_settings_t nbfi_short_range_settings =
 {      
     MODEM_ID, 
-    0,
+    KEY,
     CRX,//mode;
     DL_DBPSK_25600_PROT_D, // tx_phy_channel;
     DL_DBPSK_25600_PROT_D, // rx_phy_channel;
@@ -115,7 +115,7 @@ const nbfi_settings_t nbfi_short_range_settings =
     TX_MAX_POWER,       //tx_pwr;
     1,//3600*6,         //heartbeat_interval
     0,                  //heartbeat_num
-    NBFI_FLG_FIXED_BAUD_RATE|NBFI_FLG_NO_RESET_TO_DEFAULTS|NBFI_FLG_NO_SENDINFO|NBFI_FLG_NO_REDUCE_TX_PWR,                  //additional_flags
+    NBFI_FLG_FIXED_BAUD_RATE|NBFI_FLG_SHORT_RANGE_CRYPTO|NBFI_FLG_NO_RESET_TO_DEFAULTS|NBFI_FLG_NO_SENDINFO|NBFI_FLG_NO_REDUCE_TX_PWR,                  //additional_flags
     NBFI_UL_FREQ_BASE,
     NBFI_DL_FREQ_BASE,
     NBFI_FREQ_PLAN_MINIMAL + NBFI_DL_FREQ_PLAN_819200_M2457600,

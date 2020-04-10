@@ -34,6 +34,28 @@ void nbfi_receive_complete(uint8_t * data, uint16_t length)
     uint8_t payload[] = {0xaa};
     NBFi_Send5(payload, sizeof(payload));
   }*/
+  
+  
+  if((data[0] == 0x80)&&(length == 1+4+32))
+  {
+    aux_modem_id_and_key.id = 0;
+    for(uint8_t i = 0; i != 4; i++ )
+    {
+        aux_modem_id_and_key.id <<= 8;
+        aux_modem_id_and_key.id += data[i + 1];
+        
+    }
+    
+    for(uint8_t i = 0; i != 32; i++ )
+    {
+        aux_modem_id_and_key.key[i] = data[i + 1 + 4];      
+    } 
+    
+    radio_save_id_and_key_of_aux_device(&aux_modem_id_and_key);
+  }
+  
+  
+  
 }
 
 
@@ -50,11 +72,15 @@ int main(void)
 
   log_init();
   
-  radio_switch_to_from_short_range(1);
+  //radio_switch_to_from_short_range(1);
   
   //last_send_status = NBFi_Send5({0xaa}, 1);   
   //uint8_t payload[] = {0xaa};
   //last_send_status = NBFi_Send5(payload, sizeof(payload));
+  
+  radio_load_id_and_key_of_aux_device(&aux_modem_id_and_key);
+  
+  if(aux_modem_id_and_key.id != 0)  radio_switch_to_from_short_range(1);
   
   while (1) 
   {     
@@ -66,11 +92,14 @@ int main(void)
             
       NBFI_Main_Level_Loop();
       
-      if( NBFi_is_Idle() )
+      if(NBFi_is_Switched_to_Custom_Settings())
       {
-        uint8_t payload[] = {0xaa};
-        last_send_status = NBFi_Send5(payload, sizeof(payload),0);
-      }
+        if( NBFi_is_Idle() )
+        {
+          uint8_t payload[] = {0xaa};
+          last_send_status = NBFi_Send5(payload, sizeof(payload),0);
+        }
+      }  
              
       //rssi = wa1470dem_get_rssi();
             

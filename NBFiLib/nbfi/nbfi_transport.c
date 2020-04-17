@@ -391,7 +391,7 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
                     else rtc_offset = nbfi_station_info.info.RTC_MSB;
                     rtc_offset <<= 8;
                     rtc_offset |= phy_pkt->payload[6];
-                    if(rtc_offset) NBFi_set_RTC_irq(NBFi_get_RTC() + rtc_offset);                 
+                    if(rtc_offset&&!NBFi_is_Switched_to_Custom_Settings()) NBFi_set_RTC_irq(NBFi_get_RTC() + rtc_offset);                 
                     if(phy_pkt->payload[0] == SYSTEM_PACKET_ACK)
                     {
                       do
@@ -401,7 +401,7 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
 
                       NBFi_Resend_Pkt(nbfi_active_pkt, mask);
                     }
-                    else
+                    else if(!NBFi_is_Switched_to_Custom_Settings())
                     {
                        nbfi_station_info.fp.fp = phy_pkt->payload[1];
                        nbfi_station_info.fp.fp = (nbfi_station_info.fp.fp << 8) + phy_pkt->payload[2];

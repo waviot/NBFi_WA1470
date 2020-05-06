@@ -2698,6 +2698,30 @@
       </file>
     </group>
     <group>
+      <name>nbfi_at_server</name>
+      <file>
+        <name>$PROJ_DIR$\..\..\NBFiLib\nbfi_at_server\nbfi_at_server.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\NBFiLib\nbfi_at_server\nbfi_at_server.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\NBFiLib\nbfi_at_server\nbfi_at_server_handlers.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\NBFiLib\nbfi_at_server\nbfi_at_server_handlers.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\NBFiLib\nbfi_at_server\nbfi_at_server_tags.c</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\NBFiLib\nbfi_at_server\nbfi_at_server_tags.h</name>
+      </file>
+      <file>
+        <name>$PROJ_DIR$\..\..\NBFiLib\nbfi_at_server\nbfi_at_server_types.h</name>
+      </file>
+    </group>
+    <group>
       <name>preambula</name>
       <file>
         <name>$PROJ_DIR$\..\..\NBFiLib\preambula\preambula\preambula.c</name>

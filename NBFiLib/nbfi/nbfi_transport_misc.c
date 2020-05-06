@@ -400,6 +400,7 @@ _Bool NBFi_Check_RX_Packet_Duplicate(nbfi_transport_frame_t * pkt, uint8_t len)
 {
     nbfi_transport_frame_t *rec_pkt = &(NBFi_Get_RX_Packet_Ptr(nbfi_state.DL_iter&0x1f)->phy_data);
 
+    
     for(uint8_t i = 0; i != len; i++)
     {
         if(((uint8_t*)rec_pkt)[i] != ((uint8_t*)pkt)[i]) return 0;

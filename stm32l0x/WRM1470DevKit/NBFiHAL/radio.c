@@ -144,5 +144,5 @@ void radio_init(void)
         wa1470_HAL_init();        
 	nbfi_HAL_init(&nbfi_default_settings, (nbfi_dev_info_t*)&nbfi_info);  
         scheduler_run_callbacks();
-        NBFi_clear_Saved_Configuration(); //if you need to clear previously saved nbfi configuration in EEPROM
+        //NBFi_clear_Saved_Configuration(); //if you need to clear previously saved nbfi configuration in EEPROM
 }

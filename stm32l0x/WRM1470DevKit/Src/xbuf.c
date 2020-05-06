@@ -14,7 +14,7 @@ uint8_t xbuf_get(UART_X_BUF *xbuf) {
 		return 0;
 
 	uint8_t data = xbuf->buf[xbuf->rd];
-	if (++xbuf->rd >= OPTO_BUFFER_SIZE) {
+	if (++xbuf->rd >= UART_BUFFER_SIZE) {
 		xbuf->rd = 0;
 	}
 
@@ -25,7 +25,7 @@ void xbuf_send(UART_X_BUF *xbuf, uint8_t data) {
   	if (xbuf->wr != xbuf->rd - 1)
 	{
 		xbuf->buf[xbuf->wr] = data;
-		if (++xbuf->wr >= OPTO_BUFFER_SIZE) {
+		if (++xbuf->wr >= UART_BUFFER_SIZE) {
 			xbuf->wr = 0;
 		}
 		xbuf->len++;

@@ -7,13 +7,13 @@
 extern "C" {
 #endif
 
-#define OPTO_BUFFER_SIZE (1024)
+#define UART_BUFFER_SIZE (1024)
 
 typedef struct {
-	uint8_t buf[OPTO_BUFFER_SIZE];
-	uint8_t wr;
-	uint8_t rd;
-	uint8_t len;
+	uint8_t buf[UART_BUFFER_SIZE];
+	uint16_t wr;
+	uint16_t rd;
+	uint16_t len;
 } UART_X_BUF;
 
 void xbuf_clear(UART_X_BUF *xbuf);

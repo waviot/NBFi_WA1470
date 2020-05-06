@@ -338,14 +338,6 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         buf[5] = nbfi.tx_pwr;
                         buf[6] = nbfi.num_of_retries;
                         break;
-                    /* case NBFI_PARAM_MODE_V5:
-                        buf[1] = nbfi.mode + ((nbfi.nbfi_ul_freq_plan.fp) << 3);
-                        buf[2] = nbfi.tx_phy_channel;
-                        buf[3] = nbfi.rx_phy_channel;
-                        buf[4] = nbfi.nbfi_ul_freq_plan.fp;
-                        //buf[5] = (nbfi_iter.dl >> 16); //thease fields will be updated in NBFi_ProcessTasks()  
-                        //buf[6] = (nbfi_iter.dl >> 8);
-                        break;*/
                     case NBFI_PARAM_HANDSHAKE:
                         buf[1] = nbfi.handshake_mode;
                         buf[2] = nbfi.mack_mode;
@@ -364,12 +356,6 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         buf[2] = nbfi.tx_antenna;
                         buf[3] = nbfi.rx_antenna;
                         break;
-                   /* case NBFI_PARAM_DL_ADD:
-                        bigendian_cpy((uint8_t*)&nbfi.dl_ID, &buf[1], 4);
-                        break;*/
-                    /*case NBFI_PARAM_BROADCAST_ADD:
-                        for(uint8_t i = 0; i != 3; i++)  buf[1 + i] = nbfi.broadcast_ID[i];
-                        break;*/
                     case NBFI_PARAM_HEART_BEAT:
                         buf[1] = nbfi.heartbeat_num;
                         buf[2] = nbfi.heartbeat_interval >> 8;
@@ -401,13 +387,13 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         bigendian_cpy((uint8_t*)&dev_info.hardware_type_id, &buf[3], 2);
                         bigendian_cpy((uint8_t*)&dev_info.protocol_id, &buf[5], 2);
                         break;
-                    case NBFI_QUALITY:
+                    case NBFI_PARAM_QUALITY:
                         bigendian_cpy((uint8_t*)&nbfi_state.UL_total, &buf[1], 2);
                         bigendian_cpy((uint8_t*)&nbfi_state.DL_total, &buf[3], 2);
                         buf[5] = nbfi_state.aver_rx_snr;
                         buf[6] = nbfi_state.aver_tx_snr;
                         break;
-                    case NBFI_QUALITY_EX :
+                    case NBFI_PARAM_QUALITY_EX :
                         buf[1] = nbfi_state.UL_rating;
                         buf[2] = nbfi_state.DL_rating;
                         bigendian_cpy((uint8_t*)&nbfi_state.success_total, &buf[3], 2);
@@ -417,15 +403,23 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         bigendian_cpy((uint8_t*)&nbfi_state.bs_id, &buf[1], 3);
                         bigendian_cpy((uint8_t*)&nbfi_state.server_id, &buf[4], 3);
                         break;
-                    case NBFI_ADD_FLAGS:
+                    case NBFI_PARAM_ADD_FLAGS:
                         buf[1] = nbfi.additional_flags;
                         buf[2] = (nbfi.additional_flags>>8);
                         break;
-                    case NBFI_UL_BASE_FREQ:
+                    case NBFI_PARAM_UL_BASE_FREQ:
                         bigendian_cpy((uint8_t*)&nbfi.ul_freq_base, &buf[1], 4);
                         break;
-                    case NBFI_DL_BASE_FREQ:
+                    case NBFI_PARAM_DL_BASE_FREQ:
                         bigendian_cpy((uint8_t*)&nbfi.dl_freq_base, &buf[1], 4);
+                        break;
+                    case NBFI_PARAM_FPLAN:
+                        buf[1] = (nbfi.nbfi_freq_plan.fp >> 8);
+                        buf[2] = (nbfi.nbfi_freq_plan.fp & 0xff);
+                        break;
+                    case NBFI_PARAM_WAIT_ACK_TIMEOUT:
+                        buf[1] = (nbfi.wait_ack_timeout >> 8);
+                        buf[2] = nbfi.wait_ack_timeout&0xff;
                         break;
                     default:
                         return 0;
@@ -448,16 +442,6 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         if(buf[5] != 0xff) nbfi.tx_pwr = buf[5];
                         if(buf[6] != 0xff) nbfi.num_of_retries = buf[6];
                         break;
-                   /* case NBFI_PARAM_MODE_V5:
-                        if(buf[1] != 0xff) 
-                        {
-                          nbfi.mode = (nbfi_mode_t)(buf[1]&0x03);
-                          nbfi.nbfi_dl_freq_plan.fp = (buf[1]>>3);
-                        }
-                        if(buf[2] != 0xff) NBFi_Config_Set_TX_Chan((nbfi_phy_channel_t)buf[3]);
-                        if(buf[3] != 0xff) {NBFi_Config_Set_RX_Chan((nbfi_phy_channel_t)buf[4]); rf_state = STATE_CHANGED;}
-                        if(buf[3] != 0xff) nbfi.nbfi_ul_freq_plan.fp = buf[4];
-                        break;*/
                     case NBFI_PARAM_HANDSHAKE:
                         if(buf[1] != 0xff)
                         {
@@ -483,29 +467,33 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         if(buf[1] != 0xff) nbfi.tx_pwr = buf[1];
                         if(buf[2] != 0xff) nbfi.tx_antenna = buf[2];
                         if(buf[3] != 0xff) {nbfi.rx_antenna = buf[3]; rf_state = STATE_CHANGED;}
-                        break;
-                   /* case NBFI_PARAM_DL_ADD:
-                        bigendian_cpy(&buf[1], (uint8_t*)&nbfi.dl_ID, 4);
-                        break;*/
-                    /*case NBFI_PARAM_BROADCAST_ADD:
-                        for(uint8_t i = 0; i != 3; i++)  nbfi.broadcast_ID[i] = buf[1 + i];
-                        break; */                      
+                        break;                
                     case NBFI_PARAM_HEART_BEAT:
                         nbfi.heartbeat_num = buf[1];
                         nbfi.heartbeat_interval  = buf[2];
                         nbfi.heartbeat_interval <<= 8;
                         nbfi.heartbeat_interval += buf[3];
                         break;
-                    case NBFI_ADD_FLAGS:
+                    case NBFI_PARAM_ADD_FLAGS:
                         nbfi.additional_flags = buf[2];
                         nbfi.additional_flags <<= 8;
                         nbfi.additional_flags += buf[1];
                         break;
-                    case NBFI_UL_BASE_FREQ:
+                    case NBFI_PARAM_UL_BASE_FREQ:
                         bigendian_cpy(&buf[1], (uint8_t*)&nbfi.ul_freq_base, 4);
                         break;
-                    case NBFI_DL_BASE_FREQ:
+                    case NBFI_PARAM_DL_BASE_FREQ:
                         bigendian_cpy(&buf[1], (uint8_t*)&nbfi.dl_freq_base, 4);
+                        break;
+                    case NBFI_PARAM_FPLAN:
+                        nbfi.nbfi_freq_plan.fp = buf[1];
+                        nbfi.nbfi_freq_plan.fp <<= 8;
+                        nbfi.nbfi_freq_plan.fp += buf[2];
+                        break;
+                    case NBFI_PARAM_WAIT_ACK_TIMEOUT:
+                        nbfi.wait_ack_timeout = buf[1];
+                        nbfi.wait_ack_timeout <<= 8;
+                        nbfi.wait_ack_timeout += buf[2];
                         break;
                     default:
                         return 0;

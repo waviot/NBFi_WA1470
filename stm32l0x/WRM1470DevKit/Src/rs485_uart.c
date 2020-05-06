@@ -2,16 +2,16 @@
 #include "xbuf.h"
 
 //			STM defines
-#define RS485_USART	 			USART2
+#define RS485_USART	 		USART2
 #define RS485_USART_IRQ 		USART2_IRQn
 #define RS485_RCC_ENABLE		__HAL_RCC_USART2_CLK_ENABLE
 #define RS485_RCC_DISABLE		__HAL_RCC_USART2_CLK_DISABLE
 #define RS485_TX_GPIO_Port		GPIOA
 #define RS485_TX_Pin 			GPIO_PIN_2
-#define RS485_TX_AF				GPIO_AF4_USART2
+#define RS485_TX_AF			GPIO_AF4_USART2
 #define RS485_RX_GPIO_Port 		GPIOA
 #define RS485_RX_Pin 			GPIO_PIN_3
-#define RS485_RX_AF				GPIO_AF4_USART2
+#define RS485_RX_AF			GPIO_AF4_USART2
 
 
 static UART_HandleTypeDef huart;
@@ -35,6 +35,7 @@ uint8_t RS485_UART_TX_is_empty(void){
 uint8_t RS485_UART_get(void){
 	return xbuf_get(&RS485_UART_rx);
 }
+
 
 void RS485_UART_IRQ(void) {
 	if (__HAL_UART_GET_FLAG(&huart, UART_FLAG_RXNE)){
@@ -79,6 +80,9 @@ void RS485_UART_init(void) {
   GPIO_InitStruct.Alternate = RS485_RX_AF;
   HAL_GPIO_Init(RS485_RX_GPIO_Port, &GPIO_InitStruct);
 	
+  
+  for(uint16_t i = 0; i != 100; i++) huart.Instance->RDR; //wait and clear first received char
+    
   __HAL_UART_ENABLE_IT(&huart, UART_IT_RXNE);
   __HAL_UART_ENABLE_IT(&huart, UART_IT_TXE);
 	

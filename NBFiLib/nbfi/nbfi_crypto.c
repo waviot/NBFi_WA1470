@@ -51,7 +51,7 @@ uint8_t NBFI_Crypto_mic_check(uint8_t *buf, uint8_t len, uint8_t *mic, uint32_t 
 	magma_ctx_t tmp_ctx_mic, tmp_ctx_master;
 	uint32_t mic_calced;
 
-        if(nbfi.additional_flags&&NBFI_FLG_SHORT_RANGE_CRYPTO)
+        if(nbfi.additional_flags&NBFI_FLG_SHORT_RANGE_CRYPTO)
         {
                   *iter_int = iter;
                   mic_calced = NBFi_Crypto_DL_MIC(buf, len);
@@ -114,7 +114,7 @@ uint8_t NBFI_Crypto_mic_check(uint8_t *buf, uint8_t len, uint8_t *mic, uint32_t 
 uint32_t NBFI_Crypto_inc_iter(uint32_t iter)
 {
 	iter++;
-        if(nbfi.additional_flags&&NBFI_FLG_SHORT_RANGE_CRYPTO) return iter&0xff;
+        if(nbfi.additional_flags&NBFI_FLG_SHORT_RANGE_CRYPTO) return iter&0xff;
         
 	if (iter >> CRYPTO_ITER_SIZE)
 	{
@@ -144,7 +144,7 @@ void NBFi_Crypto_Set_KEY(uint32_t *key, uint32_t *ul_iter, uint32_t *dl_iter)
 
 	Magma_KEY_mesh(&key_root_ctx, &key_ul_master_ctx, 0x00);
 
-        Magma_KEY_mesh(&key_root_ctx, &key_dl_master_ctx, (nbfi.additional_flags&&NBFI_FLG_SHORT_RANGE_CRYPTO)?0x00:0xFF);
+        Magma_KEY_mesh(&key_root_ctx, &key_dl_master_ctx, (nbfi.additional_flags&NBFI_FLG_SHORT_RANGE_CRYPTO)?0x00:0xFF);
 	
 	for (uint32_t i = 0; i < (*ul_iter >> 8); i++)
 		Magma_KEY_mesh(&key_ul_master_ctx, &key_ul_master_ctx, 0x0F);

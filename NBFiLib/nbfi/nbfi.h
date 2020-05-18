@@ -18,9 +18,9 @@
 
 typedef struct 
 {
-  void (* __nbfi_before_tx)();
-  void (* __nbfi_before_rx)();
-  void (* __nbfi_before_off)();
+  void (* __nbfi_before_tx)(nbfi_settings_t*);
+  void (* __nbfi_before_rx)(nbfi_settings_t*);
+  void (* __nbfi_before_off)(nbfi_settings_t*);
   void (* __nbfi_lock_unlock_loop_irq)(uint8_t);
   void (*__nbfi_send_status_handler)(nbfi_ul_sent_status_t);
   void (*__nbfi_rx_handler)(uint8_t*, uint16_t);

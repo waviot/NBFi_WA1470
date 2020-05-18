@@ -67,7 +67,7 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
     case UL_DBPSK_3200_PROT_E:
     case UL_DBPSK_25600_PROT_E:
         wa1470dem_rx_enable(0);
-        nbfi_hal->__nbfi_before_tx();
+        nbfi_hal->__nbfi_before_tx(&nbfi);
                         
         if(freq != last_tx_freq)
         {
@@ -93,7 +93,7 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
     case DL_DBPSK_3200_PROT_D:
     case DL_DBPSK_25600_PROT_D:
     case DL_DBPSK_100H_PROT_D:
-        nbfi_hal->__nbfi_before_rx();
+        nbfi_hal->__nbfi_before_rx(&nbfi);
         wa1470dem_rx_enable(1);
         
         if(last_phy != phy_channel)
@@ -119,7 +119,7 @@ nbfi_status_t NBFi_RF_Deinit()
 {
     if(rf_busy) return ERR_RF_BUSY;
     wa1470dem_rx_enable(0);
-    nbfi_hal->__nbfi_before_off();    
+    nbfi_hal->__nbfi_before_off(&nbfi);    
     rf_busy = 1;
     //wa1470rfe_set_mode(RFE_MODE_DEEP_SLEEP);
     wa1470_deinit();

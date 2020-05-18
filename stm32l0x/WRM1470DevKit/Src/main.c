@@ -5,7 +5,7 @@
 #include "log.h"
 #include "defines.h"
 #include "pca9454.h"
-
+#include "rs485_uart.h"
 
 uint32_t volatile systimer = 0;
 
@@ -100,8 +100,20 @@ int main(void)
       #include "plot_spectrum.h"
       plot_spectrum();
       #endif
+
       NBFI_Main_Level_Loop();
-      switch_to_short_range_and_send_hello();
+
+      #ifdef NBFI_AT_SERVER
+      uint8_t *buf;
+      if(!RS485_UART_is_empty()) 
+      {
+         uint8_t c = RS485_UART_get(); 
+         if(nbfi_at_server_echo_mode) RS485_UART_send(c);
+         uint16_t reply_len = nbfi_at_server_parse_char(c, &buf);
+         for(uint16_t i = 0; i != reply_len; i++) RS485_UART_send(buf[i]); 
+      }
+      #endif
+
       if (NBFi_can_sleep() && scheduler_can_sleep()) 
       {
         //HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_SLEEPENTRY_WFI);

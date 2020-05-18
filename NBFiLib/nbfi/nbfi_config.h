@@ -17,14 +17,17 @@
 #define NBFI_PARAM_TX_BRATES            0x08
 #define NBFI_PARAM_RX_BRATES            0x09
 #define NBFI_PARAM_VERSION              0x0A
-#define NBFI_ADD_FLAGS                  0x0B
-#define NBFI_QUALITY                    0x0C
-#define NBFI_UL_BASE_FREQ               0x0D
-#define NBFI_DL_BASE_FREQ               0x0E
-#define NBFI_QUALITY_EX                 0x0F
+#define NBFI_PARAM_ADD_FLAGS            0x0B
+#define NBFI_PARAM_QUALITY              0x0C
+#define NBFI_PARAM_UL_BASE_FREQ         0x0D
+#define NBFI_PARAM_DL_BASE_FREQ         0x0E
+#define NBFI_PARAM_QUALITY_EX           0x0F
 #define NBFI_PARAM_BROADCAST_ADD        0x10
 #define NBFI_PARAM_APP_IDS              0x11
 #define NBFI_PARAM_BSANDSERVER_IDS      0x12
+#define NBFI_PARAM_FPLAN                0x13
+#define NBFI_PARAM_WAIT_ACK_TIMEOUT     0x14
+
 
 
 extern nbfi_settings_t nbfi;

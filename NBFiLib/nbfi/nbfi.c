@@ -67,7 +67,7 @@ void  NBFI_Main_Level_Loop()
         if(ul == 0) ul = NBFi_Get_Next_Unreported_UL(LOST);
         nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
         if(ul) nbfi_hal->__nbfi_send_status_handler(*ul);
-        else return;
+        else break;
       }
     }
     
@@ -204,9 +204,9 @@ void NBFi_set_Settings(nbfi_settings_t* settings)
 _Bool NBFi_send_Packet_to_Config_Parser(uint8_t* buf)
 {
     nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
-    _Bool has_request = NBFi_Config_Parser(buf);
+    _Bool has_reply = NBFi_Config_Parser(buf);
     nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
-    return has_request;
+    return has_reply;
 }
 
 void NBFi_clear_Saved_Configuration()
@@ -261,4 +261,9 @@ void NBFi_switch_to_another_settings(nbfi_settings_t* settings, nbfi_crypto_iter
 _Bool   NBFi_is_Switched_to_Custom_Settings()
 {
   return switched_to_custom_settings;
+}
+
+void    NBFi_CPU_Reset()
+{
+  if(nbfi_hal->__nbfi_reset) nbfi_hal->__nbfi_reset();
 }

@@ -435,7 +435,7 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
                 }
                 break;
             case SYSTEM_PACKET_RESET: //software reset
-                if((nbfi_hal->__nbfi_reset)&&(phy_pkt->payload[1] == 0xDE) && (phy_pkt->payload[2] == 0xAD)) nbfi_hal->__nbfi_reset();
+                if((phy_pkt->payload[1] == 0xDE) && (phy_pkt->payload[2] == 0xAD)) NBFi_CPU_Reset();
                 break;
             case SYSTEM_PACKET_TIME:  //time correction
               memcpy(&rtc, &phy_pkt->payload[1], 4);
@@ -908,8 +908,8 @@ static void NBFi_SendHeartBeats(struct scheduler_desc *desc)
                 NBFi_Config_Send_Mode(nbfi.handshake_mode, NBFI_PARAM_TX_BRATES);
                 NBFi_Config_Send_Mode(nbfi.handshake_mode, NBFI_PARAM_RX_BRATES);
                 NBFi_Config_Send_Mode(nbfi.handshake_mode, NBFI_PARAM_APP_IDS);
-                NBFi_Config_Send_Mode(nbfi.handshake_mode, NBFI_UL_BASE_FREQ);
-                NBFi_Config_Send_Mode(nbfi.handshake_mode, NBFI_DL_BASE_FREQ);
+                NBFi_Config_Send_Mode(nbfi.handshake_mode, NBFI_PARAM_UL_BASE_FREQ);
+                NBFi_Config_Send_Mode(nbfi.handshake_mode, NBFI_PARAM_DL_BASE_FREQ);
         }
     }
 }

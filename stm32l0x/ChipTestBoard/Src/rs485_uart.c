@@ -78,7 +78,9 @@ void RS485_UART_init(void) {
   GPIO_InitStruct.Pin = RS485_RX_Pin;
   GPIO_InitStruct.Alternate = RS485_RX_AF;
   HAL_GPIO_Init(RS485_RX_GPIO_Port, &GPIO_InitStruct);
-	
+
+    for(uint16_t i = 0; i != 100; i++) huart.Instance->RDR; //wait and clear first received char
+  
   __HAL_UART_ENABLE_IT(&huart, UART_IT_RXNE);
   __HAL_UART_ENABLE_IT(&huart, UART_IT_TXE);
 	

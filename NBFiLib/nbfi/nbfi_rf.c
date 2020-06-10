@@ -5,7 +5,7 @@ _Bool rf_busy = 0;
 _Bool transmit = 0;
 
 
-nbfi_rf_state_s rf_state = STATE_OFF;
+nbfi_rf_state_s rf_state = STATE_UNDEFINED;
 
 nbfi_phy_channel_t nbfi_phy_channel;
 
@@ -163,7 +163,9 @@ void NBFi_RF_TX_Finished()
 
 _Bool NBFi_RF_is_TX_in_Progress()
 {
-  return wa1470mod_is_tx_in_progress();
+  if((rf_state == STATE_TX)||(rf_state == STATE_RX))
+      return wa1470mod_is_tx_in_progress();
+  else return 0;
 }  
 
 float NBFi_RF_get_noise()

@@ -38,21 +38,17 @@ void scheduler_HAL_LPTIM_Init(void)
     
     HAL_NVIC_SetPriority(WA_LPTIM_IRQn, 2, 0);
     HAL_NVIC_EnableIRQ(WA_LPTIM_IRQn);
-
 }
-
-//#include "pca9454.h"
 
 void WA_LPTIM_IRQHandler(void)
 {
   
   if (__HAL_LPTIM_GET_FLAG(&hlptim, LPTIM_FLAG_CMPM) != RESET) {
-		__HAL_LPTIM_CLEAR_FLAG(&hlptim, LPTIM_FLAG_CMPM);  
+                __HAL_LPTIM_CLEAR_FLAG(&hlptim, LPTIM_FLAG_CMPM);  
+                
                 scheduler_irq();
   }
 }
-
-
 
 void scheduler_HAL_LOOPTIM_Init(void)
 {
@@ -76,13 +72,12 @@ void scheduler_HAL_LOOPTIM_Init(void)
 
 void WA_LOOPTIM_IRQHandler(void)
 {
-    //static uint8_t timer = 0;
-	if(__HAL_TIM_GET_FLAG(&hlooptim, TIM_FLAG_UPDATE) != RESET){
+ 	if(__HAL_TIM_GET_FLAG(&hlooptim, TIM_FLAG_UPDATE) != RESET){
 		if(__HAL_TIM_GET_IT_SOURCE(&hlooptim, TIM_IT_UPDATE) != RESET){
 			__HAL_TIM_CLEAR_IT(&hlooptim, TIM_IT_UPDATE);
-                     // if(timer++%2)   PCA9454_set_out_pin(EXT_OUTPIN_NBACKLIGHT);
-                     // else   PCA9454_reset_out_pin(EXT_OUTPIN_NBACKLIGHT);
-                        scheduler_run_callbacks();
+                     
+                     scheduler_run_callbacks();
+                   
 		}
 	}
 }
@@ -135,20 +130,20 @@ uint16_t scheduler_HAL_cc_get(uint8_t chan)
 
 uint16_t scheduler_HAL_cnt_get(uint8_t chan)
 {
-  static uint16_t prev = 0; 
+  //static uint16_t prev = 0; 
   uint16_t timer = (uint16_t) hlptim.Instance->CNT;
     
-  if((timer < prev) && ((prev - timer) < 10000))
-  {
-    return prev;
-  }
-  prev = timer;
+  //if((timer < prev) && ((prev - timer) < 10000))
+  //{
+  //  return prev;
+  //}
+  //prev = timer;
   return timer; 
 }
 
 uint8_t scheduler_HAL_check_cc_irq(uint8_t chan)
 {
-  return __HAL_LPTIM_GET_FLAG(&hlptim, LPTIM_IT_CMPM);
+  return (__HAL_LPTIM_GET_IT_SOURCE(&hlptim, LPTIM_IT_CMPM) != RESET) && __HAL_LPTIM_GET_FLAG(&hlptim, LPTIM_IT_CMPM);
 }
 
 scheduler_HAL_st scheduler_hal_struct = {0,0,0,0,0,0,0,0,0,0};

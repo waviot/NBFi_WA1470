@@ -118,7 +118,7 @@ uint8_t NBFi_can_sleep()
 {
   nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
   uint8_t can = (!rf_busy) && (rf_state == STATE_OFF) && (NBFi_Packets_To_Send() == 0) && NBFi_RF_can_Sleep();
-  can = can && !(last_ack_send_ts &&  ((nbfi_scheduler->__scheduler_curr_time() - last_ack_send_ts) < WAITALITTLEBIT));
+  //can = can && !(last_ack_send_ts &&  ((nbfi_scheduler->__scheduler_curr_time() - last_ack_send_ts) < WAITALITTLEBIT));
   nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
   return can;
 }
@@ -263,7 +263,7 @@ _Bool   NBFi_is_Switched_to_Custom_Settings()
   return switched_to_custom_settings;
 }
 
-void    NBFi_CPU_Reset()
+void NBFi_CPU_Reset()
 {
   if(nbfi_hal->__nbfi_reset) nbfi_hal->__nbfi_reset();
 }

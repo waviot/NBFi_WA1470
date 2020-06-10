@@ -89,7 +89,19 @@ int main(void)
       #include "plot_spectrum.h"
       plot_spectrum();
       #endif
-            
+      
+      #ifdef NBFI_AT_SERVER
+      uint8_t *buf;
+      if(!RS485_UART_is_empty()) 
+      {
+         uint8_t c = RS485_UART_get(); 
+         if(nbfi_at_server_echo_mode) RS485_UART_send(c);
+         uint16_t reply_len = nbfi_at_server_parse_char(c, &buf);
+         for(uint16_t i = 0; i != reply_len; i++) RS485_UART_send(buf[i]); 
+      }
+      #endif
+
+      
       NBFI_Main_Level_Loop();
       
       if(NBFi_is_Switched_to_Custom_Settings())

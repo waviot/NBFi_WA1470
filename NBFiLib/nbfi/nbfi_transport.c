@@ -1,6 +1,6 @@
 #include "nbfi.h"
 
-nbfi_state_t nbfi_state = {0,0,0,0,0,0,0,0,0,0,0,0,0};
+nbfi_state_t nbfi_state = {0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 
 
@@ -18,7 +18,7 @@ struct scheduler_desc nbfi_heartbeat_desc;
 uint8_t not_acked = 0;
 
 int16_t noise = -150;
-uint8_t nbfi_last_snr = 0;
+//uint8_t nbfi_last_snr = 0;
 
 _Bool wait_Receive = 0;
 _Bool wait_Extra = 0;
@@ -336,9 +336,9 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
     nbfi_state.DL_last_time = NBFi_get_RTC();
 
     nbfi_state.aver_rx_snr = (((uint16_t)nbfi_state.aver_rx_snr)*3 + info->snr)>>2;
-    nbfi_last_snr = info->snr;  
+    nbfi_state.last_snr = info->snr;  
     noise = info->rssi - info->snr;  
-   
+    nbfi_state.last_rssi = info->rssi;
     nbfi_transport_packet_t* pkt = 0;
 
 
@@ -543,7 +543,7 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
    {
         NBFi_RX_Controller();
         NBFi_Clear_TX_Buffer();
-        nbfi_scheduler->__scheduler_add_task(desc, 0, RELATIVE, SECONDS(30));
+        //nbfi_scheduler->__scheduler_add_task(desc, 0, RELATIVE, SECONDS(30));
         return;
    }
    if((rf_busy == 0)&&(transmit == 0))
@@ -727,6 +727,8 @@ static nbfi_status_t NBFi_RX_Controller()
         if(rf_state != STATE_OFF)  return NBFi_RF_Deinit();
         break;
     }
+    //wa1470_scheduler->__scheduler_remove_task(&nbfi_processTask_desc);
+    //nbfi_scheduler->__scheduler_add_task(&nbfi_processTask_desc, NBFi_ProcessTasks, RELATIVE, SECONDS(30));
     return OK;
 }
 
@@ -916,12 +918,9 @@ static void NBFi_SendHeartBeats(struct scheduler_desc *desc)
 
 void NBFi_Force_process()
 {
-  /*#ifdef NBFI_LOG
-                sprintf(nbfi_log_string, "%05u: Force ", (uint16_t)(nbfi_scheduler->__scheduler_curr_time()&0xffff));
-                nbfi_hal->__nbfi_log_send_str(nbfi_log_string);
-   #endif*/
   nbfi_scheduler->__scheduler_add_task(&nbfi_processTask_desc, NBFi_ProcessTasks, RELATIVE, MILLISECONDS(1));
 }
+
 
 static uint32_t NBFI_PhyToDL_Delay(nbfi_phy_channel_t chan)
 {

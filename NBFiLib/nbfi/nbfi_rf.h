@@ -10,7 +10,8 @@ typedef enum
     STATE_OFF,
     STATE_RX,
     STATE_TX,
-    STATE_CHANGED
+    STATE_CHANGED,
+    STATE_UNDEFINED=255
 }nbfi_rf_state_s;
 
 

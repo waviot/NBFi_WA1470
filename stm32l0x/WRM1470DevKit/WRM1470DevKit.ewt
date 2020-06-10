@@ -2558,7 +2558,49 @@
     </group>
   </group>
   <group>
+    <name>GUI</name>
+    <file>
+      <name>$PROJ_DIR$\GUI\buttons.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\GUI\buttons.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\GUI\fonts.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\GUI\fonts.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\GUI\glcd.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\GUI\glcd.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\GUI\gui.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\GUI\gui.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\GUI\stlcd.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\GUI\stlcd.h</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\GUI\time.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\GUI\time.h</name>
+    </file>
+  </group>
+  <group>
     <name>inc</name>
+    <file>
+      <name>$PROJ_DIR$\Inc\adc.h</name>
+    </file>
     <file>
       <name>$PROJ_DIR$\Inc\defines.h</name>
     </file>
@@ -2567,9 +2609,6 @@
     </file>
     <file>
       <name>$PROJ_DIR$\Inc\main.h</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\Inc\pca9454.h</name>
     </file>
     <file>
       <name>$PROJ_DIR$\Inc\plot_spectrum.h</name>
@@ -2806,13 +2845,13 @@
   <group>
     <name>src</name>
     <file>
+      <name>$PROJ_DIR$\Src\adc.c</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\Src\log.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\Src\main.c</name>
-    </file>
-    <file>
-      <name>$PROJ_DIR$\Src\pca9454.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\Src\plot_spectrum.c</name>

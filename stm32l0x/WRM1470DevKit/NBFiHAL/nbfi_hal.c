@@ -1,73 +1,43 @@
 #include <stm32l0xx_hal.h>
-#include "stm32l0xx_ll_adc.h"
-#include "stm32l0xx_hal_adc.h"
+//#include "stm32l0xx_ll_adc.h"
+//#include "stm32l0xx_hal_adc.h"
 #include "nbfi_hal.h"
 #include "log.h"
 #include "scheduler_hal.h"
-#include "pca9454.h"
+#include "adc.h"
 
-#define WA_TXEN_GPIO_Port 	GPIOA
-#define WA_TXEN_Pin 		GPIO_PIN_12
-#define WA_TXNEN_GPIO_Port 	GPIOA
-#define WA_TXNEN_Pin 		GPIO_PIN_11
+#define WA_EXTANT_GPIO_Port 	GPIOA
+#define WA_EXTANT_Pin 		GPIO_PIN_11
 
 static void nbfi_HAL_GPIO_Init()
 {
-  GPIO_InitTypeDef GPIO_InitStruct;
-  
-  GPIO_InitStruct.Pin = WA_TXEN_Pin;    
+  GPIO_InitTypeDef GPIO_InitStruct;  
+  GPIO_InitStruct.Pin = WA_EXTANT_Pin;    
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(WA_TXEN_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_Init(WA_EXTANT_GPIO_Port, &GPIO_InitStruct);
 
-  GPIO_InitStruct.Pin = WA_TXNEN_Pin;    
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(WA_TXNEN_GPIO_Port, &GPIO_InitStruct);  
 }
 
 
-void nbfi_HAL_before_tx()
+void nbfi_HAL_before_tx(nbfi_settings_t* nbfi)
 {
-  HAL_GPIO_WritePin(WA_TXEN_GPIO_Port, WA_TXEN_Pin,  GPIO_PIN_SET);
-  HAL_GPIO_WritePin(WA_TXEN_GPIO_Port, WA_TXNEN_Pin,  GPIO_PIN_RESET);
   
-  if(nbfi.tx_antenna == PCB)
-  {
-    PCA9454_set_out_pin(EXT_OUTPIN_ANT_SEL_V1);
-    PCA9454_reset_out_pin(EXT_OUTPIN_ANT_SEL_V2);
-  }
-  else
-  {
-    PCA9454_set_out_pin(EXT_OUTPIN_ANT_SEL_V2);
-    PCA9454_reset_out_pin(EXT_OUTPIN_ANT_SEL_V1);
-  }
-  
+  if(nbfi->tx_antenna == SMA) HAL_GPIO_WritePin(WA_EXTANT_GPIO_Port, WA_EXTANT_Pin,  GPIO_PIN_SET);
+  else  HAL_GPIO_WritePin(WA_EXTANT_GPIO_Port, WA_EXTANT_Pin,  GPIO_PIN_RESET);
+
 }
 
-void nbfi_HAL_before_rx()
+void nbfi_HAL_before_rx(nbfi_settings_t* nbfi)
 {
-  HAL_GPIO_WritePin(WA_TXEN_GPIO_Port, WA_TXEN_Pin,  GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(WA_TXEN_GPIO_Port, WA_TXNEN_Pin,  GPIO_PIN_SET);
-  
-  if(nbfi.tx_antenna == PCB)
-  {
-    PCA9454_set_out_pin(EXT_OUTPIN_ANT_SEL_V1);
-    PCA9454_reset_out_pin(EXT_OUTPIN_ANT_SEL_V2);
-  }
-  else
-  {
-    PCA9454_set_out_pin(EXT_OUTPIN_ANT_SEL_V2);
-    PCA9454_reset_out_pin(EXT_OUTPIN_ANT_SEL_V1);
-  }
+  if(nbfi->rx_antenna == SMA) HAL_GPIO_WritePin(WA_EXTANT_GPIO_Port, WA_EXTANT_Pin,  GPIO_PIN_SET);
+  else  HAL_GPIO_WritePin(WA_EXTANT_GPIO_Port, WA_EXTANT_Pin,  GPIO_PIN_RESET);
 }
 
-void nbfi_HAL_before_off()
+void nbfi_HAL_before_off(nbfi_settings_t* nbfi)
 {
-  HAL_GPIO_WritePin(WA_TXEN_GPIO_Port, WA_TXEN_Pin,  GPIO_PIN_RESET);
-  HAL_GPIO_WritePin(WA_TXEN_GPIO_Port, WA_TXNEN_Pin,  GPIO_PIN_SET);
+  HAL_GPIO_WritePin(WA_EXTANT_GPIO_Port, WA_EXTANT_Pin,  GPIO_PIN_RESET);
 }
 
 void nbfi_HAL_lock_unlock_loop_irq(uint8_t lock)
@@ -103,7 +73,7 @@ void nbfi_HAL_write_flash_settings(nbfi_settings_t* settings)
     HAL_FLASHEx_DATAEEPROM_Lock(); 
 }
 
-
+/*
 static ADC_HandleTypeDef 		AdcHandle;
 static ADC_ChannelConfTypeDef 	        sConfig;
 
@@ -126,7 +96,7 @@ void nbfi_HAL_ADC_init(void){
 	AdcHandle.Init.DataAlign             = ADC_DATAALIGN_RIGHT;
 	AdcHandle.Init.ContinuousConvMode    = DISABLE;
 	AdcHandle.Init.DiscontinuousConvMode = ENABLE;
-	AdcHandle.Init.ExternalTrigConv		 = ADC_SOFTWARE_START;
+	AdcHandle.Init.ExternalTrigConv      = ADC_SOFTWARE_START;
 	AdcHandle.Init.ExternalTrigConvEdge  = ADC_EXTERNALTRIGCONVEDGE_NONE;
 	AdcHandle.Init.EOCSelection          = ADC_EOC_SINGLE_SEQ_CONV;
 	AdcHandle.Init.DMAContinuousRequests = DISABLE;
@@ -167,13 +137,16 @@ int nbfi_HAL_ADC_get(uint32_t * voltage, uint32_t * temp){
 	return 0;
 }
 
+*/
+
 
 uint32_t nbfi_HAL_measure_valtage_or_temperature(uint8_t val)
 {
-	uint32_t voltage, temp;
-	nbfi_HAL_ADC_get(&voltage, &temp);
+	uint32_t voltage, temp, ch8;
+	ADC_get(&voltage, &temp, &ch8);
 	return val ? voltage / 10 : temp;
 }
+
 
 uint32_t nbfi_HAL_update_rtc()
 {
@@ -205,6 +178,10 @@ __weak void nbfi_receive_complete(uint8_t * data, uint16_t length)
    */
 }
 
+void nbfi_HAL_reset()
+{
+  NVIC_SystemReset();
+}
 
 void nbfi_HAL_get_iterator(nbfi_crypto_iterator_t * iter)
 {
@@ -229,7 +206,7 @@ void nbfi_HAL_init(const nbfi_settings_t* settings, nbfi_dev_info_t* info)
   _default_settings = settings;
   
   nbfi_HAL_GPIO_Init();
-  nbfi_HAL_ADC_init();
+  //nbfi_HAL_ADC_init();
   
   nbfi_hal_struct.__nbfi_before_tx = &nbfi_HAL_before_tx;
   nbfi_hal_struct.__nbfi_before_rx = &nbfi_HAL_before_rx;
@@ -241,6 +218,7 @@ void nbfi_HAL_init(const nbfi_settings_t* settings, nbfi_dev_info_t* info)
   nbfi_hal_struct.__nbfi_read_flash_settings = &nbfi_HAL_read_flash_settings;
   nbfi_hal_struct.__nbfi_write_flash_settings = &nbfi_HAL_write_flash_settings;
   nbfi_hal_struct.__nbfi_measure_voltage_or_temperature = &nbfi_HAL_measure_valtage_or_temperature;
+  nbfi_hal_struct.__nbfi_reset = &nbfi_HAL_reset;
   nbfi_hal_struct.__nbfi_get_iterator = &nbfi_HAL_get_iterator;
   nbfi_hal_struct.__nbfi_set_iterator = &nbfi_HAL_set_iterator; 
   nbfi_hal_struct.__nbfi_log_send_str = &log_send_str;

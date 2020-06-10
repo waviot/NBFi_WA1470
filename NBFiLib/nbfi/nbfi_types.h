@@ -151,6 +151,7 @@ typedef struct
     int16_t success_total;
     int16_t fault_total;
     int16_t last_rssi;
+    uint8_t last_snr;
     uint8_t UL_rating;
     uint8_t DL_rating;
     uint32_t DL_last_time;

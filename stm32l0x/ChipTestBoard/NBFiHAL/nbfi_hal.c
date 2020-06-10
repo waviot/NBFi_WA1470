@@ -156,6 +156,10 @@ __weak void nbfi_receive_complete(uint8_t * data, uint16_t length)
    */
 }
 
+void nbfi_HAL_reset()
+{
+  NVIC_SystemReset();
+}
 
 void nbfi_HAL_get_iterator(nbfi_crypto_iterator_t * iter)
 {
@@ -191,6 +195,7 @@ void nbfi_HAL_init(const nbfi_settings_t* settings, nbfi_dev_info_t* info)
   nbfi_hal_struct.__nbfi_read_flash_settings = &nbfi_HAL_read_flash_settings;
   nbfi_hal_struct.__nbfi_write_flash_settings = &nbfi_HAL_write_flash_settings;
   nbfi_hal_struct.__nbfi_measure_voltage_or_temperature = &nbfi_HAL_measure_valtage_or_temperature;
+  nbfi_hal_struct.__nbfi_reset = &nbfi_HAL_reset;
   nbfi_hal_struct.__nbfi_get_iterator = &nbfi_HAL_get_iterator;
   nbfi_hal_struct.__nbfi_set_iterator = &nbfi_HAL_set_iterator; 
   nbfi_hal_struct.__nbfi_log_send_str = &log_send_str;

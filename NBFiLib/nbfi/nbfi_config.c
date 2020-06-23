@@ -136,12 +136,14 @@ void NBFI_Config_Check_State()
 {
     if(nbfi.tx_phy_channel != UL_PSK_FASTDL)
     {
-        nbfi_state.UL_rating = (nbfi_state.aver_tx_snr + TxSNRDegradationTable[current_tx_rate]);
-        if(nbfi_state.UL_rating > 40) nbfi_state.UL_rating = 40;
+        if(nbfi_state.aver_tx_snr) nbfi_state.UL_rating = (nbfi_state.aver_tx_snr + TxSNRDegradationTable[current_tx_rate]);
+        else nbfi_state.UL_rating = 0;
+	if(nbfi_state.UL_rating > 40) nbfi_state.UL_rating = 40;
         nbfi_state.UL_rating >>= 2;
 
-        nbfi_state.DL_rating = (nbfi_state.aver_rx_snr + RxSNRDegradationTable[current_rx_rate]);
-        if(nbfi_state.DL_rating > 40) nbfi_state.DL_rating = 40;
+        if(nbfi_state.aver_rx_snr) nbfi_state.DL_rating = (nbfi_state.aver_rx_snr + RxSNRDegradationTable[current_rx_rate]);
+        else nbfi_state.DL_rating = 0;
+	if(nbfi_state.DL_rating > 40) nbfi_state.DL_rating = 40;
         nbfi_state.DL_rating >>= 2;
     }
 

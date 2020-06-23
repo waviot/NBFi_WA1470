@@ -74,4 +74,6 @@ _Bool                   NBFi_is_Switched_to_Custom_Settings();
 
 void                    NBFi_CPU_Reset();
 
+float                   NBFi_get_rssi();
+
 #endif // NBFI_H

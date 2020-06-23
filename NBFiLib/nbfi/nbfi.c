@@ -267,3 +267,12 @@ void NBFi_CPU_Reset()
 {
   if(nbfi_hal->__nbfi_reset) nbfi_hal->__nbfi_reset();
 }
+
+float NBFi_get_rssi()
+{
+  float rssi;
+  nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+  rssi = NBFi_RF_get_rssi();
+  nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+  return rssi;
+}

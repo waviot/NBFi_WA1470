@@ -5,17 +5,17 @@
 #include "log.h"
 #include "scheduler_hal.h"
 
-void nbfi_HAL_before_tx()
+void nbfi_HAL_before_tx(nbfi_settings_t* nbfi)
 {
 
 }
 
-void nbfi_HAL_before_rx()
+void nbfi_HAL_before_rx(nbfi_settings_t* nbfi)
 {
 
 }
 
-void nbfi_HAL_before_off()
+void nbfi_HAL_before_off(nbfi_settings_t* nbfi)
 {
 
   

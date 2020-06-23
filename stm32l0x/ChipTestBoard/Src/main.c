@@ -78,9 +78,9 @@ int main(void)
   //uint8_t payload[] = {0xaa};
   //last_send_status = NBFi_Send5(payload, sizeof(payload));
   
-  radio_load_id_and_key_of_aux_device(&aux_modem_id_and_key);
+  //radio_load_id_and_key_of_aux_device(&aux_modem_id_and_key);
   
-  if(aux_modem_id_and_key.id != 0)  radio_switch_to_from_short_range(1);
+  //if(aux_modem_id_and_key.id != 0)  radio_switch_to_from_short_range(1);
   
   while (1) 
   {     
@@ -104,14 +104,14 @@ int main(void)
       
       NBFI_Main_Level_Loop();
       
-      if(NBFi_is_Switched_to_Custom_Settings())
+     /* if(NBFi_is_Switched_to_Custom_Settings())
       {
         if( NBFi_is_Idle() )
         {
           uint8_t payload[] = {0xaa};
           last_send_status = NBFi_Send5(payload, sizeof(payload),0);
         }
-      }  
+      }  */
              
       //rssi = wa1470dem_get_rssi();
             

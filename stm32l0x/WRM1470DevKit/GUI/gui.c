@@ -41,14 +41,13 @@ static uint32_t gui_activity_timer = 0;
 
 static bool gui_inited = false;
 
+static volatile uint32_t gui_systimer = 0;
 
 void GUI_systick()
 {
-  static uint32_t timer = 0;
   
-  if(++timer >= BUTTONS_RESP_TIME)
+  if((++gui_systimer%BUTTONS_RESP_TIME) == 0)
   {
-    timer = 0;
     gui_update_state = true;
   }
   
@@ -406,11 +405,21 @@ void NBFiRxHandler()
 
 void RSSiHandler()
 {
-  //LCD_DrawString(10,5,"RX enabled", COLOR_FILL, ALIGN_LEFT);
-    //current_rssi = (int8_t)AX5043_RSSI - (int16_t)64;
-    //current_rssi = nbfi_state.last_rssi;
-  sprintf(textbuf, "RSSI = %3.1f dBm", NBFi_RF_get_noise());
-  LCD_DrawString(10,23,textbuf, COLOR_FILL, ALIGN_LEFT);
+
+  static uint32_t last_update_time = 0;
+  static float rssi;
+  if((gui_systimer - last_update_time) > 250) 
+  {
+    rssi = NBFi_get_rssi();
+    last_update_time = gui_systimer;
+  }
+  if(rssi) sprintf(textbuf, "RSSI  = %3.1f dBm", rssi);
+  else sprintf(textbuf, "RSSI = ------ dBm");
+  LCD_DrawString(10,13,textbuf, COLOR_FILL, ALIGN_LEFT);
+  
+  sprintf(textbuf, "NOISE = %3.1f dBm", NBFi_RF_get_noise());
+  
+  LCD_DrawString(10,25,textbuf, COLOR_FILL, ALIGN_LEFT);
   
   // Caption
   LCD_DrawString(0,(uint16_t)-6,"../Tests/RSSi", COLOR_FILL, ALIGN_LEFT);

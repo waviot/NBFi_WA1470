@@ -170,9 +170,18 @@ _Bool NBFi_RF_is_TX_in_Progress()
 
 float NBFi_RF_get_noise()
 {
+  
   if(wa1470dem_get_noise() < -150) return -150;
   else return wa1470dem_get_noise();
 }
+
+float NBFi_RF_get_rssi()
+{
+  if(rf_state == STATE_RX) return wa1470dem_get_rssi();
+  else return 0; //unavailable
+    
+}
+
 
 _Bool NBFi_RF_can_Sleep()
 {

@@ -15,8 +15,6 @@ nbfi_crypto_iterator_t nbfi_iter;
 
 nbfi_dev_info_t dev_info =
 {
-  //  0,
-  //  0,
     NBFI_DEFAULT_RF_MIN_POWER,
     NBFI_DEFAULT_RF_MAX_POWER,
     NBFI_DEFAULT_MANUFACTURER_ID,
@@ -26,32 +24,6 @@ nbfi_dev_info_t dev_info =
     NBFI_DEFAULT_SEND_INFO_INTERVAL
 };
 
-/*
-const nbfi_settings_t nbfi_fastdl =
-{
-    
-    CRX,
-    UL_PSK_FASTDL,  
-    DL_PSK_FASTDL,  
-    HANDSHAKE_NONE,
-    MACK_1, 
-    1,
-    128,
-    {0}, //modem_ID[4]    
-    868800000,      
-    865000000,      
-    PCB,    
-    PCB,    
-    NBFI_DEFAULT_RF_MAX_POWER,     
-    60,     
-    0,      
-    NBFI_FLG_FIXED_BAUD_RATE | NBFI_FLG_NO_RESET_TO_DEFAULTS | NBFI_FLG_NO_SENDINFO,
-    0,
-    0,
-    0,
-    //0
-};
-*/
 
 NBFi_station_info_s nbfi_station_info = {0,NBFI_UL_FREQ_PLAN_NO_CHANGE + NBFI_DL_FREQ_PLAN_NO_CHANGE};
 

@@ -42,5 +42,6 @@ uint32_t        NBFi_DL_ID();
 
 
 float NBFi_RF_get_noise();
+float NBFi_RF_get_rssi();
 
 #endif // NBFI_RF_H

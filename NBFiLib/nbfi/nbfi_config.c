@@ -603,7 +603,7 @@ void NBFi_Config_Set_TX_Chan(nbfi_phy_channel_t ch)
     if(current_tx_rate != i)
     {
         current_tx_rate = i;
-        nbfi_state.aver_tx_snr = 15;
+        nbfi_state.aver_tx_snr = 0;//15;
     }
 }
 
@@ -617,7 +617,7 @@ void NBFi_Config_Set_RX_Chan(nbfi_phy_channel_t ch)
     if(current_rx_rate != i)
     {
         current_rx_rate = i;
-        nbfi_state.aver_rx_snr = 15;
+        nbfi_state.aver_rx_snr = 0;//15;
     }
 }
 

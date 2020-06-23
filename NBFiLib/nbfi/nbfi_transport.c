@@ -613,9 +613,13 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
                       }
                       break;
                     case SYSTEM_PACKET_SYNC:
-                      pkt->phy_data.payload[6] = (nbfi_iter.dl >> 16); 
-                      pkt->phy_data.payload[7] = (nbfi_iter.dl >> 8);
-                      break;
+		   	pkt->phy_data.payload[2] = nbfi.tx_phy_channel;
+    			pkt->phy_data.payload[3] = nbfi.rx_phy_channel;    
+    			pkt->phy_data.payload[4] = (nbfi.nbfi_freq_plan.fp>>8);
+    			pkt->phy_data.payload[5] = (nbfi.nbfi_freq_plan.fp&0xff);  
+                      	pkt->phy_data.payload[6] = (nbfi_iter.dl >> 16); 
+                      	pkt->phy_data.payload[7] = (nbfi_iter.dl >> 8);
+                    	break;
                   }
                 }
                 

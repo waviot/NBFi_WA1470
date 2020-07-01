@@ -80,7 +80,19 @@ void  NBFI_Main_Level_Loop()
      if(nbfi_settings_need_to_save_to_flash && (nbfi_hal->__nbfi_write_flash_settings != 0)) 
      {
         nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+        nbfi_phy_channel_t tmp_tx_phy = nbfi.tx_phy_channel;
+        nbfi_phy_channel_t tmp_rx_phy = nbfi.rx_phy_channel;
+        
+        if(!nbfi.additional_flags&NBFI_FLG_FIXED_BAUD_RATE) //if auto bitrates
+        {
+          nbfi_settings_t default_nbfi_settings;
+          nbfi_hal->__nbfi_read_default_settings(&default_nbfi_settings);
+          nbfi.rx_phy_channel = default_nbfi_settings.rx_phy_channel;
+          nbfi.tx_phy_channel = default_nbfi_settings.tx_phy_channel;
+        }
         nbfi_hal->__nbfi_write_flash_settings(&nbfi);
+        nbfi.tx_phy_channel = tmp_tx_phy;
+        nbfi.rx_phy_channel = tmp_rx_phy;      
         nbfi_settings_need_to_save_to_flash = 0;
         nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
      }
@@ -194,10 +206,33 @@ void NBFi_get_Settings(nbfi_settings_t* settings)
     nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
 }
 
-void NBFi_set_Settings(nbfi_settings_t* settings)
+void NBFi_set_Settings(nbfi_settings_t* settings, _Bool persistent)
 {
+    _Bool need_to_send_sync = 0;
+    _Bool need_to_send_ul_freq_base = 0;
+    _Bool need_to_send_dl_freq_base = 0;
+    
     nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+    if(nbfi.rx_phy_channel != settings->rx_phy_channel) need_to_send_sync = 1;
+    if(nbfi.ul_freq_base != settings->ul_freq_base) need_to_send_ul_freq_base = 1;
+    if(nbfi.dl_freq_base != settings->dl_freq_base) need_to_send_dl_freq_base = 1;
+    
+    if(nbfi.mode != settings->mode) 
+    {
+      NBFi_Clear_TX_Buffer();
+      need_to_send_sync = 1;
+    }
     memcpy(&nbfi, settings , sizeof(nbfi_settings_t));
+    if(persistent) 
+    {
+      nbfi_settings_need_to_save_to_flash = 1;
+    }
+    rf_state = STATE_CHANGED;
+    if(need_to_send_sync) {NBFi_Config_Send_Sync(0); NBFi_Force_process();}
+    if(need_to_send_ul_freq_base)  NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_UL_BASE_FREQ);
+    if(need_to_send_dl_freq_base)  NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_DL_BASE_FREQ);
+    
+   
     nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
 }
 

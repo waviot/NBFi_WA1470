@@ -36,6 +36,8 @@
 #include "stm32l0xx_it.h"
 #include "rs485_uart.h"    
 #include "wa1470.h"
+#include "rtc.h"
+
 /* External variables --------------------------------------------------------*/
 extern LPTIM_HandleTypeDef hlptim1;
 
@@ -100,6 +102,12 @@ void SysTick_Handler(void)
 void USART2_IRQHandler(void)
 {
   RS485_UART_IRQ();
+}
+
+
+void RTC_IRQHandler(void)
+{
+  RTC_GPIO_RTC_IRQ();
 }
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -22,18 +22,10 @@
 #define ACTIVITY_TIME       1000*15
 
 
-//extern nbfi_state_t nbfi_state;
-
-//uint16_t NBFi_Phy_To_Bitrate(nbfi_phy_channel_t ch);
-//uint32_t nbfi_HAL_measure_valtage_or_temperature(uint8_t val);             
-//float NBFi_RF_get_noise();
-
-//int16_t noise;
 
 uint8_t last_rx_pkt[240];
 uint8_t last_rx_pkt_len = 0;
 
-//struct wtimer_desc gui_handler;
 
 static bool gui_update_state = false;
 static uint32_t backlight_timer = 0;
@@ -73,8 +65,6 @@ void (*current_handler)(void);
 
 char textbuf[30]; // for formatted strings
 
-//extern int sprintf(char *buf, char *fmt, ...);
-
 void GUI_DrawButtonR(const char *label, uint8_t state);
 void GUI_DrawButtonL(const char *label, uint8_t state);
 
@@ -83,7 +73,6 @@ void TestsHandler();
 void NBFiTxHandler();
 void NBFiRxHandler();
 void RSSiHandler();
-//void CarrierHandler();
 void InfoHandler();
 void NBFiQuality();
 void DevInfoHandler();
@@ -135,16 +124,6 @@ void MainHandler()
     GUI_DrawButtonL(label_enter, 0);
   }
   
-//  if(GetButton2())
-//  {
-//    GUI_DrawButtonR(label_back, 1);
-//    
-//  }
-//  else
-//  {
-//    GUI_DrawButtonR(label_back, 0);
-//  }
-  
   if(GetButton3())
   {
     state--;
@@ -161,11 +140,8 @@ void MainHandler()
 
 const gui_entry_t packet_tests_table[]=
 {
-  //{"NBFi-D",          &TestsHandler},
   {"NBFi TX",            &NBFiTxHandler},
   {"NBFi RX",            &NBFiRxHandler},
-  //{"Carrier TX",       &CarrierHandler},
-  //{"Hopping",         &NBFiHoppingHandler},
   {"RSSi",            &RSSiHandler},
 };
 
@@ -235,7 +211,6 @@ const char *gui_packet_state[]=
   "TIMEOUT"
 };
 
-//extern received_packet_t __xdata* rx_pkt;
 extern uint8_t rx_pkt_len;
 extern int16_t rssi;
 extern int16_t offset;
@@ -251,8 +226,6 @@ const gui_entry_t nbfi_tx_table[]=
 void NBFiTxHandler()
 {
   static uint8_t state_n = 0;
-  //static nbfi_packet_t __xdata* pkt;
-  //static uint8_t __xdata dl_result = 0;
   
   static uint8_t test_pkt[8] = {0,0xDE,0xAD,0xBE,0xEF,0x12,0x34,0x56};
   static uint8_t test_pkt_long[] = "Do you like this weather? I saw a politician with his hands in his own pockets.\n";
@@ -323,6 +296,10 @@ void NBFiRxHandler()
   LCD_DrawString(0,(uint16_t)-6,"../Tests/NBFi RX", COLOR_FILL, ALIGN_LEFT);
 
   LCD_DrawString(2,5,"Last received HEX:", COLOR_FILL, ALIGN_LEFT);
+ 
+  nbfi_state_t _nbfi_state;
+  NBFi_get_state(&_nbfi_state);
+  
   
   if(last_rx_pkt_len)
   {
@@ -346,7 +323,7 @@ void NBFiRxHandler()
     LCD_DrawString(2, 35, textbuf, COLOR_FILL, ALIGN_LEFT);
   }
    
-  sprintf(textbuf, "RSSI:%ddBm SNR:%d", nbfi_state.last_rssi,nbfi_state.last_snr);
+  sprintf(textbuf, "RSSI:%ddBm SNR:%d", _nbfi_state.last_rssi, _nbfi_state.last_snr);
   
   LCD_DrawString(2,45, textbuf, COLOR_FILL, ALIGN_LEFT);
   
@@ -357,51 +334,6 @@ void NBFiRxHandler()
   
 }
 
-/*void NBFiHoppingHandler()
-{
-    static uint8_t __xdata state = 0;
-
-    // Caption
-    LCD_DrawString(0,-6,"../Tests/Hopping", COLOR_FILL, ALIGN_LEFT);
-
-    switch(state)
-    {
-    case 0:
-        LCD_DrawString(10,5,"Ready", COLOR_FILL, ALIGN_LEFT);
-        break;
-    case 1:
-        LCD_DrawString(10,5,"Sending", COLOR_FILL, ALIGN_LEFT);
-
-        NBFi_TX_Hopping();
-        break;
-    }
-
-    // Button processing
-    if(GetButton1())
-    {
-        GUI_DrawButtonL(label_start, 1);
-        state = 1;
-    }
-    else
-    {
-        GUI_DrawButtonL(label_start, 0);
-    }
-
-    if(GetButton2())
-    {
-        GUI_DrawButtonR(label_cancel, 1);
-        state = 0;
-    }
-    else
-    {
-        GUI_DrawButtonR(label_cancel, 0);
-    }
-
-    if(GetButton2())
-    {
-        current_handler = &TestsHandler;
-    }
-}*/
 
 void RSSiHandler()
 {
@@ -413,14 +345,23 @@ void RSSiHandler()
     rssi = NBFi_get_rssi();
     last_update_time = gui_systimer;
   }
+  
+  nbfi_settings_t _nbfi;
+  NBFi_get_Settings(&_nbfi);
+  
+  nbfi_state_t _nbfi_state;
+  NBFi_get_state(&_nbfi_state);
+    
   if(rssi) sprintf(textbuf, "RSSI  = %3.1f dBm", rssi);
   else sprintf(textbuf, "RSSI = ------ dBm");
-  LCD_DrawString(10,13,textbuf, COLOR_FILL, ALIGN_LEFT);
-  
+  LCD_DrawString(10,5,textbuf, COLOR_FILL, ALIGN_LEFT);
   sprintf(textbuf, "NOISE = %3.1f dBm", NBFi_RF_get_noise());
-  
+  LCD_DrawString(10,15,textbuf, COLOR_FILL, ALIGN_LEFT);
+  sprintf(textbuf, "FREQ = %u Hz", _nbfi_state.last_rx_freq);
   LCD_DrawString(10,25,textbuf, COLOR_FILL, ALIGN_LEFT);
-  
+  sprintf(textbuf, "BITRATE = %u",  NBFi_Phy_To_Bitrate(_nbfi.tx_phy_channel));
+  LCD_DrawString(10,35,textbuf, COLOR_FILL, ALIGN_LEFT);
+   
   // Caption
   LCD_DrawString(0,(uint16_t)-6,"../Tests/RSSi", COLOR_FILL, ALIGN_LEFT);
   
@@ -436,64 +377,7 @@ void RSSiHandler()
   }
 }
 
-/*
-void CarrierHandler()
-{
-    static uint8_t __xdata state_c = 0;
-    static uint32_t __xdata freq = 868800000;
-    // Caption
-    LCD_DrawString(0,-6,"../Tests/Carrier TX", COLOR_FILL, ALIGN_LEFT);
 
-    switch(state_c)
-    {
-    case 0:
-        freq = 868800000;
-        RF_Init(UL_DBPSK_50_PROT_C, nbfi.tx_antenna, nbfi.tx_pwr, freq);
-        axradio_set_mode(AXRADIO_MODE_CW_TRANSMIT);
-        state_c = 1;
-        break;
-    case 1:
-        break;
-    }
-
-    sprintf(textbuf, "Freq: %lu Hz", freq);
-    LCD_DrawString(10,5,textbuf, COLOR_FILL, ALIGN_LEFT);
-
-    // Button processing
-    if(GetButton1())
-    {
-        GUI_DrawButtonL(label_dec, 1);
-        freq -= 1;
-
-        RF_SetFreq(freq);
-        axradio_set_channel(0);
-    }
-    else
-    {
-        GUI_DrawButtonL(label_dec, 0);
-    }
-
-    if(GetButton2())
-    {
-        GUI_DrawButtonR(label_inc, 1);
-        freq += 1;
-
-        RF_SetFreq(freq);
-        axradio_set_channel(0);
-    }
-    else
-    {
-        GUI_DrawButtonR(label_inc, 0);
-    }
-
-    if(GetButton3())
-    {
-        state_c = 0;
-        RF_Deinit();
-        current_handler = &MainHandler;
-    }
-}
-*/
 const char fmt_uint8_t[] = "%u";
 const char fmt_int8_t[] = "%d";
 const char fmt_uint32_t[] = "%d";
@@ -501,50 +385,82 @@ const char fmt_str[] = "%s";
 
 void SettingsHandler()
 {
-  static uint8_t state_s = 0;
+  static int8_t state_s = 0;
   static uint8_t edit = 0;
+   
+  #define TOTAL_NUMBER_OF_SETTINGS      6 
   
+  static uint8_t scroll = 0;
+  
+ 
   // Caption
   LCD_DrawString(0,(uint16_t)-6,"../Settings", COLOR_FILL, ALIGN_LEFT);
   
+  static nbfi_settings_t _nbfi = {0};
+  
+  if(!_nbfi.modem_id) NBFi_get_Settings(&_nbfi);
+  
   // Entry list
-  for(int i=0; i<GUI_NUM_LINES; i++)                                            //for(int i=0; i<4 && i<GUI_NUM_LINES; i++)
+  for(int i = scroll; i < scroll + GUI_NUM_LINES; i++)                                            //for(int i=0; i<4 && i<GUI_NUM_LINES; i++)
   {
     switch(i)
     {
     case 0:
-      /*LCD_DrawString(10,(i*9)+5, "TX Power", COLOR_FILL, ALIGN_LEFT);
-      sprintf(textbuf, "%d", nbfi.tx_pwr);
-      LCD_DrawString(127,(i*9)+5, textbuf, COLOR_FILL, ALIGN_RIGHT);*/
-      LCD_DrawString(10,(i*9)+5, " TX BitRate", COLOR_FILL, ALIGN_LEFT);
-      sprintf(textbuf, "%d", NBFi_Phy_To_Bitrate(nbfi.tx_phy_channel));
-      LCD_DrawString(127,(i*9)+5, textbuf, COLOR_FILL, ALIGN_RIGHT);
+      LCD_DrawString(10,((i-scroll)*9)+5, " BitRates", COLOR_FILL, ALIGN_LEFT);
+      if(_nbfi.additional_flags&NBFI_FLG_FIXED_BAUD_RATE) sprintf(textbuf, "%d", NBFi_Phy_To_Bitrate(_nbfi.tx_phy_channel));
+      else sprintf(textbuf, "AUTO");
+      LCD_DrawString(127,((i-scroll)*9)+5, textbuf, COLOR_FILL, ALIGN_RIGHT);
       break;
     case 1:
-      LCD_DrawString(10,(i*9)+5, " TX Antenna", COLOR_FILL, ALIGN_LEFT);
-      sprintf(textbuf, "%s", nbfi.tx_antenna?"SMA":"PCB");
-      LCD_DrawString(127,(i*9)+5, textbuf, COLOR_FILL, ALIGN_RIGHT);
+      LCD_DrawString(10,((i-scroll)*9)+5, " TX Antenna", COLOR_FILL, ALIGN_LEFT);
+      sprintf(textbuf, "%s", _nbfi.tx_antenna?"SMA":"PCB");
+      LCD_DrawString(127,((i-scroll)*9)+5, textbuf, COLOR_FILL, ALIGN_RIGHT);
       break;
     case 2:
-      LCD_DrawString(10,(i*9)+5, " RX Antenna", COLOR_FILL, ALIGN_LEFT);
-      sprintf(textbuf, "%s", nbfi.rx_antenna?"SMA":"PCB");
-      LCD_DrawString(127,(i*9)+5, textbuf, COLOR_FILL, ALIGN_RIGHT);
+      LCD_DrawString(10,((i-scroll)*9)+5, " RX Antenna", COLOR_FILL, ALIGN_LEFT);
+      sprintf(textbuf, "%s", _nbfi.rx_antenna?"SMA":"PCB");
+      LCD_DrawString(127,((i-scroll)*9)+5, textbuf, COLOR_FILL, ALIGN_RIGHT);
       break;
     case 3:
-      LCD_DrawString(10,(i*9)+5, " NBFi Mode", COLOR_FILL, ALIGN_LEFT);
-      if(nbfi.mode == DRX)
-        sprintf(textbuf, "%s", "DRX");
-      else
-        sprintf(textbuf, "%s", nbfi.mode?"CRX":"NRX");
-      LCD_DrawString(127,(i*9)+5, textbuf, COLOR_FILL, ALIGN_RIGHT);
+      LCD_DrawString(10,((i-scroll)*9)+5, " NBFi Mode", COLOR_FILL, ALIGN_LEFT);
+      switch(_nbfi.mode)
+      {
+        case NRX:
+          sprintf(textbuf, "%s", "NRX");
+          break;
+        case DRX:
+          sprintf(textbuf, "%s", "DRX");
+          break;
+        case CRX:
+          sprintf(textbuf, "%s", "CRX");
+          break;
+      }
+      LCD_DrawString(127,((i-scroll)*9)+5, textbuf, COLOR_FILL, ALIGN_RIGHT);
       break;
+    case 4:
+      LCD_DrawString(10,((i-scroll)*9)+5, " HB Interval, min", COLOR_FILL, ALIGN_LEFT);
+      if(_nbfi.heartbeat_num == 255)  sprintf(textbuf, "%u", (_nbfi.mode == CRX)?_nbfi.heartbeat_interval/60:_nbfi.heartbeat_interval);
+      else sprintf(textbuf, "OFF");
+      LCD_DrawString(127,((i-scroll)*9)+5, textbuf, COLOR_FILL, ALIGN_RIGHT);
+      break;
+    case 5:
+      LCD_DrawString(10,((i-scroll)*9)+5, " Base Freqs", COLOR_FILL, ALIGN_LEFT);
+      if(_nbfi.ul_freq_base == 868800000) sprintf(textbuf, "RU");
+      else if(_nbfi.ul_freq_base == 868100000) sprintf(textbuf, "EU");
+      else if(_nbfi.ul_freq_base == 866900000) sprintf(textbuf, "IN");
+      else if(_nbfi.ul_freq_base == 864000000) sprintf(textbuf, "KZ");
+      else if(_nbfi.ul_freq_base == 458550000) sprintf(textbuf, "UZ");
+      else if(_nbfi.ul_freq_base == 916500000) sprintf(textbuf, "ARG");
+      else sprintf(textbuf, "UNKN");
+      LCD_DrawString(127,((i-scroll)*9)+5, textbuf, COLOR_FILL, ALIGN_RIGHT);
+      break;  
     }
   }
   
   // Button processing
   if(edit)
   {
-    LCD_FillRect(0,(state_s*9)+10,128,10, COLOR_INVERT);
+    LCD_FillRect(0,((state_s-scroll)*9)+10,128,10, COLOR_INVERT);
 
     if(GetButton1())
     {
@@ -552,31 +468,94 @@ void SettingsHandler()
       switch(state_s)
       {
       case 0:
-        switch(nbfi.tx_phy_channel)
+        if(_nbfi.additional_flags&NBFI_FLG_FIXED_BAUD_RATE)
         {
-          case UL_DBPSK_50_PROT_D:
-            nbfi.tx_phy_channel = UL_DBPSK_400_PROT_D;
-            break;
-          case UL_DBPSK_400_PROT_D:
-            nbfi.tx_phy_channel = UL_DBPSK_3200_PROT_D;
-            break;
-          case UL_DBPSK_3200_PROT_D:
-            nbfi.tx_phy_channel = UL_DBPSK_50_PROT_D;
-            break;
+          switch(_nbfi.tx_phy_channel)
+          {
+            case UL_DBPSK_50_PROT_E:
+              _nbfi.tx_phy_channel = UL_DBPSK_400_PROT_E;
+              _nbfi.rx_phy_channel = DL_DBPSK_400_PROT_D;             
+              break;
+            case UL_DBPSK_400_PROT_E:
+              _nbfi.tx_phy_channel = UL_DBPSK_3200_PROT_E;
+              _nbfi.rx_phy_channel = DL_DBPSK_3200_PROT_D;
+              break;
+            case UL_DBPSK_3200_PROT_E:
+              _nbfi.tx_phy_channel = UL_DBPSK_25600_PROT_E;
+              _nbfi.rx_phy_channel = DL_DBPSK_25600_PROT_D;
+              break;
+            case UL_DBPSK_25600_PROT_E:
+              _nbfi.tx_phy_channel = UL_DBPSK_50_PROT_E;
+              _nbfi.rx_phy_channel = DL_DBPSK_50_PROT_D;
+              _nbfi.additional_flags &= ~NBFI_FLG_FIXED_BAUD_RATE;
+              break;  
+          }
         }
-        //if(nbfi.tx_pwr < 26) nbfi.tx_pwr++;
+        else
+        {
+              _nbfi.tx_phy_channel = UL_DBPSK_50_PROT_E;
+              _nbfi.rx_phy_channel = DL_DBPSK_50_PROT_D;
+              _nbfi.additional_flags |= NBFI_FLG_FIXED_BAUD_RATE;
+              
+        }
+        
         break;
       case 1:
-        nbfi.tx_antenna ^= 1;
+        _nbfi.tx_antenna ^= 1;
         break;
       case 2:
-        nbfi.rx_antenna ^= 1;
+        _nbfi.rx_antenna ^= 1;
         break;
       case 3:
-        nbfi.mode++;
-        nbfi.mode %= 3;
+        _nbfi.mode++;
+        _nbfi.mode %= 3;
+        if(_nbfi.mode == CRX && _nbfi.heartbeat_num) _nbfi.heartbeat_interval *= 60;
+        else if(_nbfi.mode == NRX && _nbfi.heartbeat_num) _nbfi.heartbeat_interval /= 60;
         break;
-      }      
+      case 4:
+        if(_nbfi.mode == CRX) 
+        {
+          if(_nbfi.heartbeat_interval >= 60*10) {_nbfi.heartbeat_interval = 0;_nbfi.heartbeat_num = 0;}
+          else {_nbfi.heartbeat_interval += 60; _nbfi.heartbeat_num = 255;}
+        }
+        else 
+        {
+          if(_nbfi.heartbeat_interval >= 10) {_nbfi.heartbeat_interval = 0;_nbfi.heartbeat_num = 0;}
+          else {_nbfi.heartbeat_interval++; _nbfi.heartbeat_num = 255;}
+        }
+        
+        break;
+      case 5:
+        switch(_nbfi.ul_freq_base)
+          {
+            case 868800000:
+              _nbfi.ul_freq_base = 868100000;
+              _nbfi.dl_freq_base = 869500000;            
+              break;
+            case 868100000:
+              _nbfi.ul_freq_base = 866900000;
+              _nbfi.dl_freq_base = 865100000;            
+              break;
+            case 866900000:
+              _nbfi.ul_freq_base = 864000000;
+              _nbfi.dl_freq_base = 863500000;            
+              break;
+            case 864000000:
+              _nbfi.ul_freq_base = 458550000;
+              _nbfi.dl_freq_base = 453800000;            
+              break; 
+            case 458550000:
+              _nbfi.ul_freq_base = 916500000;
+              _nbfi.dl_freq_base = 903000000;            
+              break; 
+            case 916500000:
+              _nbfi.ul_freq_base = 868800000;
+              _nbfi.dl_freq_base = 869150000;            
+              break; 
+          }
+        break;
+      }    
+     
     }
     else
     {
@@ -586,17 +565,21 @@ void SettingsHandler()
     if(GetButton2())
     {
       GUI_DrawButtonR(label_back, 1);
-      edit = 0;
+      edit = 0;     
+      NBFi_set_Settings(&_nbfi, 1);
     }
     else
     {
       GUI_DrawButtonR(label_back, 0);
     }
   }
-  else          //if (edit == 0);
+  else          
   {
     // Cursor
-    LCD_DrawString(5,(state_s*9)+5,">", COLOR_FILL, ALIGN_LEFT);
+    LCD_DrawString(5,((state_s-scroll)*9)+5,">", COLOR_FILL, ALIGN_LEFT);
+    
+    NBFi_get_Settings(&_nbfi);
+    
     
     if(GetButton1())
     {
@@ -612,6 +595,7 @@ void SettingsHandler()
     {
       GUI_DrawButtonR(label_back, 1);
       state_s = 0;
+      scroll = 0;
       current_handler = &MainHandler;
     }
     else
@@ -621,15 +605,24 @@ void SettingsHandler()
     
     if(GetButton3())
     {
-      state_s--;
-      if(state_s > 4)
-        state_s = 4-1;
+      if(--state_s < 0 ) state_s = 0;
+      
+      if(state_s - scroll < 0) scroll--;
+      
     }
     
     if(GetButton4())
     {
-      state_s++;
-      state_s = state_s % 4;
+      
+      if(++state_s >= TOTAL_NUMBER_OF_SETTINGS)
+      {
+        
+        state_s = TOTAL_NUMBER_OF_SETTINGS - 1;
+        
+      }
+      
+      if(state_s - GUI_NUM_LINES + 1 > 0 ) scroll = state_s - GUI_NUM_LINES + 1;
+      
     }
   }
 }
@@ -695,26 +688,34 @@ void InfoHandler()
 
 void NBFiQuality()
 {
+  
+  nbfi_settings_t _nbfi;
+  NBFi_get_Settings(&_nbfi);
+  
+  nbfi_state_t _nbfi_state;
+  NBFi_get_state(&_nbfi_state);
+  
+  
   LCD_DrawString(0,(uint16_t)-6,"../Info/NBFi quality", COLOR_FILL, ALIGN_LEFT);
   
   LCD_DrawString(10,5,"Noise lev:", COLOR_FILL, ALIGN_LEFT);
-  sprintf(textbuf, "%d dBm", noise);
+  sprintf(textbuf, "%3.1f dBm", NBFi_RF_get_noise());
   LCD_DrawString(127,5, textbuf, COLOR_FILL, ALIGN_RIGHT);
   
   LCD_DrawString(10,15,"UL aver. SNR:", COLOR_FILL, ALIGN_LEFT);
-  sprintf(textbuf, "%d", nbfi_state.aver_tx_snr);
+  sprintf(textbuf, "%d", _nbfi_state.aver_tx_snr);
   LCD_DrawString(127,15, textbuf, COLOR_FILL, ALIGN_RIGHT);
   
   LCD_DrawString(10,25,"DL aver. SNR:", COLOR_FILL, ALIGN_LEFT);
-  sprintf(textbuf, "%d", nbfi_state.aver_rx_snr);
+  sprintf(textbuf, "%d", _nbfi_state.aver_rx_snr);
   LCD_DrawString(127,25, textbuf, COLOR_FILL, ALIGN_RIGHT);
   
   LCD_DrawString(10,35,"UL bitrate:", COLOR_FILL, ALIGN_LEFT);
-  sprintf(textbuf, "%d", NBFi_Phy_To_Bitrate(nbfi.tx_phy_channel));
+  sprintf(textbuf, "%d", NBFi_Phy_To_Bitrate(_nbfi.tx_phy_channel));
   LCD_DrawString(127,35, textbuf, COLOR_FILL, ALIGN_RIGHT);
   
   LCD_DrawString(10,45,"DL bitrate:", COLOR_FILL, ALIGN_LEFT);
-  sprintf(textbuf, "%u", NBFi_Phy_To_Bitrate(nbfi.rx_phy_channel));
+  sprintf(textbuf, "%u", NBFi_Phy_To_Bitrate(_nbfi.rx_phy_channel));
   LCD_DrawString(127,45, textbuf, COLOR_FILL, ALIGN_RIGHT);
   
   if(GetButton2())
@@ -725,26 +726,30 @@ void NBFiQuality()
 
 void NBFiStats()
 {
+  
   LCD_DrawString(0,(uint16_t)-6,"../Info/NBFi statistics", COLOR_FILL, ALIGN_LEFT);
+  
+  nbfi_state_t _nbfi_state;
+  NBFi_get_state(&_nbfi_state);
   
   LCD_DrawString(10,5,"UL enqueued:", COLOR_FILL, ALIGN_LEFT);
   sprintf(textbuf, "%d", NBFi_Packets_To_Send());
   LCD_DrawString(127,5, textbuf, COLOR_FILL, ALIGN_RIGHT);
   
   LCD_DrawString(10,15,"UL delivered:", COLOR_FILL, ALIGN_LEFT);
-  sprintf(textbuf, "%d", nbfi_state.success_total);
+  sprintf(textbuf, "%d", _nbfi_state.success_total);
   LCD_DrawString(127,15, textbuf, COLOR_FILL, ALIGN_RIGHT);
   
   LCD_DrawString(10,25,"UL lost:", COLOR_FILL, ALIGN_LEFT);
-  sprintf(textbuf, "%d", nbfi_state.fault_total);
+  sprintf(textbuf, "%d", _nbfi_state.fault_total);
   LCD_DrawString(127,25, textbuf, COLOR_FILL, ALIGN_RIGHT);
   
   LCD_DrawString(10,35,"UL total:", COLOR_FILL, ALIGN_LEFT);
-  sprintf(textbuf, "%d", nbfi_state.UL_total);
+  sprintf(textbuf, "%d", _nbfi_state.UL_total);
   LCD_DrawString(127,35, textbuf, COLOR_FILL, ALIGN_RIGHT);
   
   LCD_DrawString(10,45,"DL total:", COLOR_FILL, ALIGN_LEFT);
-  sprintf(textbuf, "%d", nbfi_state.DL_total);
+  sprintf(textbuf, "%d", _nbfi_state.DL_total);
   LCD_DrawString(127,45, textbuf, COLOR_FILL, ALIGN_RIGHT);
   
   if(GetButton2())
@@ -757,40 +762,30 @@ void DevInfoHandler()
 {
   LCD_DrawString(0,(uint16_t)-6,"../Info/Device info", COLOR_FILL, ALIGN_LEFT);
   
+  
+  nbfi_settings_t _nbfi;
+  NBFi_get_Settings(&_nbfi);
+  
   // Device full ID
   LCD_DrawString(10,5,"ID:", COLOR_FILL, ALIGN_LEFT);
 
-  sprintf(textbuf, "%d", *nbfi.modem_id);
+  sprintf(textbuf, "%d", *_nbfi.modem_id);
   LCD_DrawString(127,5,textbuf, COLOR_FILL, ALIGN_RIGHT);
   
-  time_t t = RTC_Time();
+  time_t t = NBFi_get_RTC();
   struct tm *TM = localtime(&t);
   
   LCD_DrawString(10,15,"Time:", COLOR_FILL, ALIGN_LEFT);
   sprintf(textbuf, "%02d:%02d:%02d", TM->tm_hour, TM->tm_min, TM->tm_sec);
   LCD_DrawString(127,15,textbuf, COLOR_FILL, ALIGN_RIGHT);
   
-  //    LCD_DrawString(10,23,"Buttons:", COLOR_FILL, ALIGN_LEFT);
-  //    sprintf(textbuf, "%u", buttons_v);
-  //    LCD_DrawString(127,23,textbuf, COLOR_FILL, ALIGN_RIGHT);
-  
   LCD_DrawString(10,25,"VCC:", COLOR_FILL, ALIGN_LEFT);
-  sprintf(textbuf, "%umV", nbfi_HAL_measure_valtage_or_temperature(0));
+  sprintf(textbuf, "%.2fV", (float)nbfi_HAL_measure_valtage_or_temperature(1)/100);
   LCD_DrawString(127,25,textbuf, COLOR_FILL, ALIGN_RIGHT);
 
   LCD_DrawString(10,35,"TEMP:", COLOR_FILL, ALIGN_LEFT);
-  sprintf(textbuf, "%d'C", nbfi_HAL_measure_valtage_or_temperature(1));
+  sprintf(textbuf, "%d'C", nbfi_HAL_measure_valtage_or_temperature(0));
   LCD_DrawString(127,35,textbuf, COLOR_FILL, ALIGN_RIGHT);
-  
-//  if(GetButton1())
-//  {
-//    GUI_DrawButtonL(label_reflash, 1);
-//    HAL_RebootToBootloader();
-//  }
-//  else
-//  {
-//    GUI_DrawButtonL(label_reflash, 0);
-//  }
   
   if(GetButton2())
   {
@@ -815,7 +810,6 @@ void GUI_Update()
   
   (*current_handler)();
   
-  //ResetButtonFlags(0xff);                                                       //сброс всех флагов кнопок
   LCD_WriteBuffer();
 }
 
@@ -829,9 +823,7 @@ void GUI_Init()
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;  
   GPIO_InitStruct.Pin = LCD_BACKLIGHT_Pin;    
   HAL_GPIO_Init(LCD_BACKLIGHT_GPIO_Port, &GPIO_InitStruct); 
-  //ScheduleTask(&gui_handler, GUI_Handler, RELATIVE, 0);
-  current_handler = &MainHandler;
-  
+  current_handler = &MainHandler;  
   gui_inited = true;
   
 }

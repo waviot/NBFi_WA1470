@@ -625,7 +625,7 @@ uint16_t nbfi_at_server_nbfi_settings_handler(uint8_t *reply, nbfi_at_server_act
       {
         nbfi_settings_t _nbfi;
         hex2bin((const char*)value[0], (char*)&_nbfi);
-        NBFi_set_Settings(&_nbfi);
+        NBFi_set_Settings(&_nbfi, 0);
         return nbfi_at_server_return_str(reply, 0, AT_OK);
       }
     case AT_HELP:

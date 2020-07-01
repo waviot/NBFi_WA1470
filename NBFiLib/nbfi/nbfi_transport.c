@@ -1,6 +1,6 @@
 #include "nbfi.h"
 
-nbfi_state_t nbfi_state = {0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+nbfi_state_t nbfi_state = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 
 
@@ -591,7 +591,20 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
                             pkt->state = PACKET_SENT;
                             break;
                         }
-                    }else pkt->state = PACKET_SENT_NOACKED;
+                    }
+                    else 
+                    {
+                       switch(nbfi.mode)
+                        {
+                        case DRX:
+                        case CRX:
+                          pkt->state = PACKET_SENT_NOACKED;
+                          break;
+                        case NRX:
+                          pkt->state = PACKET_SENT;
+                          break;
+                      }
+                    }
                 }
                 else pkt->state = PACKET_SENT;
                 nbfi_active_pkt = pkt;

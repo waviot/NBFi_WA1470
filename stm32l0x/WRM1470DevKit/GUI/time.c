@@ -254,8 +254,8 @@ time_t mktime(struct tm *tmbuf) {
 }
 
 //struct wtimer_desc rtc_desc;
-uint32_t rtc_time = 1454448080;
-
+//uint32_t rtc_time = 1454448080;
+/*
 void RTC_Callback()
 {
     rtc_time++;
@@ -274,3 +274,4 @@ time_t RTC_Time()
 {
     return rtc_time;
 }
+*/

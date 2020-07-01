@@ -63,12 +63,13 @@ uint32_t                NBFi_get_RTC();
 void                    NBFi_set_RTC(uint32_t time);
 
 void                    NBFi_set_Device_Info(nbfi_dev_info_t *);
+
+
 void                    NBFi_get_Settings(nbfi_settings_t*);
-void                    NBFi_set_Settings(nbfi_settings_t*);
-
+void                    NBFi_set_Settings(nbfi_settings_t*, _Bool persistent);
 _Bool                   NBFi_send_Packet_to_Config_Parser(uint8_t* buf);
-
 void                    NBFi_clear_Saved_Configuration();
+
 void                    NBFi_switch_to_another_settings(nbfi_settings_t* settings, nbfi_crypto_iterator_t* it, _Bool to_or_from);
 _Bool                   NBFi_is_Switched_to_Custom_Settings();
 

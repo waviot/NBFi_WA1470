@@ -2,6 +2,7 @@
 #include "stm32_init.h"
 #include "string.h"
 #include "adc.h"
+#include "rtc.h"
 #include "radio.h"
 #include "log.h"
 #include "defines.h"
@@ -40,6 +41,8 @@ int main(void)
   SystemClock_Config();
   
   MX_GPIO_Init();
+  
+  RTC_init();
   
   ADC_init();
   
@@ -93,8 +96,7 @@ int main(void)
         SystemClock_Config();
       }
       else 
-      {
-        
+      {       
         HAL_GPIO_WritePin(POWER_LED_GPIO_Port, POWER_LED_Pin,  GPIO_PIN_SET);
         HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
       }

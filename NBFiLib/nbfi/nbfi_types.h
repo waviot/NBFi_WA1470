@@ -150,6 +150,8 @@ typedef struct
     uint8_t  aver_tx_snr;
     int16_t success_total;
     int16_t fault_total;
+    uint32_t last_tx_freq;
+    uint32_t last_rx_freq;
     int16_t last_rssi;
     uint8_t last_snr;
     uint8_t UL_rating;

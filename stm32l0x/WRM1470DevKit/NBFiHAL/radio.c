@@ -5,17 +5,16 @@
 #define MODEM_ID  ((uint32_t *)0x0801ff80)
 #define KEY  ((uint32_t *)0x0801ff84)    
 
-#define MANUFACTURER_ID         0x8888 //Waviot
-#define HARDWARE_TYPE_ID        0x3       //ASIC_PROTOTYPE
+#define MANUFACTURER_ID         0x8888  //Waviot
+#define HARDWARE_TYPE_ID        48      //WRM1470DevKit
 #define PROTOCOL_ID             0       //undefined
 #define TX_MAX_POWER            15
 #define TX_MIN_POWER            -13
 #define SEND_INFO_PERIOD	2592000         //one time per month
 
-#define BAND         UL868800_DL869150          
+#define BAND         UL868800_DL869150          //RU
 
-
-#if BAND == UL868800_DL446000
+#if BAND == UL868800_DL446000                   
 #define NBFI_UL_FREQ_BASE       868800000
 #define NBFI_DL_FREQ_BASE       446000000
 #elif BAND == UL868800_DL864000
@@ -45,9 +44,24 @@
 #elif BAND == UL868800_DL868000
 #define NBFI_UL_FREQ_BASE       868800000
 #define NBFI_DL_FREQ_BASE       868800000
-#elif BAND == UL868800_DL869150
+#elif BAND == UL868800_DL869150                 //RU
 #define NBFI_UL_FREQ_BASE       868800000    
 #define NBFI_DL_FREQ_BASE       869150000
+#elif BAND == UL868100_DL869500
+#define NBFI_UL_FREQ_BASE       868100000       //EU
+#define NBFI_DL_FREQ_BASE       869500000
+#elif BAND == UL866900_DL865100
+#define NBFI_UL_FREQ_BASE       866900000       //IN
+#define NBFI_DL_FREQ_BASE       865100000
+#elif BAND == UL864000_DL863500
+#define NBFI_UL_FREQ_BASE       864000000       //KZ
+#define NBFI_DL_FREQ_BASE       863500000
+#elif BAND == UL458550_DL453800
+#define NBFI_UL_FREQ_BASE       458550000       //UZ
+#define NBFI_DL_FREQ_BASE       453800000
+#elif BAND == UL916500_DL903000
+#define NBFI_UL_FREQ_BASE       916500000       //ARG
+#define NBFI_DL_FREQ_BASE       903000000
 #endif 
 
 
@@ -58,28 +72,28 @@ const nbfi_settings_t nbfi_default_settings =
 {      
     MODEM_ID, 
     KEY,
-    CRX,//mode;
-    UL_DBPSK_50_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
+    CRX,                //mode;
+    UL_DBPSK_50_PROT_E, // tx_phy_channel;
     DL_DBPSK_50_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
     MACK_1,             //mack_mode
-    0x82,                  //num_of_retries;
+    0x82,               //num_of_retries;
     8,                  //max_payload_len;
     0,                  //wait_ack_timeout
     0,                  //tx_freq;
-    0,//858090000,//868791000,//0,//868790000,//0,//868735500,//868710000,//868800000,                  //rx_freq;
+    0,                  //rx_freq;
     PCB,                //tx_antenna;
     PCB,                //rx_antenna;
     TX_MAX_POWER,       //tx_pwr;
-    60*5,//60*5,             //heartbeat_interval
+    60*5,               //heartbeat_interval
     255,                //heartbeat_num
     0,                  //additional_flags
     NBFI_UL_FREQ_BASE,
     NBFI_DL_FREQ_BASE,
     NBFI_UL_FREQ_PLAN_51200_0 + NBFI_FREQ_PLAN_MINIMAL,
     {
-      TRY_MINIMAL_UL_BAND_AND_LOW_PHY_ALTERNATIVE,
-      TRY_LOW_PHY_ALTERNATIVE,
+      NBFI_VOID_ALTERNATIVE,
+      NBFI_VOID_ALTERNATIVE,
       NBFI_VOID_ALTERNATIVE,
       NBFI_VOID_ALTERNATIVE
     }
@@ -92,7 +106,7 @@ const nbfi_settings_t nbfi_short_range_settings =
 {      
     MODEM_ID, 
     KEY,
-    CRX,//mode;
+    CRX,                   //mode;
     DL_DBPSK_25600_PROT_D, // tx_phy_channel;
     DL_DBPSK_25600_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
@@ -105,7 +119,7 @@ const nbfi_settings_t nbfi_short_range_settings =
     PCB,                //tx_antenna;
     PCB,                //rx_antenna;
     TX_MAX_POWER,       //tx_pwr;
-    1,//3600*6,         //heartbeat_interval
+    0,                  //heartbeat_interval
     0,                  //heartbeat_num
     NBFI_FLG_FIXED_BAUD_RATE|NBFI_FLG_SHORT_RANGE_CRYPTO|NBFI_FLG_NO_RESET_TO_DEFAULTS|NBFI_FLG_NO_SENDINFO|NBFI_FLG_NO_REDUCE_TX_PWR,                  //additional_flags
     NBFI_UL_FREQ_BASE,

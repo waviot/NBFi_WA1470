@@ -21,13 +21,15 @@ uint32_t NBFi_DL_ID()
   return *((uint32_t*)FULL_ID);
 }
 
+
+static nbfi_phy_channel_t last_phy = UNDEFINED;
+
 nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
                         nbfi_rf_antenna_t        antenna,
                         int8_t              power,
                         uint32_t            freq)
 {
 
-    static nbfi_phy_channel_t last_phy = UNDEFINED;
     static int8_t last_tx_prw;
     static uint32_t last_tx_freq;
     static uint32_t last_rx_freq;
@@ -71,8 +73,9 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
                         
         if(freq != last_tx_freq)
         {
-          last_tx_freq = freq;
+          nbfi_state.last_tx_freq = last_tx_freq = freq;
           wa1470mod_set_freq(freq);
+           
         }
                 
         if(power != last_tx_prw)
@@ -103,7 +106,7 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
         
         if(freq != last_rx_freq)
         {
-          last_rx_freq = freq;
+          nbfi_state.last_rx_freq = last_rx_freq = freq;
           wa1470dem_set_freq(freq);
         }
         //wa1470dem_set_freq(freq);
@@ -126,6 +129,7 @@ nbfi_status_t NBFi_RF_Deinit()
     rf_busy = 0;
     transmit = 0;
     rf_state = STATE_OFF;
+    last_phy = UNDEFINED;
     return OK;
 }
 

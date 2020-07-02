@@ -213,25 +213,26 @@ void NBFi_set_Settings(nbfi_settings_t* settings, _Bool persistent)
     _Bool need_to_send_dl_freq_base = 0;
     
     nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
-    if(nbfi.rx_phy_channel != settings->rx_phy_channel) need_to_send_sync = 1;
-    if(nbfi.ul_freq_base != settings->ul_freq_base) need_to_send_ul_freq_base = 1;
-    if(nbfi.dl_freq_base != settings->dl_freq_base) need_to_send_dl_freq_base = 1;
     
-    if(nbfi.mode != settings->mode) 
+    if(persistent)
     {
-      NBFi_Clear_TX_Buffer();
-      need_to_send_sync = 1;
-    }
-    memcpy(&nbfi, settings , sizeof(nbfi_settings_t));
-    if(persistent) 
-    {
+      if(nbfi.rx_phy_channel != settings->rx_phy_channel) need_to_send_sync = 1;
+      if(nbfi.ul_freq_base != settings->ul_freq_base) need_to_send_ul_freq_base = 1;
+      if(nbfi.dl_freq_base != settings->dl_freq_base) need_to_send_dl_freq_base = 1;    
+      if(nbfi.mode != settings->mode) 
+      {
+        NBFi_Clear_TX_Buffer();
+        need_to_send_sync = 1;
+      }
+      memcpy(&nbfi, settings , sizeof(nbfi_settings_t));
       nbfi_settings_need_to_save_to_flash = 1;
-    }
-    rf_state = STATE_CHANGED;
-    if(need_to_send_sync) {NBFi_Config_Send_Sync(0); NBFi_Force_process();}
-    if(need_to_send_ul_freq_base)  NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_UL_BASE_FREQ);
-    if(need_to_send_dl_freq_base)  NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_DL_BASE_FREQ);
+      rf_state = STATE_CHANGED;
+      if(need_to_send_sync) {NBFi_Config_Send_Sync(0); NBFi_Force_process();}
+      if(need_to_send_ul_freq_base)  NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_UL_BASE_FREQ);
+      if(need_to_send_dl_freq_base)  NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_DL_BASE_FREQ);
     
+    }
+    else memcpy(&nbfi, settings , sizeof(nbfi_settings_t));
    
     nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
 }

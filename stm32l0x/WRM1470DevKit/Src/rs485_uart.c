@@ -1,6 +1,6 @@
 #include "rs485_uart.h"
 #include "xbuf.h"
-
+#include "main.h"
 //			STM defines
 #define RS485_USART	 		USART2
 #define RS485_USART_IRQ 		USART2_IRQn
@@ -18,6 +18,13 @@ static UART_HandleTypeDef huart;
 
 static UART_X_BUF RS485_UART_rx;
 static UART_X_BUF RS485_UART_tx;
+
+uint32_t last_uart_rx_time = 0;
+
+#ifdef PHOBOS_HDLC_FORWARDER
+_Bool phobos_hdlc_mode = 0;
+#endif
+
 
 void RS485_UART_send(uint8_t data){
   	xbuf_send(&RS485_UART_tx, data);
@@ -40,6 +47,7 @@ uint8_t RS485_UART_get(void){
 void RS485_UART_IRQ(void) {
 	if (__HAL_UART_GET_FLAG(&huart, UART_FLAG_RXNE)){
 		xbuf_send(&RS485_UART_rx, huart.Instance->RDR);
+                last_uart_rx_time = systimer;
 	}
 	else if (__HAL_UART_GET_FLAG(&huart, UART_FLAG_TXE) && (huart.Instance->CR1 & 1 << (UART_IT_TXE & 0x1F))) {
 		if (!xbuf_is_empty(&RS485_UART_tx))

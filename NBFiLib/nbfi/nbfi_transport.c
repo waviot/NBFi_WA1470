@@ -524,7 +524,14 @@ place_to_stack:
 
     }
     if(!phy_pkt->ACK) NBFI_Config_Check_State();
-    if(NBFi_GetQueuedTXPkt()) NBFi_Force_process();
+    nbfi_transport_packet_t* queued;
+    if(queued = NBFi_GetQueuedTXPkt()) 
+    {
+      if((queued->phy_data.header&SYS_FLAG) && (queued->phy_data.payload[0] == SYSTEM_PACKET_CLEAR_EXT)&&(NBFi_Packets_To_Send() == 1))
+        NBFi_SlowDown_Process(100);
+      else NBFi_Force_process();
+    
+    }
     else
     {
         if(nbfi.mode == DRX)
@@ -939,6 +946,12 @@ void NBFi_Force_process()
 {
   nbfi_scheduler->__scheduler_add_task(&nbfi_processTask_desc, NBFi_ProcessTasks, RELATIVE, MILLISECONDS(1));
 }
+
+void NBFi_SlowDown_Process(uint16_t msec)
+{
+  nbfi_scheduler->__scheduler_add_task(&nbfi_processTask_desc, NBFi_ProcessTasks, RELATIVE, MILLISECONDS(msec));
+}
+
 
 
 static uint32_t NBFI_PhyToDL_Delay(nbfi_phy_channel_t chan)

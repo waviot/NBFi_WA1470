@@ -2614,6 +2614,9 @@
       <name>$PROJ_DIR$\Inc\adc.h</name>
     </file>
     <file>
+      <name>$PROJ_DIR$\Inc\at_user.h</name>
+    </file>
+    <file>
       <name>$PROJ_DIR$\Inc\defines.h</name>
     </file>
     <file>
@@ -2861,6 +2864,9 @@
     <name>src</name>
     <file>
       <name>$PROJ_DIR$\Src\adc.c</name>
+    </file>
+    <file>
+      <name>$PROJ_DIR$\Src\at_user.c</name>
     </file>
     <file>
       <name>$PROJ_DIR$\Src\log.c</name>

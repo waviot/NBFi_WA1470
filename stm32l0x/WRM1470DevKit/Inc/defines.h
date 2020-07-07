@@ -4,5 +4,7 @@
 //#define PLOT_SPECTRUM
 
 #define NBFI_AT_SERVER
+#define PHOBOS_HDLC_FORWARDER
+
 
 #endif

@@ -38,20 +38,20 @@ void nbfi_receive_complete(uint8_t * data, uint16_t length)
   
   if((data[0] == 0x80)&&(length == 1+4+32))
   {
-    aux_modem_id_and_key.id = 0;
+    sr_server_modem_id_and_key.id = 0;
     for(uint8_t i = 0; i != 4; i++ )
     {
-        aux_modem_id_and_key.id <<= 8;
-        aux_modem_id_and_key.id += data[i + 1];
+        sr_server_modem_id_and_key.id <<= 8;
+        sr_server_modem_id_and_key.id += data[i + 1];
         
     }
     
     for(uint8_t i = 0; i != 32; i++ )
     {
-        aux_modem_id_and_key.key[i] = data[i + 1 + 4];      
+        sr_server_modem_id_and_key.key[i] = data[i + 1 + 4];      
     } 
     
-    radio_save_id_and_key_of_aux_device(&aux_modem_id_and_key);
+    radio_save_id_and_key_of_sr_server(&sr_server_modem_id_and_key);
   }
   
   
@@ -78,7 +78,7 @@ int main(void)
   //uint8_t payload[] = {0xaa};
   //last_send_status = NBFi_Send5(payload, sizeof(payload));
   
-  //radio_load_id_and_key_of_aux_device(&aux_modem_id_and_key);
+  //radio_load_id_and_key_of_sr_server(&sr_server_modem_id_and_key);
   
   //if(aux_modem_id_and_key.id != 0)  radio_switch_to_from_short_range(1);
   

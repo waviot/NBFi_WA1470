@@ -41,7 +41,7 @@
 #ifndef __MAIN_H__
 #define __MAIN_H__
 
-
+#include "defines.h"
 
 #ifdef __cplusplus
  extern "C" {
@@ -52,6 +52,10 @@ void _Error_Handler(char *, int);
 #ifdef __cplusplus
 }
 #endif
+
+
+extern uint32_t volatile systimer;
+
 
 #endif /* __MAIN_H__ */
 

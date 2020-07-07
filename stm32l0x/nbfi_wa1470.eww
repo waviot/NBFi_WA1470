@@ -5,9 +5,6 @@
     <path>$WS_DIR$\ChipTestBoard\ChipTestBoard.ewp</path>
   </project>
   <project>
-    <path>$WS_DIR$\..\..\BigTiffanyRS_STM\stm\sample.ewp</path>
-  </project>
-  <project>
     <path>$WS_DIR$\WRM1470DevKit\WRM1470DevKit.ewp</path>
   </project>
   <batchBuild/>

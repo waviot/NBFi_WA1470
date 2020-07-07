@@ -3,7 +3,7 @@
 #include "radio.h"
 
 
-void hex2bin(const char* hexstr, char * binstr)
+uint8_t hex2bin(const char* hexstr, char * binstr)
 {
     uint16_t hexstrLen = strlen(hexstr);
     int count = 0;
@@ -13,7 +13,8 @@ void hex2bin(const char* hexstr, char * binstr)
         sscanf(pos, "%2hhx", &binstr[count]);
         pos += 2;
     }
-    binstr[count] = 0;
+    return count;
+    //binstr[count] = 0;
 }
 
 
@@ -54,8 +55,8 @@ uint16_t nbfi_at_server_send_handler(uint8_t *reply, nbfi_at_server_action_t act
   {
     case AT_SET:
       {
-        hex2bin((const char*)value[0], (char*)buf);
-        nbfi_ul_sent_status_t   status = NBFi_Send5(buf, sizeof((const char*)buf), 0);
+        uint8_t len = hex2bin((const char*)value[0], (char*)buf);
+        nbfi_ul_sent_status_t   status = NBFi_Send5(buf, len, 0);
         return nbfi_at_server_return_uint(reply, status.id, AT_OK);
       }
     case AT_HELP:

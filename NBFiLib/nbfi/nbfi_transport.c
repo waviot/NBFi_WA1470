@@ -35,6 +35,7 @@ uint32_t nbfi_rtc = 0;
 
 uint32_t last_ack_send_ts = 0;
 
+#define TX_MAX_TIME 1000
 //_Bool process_rx_external = 0;
 _Bool rtc_synchronised = 0;
 
@@ -555,9 +556,11 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
         //nbfi_scheduler->__scheduler_add_task(desc, 0, RELATIVE, SECONDS(30));
         return;
    }
+   static uint32_t tx_timer = 0;
    if((rf_busy == 0)&&(transmit == 0))
    //if((rf_busy == 0)&&!NBFi_RF_is_TX_in_Progress())
    {
+     	tx_timer = 0;
         switch(nbfi_active_pkt->state)
         {
         case PACKET_WAIT_ACK:
@@ -688,6 +691,11 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
           uint32_t t = nbfi_hal->__nbfi_measure_voltage_or_temperature(1);
           if(t < MinVoltage || !MinVoltage) MinVoltage = t;
           if((rf_busy == 0)&&!NBFi_RF_is_TX_in_Progress()) NBFi_TX_Finished();
+
+	  if(++tx_timer > TX_MAX_TIME) 
+	  {
+	    NBFi_TX_Finished();
+	  }
     }
 
     if(rf_state == STATE_CHANGED)  NBFi_RX_Controller();

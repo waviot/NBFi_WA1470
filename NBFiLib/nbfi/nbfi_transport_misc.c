@@ -265,7 +265,7 @@ uint8_t NBFi_Packets_To_Send()
         case PACKET_NEED_TO_SEND_RIGHT_NOW:
             break;
         case PACKET_SENT_NOACKED:
-            if(nbfi.mack_mode < MACK_2) break;
+            if((nbfi.mack_mode < MACK_2) && (nbfi_active_pkt->state != PACKET_FREE)) break;
         default:
             packets_free++;
             continue;
@@ -630,7 +630,8 @@ void NBFi_Resend_Pkt(nbfi_transport_packet_t* act_pkt, uint32_t mask)
     {
       if((mask == 0))  //all packets delivered, send message to clear receiver's input buffer
       {
-           NBFi_Send_Clear_Cmd(nbfi_active_pkt->phy_data.ITER);
+           //if(!NBFi_GetQueuedTXPkt()) NBFi_SlowDown_Process(100);
+           NBFi_Send_Clear_Cmd(nbfi_active_pkt->phy_data.ITER);          
       }
       NBFi_Set_UL_Status(nbfi_active_pkt->id, DELIVERED);
    }

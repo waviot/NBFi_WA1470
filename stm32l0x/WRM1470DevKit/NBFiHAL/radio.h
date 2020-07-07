@@ -6,8 +6,19 @@
 #include "scheduler_hal.h"
 #include "nbfi_hal.h"
 
+typedef struct 
+{
+  uint32_t id;
+  uint8_t key[32];
+} nbfi_device_id_and_key_st;
+
+extern nbfi_device_id_and_key_st sr_server_modem_id_and_key;
+
 void radio_init(void);
 
-void radio_switch_to_from_short_range(_Bool en);
+void radio_switch_to_from_short_range(_Bool en, _Bool client_or_server);
+
+void radio_load_id_and_key_of_sr_server(nbfi_device_id_and_key_st *data);
+void radio_save_id_and_key_of_sr_server(nbfi_device_id_and_key_st *data);
 
 #endif /* RADIO_H_ */

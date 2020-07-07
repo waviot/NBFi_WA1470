@@ -5,6 +5,7 @@
 
 const char nbfi_at_server_tags_mas[NBFI_AT_SERVER_TAGS_NUMBER][NBFI_AT_SERVER_TAGS_MAX_LEN] = 
 {
+  "LIST",
   "SEND",
   "SEND_STATUS",
   "RECEIVE", 
@@ -31,9 +32,21 @@ const char nbfi_at_server_tags_mas[NBFI_AT_SERVER_TAGS_NUMBER][NBFI_AT_SERVER_TA
   "FPLAN",
   "ALT",
   "FACTORY_SETTINGS",
-  "CPU_RESET",
+  "RESET",
   "NBFI_SETTINGS",
-  "NBFI_RTC"
+  "NBFI_RTC",
+  "RSSI",
+  "NOISE",
+  "LAST_SNR",
+  "LAST_RSSI",
+  "AVER_UL_SNR",
+  "AVER_DL_SNR",
+  "VCC",
+  "TEMP",
+  "SR_SERVER_ID",
+  "SR_SERVER_KEY",
+  "SR_MODE",
+  "USER"
 };
 
 

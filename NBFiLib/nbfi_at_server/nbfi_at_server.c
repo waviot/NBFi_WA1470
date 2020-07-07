@@ -1,9 +1,13 @@
 #include "nbfi.h"
 #include "nbfi_at_server.h"
 
-#define NBFI_AT_SERVER_BUF_SIZE 512
+#define NBFI_AT_SERVER_BUF_SIZE 1024
 
 _Bool nbfi_at_server_echo_mode = 1;
+
+uint8_t at_server_last_rx_pkt[240];
+uint8_t at_server_last_rx_pkt_len = 0;
+
 
 const char common_help[] = "\
 AT-command interface:\n\r\
@@ -15,6 +19,12 @@ AT+XXX=<value> is used to provide a value to a command, for example AT+MODE=CRX\
 
 static nbfi_at_server_tags_t tag_for_help;
 
+nbfi_at_server_handler_t nbfi_at_server_user_defined_handler = 0;
+
+void nbfi_at_server_define_user_handler(nbfi_at_server_handler_t func)
+{
+  nbfi_at_server_user_defined_handler = func;
+}
 
 uint8_t nbfi_at_server_fill_result(uint8_t *data, nbfi_at_server_result_t result)
 {
@@ -72,6 +82,7 @@ uint16_t nbfi_at_server_return_uint(uint8_t *data, uint32_t n, nbfi_at_server_re
   return i;
 }
 
+
 uint16_t nbfi_at_server_return_hex_str(uint8_t *data, uint8_t *str, uint8_t size, nbfi_at_server_result_t result)
 {
   uint16_t i = 0;
@@ -87,6 +98,10 @@ uint16_t nbfi_at_server_return_hex_str(uint8_t *data, uint8_t *str, uint8_t size
   data[i++] = 0x0a;
   return i;
 }
+
+
+
+
 
 static uint16_t nbfi_at_server_get_param(uint8_t *param, uint8_t *reply)
 {  
@@ -194,7 +209,7 @@ uint16_t nbfi_at_server_parse_char(uint8_t input_char, uint8_t ** reply_data_ptr
        if((input_char == 0x0d) || (input_char == 0x0a))
        {
         if(!len) return 0;
-        if((input_char == 0x0d))
+        if((input_char == 0x0a))
         {  
           uint16_t reply_len = nbfi_at_server_parse_line(buf, len);
           *reply_data_ptr = buf;
@@ -208,4 +223,11 @@ uint16_t nbfi_at_server_parse_char(uint8_t input_char, uint8_t ** reply_data_ptr
        return 0;
 }
 
+
+
+void nbfi_at_server_receive_complete(uint8_t * data, uint16_t length)
+{
+  for(uint8_t i = 0; i != length; i++) at_server_last_rx_pkt[i] = data[i];
+  at_server_last_rx_pkt_len = length;
+}
        

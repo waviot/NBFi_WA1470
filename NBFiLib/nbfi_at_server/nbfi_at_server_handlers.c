@@ -1,6 +1,6 @@
 #include "nbfi_at_server.h"
 #include "nbfi.h"
-
+#include "radio.h"
 
 
 void hex2bin(const char* hexstr, char * binstr)
@@ -15,6 +15,36 @@ void hex2bin(const char* hexstr, char * binstr)
     }
     binstr[count] = 0;
 }
+
+
+uint16_t nbfi_at_server_list_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
+{ 
+  
+  uint8_t buf[1024];
+  uint8_t *ptr = buf;
+  switch(action)
+  {
+    case AT_GET:
+    case AT_CMD:
+      {
+          for(uint8_t i = 0; i != NBFI_AT_SERVER_TAGS_NUMBER; i++)
+          {
+            uint8_t len = strlen(nbfi_at_server_tags_mas[i]);
+            memcpy(ptr, nbfi_at_server_tags_mas[i], len);
+            ptr += len;
+            *ptr++ = 0x0d;
+            *ptr++ = 0x0a;
+          }
+          return nbfi_at_server_return_str(reply, (const char*)buf, AT_OK);
+      }
+    case AT_HELP:
+      return nbfi_at_server_return_tag_help(reply, "get the list of AT commands supported");
+    default:
+      break;
+  }
+  return nbfi_at_server_return_str(reply, 0, AT_PARAM_ERROR);
+}
+
 
 uint16_t nbfi_at_server_send_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
 { 
@@ -59,6 +89,27 @@ uint16_t nbfi_at_server_send_status_handler(uint8_t *reply, nbfi_at_server_actio
 }
 
 
+uint16_t nbfi_at_server_receive_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
+{ 
+  
+  switch(action)
+  {
+    case AT_GET:
+    case AT_CMD:
+    {
+
+      return nbfi_at_server_return_hex_str(reply, at_server_last_rx_pkt, at_server_last_rx_pkt_len, at_server_last_rx_pkt_len?AT_OK:AT_EMPTY_ERROR);
+    }
+    case AT_HELP:
+      return nbfi_at_server_return_tag_help(reply, "get the last received data packet");
+    default:
+      break;
+  }
+  return nbfi_at_server_return_str(reply, 0, AT_PARAM_ERROR);
+}
+
+
+
 uint16_t nbfi_at_server_id_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
 {  
   switch(action)
@@ -69,7 +120,7 @@ uint16_t nbfi_at_server_id_handler(uint8_t *reply, nbfi_at_server_action_t actio
     case AT_SET:
       return nbfi_at_server_return_str(reply, 0, AT_READONLY_ERROR);
     case AT_HELP:
-      return nbfi_at_server_return_tag_help(reply, "get the device address");
+      return nbfi_at_server_return_tag_help(reply, "get the device ID");
     default:
       break;
   }
@@ -139,7 +190,7 @@ uint16_t nbfi_at_server_tx_phy_handler(uint8_t *reply, nbfi_at_server_action_t a
         return nbfi_at_server_return_str(reply, 0, AT_OK);
       }
     case AT_HELP:
-      return nbfi_at_server_return_tag_help(reply, "get/set the tx phy default mode");
+      return nbfi_at_server_return_tag_help(reply, "get/set the tx phy default value");
     default:
       break;
   }
@@ -164,7 +215,7 @@ uint16_t nbfi_at_server_rx_phy_handler(uint8_t *reply, nbfi_at_server_action_t a
         return nbfi_at_server_return_str(reply, 0, AT_OK);
       }
     case AT_HELP:
-      return nbfi_at_server_return_tag_help(reply, "get/set the rx phy default mode");
+      return nbfi_at_server_return_tag_help(reply, "get/set the rx phy default value");
     default:
       break;
   }
@@ -421,16 +472,19 @@ uint16_t nbfi_at_server_hb_interval_handler(uint8_t *reply, nbfi_at_server_actio
   {
     case AT_GET:
     case AT_CMD:
-      return  nbfi_at_server_return_uint(reply, nbfi.heartbeat_interval, AT_OK);
+      if(nbfi.heartbeat_num != 0) return  nbfi_at_server_return_uint(reply, nbfi.heartbeat_interval, AT_OK);
+      else return  nbfi_at_server_return_uint(reply, 0, AT_OK);
     case AT_SET:
       {
         uint16_t interval = (uint16_t)atoi((char const*)value[0]);
         uint8_t buf[7];
         memset((void*)buf, 0xff, sizeof(buf));
         buf[0] = (WRITE_PARAM_AND_SAVE_CMD << 6) + NBFI_PARAM_HEART_BEAT;
+        if(interval == 0 ) buf[1] = 0;
+        else  buf[1] = 255;
         buf[2] = (interval >> 8);
         buf[3] = (interval&0xff);
-        NBFi_send_Packet_to_Config_Parser(buf);
+        NBFi_send_Packet_to_Config_Parser(buf);        
         return nbfi_at_server_return_str(reply, 0, AT_OK);
       }
     case AT_HELP:
@@ -486,7 +540,7 @@ uint16_t nbfi_at_server_flags_handler(uint8_t *reply, nbfi_at_server_action_t ac
         return nbfi_at_server_return_str(reply, 0, AT_OK);
       }
     case AT_HELP:
-      return nbfi_at_server_return_tag_help(reply, "get/set the NBFi flags bitmask");
+      return nbfi_at_server_return_tag_help(reply, "get/set the NBFi flags bitmap");
     default:
       break;
   }
@@ -599,7 +653,7 @@ uint16_t nbfi_at_server_factory_settings_handler(uint8_t *reply, nbfi_at_server_
   return nbfi_at_server_return_str(reply, 0, AT_PARAM_ERROR);
 }
 
-uint16_t nbfi_at_server_cpu_reset_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
+uint16_t nbfi_at_server_reset_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
 {  
   switch(action)
   {
@@ -607,7 +661,7 @@ uint16_t nbfi_at_server_cpu_reset_handler(uint8_t *reply, nbfi_at_server_action_
       NBFi_CPU_Reset();
       break;
     case AT_HELP:
-      return nbfi_at_server_return_tag_help(reply, "CPU reset");
+      return nbfi_at_server_return_tag_help(reply, "device reset");
     default:
       break;
   }
@@ -656,16 +710,246 @@ uint16_t nbfi_at_server_nbfi_rtc_handler(uint8_t *reply, nbfi_at_server_action_t
   return nbfi_at_server_return_str(reply, 0, AT_PARAM_ERROR);
 }
 
+
+uint16_t nbfi_at_server_rssi_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
+{  
+  switch(action)
+  {
+    case AT_GET:
+    case AT_CMD:
+      {
+        uint8_t buf[20];
+        sprintf((char*)buf, "%3.1f", NBFi_get_rssi());
+        return  nbfi_at_server_return_str(reply, (char const*)buf, AT_OK);
+      }
+    case AT_HELP:
+      return nbfi_at_server_return_tag_help(reply, "get receiver RSSI current level");
+    default:
+      break;
+  }
+  return nbfi_at_server_return_str(reply, 0, AT_PARAM_ERROR);
+}
+
+uint16_t nbfi_at_server_noise_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
+{  
+  switch(action)
+  {
+    case AT_GET:
+    case AT_CMD:
+      {
+        uint8_t buf[20];
+        sprintf((char*)buf, "%3.1f", NBFi_RF_get_noise());
+        return  nbfi_at_server_return_str(reply, (char const*)buf, AT_OK);
+      }
+    case AT_HELP:
+      return nbfi_at_server_return_tag_help(reply, "get receiver noise level");
+    default:
+      break;
+  }
+  return nbfi_at_server_return_str(reply, 0, AT_PARAM_ERROR);
+}
+
+uint16_t nbfi_at_server_last_snr_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
+{  
+  switch(action)
+  {
+    case AT_GET:
+    case AT_CMD:
+      {
+        nbfi_state_t _nbfi_state;
+        NBFi_get_state(&_nbfi_state);
+        return  nbfi_at_server_return_uint(reply, _nbfi_state.last_snr, AT_OK);
+      }
+    case AT_HELP:
+      return nbfi_at_server_return_tag_help(reply, "get last received packed SNR level");
+    default:
+      break;
+  }
+  return nbfi_at_server_return_str(reply, 0, AT_PARAM_ERROR);
+}
+
+uint16_t nbfi_at_server_last_rssi_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
+{  
+  switch(action)
+  {
+    case AT_GET:
+    case AT_CMD:
+      {
+        nbfi_state_t _nbfi_state;
+        NBFi_get_state(&_nbfi_state);
+        return  nbfi_at_server_return_uint(reply, _nbfi_state.last_rssi, AT_OK);
+      }
+    case AT_HELP:
+      return nbfi_at_server_return_tag_help(reply, "get last received packed RSSI level");
+    default:
+      break;
+  }
+  return nbfi_at_server_return_str(reply, 0, AT_PARAM_ERROR);
+}
+
+uint16_t nbfi_at_server_aver_ul_snr_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
+{  
+  switch(action)
+  {
+    case AT_GET:
+    case AT_CMD:
+      {
+        nbfi_state_t _nbfi_state;
+        NBFi_get_state(&_nbfi_state);
+        return  nbfi_at_server_return_uint(reply, _nbfi_state.aver_tx_snr, AT_OK);
+      }
+    case AT_HELP:
+      return nbfi_at_server_return_tag_help(reply, "get average uplink SNR level");
+    default:
+      break;
+  }
+  return nbfi_at_server_return_str(reply, 0, AT_PARAM_ERROR);
+}
+
+uint16_t nbfi_at_server_vcc_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
+{  
+  switch(action)
+  {
+    case AT_GET:
+    case AT_CMD:
+      {
+        uint8_t buf[20];
+        sprintf((char*)buf, "%.2f", (float)nbfi_HAL_measure_valtage_or_temperature(1)/100);
+        return  nbfi_at_server_return_str(reply, (char const*)buf, AT_OK);
+      }
+    case AT_HELP:
+      return nbfi_at_server_return_tag_help(reply, "get VCC value");
+    default:
+      break;
+  }
+  return nbfi_at_server_return_str(reply, 0, AT_PARAM_ERROR);
+}
+
+uint16_t nbfi_at_server_temp_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
+{  
+  switch(action)
+  {
+    case AT_GET:
+    case AT_CMD:
+      {
+        return nbfi_at_server_return_uint(reply, nbfi_HAL_measure_valtage_or_temperature(0), AT_OK);
+      }
+    case AT_HELP:
+      return nbfi_at_server_return_tag_help(reply, "get VCC value");
+    default:
+      break;
+  }
+  return nbfi_at_server_return_str(reply, 0, AT_PARAM_ERROR);
+}
+
+uint16_t nbfi_at_server_aver_dl_snr_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
+{  
+  switch(action)
+  {
+    case AT_GET:
+    case AT_CMD:
+      {
+        nbfi_state_t _nbfi_state;
+        NBFi_get_state(&_nbfi_state);
+        return  nbfi_at_server_return_uint(reply, _nbfi_state.aver_rx_snr, AT_OK);
+      }
+    case AT_HELP:
+      return nbfi_at_server_return_tag_help(reply, "get average downlink SNR level");
+    default:
+      break;
+  }
+  return nbfi_at_server_return_str(reply, 0, AT_PARAM_ERROR);
+}
+
+uint16_t nbfi_at_server_sr_server_id_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
+{  
+  nbfi_device_id_and_key_st id_and_key;
+  switch(action)
+  {
+    case AT_GET:
+    case AT_CMD:
+      radio_load_id_and_key_of_sr_server(&id_and_key);
+      return  nbfi_at_server_return_uint(reply, id_and_key.id, AT_OK);
+    case AT_SET:
+      radio_load_id_and_key_of_sr_server(&id_and_key);
+      id_and_key.id = (uint32_t)atoi((char const*)value[0]);
+      radio_save_id_and_key_of_sr_server(&id_and_key);
+      return nbfi_at_server_return_str(reply, 0, AT_OK);
+    case AT_HELP:
+      return nbfi_at_server_return_tag_help(reply, "get/set the short-range server device ID");
+    default:
+      break;
+  }
+  return nbfi_at_server_return_str(reply, 0, AT_PARAM_ERROR);
+}
+
+
+uint16_t nbfi_at_server_sr_server_key_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
+{  
+  nbfi_device_id_and_key_st id_and_key;
+  switch(action)
+  {
+    case AT_GET:
+    case AT_CMD:
+      radio_load_id_and_key_of_sr_server(&id_and_key);
+      return  nbfi_at_server_return_hex_str(reply, id_and_key.key, 32,  AT_OK);
+    case AT_SET:
+      radio_load_id_and_key_of_sr_server(&id_and_key);
+      hex2bin((const char*)value[0], (char*)id_and_key.key);
+      radio_save_id_and_key_of_sr_server(&id_and_key);
+      return nbfi_at_server_return_str(reply, 0, AT_OK);
+    case AT_HELP:
+      return nbfi_at_server_return_tag_help(reply, "get/set the short-range server device master key");
+    default:
+      break;
+  }
+  return nbfi_at_server_return_str(reply, 0, AT_PARAM_ERROR);
+}
+
+uint16_t nbfi_at_server_sr_mode_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
+{  
+  switch(action)
+  {
+    case AT_GET:
+    case AT_CMD:
+      if(!NBFi_is_Switched_to_Custom_Settings()) return  nbfi_at_server_return_uint(reply, 0, AT_OK);
+      nbfi_device_id_and_key_st id_and_key;
+      radio_load_id_and_key_of_sr_server(&id_and_key);
+      if(*nbfi.modem_id != id_and_key.id) return  nbfi_at_server_return_uint(reply, 1, AT_OK);
+      else return  nbfi_at_server_return_uint(reply, 2, AT_OK);
+    case AT_SET:
+      {
+        uint8_t mode = (uint8_t)atoi((char const*)value[0]);
+        radio_switch_to_from_short_range((mode != 0), (mode == 2));
+        return nbfi_at_server_return_str(reply, 0, AT_OK);
+      }
+    case AT_HELP:
+      return nbfi_at_server_return_tag_help(reply, "get/set the short-range mode(0-disabled, 1-server, 2 - client)");
+    default:
+      break;
+  }
+  return nbfi_at_server_return_str(reply, 0, AT_PARAM_ERROR);
+}
+
+uint16_t nbfi_at_server_user_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
+{   
+  if(nbfi_at_server_user_defined_handler) return nbfi_at_server_user_defined_handler(reply, action, sub_param, value);
+  return nbfi_at_server_return_str(reply, 0, AT_ERROR);
+}
+
+
 uint16_t nbfi_at_server_common_handler(nbfi_at_server_tags_t tag, uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
 {
   switch(tag)
   {
+  case LIST:
+    return nbfi_at_server_list_handler(reply, action, sub_param, value);
   case SEND:
     return nbfi_at_server_send_handler(reply, action, sub_param, value);
   case SEND_STATUS:
     return nbfi_at_server_send_status_handler(reply, action, sub_param, value);
   case RECEIVE:
-    break;
+    return nbfi_at_server_receive_handler(reply, action, sub_param, value);
   case ID:
     return nbfi_at_server_id_handler(reply, action, sub_param, value);
   case KEY:
@@ -713,11 +997,35 @@ uint16_t nbfi_at_server_common_handler(nbfi_at_server_tags_t tag, uint8_t *reply
   case FACTORY_SETTINGS:
     return nbfi_at_server_factory_settings_handler(reply, action, sub_param, value);    
   case CPU_RESET:
-    return nbfi_at_server_cpu_reset_handler(reply, action, sub_param, value);  
+    return nbfi_at_server_reset_handler(reply, action, sub_param, value);  
   case NBFI_SETTINGS:
     return nbfi_at_server_nbfi_settings_handler(reply, action, sub_param, value); 
   case NBFI_RTC:
     return nbfi_at_server_nbfi_rtc_handler(reply, action, sub_param, value);   
+  case RSSI:
+    return nbfi_at_server_rssi_handler(reply, action, sub_param, value); 
+  case NOISE:
+    return nbfi_at_server_noise_handler(reply, action, sub_param, value); 
+  case LAST_SNR:
+    return nbfi_at_server_last_snr_handler(reply, action, sub_param, value); 
+  case LAST_RSSI:
+    return nbfi_at_server_last_rssi_handler(reply, action, sub_param, value); 
+  case AVER_UL_SNR:
+    return nbfi_at_server_aver_ul_snr_handler(reply, action, sub_param, value);   
+  case AVER_DL_SNR:
+    return nbfi_at_server_aver_ul_snr_handler(reply, action, sub_param, value);   
+  case VCC:
+    return nbfi_at_server_vcc_handler(reply, action, sub_param, value);  
+  case TEMP:
+    return nbfi_at_server_temp_handler(reply, action, sub_param, value);  
+  case SR_SERVER_ID:
+    return nbfi_at_server_sr_server_id_handler(reply, action, sub_param, value);  
+  case SR_SERVER_KEY:
+    return nbfi_at_server_sr_server_key_handler(reply, action, sub_param, value);  
+  case SR_MODE:
+    return nbfi_at_server_sr_mode_handler(reply, action, sub_param, value);  
+  case USER:
+    return nbfi_at_server_user_handler(reply, action, sub_param, value);  
   default:
     break;
   }

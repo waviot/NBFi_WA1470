@@ -18,6 +18,7 @@ extern uint32_t last_ack_send_ts;
 
 void            NBFI_Transport_Init();
 void            NBFi_Force_process();
+void            NBFi_SlowDown_Process(uint16_t msec);
 void            NBFi_ProcessRxPackets();
 void            NBFi_update_RTC();
 void            NBFi_set_RTC_irq(uint32_t time);

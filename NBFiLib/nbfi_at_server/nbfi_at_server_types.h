@@ -21,6 +21,7 @@ typedef enum
 
 typedef enum
 {
+  LIST,
   SEND,
   SEND_STATUS,
   RECEIVE,  
@@ -50,10 +51,24 @@ typedef enum
   CPU_RESET,
   NBFI_SETTINGS,
   NBFI_RTC,
+  RSSI,
+  NOISE,
+  LAST_SNR,
+  LAST_RSSI,
+  AVER_UL_SNR,
+  AVER_DL_SNR,
+  VCC,
+  TEMP,
+  SR_SERVER_ID,
+  SR_SERVER_KEY,
+  SR_MODE,
+  USER,
   TAG_UNDEFINED = 255
 }nbfi_at_server_tags_t;
 
 
-//typedef uint16_t (*nbfi_at_server_handler_t)(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[]);
+typedef uint16_t (*nbfi_at_server_handler_t)(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[]);
+
+
 
 #endif //NBFI_AT_SERVER_TYPES_H

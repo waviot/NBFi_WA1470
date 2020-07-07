@@ -2,7 +2,7 @@
 #define NBFI_AT_SEVER_TAGS_H
 
 
-#define NBFI_AT_SERVER_TAGS_NUMBER   29   
+#define NBFI_AT_SERVER_TAGS_NUMBER   42  
 #define NBFI_AT_SERVER_TAGS_MAX_LEN  20   
 
 extern const char nbfi_at_server_tags_mas[NBFI_AT_SERVER_TAGS_NUMBER][NBFI_AT_SERVER_TAGS_MAX_LEN];

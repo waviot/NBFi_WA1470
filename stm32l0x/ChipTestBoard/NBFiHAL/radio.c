@@ -9,19 +9,12 @@
 #define KEY  ((uint32_t *)(MODEM_ID_AND_KEY_ADD+4))               
 
 
-#define AUX_MODEM_ID_AND_KEY_ADD    0x20001000
+#define SR_SERVER_MODEM_ID_AND_KEY_ADD    0x20001000
 
-nbfi_device_id_and_key_st aux_modem_id_and_key @AUX_MODEM_ID_AND_KEY_ADD;
+nbfi_device_id_and_key_st sr_server_modem_id_and_key @SR_SERVER_MODEM_ID_AND_KEY_ADD;
 
-//#define AUX_MODEM_ID_ADD 0x20001000
-#define AUX_MODEM_ID_PTR  ((uint32_t *)AUX_MODEM_ID_AND_KEY_ADD)
-#define AUX_KEY_PTR  ((uint32_t *)(AUX_MODEM_ID_AND_KEY_ADD + 4))
-//#define AUX_KEY_ADD     0x20001004
-
-
-
-//uint32_t sr_modem_id @AUX_MODEM_ID_ADD;
-//uint32_t sr_key[8] @AUX_KEY_ADD;
+#define SR_SERVER_MODEM_ID_PTR  ((uint32_t *)SR_SERVER_MODEM_ID_AND_KEY_ADD)
+#define SR_SERVER_KEY_PTR  ((uint32_t *)(SR_SERVER_MODEM_ID_AND_KEY_ADD + 4))
 
 
 #define MANUFACTURER_ID         0x8888 //Waviot
@@ -78,20 +71,20 @@ const nbfi_settings_t nbfi_default_settings =
 {      
     MODEM_ID, 
     KEY,
-    CRX,//mode;
+    CRX,                //mode;
     UL_DBPSK_50_PROT_E,//UL_DBPSK_50_PROT_D, // tx_phy_channel;
     DL_DBPSK_50_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
     MACK_1,             //mack_mode
-    0x82,                  //num_of_retries;
+    0x82,               //num_of_retries;
     8,                  //max_payload_len;
     0,                  //wait_ack_timeout
     0,                  //tx_freq;
-    0,//0,//858090000,//868791000,//0,//868790000,//0,//868735500,//868710000,//868800000,                  //rx_freq;
+    0,                  //rx_freq;
     PCB,                //tx_antenna;
     PCB,                //rx_antenna;
     TX_MAX_POWER,       //tx_pwr;
-    60*5,//3600*6,             //heartbeat_interval
+    60*5,               //heartbeat_interval
     255,                //heartbeat_num
     NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
     NBFI_UL_FREQ_BASE,
@@ -108,25 +101,56 @@ const nbfi_settings_t nbfi_default_settings =
 const nbfi_dev_info_t nbfi_info = {TX_MIN_POWER, TX_MAX_POWER, MANUFACTURER_ID, HARDWARE_TYPE_ID, PROTOCOL_ID, BAND, SEND_INFO_PERIOD};
 
 
-const nbfi_settings_t nbfi_short_range_settings =
+const nbfi_settings_t nbfi_short_range_settings_server =
 {      
-    AUX_MODEM_ID_PTR, 
-    AUX_KEY_PTR,
-    CRX,//mode;
+    MODEM_ID, 
+    KEY,
+    CRX,                   //mode;
+    DL_DBPSK_25600_PROT_D, // tx_phy_channel;
+    DL_DBPSK_25600_PROT_D, // rx_phy_channel;
+    HANDSHAKE_SIMPLE,
+    MACK_1,             //mack_mode
+    0,                  //num_of_retries;
+    8,                  //max_payload_len;
+    120,                //wait_ack_timeout
+    0,                  //tx_freq;
+    0,                  //rx_freq;
+    PCB,                //tx_antenna;
+    PCB,                //rx_antenna;
+    TX_MAX_POWER,       //tx_pwr;
+    0,                  //heartbeat_interval
+    0,                  //heartbeat_num
+    NBFI_FLG_FIXED_BAUD_RATE|NBFI_FLG_SHORT_RANGE_CRYPTO|NBFI_FLG_NO_RESET_TO_DEFAULTS|NBFI_FLG_NO_SENDINFO|NBFI_FLG_NO_REDUCE_TX_PWR,                  //additional_flags
+    NBFI_UL_FREQ_BASE,
+    NBFI_DL_FREQ_BASE,
+    NBFI_FREQ_PLAN_MINIMAL + NBFI_DL_FREQ_PLAN_819200_M2457600,
+    {
+      NBFI_VOID_ALTERNATIVE,
+      NBFI_VOID_ALTERNATIVE,
+      NBFI_VOID_ALTERNATIVE,
+      NBFI_VOID_ALTERNATIVE
+    }
+};
+
+
+const nbfi_settings_t nbfi_short_range_settings_client =
+{      
+    SR_SERVER_MODEM_ID_PTR, 
+    SR_SERVER_KEY_PTR,
+    CRX,                   //mode;
     DL_DBPSK_25600_PROT_D, // tx_phy_channel;
     DL_DBPSK_25600_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
     MACK_1,             //mack_mode
     2,                  //num_of_retries;
     8,                  //max_payload_len;
-    //0,                  //dl_ID;
     150,                //wait_ack_timeout
     0,                  //tx_freq;
     0,                  //rx_freq;
     PCB,                //tx_antenna;
     PCB,                //rx_antenna;
     TX_MAX_POWER,       //tx_pwr;
-    1,//3600*6,         //heartbeat_interval
+    0,                  //heartbeat_interval
     0,                  //heartbeat_num
     NBFI_FLG_SEND_IN_RESPONSE|NBFI_FLG_SHORT_RANGE_CRYPTO|NBFI_FLG_FIXED_BAUD_RATE|NBFI_FLG_NO_RESET_TO_DEFAULTS|NBFI_FLG_NO_SENDINFO|NBFI_FLG_NO_REDUCE_TX_PWR,                  //additional_flags
     NBFI_UL_FREQ_BASE,
@@ -140,22 +164,22 @@ const nbfi_settings_t nbfi_short_range_settings =
     }
 };
 
-void radio_switch_to_from_short_range(_Bool en)
+
+void radio_switch_to_from_short_range(_Bool en, _Bool client_or_server)
 {
     nbfi_crypto_iterator_t it = {0,0};
-    NBFi_switch_to_another_settings((nbfi_settings_t *)&nbfi_short_range_settings, &it, en);
+    NBFi_switch_to_another_settings(client_or_server?((nbfi_settings_t *)&nbfi_short_range_settings_client):((nbfi_settings_t *)&nbfi_short_range_settings_server), &it, en);
 }
 
 
 #define EEPROM_INT_aux_modem_data (DATA_EEPROM_BASE + 1024*5 + 128)
-
  
-void radio_load_id_and_key_of_aux_device(nbfi_device_id_and_key_st *data) 
+void radio_load_id_and_key_of_sr_server(nbfi_device_id_and_key_st *data) 
 {
 	memcpy((void*)data, ((const void*)EEPROM_INT_aux_modem_data), sizeof(nbfi_device_id_and_key_st));
 }
 
-void radio_save_id_and_key_of_aux_device(nbfi_device_id_and_key_st *data)
+void radio_save_id_and_key_of_sr_server(nbfi_device_id_and_key_st *data)
 {	
     if(HAL_FLASHEx_DATAEEPROM_Unlock() != HAL_OK) return;
     for(uint8_t i = 0; i != sizeof(nbfi_device_id_and_key_st); i++)

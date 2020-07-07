@@ -16,4 +16,10 @@ void set_baud_opto_uart(uint8_t speed_byte);
 void RS485_UART_set_baud_parity(uint32_t baud);
 void RS485_UART_set_baud_no_parity(uint32_t baud);
 
+extern uint32_t last_uart_rx_time;
+
+#ifdef PHOBOS_HDLC_FORWARDER
+extern _Bool phobos_hdlc_mode;
+#endif
+
 #endif /* RS485_UART_H_ */

@@ -77,7 +77,8 @@ typedef enum
 typedef struct
 {
     nbfi_packet_state_t state;              //packet state
-    uint8_t             id;
+    uint8_t             id;		    //ulapp id
+    uint32_t		ts;		    //timestamp of packet		
     nbfi_handshake_t    handshake;          //packet handshake mode
     uint8_t             retry_num;          //retry counter
     uint8_t             mack_num;           //number of packets for multi ack mode

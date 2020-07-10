@@ -91,6 +91,9 @@ nbfi_transport_packet_t* NBFi_AllocateTxPkt(uint8_t payload_length)
     pointer->phy_data.header = 0;
 
     pointer->id = 0;
+    
+    pointer->ts = nbfi_scheduler->__scheduler_curr_time();
+    
     nbfi_TXbuf_head++;
 
     return pointer;
@@ -145,6 +148,9 @@ nbfi_transport_packet_t* NBFi_AllocateRxPkt(uint8_t header, uint8_t payload_leng
     pointer->phy_data_length = payload_length;
 
     pointer->phy_data.header = header;
+    
+    pointer->ts = nbfi_scheduler->__scheduler_curr_time();
+    
 
     return pointer;
 
@@ -470,12 +476,30 @@ nbfi_transport_packet_t* NBFi_Get_QueuedRXPkt(uint8_t *groupe, uint16_t *total_l
     return 0;
 }
 
-void NBFi_Clear_RX_Buffer(int8_t besides)
+uint32_t ts_curr;
+uint32_t ts_pack;
+void NBFi_Clear_RX_Buffer(int8_t besides, uint32_t time_expired)
 {
     for(uint8_t i = 0; i != NBFI_RX_PKTBUF_SIZE; i++ )
     {
+      	if(NBFi_Get_RX_Packet_Ptr(i) == 0) continue;
         if ((besides != -1) && (besides == NBFi_Get_RX_Packet_Ptr(i)->phy_data.ITER)) NBFi_Get_RX_Packet_Ptr(i)->state = PACKET_RECEIVED;
-        else NBFi_Get_RX_Packet_Ptr(i)->state = PACKET_CLEARED;
+        else
+	{
+	  if((time_expired == 0) || ((ts_curr = nbfi_scheduler->__scheduler_curr_time()) - NBFi_Get_RX_Packet_Ptr(i)->ts) > time_expired)
+	  {
+	    if(time_expired)
+	    {
+	      ts_pack = NBFi_Get_RX_Packet_Ptr(i)->ts;
+	    }
+	    NBFi_Get_RX_Packet_Ptr(i)->state = PACKET_CLEARED;  //clear all old packets
+	  }
+	  else
+	  {
+	    	//ts_pack = NBFi_Get_RX_Packet_Ptr(i)->ts;
+		
+	  }
+	}
     }
 }
 
@@ -776,5 +800,7 @@ uint8_t NBFi_Next_Ready_DL(uint8_t* data)
   }
   return 0;
 }
+
+
 
 

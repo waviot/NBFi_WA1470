@@ -34,7 +34,7 @@ uint8_t                             NBFi_Calc_Queued_Sys_Packets_With_Type(uint8
 uint8_t                             NBFi_Calc_Packets_With_State(uint8_t state);
 uint32_t                            NBFi_Get_RX_ACK_Mask();
 void                                NBFi_Resend_Pkt(nbfi_transport_packet_t* act_pkt, uint32_t mask);
-void                                NBFi_Clear_RX_Buffer(int8_t besides);
+void                                NBFi_Clear_RX_Buffer(int8_t besides, uint32_t time_expired);
 void                                NBFi_Clear_TX_Buffer();
 void                                NBFi_Send_Clear_Cmd(uint8_t iter);
 _Bool                               NBFi_Config_Send_Mode(_Bool, uint8_t param);

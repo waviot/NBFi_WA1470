@@ -23,14 +23,8 @@
 #define WA_EXT_IRQHandler       EXTI4_15_IRQHandler
 #define WA_CS_GPIO_Port 	GPIOA
 #define WA_CS_Pin 		GPIO_PIN_4
-//#define WA_TCXO_GPIO_Port 	GPIOB
-//#define WA_TCXO_Pin 		GPIO_PIN_6
 #define WA_CHIP_EN_GPIO_Port 	GPIOB
 #define WA_CHIP_EN_Pin 		GPIO_PIN_6
-//#define WA_DFT_EN_GPIO_Port 	GPIOB
-//#define WA_DFT_EN_Pin 		GPIO_PIN_11
-//#define WA_BPSK_PIN_GPIO_Port 	GPIOB
-//#define WA_BPSK_PIN_Pin 	GPIO_PIN_12
 
 
 static SPI_HandleTypeDef hspi;

@@ -4,7 +4,7 @@ nbfi_state_t nbfi_state = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 
 
-nbfi_transport_packet_t idle_pkt = {PACKET_FREE, 0, HANDSHAKE_NONE, 0, 0, 0, {0,0} };
+nbfi_transport_packet_t idle_pkt = {PACKET_FREE, 0, 0, HANDSHAKE_NONE, 0, 0, 0, {0,0} };
 nbfi_transport_packet_t* nbfi_active_pkt = &idle_pkt;
 nbfi_packet_state_t nbfi_active_pkt_old_state;
 
@@ -45,9 +45,7 @@ static void    NBFi_Wait_Extra_Handler(struct scheduler_desc *desc);
 static void    NBFi_SendHeartBeats(struct scheduler_desc *desc);
 static nbfi_status_t NBFi_RX_Controller();
 
-//static uint32_t NBFI_PhyToDL_ListenTime(nbfi_phy_channel_t chan);
-//static uint32_t NBFI_PhyToDL_Delay(nbfi_phy_channel_t chan);
-//static uint32_t NBFI_PhyToDL_AddRndListenTime(nbfi_phy_channel_t chan);
+static uint32_t NBFI_PhyTo_Delay(nbfi_phy_channel_t chan);
 static uint32_t NBFi_UL_Delivery_Time(nbfi_phy_channel_t chan);
 static uint32_t NBFi_DL_Delivery_Time(nbfi_phy_channel_t chan);
 
@@ -304,7 +302,7 @@ void NBFi_ProcessRxPackets()
             total_length--;
             if(CRC8((unsigned char*)(&data[1]), (unsigned char)(total_length)) != data[0]) 
             {
-                NBFi_Clear_RX_Buffer(nbfi_state.DL_iter&0x1f);
+                NBFi_Clear_RX_Buffer(nbfi_state.DL_iter&0x1f, 0);
                 #ifdef NBFI_LOG
                 sprintf(nbfi_log_string, "%05u: CRC mismatch ", (uint16_t)(nbfi_scheduler->__scheduler_curr_time()&0xffff));
                 nbfi_hal->__nbfi_log_send_str(nbfi_log_string);
@@ -336,6 +334,12 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
     rx_complete = 1;
 
     nbfi_state.DL_total++;
+    
+    //static uint32_t last_dl_scheduler_time = 0;
+    
+    //last_dl_scheduler_time = nbfi_scheduler->__scheduler_curr_time();
+    
+    int32_t time_from_last_dl = NBFi_get_RTC() - nbfi_state.DL_last_time;
     nbfi_state.DL_last_time = NBFi_get_RTC();
 
     nbfi_state.aver_rx_snr = (((uint16_t)nbfi_state.aver_rx_snr)*3 + info->snr)>>2;
@@ -415,12 +419,12 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
                 break;
             case SYSTEM_PACKET_CLEAR:  //clear RX buffer message received
             case SYSTEM_PACKET_CLEAR_EXT:
-                NBFi_Clear_RX_Buffer(-1);
+                NBFi_Clear_RX_Buffer(-1, 0);
                 was_not_cleared_after_groupe = 0;
                 break;
             case SYSTEM_PACKET_GROUP_START:  //start packet of the groupe
             case SYSTEM_PACKET_GROUP_START_OLD:  
-                if(was_not_cleared_after_groupe)   NBFi_Clear_RX_Buffer(-1);
+                if(was_not_cleared_after_groupe)   NBFi_Clear_RX_Buffer(-1, NBFI_PhyTo_Delay(nbfi.rx_phy_channel)*32);
                 was_not_cleared_after_groupe = 1;
                 
                 goto place_to_stack;
@@ -516,7 +520,7 @@ place_to_stack:
           nbfi_active_pkt->state = PACKET_WAIT_FOR_EXTRA_PACKETS;
         }
         wait_Extra = 1;
-        nbfi_scheduler->__scheduler_add_task(&wait_for_extra_desc, NBFi_Wait_Extra_Handler, RELATIVE, NBFi_DL_Delivery_Time(nbfi.rx_phy_channel));
+        nbfi_scheduler->__scheduler_add_task(&wait_for_extra_desc, NBFi_Wait_Extra_Handler, RELATIVE, NBFI_PhyTo_Delay(nbfi.rx_phy_channel)*2/*NBFi_DL_Delivery_Time(nbfi.rx_phy_channel)*/);
         
     }
     else
@@ -960,11 +964,9 @@ void NBFi_SlowDown_Process(uint16_t msec)
   nbfi_scheduler->__scheduler_add_task(&nbfi_processTask_desc, NBFi_ProcessTasks, RELATIVE, MILLISECONDS(msec));
 }
 
-
-
-static uint32_t NBFI_PhyToDL_Delay(nbfi_phy_channel_t chan)
+static uint32_t NBFI_PhyTo_Delay(nbfi_phy_channel_t chan)
 {
-	const uint32_t NBFI_DL_DELAY_C_D[10] = {30000, 30000, 30000, 5000, 5000, 5000, 1000, 1000, 500, 500};
+	/*const uint32_t NBFI_DL_DELAY_C_D[10] = {30000, 30000, 30000, 5000, 5000, 5000, 1000, 1000, 500, 500};
 	const uint32_t NBFI_DL_DELAY_E[10] = {6000, 1000, 500, 500};
 
 	if (chan > UL_DBPSK_25600_PROT_E)
@@ -973,20 +975,50 @@ static uint32_t NBFI_PhyToDL_Delay(nbfi_phy_channel_t chan)
 		return NBFI_DL_DELAY_E[chan - UL_DBPSK_50_PROT_E];
 	else if (chan >= UL_DBPSK_50_PROT_C)
 		return NBFI_DL_DELAY_C_D[chan - UL_DBPSK_50_PROT_C];
-	return NBFI_DL_DELAY_E[0];
-}
-
-static uint32_t NBFI_PhyToDL_AddRndListenTime(nbfi_phy_channel_t chan)
-{
-	const uint32_t NBFI_DL_ADD_RND_LISTEN_TIME[4] = {5000, 5000, 2000, 2000};
+	return NBFI_DL_DELAY_E[0];*/
 	
-	if (chan > DL_DBPSK_25600_PROT_E)
-		return NBFI_DL_ADD_RND_LISTEN_TIME[0];
-	else if (chan >= DL_DBPSK_50_PROT_E)
-		return NBFI_DL_ADD_RND_LISTEN_TIME[chan - DL_DBPSK_50_PROT_E];
-	else if (chan >= DL_DBPSK_50_PROT_D)
-		return NBFI_DL_ADD_RND_LISTEN_TIME[chan - DL_DBPSK_50_PROT_D];
-	return NBFI_DL_ADD_RND_LISTEN_TIME[0];		
+	switch(chan)
+	{
+        case DL_PSK_200:
+        case UL_PSK_200:
+                return 5700;
+        case DL_PSK_500:
+        case UL_PSK_500:
+                return 2280;
+        case DL_PSK_5000:
+        case UL_PSK_5000:
+                return 230;
+        case DL_PSK_FASTDL:
+        case UL_PSK_FASTDL:
+                return 30;
+        case UL_DBPSK_50_PROT_C:
+        case UL_DBPSK_50_PROT_D:
+        case DL_DBPSK_50_PROT_D:
+                return 5900;
+	case UL_DBPSK_50_PROT_E:
+        case DL_DBPSK_50_PROT_E:
+		return 5900;
+        case UL_DBPSK_400_PROT_C:
+        case UL_DBPSK_400_PROT_D:
+        case DL_DBPSK_400_PROT_D:
+                return 740;
+	case UL_DBPSK_400_PROT_E:
+	case DL_DBPSK_400_PROT_E:
+		return 740;
+        case UL_DBPSK_3200_PROT_D:
+        case DL_DBPSK_3200_PROT_D:
+                return 95;
+	case UL_DBPSK_3200_PROT_E:
+	case DL_DBPSK_3200_PROT_E:
+		return 95;
+        case UL_DBPSK_25600_PROT_D:
+        case DL_DBPSK_25600_PROT_D:
+	case UL_DBPSK_25600_PROT_E:
+	case DL_DBPSK_25600_PROT_E:
+                return 15;
+        default:
+                return 5900;
+	}
 }
 
 static uint32_t NBFI_PhyToDL_ListenTime(nbfi_phy_channel_t chan)
@@ -1002,19 +1034,31 @@ static uint32_t NBFI_PhyToDL_ListenTime(nbfi_phy_channel_t chan)
 	return NBFI_DL_LISTEN_TIME[0];		
 }
 
+static uint32_t NBFI_PhyToDL_AddRndListenTime(nbfi_phy_channel_t chan)
+{
+	const uint32_t NBFI_DL_ADD_RND_LISTEN_TIME[4] = {5000, 5000, 2000, 2000};
+	
+	if (chan > DL_DBPSK_25600_PROT_E)
+		return NBFI_DL_ADD_RND_LISTEN_TIME[0];
+	else if (chan >= DL_DBPSK_50_PROT_E)
+		return NBFI_DL_ADD_RND_LISTEN_TIME[chan - DL_DBPSK_50_PROT_E];
+	else if (chan >= DL_DBPSK_50_PROT_D)
+		return NBFI_DL_ADD_RND_LISTEN_TIME[chan - DL_DBPSK_50_PROT_D];
+	return NBFI_DL_ADD_RND_LISTEN_TIME[0];		
+}
 
 
 static uint32_t NBFi_UL_Delivery_Time(nbfi_phy_channel_t chan)
 {
 
   if(nbfi.wait_ack_timeout) return nbfi.wait_ack_timeout/2;
-  else return NBFI_PhyToDL_Delay(chan) + rand()%NBFI_PhyToDL_AddRndListenTime(chan);
+  else return NBFI_PhyTo_Delay(chan);
     
 }
 
 static uint32_t NBFi_DL_Delivery_Time(nbfi_phy_channel_t chan)
 {
   if(nbfi.wait_ack_timeout) return nbfi.wait_ack_timeout/2;
-  else return NBFI_PhyToDL_ListenTime(chan);
+  else return NBFI_PhyToDL_ListenTime(chan) + rand()%NBFI_PhyToDL_AddRndListenTime(chan);
 }
 

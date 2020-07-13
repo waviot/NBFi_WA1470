@@ -82,14 +82,18 @@ void  NBFI_Main_Level_Loop()
         nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
         nbfi_phy_channel_t tmp_tx_phy = nbfi.tx_phy_channel;
         nbfi_phy_channel_t tmp_rx_phy = nbfi.rx_phy_channel;
-        
+
+        nbfi_settings_t default_nbfi_settings;
+        nbfi_hal->__nbfi_read_default_settings(&default_nbfi_settings);
+          
         if(!nbfi.additional_flags&NBFI_FLG_FIXED_BAUD_RATE) //if auto bitrates
         {
-          nbfi_settings_t default_nbfi_settings;
-          nbfi_hal->__nbfi_read_default_settings(&default_nbfi_settings);
           nbfi.rx_phy_channel = default_nbfi_settings.rx_phy_channel;
           nbfi.tx_phy_channel = default_nbfi_settings.tx_phy_channel;
         }
+        
+        nbfi.nbfi_freq_plan = default_nbfi_settings.nbfi_freq_plan;
+        
         nbfi_hal->__nbfi_write_flash_settings(&nbfi);
         nbfi.tx_phy_channel = tmp_tx_phy;
         nbfi.rx_phy_channel = tmp_rx_phy;      

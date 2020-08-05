@@ -15,6 +15,7 @@ AT+XXX? provides a short help of the given command, for example AT+MODE?\n\r\
 AT+XXX is used to run a command, such as AT+RESET\n\r\
 AT+XXX=? is used to get the value of a given command, for example AT+ID=?\n\r\
 AT+XXX=<value> is used to provide a value to a command, for example AT+MODE=CRX\n\r\
+AT+LIST provides whole list of available commands\n\r\
 ";
 
 static nbfi_at_server_tags_t tag_for_help;

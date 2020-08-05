@@ -25,7 +25,7 @@ void HAL_SYSTICK_Callback(void)
 
 void nbfi_send_complete(nbfi_ul_sent_status_t ul)
 {
-   
+   //NBFi_Send5("Hello!", sizeof("Hello!"),0); 
 }
 
 void nbfi_receive_complete(uint8_t * data, uint16_t length)
@@ -87,7 +87,7 @@ int main(void)
   log_init();
     
   
-  //last_send_status = NBFi_Send5("Hello!", sizeof("Hello!"));   
+  //NBFi_Send5("Hello!", sizeof("Hello!"),0);   
   
 
   GPIO_InitTypeDef GPIO_InitStruct; 

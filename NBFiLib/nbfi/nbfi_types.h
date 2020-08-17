@@ -212,7 +212,6 @@ typedef struct
     nbfi_mack_mode_t	mack_mode;
     uint8_t             num_of_retries;
     uint8_t             max_payload_len;
-    //uint32_t            dl_ID;
     uint16_t            wait_ack_timeout;
     uint32_t            tx_freq;
     uint32_t            rx_freq;

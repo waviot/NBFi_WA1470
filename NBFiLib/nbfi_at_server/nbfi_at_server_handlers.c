@@ -836,7 +836,7 @@ uint16_t nbfi_at_server_temp_handler(uint8_t *reply, nbfi_at_server_action_t act
         return nbfi_at_server_return_uint(reply, nbfi_HAL_measure_valtage_or_temperature(0), AT_OK);
       }
     case AT_HELP:
-      return nbfi_at_server_return_tag_help(reply, "get VCC value");
+      return nbfi_at_server_return_tag_help(reply, "get device temperature");
     default:
       break;
   }

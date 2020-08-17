@@ -22,7 +22,6 @@
 #define NBFI_PARAM_UL_BASE_FREQ         0x0D
 #define NBFI_PARAM_DL_BASE_FREQ         0x0E
 #define NBFI_PARAM_QUALITY_EX           0x0F
-#define NBFI_PARAM_BROADCAST_ADD        0x10
 #define NBFI_PARAM_APP_IDS              0x11
 #define NBFI_PARAM_BSANDSERVER_IDS      0x12
 #define NBFI_PARAM_FPLAN                0x13

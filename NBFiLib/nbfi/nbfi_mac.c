@@ -261,13 +261,13 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 	uint8_t len = 0;
 	static _Bool parity = 0;
 	uint32_t tx_freq;
-        uint32_t mic_or_crc32;
+    uint32_t mic_or_crc32;
 
-        nbfi_ul_sent_status_t *pkt_status = NBFi_Get_UL_status(pkt->id, 1);
-        uint8_t pkt_flags;
-        if(pkt_status) pkt_flags = pkt_status->flags;
-        else pkt_flags = 0;
-        
+    nbfi_ul_sent_status_t *pkt_status = NBFi_Get_UL_status(pkt->id, 1);
+    uint8_t pkt_flags;
+    if(pkt_status) pkt_flags = pkt_status->flags;
+    else pkt_flags = 0;
+		      
         
 	ul_buf[len++] = FULL_ID[3];
 	ul_buf[len++] = FULL_ID[2];
@@ -312,7 +312,8 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 	else
         {
             if(pkt_flags&NBFI_UL_FLAG_SEND_ON_CENTRAL_FREQ) tx_freq = nbfi.ul_freq_base;
-            else tx_freq = NBFi_MAC_get_UL_freq(ul_buf[len - 4], parity);
+            else 
+		  	tx_freq = NBFi_MAC_get_UL_freq(ul_buf[len - 4], parity);
         }
 
 	for(int i=0; i<sizeof(protE_preambula); i++)

@@ -814,7 +814,11 @@ static void NBFi_Receive_Timeout_cb(struct scheduler_desc *desc)
                 if(NBFi_Config_is_settings_default())
                 {
                     NBFi_Config_Set_Default();
-                    NBFi_Config_Try_Alternative();
+                    if(NBFi_Config_Try_Alternative()) 
+					{
+						nbfi_active_pkt->retry_num = 0;
+                    	nbfi_active_pkt->state = PACKET_QUEUED;
+					}
                 }
                 else
                 {
@@ -1023,7 +1027,7 @@ static uint32_t NBFI_PhyTo_Delay(nbfi_phy_channel_t chan)
 
 static uint32_t NBFI_PhyToDL_ListenTime(nbfi_phy_channel_t chan)
 {
-	const uint32_t NBFI_DL_LISTEN_TIME[4] = {60000, 55000, 4000, 4000};
+	const uint32_t NBFI_DL_LISTEN_TIME[4] = {60000, 30000, 6000, 6000};
 
 	if (chan > DL_DBPSK_25600_PROT_E)
 		return NBFI_DL_LISTEN_TIME[0];
@@ -1036,7 +1040,7 @@ static uint32_t NBFI_PhyToDL_ListenTime(nbfi_phy_channel_t chan)
 
 static uint32_t NBFI_PhyToDL_AddRndListenTime(nbfi_phy_channel_t chan)
 {
-	const uint32_t NBFI_DL_ADD_RND_LISTEN_TIME[4] = {5000, 5000, 2000, 2000};
+	const uint32_t NBFI_DL_ADD_RND_LISTEN_TIME[4] = {5000, 1000, 100, 100};
 	
 	if (chan > DL_DBPSK_25600_PROT_E)
 		return NBFI_DL_ADD_RND_LISTEN_TIME[0];

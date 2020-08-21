@@ -752,10 +752,12 @@ nbfi_ul_sent_status_t* NBFi_Get_Next_Unreported_UL(nbfi_ul_status_t status)
 
 nbfi_ul_sent_status_t* NBFi_Get_UL_status(uint16_t id, _Bool eight_bits_id)
 {
+  if(id == 0) return 0;
   for(uint8_t i = nbfi_sent_buf_head - NBFI_SENT_STATUSES_BUF_SIZE; i != nbfi_sent_buf_head; i++)
   {
     nbfi_ul_sent_status_t* ul = &NBFi_sent_UL_stat_Buf[i%NBFI_SENT_STATUSES_BUF_SIZE];
-    if((ul->id == id)||(eight_bits_id&&((ul->id&0xff) == id))) 
+    
+	if((ul->id == id)||(eight_bits_id&&((ul->id&0xff) == id))) 
     {
       return ul;
     }

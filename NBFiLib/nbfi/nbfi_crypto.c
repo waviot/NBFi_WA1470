@@ -7,6 +7,10 @@ static magma_ctx_t key_root_ctx;
 static magma_ctx_t key_ul_master_ctx, key_ul_mic_ctx, key_ul_work_ctx;
 static magma_ctx_t key_dl_master_ctx, key_dl_mic_ctx, key_dl_work_ctx;
 
+
+
+
+
 static uint32_t NBFi_Crypto_MIC(magma_ctx_t *ctx, const uint8_t *buf, uint8_t len)
 {
 	uint32_t mic;
@@ -159,4 +163,34 @@ void NBFi_Crypto_Set_KEY(uint32_t *key, uint32_t *ul_iter, uint32_t *dl_iter)
 #ifndef NBFI_NO_CRYPTO
 	inited = 1;
 #endif
+}
+
+
+void NBFi_Crypto_Save_Restore_All_KEYs(_Bool save_or_restore)
+{
+	static magma_ctx_t tmp_key_root_ctx;
+	static magma_ctx_t tmp_key_ul_master_ctx, tmp_key_ul_mic_ctx, tmp_key_ul_work_ctx;
+	static magma_ctx_t tmp_key_dl_master_ctx, tmp_key_dl_mic_ctx, tmp_key_dl_work_ctx;
+
+	if(save_or_restore)
+	{
+		tmp_key_root_ctx = key_root_ctx;
+		tmp_key_ul_master_ctx = key_ul_master_ctx;
+		tmp_key_ul_mic_ctx = key_ul_mic_ctx;
+		tmp_key_ul_work_ctx = key_ul_work_ctx;
+		tmp_key_dl_master_ctx = key_dl_master_ctx;
+		tmp_key_dl_mic_ctx = key_dl_mic_ctx;
+		tmp_key_dl_work_ctx = key_dl_work_ctx;
+	}
+	else
+	{
+		key_root_ctx = tmp_key_root_ctx;
+		key_ul_master_ctx = tmp_key_ul_master_ctx;
+		key_ul_mic_ctx = tmp_key_ul_mic_ctx;
+		key_ul_work_ctx = tmp_key_ul_work_ctx;
+		key_dl_master_ctx = tmp_key_dl_master_ctx;
+		key_dl_mic_ctx = tmp_key_dl_mic_ctx;
+		key_dl_work_ctx = tmp_key_dl_work_ctx;
+	}
+
 }

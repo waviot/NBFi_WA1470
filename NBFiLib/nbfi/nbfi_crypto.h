@@ -12,5 +12,5 @@ uint32_t NBFi_Crypto_UL_MIC(const uint8_t *buf, const uint8_t len);
 uint32_t NBFi_Crypto_DL_MIC(const uint8_t *buf, const uint8_t len);
 uint32_t NBFI_Crypto_inc_iter(uint32_t iter);
 uint8_t NBFi_Crypto_Available();
-
+void NBFi_Crypto_Save_Restore_All_KEYs(_Bool save_or_restore);
 #endif // NBFI_CRYPTO_H

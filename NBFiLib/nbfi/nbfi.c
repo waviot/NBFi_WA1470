@@ -274,6 +274,12 @@ void NBFi_switch_to_another_settings(nbfi_settings_t* settings, nbfi_crypto_iter
            
       memcpy(&nbfi, settings, sizeof(nbfi_settings_t));
       nbfi_iter = *it;
+	  NBFi_Crypto_Save_Restore_All_KEYs(1);
+	  
+	  if(nbfi.master_key != 0)
+      {
+      	NBFi_Crypto_Set_KEY(nbfi.master_key, &nbfi_iter.ul, &nbfi_iter.dl);
+      }
     }
     else
     {
@@ -284,12 +290,10 @@ void NBFi_switch_to_another_settings(nbfi_settings_t* settings, nbfi_crypto_iter
         NBFi_Config_Set_TX_Chan(old_settings.tx_phy_channel);
         NBFi_Config_Set_RX_Chan(old_settings.rx_phy_channel);
         rf_state = STATE_CHANGED;
+		NBFi_Crypto_Save_Restore_All_KEYs(0);
     }
 
-    if(nbfi.master_key != 0)
-    {
-      NBFi_Crypto_Set_KEY(nbfi.master_key, &nbfi_iter.ul, &nbfi_iter.dl);
-    }
+
     
     if(rf_state == STATE_RX) NBFi_MAC_RX();
     

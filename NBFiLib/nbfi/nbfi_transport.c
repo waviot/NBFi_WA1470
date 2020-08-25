@@ -424,7 +424,7 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
                 break;
             case SYSTEM_PACKET_GROUP_START:  //start packet of the groupe
             case SYSTEM_PACKET_GROUP_START_OLD:  
-                if(was_not_cleared_after_groupe)   NBFi_Clear_RX_Buffer(-1, NBFI_PhyTo_Delay(nbfi.rx_phy_channel)*32);
+                if(was_not_cleared_after_groupe)   NBFi_Clear_RX_Buffer(-1, 1000*60*10/*NBFI_PhyTo_Delay(nbfi.rx_phy_channel)*32*/);
                 was_not_cleared_after_groupe = 1;
                 
                 goto place_to_stack;
@@ -811,7 +811,7 @@ static void NBFi_Receive_Timeout_cb(struct scheduler_desc *desc)
             if(!(nbfi.additional_flags&NBFI_FLG_NO_RESET_TO_DEFAULTS))
             {
                 
-                if(NBFi_Config_is_settings_default())
+                if(NBFi_Config_is_settings_default()||try_counter)
                 {
                     NBFi_Config_Set_Default();
                     if(NBFi_Config_Try_Alternative()) 

@@ -70,7 +70,7 @@ void                    NBFi_set_Settings(nbfi_settings_t*, _Bool persistent);
 _Bool                   NBFi_send_Packet_to_Config_Parser(uint8_t* buf);
 void                    NBFi_clear_Saved_Configuration();
 
-void                    NBFi_switch_to_another_settings(nbfi_settings_t* settings, nbfi_crypto_iterator_t* it, _Bool to_or_from);
+void                    NBFi_switch_to_custom_settings(nbfi_settings_t* settings, nbfi_crypto_iterator_t* it, _Bool to_or_from);
 _Bool                   NBFi_is_Switched_to_Custom_Settings();
 
 void                    NBFi_CPU_Reset();

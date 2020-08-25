@@ -258,7 +258,7 @@ void NBFi_clear_Saved_Configuration()
 	nbfi_hal->__nbfi_write_flash_settings(&empty);
 }
         
-void NBFi_switch_to_another_settings(nbfi_settings_t* settings, nbfi_crypto_iterator_t* it, _Bool to_or_from)
+void NBFi_switch_to_custom_settings(nbfi_settings_t* settings, nbfi_crypto_iterator_t* it, _Bool to_or_from)
 {
     static nbfi_settings_t old_settings;
     static nbfi_crypto_iterator_t old_iter;
@@ -267,6 +267,13 @@ void NBFi_switch_to_another_settings(nbfi_settings_t* settings, nbfi_crypto_iter
    
     if(to_or_from)
     {
+	  if(switched_to_custom_settings) 
+	  {
+		//if trying to switch to custom settings but have not switched off before 
+		nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+		return ;
+	  }
+	  
       memcpy(&old_settings, &nbfi, sizeof(nbfi_settings_t));
       memcpy(&state, &nbfi_state, sizeof(nbfi_state_t));
       old_iter = nbfi_iter;
@@ -281,7 +288,7 @@ void NBFi_switch_to_another_settings(nbfi_settings_t* settings, nbfi_crypto_iter
       	NBFi_Crypto_Set_KEY(nbfi.master_key, &nbfi_iter.ul, &nbfi_iter.dl);
       }
     }
-    else
+    else if(switched_to_custom_settings)
     {
         NBFi_Clear_TX_Buffer();
         memcpy(&nbfi_state, &state, sizeof(nbfi_state_t));
@@ -292,6 +299,12 @@ void NBFi_switch_to_another_settings(nbfi_settings_t* settings, nbfi_crypto_iter
         rf_state = STATE_CHANGED;
 		NBFi_Crypto_Save_Restore_All_KEYs(0);
     }
+	else
+	{
+		//if trying to return from custom settings but have not switched to it before 
+		nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+		return ;
+	}
 
 
     

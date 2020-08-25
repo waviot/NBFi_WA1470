@@ -86,6 +86,8 @@ extern _Bool nbfi_settings_need_to_save_to_flash;
 
 extern NBFi_station_info_s nbfi_station_info;
 
+extern uint8_t try_counter;
+
 void    NBFI_Config_Check_State();
 _Bool   NBFi_Config_Tx_Power_Change(nbfi_rate_direct_t dir);
 void    NBFi_Config_Return();

@@ -925,7 +925,7 @@ static void NBFi_SendHeartBeats(struct scheduler_desc *desc)
         ack_pkt->phy_data.payload[3] = nbfi_hal->__nbfi_measure_voltage_or_temperature(0);    //temperature
         ack_pkt->phy_data.payload[4] = nbfi_state.aver_rx_snr; // DL average snr
         ack_pkt->phy_data.payload[5] = nbfi_state.aver_tx_snr; // UL average snr
-        ack_pkt->phy_data.payload[6] = (uint8_t)(NBFi_RF_get_noise() + 150); // rx noice
+        ack_pkt->phy_data.payload[6] = (uint8_t)(NBFi_RF_get_noise()/*wa1470dem_get_rssi()*/ + 150); // rx noice
         ack_pkt->phy_data.payload[7] = nbfi.tx_pwr;            // output power
         ack_pkt->phy_data.ITER = nbfi_state.UL_iter++ & 0x1f;
         ack_pkt->phy_data.header |= SYS_FLAG;

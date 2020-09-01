@@ -55,6 +55,8 @@ uint8_t current_rx_rate = 0;
 uint8_t prev_tx_rate = 0;
 uint8_t prev_rx_rate = 0;
 
+nbfi_freq_plan_t prev_fplan = {0};
+
 uint8_t success_rate = 0;
 
 uint8_t you_should_dl_power_step_up = 0;
@@ -232,7 +234,7 @@ static _Bool NBFi_Config_Rate_Change(uint8_t rx_tx, nbfi_rate_direct_t dir )
     memcpy_xdata(&nbfi_prev, &nbfi, sizeof(nbfi));
     prev_rx_rate = rx;
     prev_tx_rate = tx;
-
+	prev_fplan = nbfi.nbfi_freq_plan;
     nbfi.tx_phy_channel = TxRateTable[current_tx_rate];
 
     //if((nbfi.rx_phy_channel == RxRateTable[current_rx_rate]) && (dir == DOWN)) return 1;
@@ -246,7 +248,9 @@ static _Bool NBFi_Config_Rate_Change(uint8_t rx_tx, nbfi_rate_direct_t dir )
     }
   
     if(NBFi_Config_Check_If_FP_Need_To_Change(nbfi.nbfi_freq_plan, nbfi_station_info.fp, NBFI_DL_FP_MASK))
+	{
       nbfi.nbfi_freq_plan.fp = (nbfi.nbfi_freq_plan.fp&NBFI_UL_FP_MASK) + (nbfi_station_info.fp.fp&NBFI_DL_FP_MASK);
+	}
     
     if(!NBFi_Config_Send_Sync(1))
     {
@@ -496,7 +500,8 @@ void NBFi_Config_Return()
     memcpy_xdata(&nbfi, &nbfi_prev, sizeof(nbfi));
     current_tx_rate = prev_tx_rate;
     current_rx_rate = prev_rx_rate;
-    nbfi_station_info.fp.fp = 0;
+	nbfi.nbfi_freq_plan = prev_fplan;
+   // nbfi_station_info.fp.fp = 0;
    // if(nbfi.mode == NRX) nbfi.handshake_mode = HANDSHAKE_NONE;
     NBFi_Config_Send_Sync(0);
 }

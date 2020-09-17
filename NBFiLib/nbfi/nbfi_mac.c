@@ -263,6 +263,8 @@ nbfi_status_t NBFi_MAC_TX_ProtocolE(nbfi_transport_packet_t* pkt)
 	uint32_t tx_freq;
     uint32_t mic_or_crc32;
 
+	memset(ul_buf,0,sizeof(ul_buf));
+	
     nbfi_ul_sent_status_t *pkt_status = NBFi_Get_UL_status(pkt->id, 1);
     uint8_t pkt_flags;
     if(pkt_status) pkt_flags = pkt_status->flags;

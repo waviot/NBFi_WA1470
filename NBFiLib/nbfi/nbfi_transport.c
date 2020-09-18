@@ -880,7 +880,7 @@ void NBFi_set_RTC_irq(uint32_t time)
    NBFi_update_RTC();
    nbfi_rtc = time;
    rtc_synchronised = 1;
-   //if(nbfi_hal->__nbfi_rtc_synchronized) nbfi_hal->__nbfi_rtc_synchronized(nbfi_rtc);
+   if(nbfi_hal->__nbfi_rtc_synchronized) nbfi_hal->__nbfi_rtc_synchronized(nbfi_rtc);
 }
 
 

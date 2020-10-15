@@ -74,7 +74,7 @@ void  NBFI_Main_Level_Loop()
    if(rtc_synchronised && nbfi_hal->__nbfi_rtc_synchronized) 
    {
      rtc_synchronised = 0;
-     nbfi_hal->__nbfi_rtc_synchronized(nbfi_rtc);
+     //nbfi_hal->__nbfi_rtc_synchronized(nbfi_rtc);
    }
    
      if(nbfi_settings_need_to_save_to_flash && (nbfi_hal->__nbfi_write_flash_settings != 0)) 

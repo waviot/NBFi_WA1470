@@ -1,7 +1,7 @@
 #ifndef NBFI_CRYPTO_H
 #define NBFI_CRYPTO_H
 
-#define KEY_SCAN_DEPTH		100
+#define KEY_SCAN_DEPTH		10
 #define CRYPTO_ITER_SIZE	20	//	bits
 
 void NBFi_Crypto_Set_KEY(uint32_t *key, uint32_t *ul_iter, uint32_t *dl_iter);

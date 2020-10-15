@@ -178,7 +178,7 @@ const nbfi_settings_t nbfi_short_range_settings_client =
 void radio_switch_to_from_short_range(_Bool en, _Bool client_or_server)
 {
     nbfi_crypto_iterator_t it = {0,0};
-    NBFi_switch_to_another_settings(client_or_server?((nbfi_settings_t *)&nbfi_short_range_settings_client):((nbfi_settings_t *)&nbfi_short_range_settings_server), &it, en);
+    NBFi_switch_to_custom_settings(client_or_server?((nbfi_settings_t *)&nbfi_short_range_settings_client):((nbfi_settings_t *)&nbfi_short_range_settings_server), &it, en);
 }
 
 

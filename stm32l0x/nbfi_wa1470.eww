@@ -2,7 +2,7 @@
 
 <workspace>
   <project>
-    <path>$WS_DIR$\ChipTestBoard\ChipTestBoard.ewp</path>
+    <path>$WS_DIR$\WA1470RefBoard\WA1470RefBoard.ewp</path>
   </project>
   <project>
     <path>$WS_DIR$\WRM1470DevKit\WRM1470DevKit.ewp</path>

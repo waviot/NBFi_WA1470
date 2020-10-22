@@ -108,6 +108,7 @@ nbfi_status_t NBFi_go_to_Sleep(_Bool sleep)
 {
     static _Bool old_state = 1;
     nbfi_status_t res = OK;
+	nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
     if(sleep)
     {
         nbfi.mode = OFF;
@@ -126,6 +127,7 @@ nbfi_status_t NBFi_go_to_Sleep(_Bool sleep)
             NBFi_Force_process();
         }
     }
+	nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
     old_state = sleep;
     return res;
 }
@@ -332,4 +334,18 @@ float NBFi_get_rssi()
   rssi = NBFi_RF_get_rssi();
   nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
   return rssi;
+}
+
+void	NBFi_watchdog() 	//call it every 1 sec
+{
+	static uint16_t nbfi_busy_timer = 0;
+	nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+	if(NBFi_Packets_To_Send()) nbfi_busy_timer++;
+	else nbfi_busy_timer = 0;
+	if(nbfi_busy_timer > 60*60) //more than 1 hour tx buffer is permanently full
+	{
+		nbfi_busy_timer = 0;
+		NBFi_Clear_TX_Buffer();		
+	}
+  	nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
 }

@@ -64,7 +64,6 @@ void                    NBFi_set_RTC(uint32_t time);
 
 void                    NBFi_set_Device_Info(nbfi_dev_info_t *);
 
-
 void                    NBFi_get_Settings(nbfi_settings_t*);
 void                    NBFi_set_Settings(nbfi_settings_t*, _Bool persistent);
 _Bool                   NBFi_send_Packet_to_Config_Parser(uint8_t* buf);
@@ -76,5 +75,6 @@ _Bool                   NBFi_is_Switched_to_Custom_Settings();
 void                    NBFi_CPU_Reset();
 
 float                   NBFi_get_rssi();
+void					NBFi_watchdog();
 
 #endif // NBFI_H

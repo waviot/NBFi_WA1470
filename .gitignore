@@ -30,3 +30,11 @@ stm32l0x/WRM1470DevKit/Debug/Obj/
 stm32l0x/WRM1470DevKit/Src/debug.log
 
 NBFiLib/nbfi/debug.log
+
+stm32l0x/WA1470RefBoard/Debug/Obj/
+
+*.PrjPcbStructure
+
+stm32l0x/WA1470RefBoard/Debug/List/
+
+stm32l0x/WA1470RefBoard/Debug/Exe/

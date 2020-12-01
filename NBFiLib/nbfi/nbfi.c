@@ -258,6 +258,13 @@ void NBFi_clear_Saved_Configuration()
 	nbfi_hal->__nbfi_write_flash_settings(&empty);
 }
         
+void NBFi_reset_to_default_settings()
+{
+    nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
+  	NBFi_Config_Set_Default();
+	nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
+}
+
 void NBFi_switch_to_custom_settings(nbfi_settings_t* settings, nbfi_crypto_iterator_t* it, _Bool to_or_from)
 {
     static nbfi_settings_t old_settings;

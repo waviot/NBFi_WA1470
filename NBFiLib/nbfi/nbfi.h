@@ -72,7 +72,7 @@ void                    NBFi_clear_Saved_Configuration();
 
 void                    NBFi_switch_to_custom_settings(nbfi_settings_t* settings, nbfi_crypto_iterator_t* it, _Bool to_or_from);
 _Bool                   NBFi_is_Switched_to_Custom_Settings();
-
+void 					NBFi_reset_to_default_settings();
 void                    NBFi_CPU_Reset();
 
 float                   NBFi_get_rssi();

@@ -48,15 +48,13 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
     }
     
 	
-	
     if(rf_busy) return ERR_RF_BUSY;
 
     rf_busy = 1;
 
-    if((last_phy != phy_channel) || (nbfi.additional_flags!=last_additional_flags))
+    if((last_phy != phy_channel) || ((nbfi.additional_flags&NBFI_FLG_RX_DEFAULT_PREAMBLE)!=(last_additional_flags&NBFI_FLG_RX_DEFAULT_PREAMBLE)))
     {
 	  wa1470_reinit((nbfi.additional_flags&NBFI_FLG_RX_DEFAULT_PREAMBLE)?protD_preambula:_preambule);
-      //wa1470_reinit(0);
       last_tx_prw = 100;
       last_tx_freq = 0;
       last_rx_freq = 0;

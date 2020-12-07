@@ -21,9 +21,14 @@ uint32_t NBFi_DL_ID()
   return *((uint32_t*)FULL_ID);
 }
 
-
 static nbfi_phy_channel_t last_phy = UNDEFINED;
 static uint16_t last_additional_flags = 0;
+static nbfi_rf_iface_t nbfi_rf_iface;
+
+void NBFI_RF_iface(nbfi_rf_iface_t iface)
+{
+	nbfi_rf_iface = iface;
+}
 
 nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
                         nbfi_rf_antenna_t        antenna,
@@ -54,7 +59,8 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
 
     if((last_phy != phy_channel) || ((nbfi.additional_flags&NBFI_FLG_RX_DEFAULT_PREAMBLE)!=(last_additional_flags&NBFI_FLG_RX_DEFAULT_PREAMBLE)))
     {
-	  wa1470_reinit((nbfi.additional_flags&NBFI_FLG_RX_DEFAULT_PREAMBLE)?protD_preambula:_preambule);
+
+      nbfi_rf_iface.reinit((nbfi.additional_flags&NBFI_FLG_RX_DEFAULT_PREAMBLE)?protD_preambula:_preambule);
       last_tx_prw = 100;
       last_tx_freq = 0;
       last_rx_freq = 0;
@@ -71,23 +77,23 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
     case UL_DBPSK_400_PROT_E:
     case UL_DBPSK_3200_PROT_E:
     case UL_DBPSK_25600_PROT_E:
-        wa1470dem_rx_enable(0);
+        nbfi_rf_iface.dem_rx_enable(0);
         nbfi_hal->__nbfi_before_tx(&nbfi);
                         
         if(freq != last_tx_freq)
         {
           nbfi_state.last_tx_freq = last_tx_freq = freq;
-          wa1470mod_set_freq(freq);
+          nbfi_rf_iface.mod_set_freq(freq);
            
         }
                 
         if(power != last_tx_prw)
         {
           last_tx_prw = power;
-          wa1470rfe_set_tx_power(power);
+          nbfi_rf_iface.rfe_set_tx_power(power);
         }
         
-        wa1470rfe_set_mode(RFE_MODE_TX);           
+        nbfi_rf_iface.rfe_set_mode(RFE_MODE_TX);           
                      
         rf_busy = 0;
         rf_state = STATE_TX;
@@ -100,19 +106,19 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
     case DL_DBPSK_25600_PROT_D:
     case DL_DBPSK_100H_PROT_D:
         nbfi_hal->__nbfi_before_rx(&nbfi);
-        wa1470dem_rx_enable(1);
+        nbfi_rf_iface.dem_rx_enable(1);
         
         if(last_phy != phy_channel)
-          wa1470dem_set_bitrate((dem_bitrate_s)phy_channel);
+          nbfi_rf_iface.dem_set_bitrate((dem_bitrate_s)phy_channel);
         
-        wa1470rfe_set_mode(RFE_MODE_RX);
+        nbfi_rf_iface.rfe_set_mode(RFE_MODE_RX);
         
         if(freq != last_rx_freq)
         {
           nbfi_state.last_rx_freq = last_rx_freq = freq;
-          wa1470dem_set_freq(freq);
+          nbfi_rf_iface.dem_set_freq(freq);
         }
-        //wa1470dem_set_freq(freq);
+        //nbfi_rf_iface.dem_set_freq(freq);
         rf_busy = 0;
         rf_state = STATE_RX;
         last_phy = phy_channel;
@@ -124,11 +130,11 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
 nbfi_status_t NBFi_RF_Deinit()
 {
     if(rf_busy) return ERR_RF_BUSY;
-    wa1470dem_rx_enable(0);
+    nbfi_rf_iface.dem_rx_enable(0);
     nbfi_hal->__nbfi_before_off(&nbfi);    
     rf_busy = 1;
-    //wa1470rfe_set_mode(RFE_MODE_DEEP_SLEEP);
-    wa1470_deinit();
+    //nbfi_rf_iface.rfe_set_mode(RFE_MODE_DEEP_SLEEP);
+    nbfi_rf_iface.deinit();
     rf_busy = 0;
     transmit = 0;
     rf_state = STATE_OFF;
@@ -143,7 +149,7 @@ nbfi_status_t NBFi_RF_Transmit(uint8_t* pkt, uint8_t len, nbfi_phy_channel_t  ph
 
     rf_busy = 1;
 
-    wa1470mod_send(pkt, (mod_bitrate_s) phy_channel);
+    nbfi_rf_iface.mod_send(pkt, (mod_bitrate_s) phy_channel);
     
     rf_busy = 0;
     
@@ -171,20 +177,20 @@ void NBFi_RF_TX_Finished()
 _Bool NBFi_RF_is_TX_in_Progress()
 {
   if((rf_state == STATE_TX)||(rf_state == STATE_RX))
-      return wa1470mod_is_tx_in_progress();
+      return nbfi_rf_iface.mod_is_tx_in_progress();
   else return 0;
 }  
 
 float NBFi_RF_get_noise()
 {
   
-  if(wa1470dem_get_noise() < -150) return -150;
-  else return wa1470dem_get_noise();
+  if(nbfi_rf_iface.dem_get_noise() < -150) return -150;
+  else return nbfi_rf_iface.dem_get_noise();
 }
 
 float NBFi_RF_get_rssi()
 {
-  if(rf_state == STATE_RX) return wa1470dem_get_rssi();
+  if(rf_state == STATE_RX) return nbfi_rf_iface.dem_get_rssi();
   else return 0; //unavailable
     
 }
@@ -192,6 +198,6 @@ float NBFi_RF_get_rssi()
 
 _Bool NBFi_RF_can_Sleep()
 {
-  return wa1470_cansleep();
+  return nbfi_rf_iface.cansleep();
 }  
 

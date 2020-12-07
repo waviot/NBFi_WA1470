@@ -29,6 +29,29 @@ extern nbfi_phy_channel_t nbfi_phy_channel;
 extern _Bool rf_busy;
 extern _Bool transmit;
 
+typedef struct
+{
+	void (*init)(_Bool send_by_bpsk_pin, uint32_t modem_id, wa1470_HAL_st*, ischeduler_st*);
+	void (*reinit)(uint32_t preambule);
+	void (*deinit)();
+	_Bool (*cansleep)();
+
+	void (*rfe_set_mode)(rfe_mode_s mode);
+	void (*rfe_set_tx_power)(int8_t power);
+
+	void (*mod_set_freq)(uint32_t freq);
+	void (*mod_send)(uint8_t* data, mod_bitrate_s bitrate);
+	_Bool (*mod_is_tx_in_progress)();
+
+	void (*dem_rx_enable)(_Bool en);
+	void (*dem_set_bitrate)(dem_bitrate_s bitrate);
+	void (*dem_set_freq)(uint32_t freq);
+	float (*dem_get_rssi)();
+	float (*dem_get_noise)();
+} nbfi_rf_iface_t;
+
+void NBFI_RF_iface(nbfi_rf_iface_t iface);
+
 nbfi_status_t   NBFi_RF_Init(nbfi_phy_channel_t  phy_channel,
                         nbfi_rf_antenna_t        antenna,
                         int8_t              power,

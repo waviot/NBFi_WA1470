@@ -1025,23 +1025,38 @@ static uint32_t NBFI_PhyTo_Delay(nbfi_phy_channel_t chan)
 	}
 }
 
+
 static uint32_t NBFI_PhyToDL_ListenTime(nbfi_phy_channel_t chan)
 {
 	const uint32_t NBFI_DL_LISTEN_TIME[4] = {60000, 30000, 6000, 6000};
-
-	if (chan > DL_DBPSK_25600_PROT_E)
+	const uint32_t NBFI_DL_LISTEN_TIME_NO_LATANCY[4] = {5900, 740, 500, 400};
+	
+	if((nbfi.num_of_retries&0x0f) > 5)
+	{
+		if (chan > DL_DBPSK_25600_PROT_E)
+		return NBFI_DL_LISTEN_TIME_NO_LATANCY[0];
+		else if (chan >= DL_DBPSK_50_PROT_E)
+		return NBFI_DL_LISTEN_TIME_NO_LATANCY[chan - DL_DBPSK_50_PROT_E];
+		else if (chan >= DL_DBPSK_50_PROT_D)
+		return NBFI_DL_LISTEN_TIME_NO_LATANCY[chan - DL_DBPSK_50_PROT_D];
+		return NBFI_DL_LISTEN_TIME_NO_LATANCY[0];		
+	}
+	else
+	{
+		if (chan > DL_DBPSK_25600_PROT_E)
 		return NBFI_DL_LISTEN_TIME[0];
-	else if (chan >= DL_DBPSK_50_PROT_E)
+		else if (chan >= DL_DBPSK_50_PROT_E)
 		return NBFI_DL_LISTEN_TIME[chan - DL_DBPSK_50_PROT_E];
-	else if (chan >= DL_DBPSK_50_PROT_D)
+		else if (chan >= DL_DBPSK_50_PROT_D)
 		return NBFI_DL_LISTEN_TIME[chan - DL_DBPSK_50_PROT_D];
-	return NBFI_DL_LISTEN_TIME[0];		
+		return NBFI_DL_LISTEN_TIME[0];		
+	}
+	
 }
 
 static uint32_t NBFI_PhyToDL_AddRndListenTime(nbfi_phy_channel_t chan)
 {
-	const uint32_t NBFI_DL_ADD_RND_LISTEN_TIME[4] = {5000, 1000, 100, 100};
-	
+	const uint32_t NBFI_DL_ADD_RND_LISTEN_TIME[4] = {5000, 1000, 100, 50};
 	if (chan > DL_DBPSK_25600_PROT_E)
 		return NBFI_DL_ADD_RND_LISTEN_TIME[0];
 	else if (chan >= DL_DBPSK_50_PROT_E)

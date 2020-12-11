@@ -524,6 +524,7 @@ void NBFi_Config_Set_Default()
 
 _Bool NBFi_Config_Try_Alternative()
 {
+  
   if(nbfi.try_alternative[try_counter%NBFI_ALTERNATIVES_NUMBER].try_interval == 0) 
   {
 	try_counter = 0;

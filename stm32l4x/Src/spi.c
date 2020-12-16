@@ -78,8 +78,6 @@ void MX_SPI1_Init(void)
 void SPI_Activate(void)
 {
   LL_SPI_SetRxFIFOThreshold(SPI1, LL_SPI_RX_FIFO_TH_QUARTER); //8 bit
-  /* Enable RXNE  Interrupt             */
-  //  LL_SPI_EnableIT_RXNE(SPI1);
   /* Enable SPI1 */
   LL_SPI_Enable(SPI1);
 }
@@ -94,25 +92,12 @@ void SPI_Rx(uint8_t *byte, uint16_t len)
 {
   volatile uint16_t timeout;
 
-  //  for (uint16_t i = 0; i < len; i++)
-  //  {
-  //    LL_SPI_TransmitData8(SPI1, 0x00);
-  //    timeout = SPI_TIMEOUT;
-  //    while (!LL_SPI_IsActiveFlag_RXNE(SPI1) && timeout--)
-  //      ;
-  //    timeout = SPI_TIMEOUT;
-  //    while (LL_SPI_IsActiveFlag_BSY(SPI1) && timeout--)
-  //      ;
-  //    byte[i] = LL_SPI_ReceiveData8(SPI1);
-  //  }
-
   if (LL_SPI_IsActiveFlag_RXNE(SPI1))
   {
     /* Call function Slave Reception Callback */
     SPI1_Rx_Callback();
   }
   /* Enable RXNE  Interrupt             */
-  //    LL_SPI_EnableIT_RXNE(SPI1);
   for (uint16_t i = 0; i < len; i++)
   {
     LL_SPI_TransmitData8(SPI1, 0x00);
@@ -121,11 +106,6 @@ void SPI_Rx(uint8_t *byte, uint16_t len)
       ;
     aRxBuffer[ubReceiveIndex++] = LL_SPI_ReceiveData8(SPI1);
   }
-  //    while ((len > ubReceiveIndex)&& timeout--)
-  //    {
-  //    }
-  /* Disable RXNE Interrupt */
-  //    LL_SPI_DisableIT_RXNE(SPI1);
 
   memcpy_s(byte, len, aRxBuffer, len);
   ubReceiveIndex = 0;

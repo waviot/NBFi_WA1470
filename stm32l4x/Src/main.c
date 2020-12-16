@@ -24,7 +24,6 @@
 #include "iwdg.h"
 #include "rtc.h"
 #include "spi.h"
-#include "usart.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -66,9 +65,6 @@ struct scheduler_desc everysec_desc;
  * \brief for time difference
  *
  */
-static time_t SecondsOld = 0;
-
-bool WeCanSleep = false;
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -155,13 +151,13 @@ void EverySec(struct scheduler_desc *desc)
   //  scheduler_add_task(desc, EverySec, RELATIVE, SECONDS(1));
   //IWDG_Refresh();
 
-  NBFI_Main_Level_Loop();
-  time_t timeNow = RTC_GetSeconds();
-  Water7OneSec(RTC_GetTime());
-
-  uint8_t isOk = MeterEverySecHandler(timeNow);
-  test_link(timeNow - SecondsOld);
-  SecondsOld = timeNow;
+//  NBFI_Main_Level_Loop();
+//  time_t timeNow = RTC_GetSeconds();
+//  Water7OneSec(RTC_GetTime());
+//
+//  uint8_t isOk = MeterEverySecHandler(timeNow);
+//  test_link(timeNow - SecondsOld);
+//  SecondsOld = timeNow;
 }
 
 /*!
@@ -226,7 +222,6 @@ int main(void)
   MX_RTC_Init();
   MX_SPI1_Init();
   MX_IWDG_Init();
-  MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
   IWDG_Init();
   /* Ensure that MSI is wake-up system clock */
@@ -234,12 +229,12 @@ int main(void)
 
   LL_PWR_SetPowerMode(LL_PWR_MODE_STOP2);
   LL_LPM_EnableDeepSleep();
-  GPIO_TurnOffGenPins();
-
 
   radio_init();
-  waterAndMeterInit();
-  scheduler_add_task(&everysec_desc, EverySec, RUN_CONTINUOSLY_RELATIVE, SECONDS(1));
+  radio_load_id_and_key_of_sr_server(&sr_server_modem_id_and_key);
+//  waterAndMeterInit();
+//  scheduler_add_task(&everysec_desc, EverySec, RUN_CONTINUOSLY_RELATIVE, SECONDS(1));
+  RTC_WakeUpPeriodic();
 
   /* USER CODE END 2 */
 
@@ -250,24 +245,18 @@ int main(void)
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
-    //scheduler_run_callbacks();
-    IWDG_Refresh();
-    if ((WeCanSleep)) //&& NBFi_can_sleep() && wa1470_cansleep() && Water7isCanSleep())
-    {
+      IWDG_Refresh();
+      NBFI_Main_Level_Loop();
 
-      //__WFI();
-
-      //SystemClock_Recover();
-      //          LL_mDelay(500); //only for debug
-    }
-    //SystemClock_Recover();
-    //    else if(WeCanSleep)
-    //    {
-    //        if(SystemCoreClock != 2000000)
-    //        {
-    //            //EnterRunMode_LowPower_DownTo2MHz();
-    //        }
-    //    }
+      if (NBFi_can_sleep() && scheduler_can_sleep())
+      {
+          __WFI();//HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+          SystemClock_Config();
+      }
+      else
+      {
+          EnterRunMode_LowPower_DownTo2MHz();//HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+      }
   }
   /* USER CODE END 3 */
 }
@@ -340,7 +329,6 @@ void SystemClock_Config(void)
   LL_Init1msTick(80000000);
 
   LL_SetSystemCoreClock(80000000);
-  LL_RCC_SetUSARTClockSource(LL_RCC_USART2_CLKSOURCE_PCLK1);
 }
 
 /* USER CODE BEGIN 4 */
@@ -353,11 +341,6 @@ void SystemClock_Recover(void)
   LL_RCC_MSI_EnablePLLMode();
   LL_RCC_PLL_Enable();
   LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
-}
-
-void SetWeCanSleep(bool enable)
-{
-  WeCanSleep = enable;
 }
 
 /**

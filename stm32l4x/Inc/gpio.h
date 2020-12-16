@@ -32,13 +32,7 @@ extern "C" {
 /* USER CODE END Includes */
 
 /* USER CODE BEGIN Private defines */
-  enum spi_device_state
-  {
-    SPI_DEVICE_NONE = 0,
-    SPI_DEVICE_TIC33 = 1,
-    SPI_DEVICE_MAX = 2,
-    SPI_DEVICE_WA1470 = 3
-  };
+
 /* USER CODE END Private defines */
 
 void MX_GPIO_Init(void);
@@ -51,22 +45,11 @@ void MX_GPIO_Init(void);
   void GPIO_ChipDisable(void);
   uint8_t GPIO_GetIrqPinState(void);
   void GPIO_Wa1470_WriteCs(uint8_t state);
-  void GPIO_MAX35103_WriteCs(uint8_t state);
-  void GPIO_MAX35103_Reset(void);
-  void GPIO_Tic33Init(void);
-  void GPIO_Tic33SetLoad(void);
-  void GPIO_Tic33ClearLoad(void);
   bool GPIO_IsButtonPressed(void);
-  bool GPIO_SetSpiState(enum spi_device_state NewSpiState, bool enable);
-  enum spi_device_state GPIO_GetSpiState(void);
-  void GPIO_TurnOnGenPins(void);
-  void GPIO_TurnOffGenPins(void);
+  bool GPIO_SetSpiState(bool enable);
 
   void GPIO_EXTI5_Callback(void);
   void GPIO_EXTI7_Callback(void);
-  void GPIO_EXTI10_Callback(void);
-
-
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

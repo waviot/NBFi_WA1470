@@ -68,7 +68,7 @@ static inline uint32_t nbfi_HAL_measure_valtage_or_temperature(uint8_t val)
   // temp = 27;
   if (val == 1)
   {
-    return voltage;
+    return voltage / 10;
   }
   else
   {

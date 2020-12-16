@@ -54,7 +54,7 @@ void RTC_CcSet(uint8_t chan, time_t data);
 time_t RTC_CcGet(uint8_t chan);
 time_t RTC_CntGet(uint8_t chan);
 uint8_t RTC_CheckCcIrq(uint8_t chan);
-void RTC_SartPeriodicMeas(void);
+void RTC_WakeUpPeriodic(void);
 void HAL_RTCEx_WakeUpTimerEventCallback(void);
 void Alarm_Callback(void);
 void TimerCaptureCompare_Callback(void);

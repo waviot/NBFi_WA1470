@@ -3,8 +3,5 @@
     <project>
         <path>$WS_DIR$\STM32L412k8u.ewp</path>
     </project>
-    <project>
-        <path>$WS_DIR$\STM32L412k8u_boot.ewp</path>
-    </project>
     <batchBuild />
 </workspace>

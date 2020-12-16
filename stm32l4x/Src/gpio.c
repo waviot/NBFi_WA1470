@@ -30,9 +30,6 @@
 /*----------------------------------------------------------------------------*/
 /* USER CODE BEGIN 1 */
 
-#define WA_IRQ_EXTI_IRQn EXTI9_5_IRQn
-
-enum spi_device_state SpiDeviceState = SPI_DEVICE_NONE;
 /* USER CODE END 1 */
 
 /** Configure pins as
@@ -57,27 +54,27 @@ void MX_GPIO_Init(void)
   LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_GPIOH);
 
   /**/
-  LL_GPIO_ResetOutputPin(GPIOB, LCD_LOAD_Pin|SPI1_NSS_Pin);
-
-  /**/
   LL_GPIO_SetOutputPin(WA_CHIP_EN_GPIO_Port, WA_CHIP_EN_Pin);
 
   /**/
-  GPIO_InitStruct.Pin = LL_GPIO_PIN_0|LL_GPIO_PIN_1|LL_GPIO_PIN_3|LL_GPIO_PIN_4
-                          |LL_GPIO_PIN_6|LL_GPIO_PIN_8|LL_GPIO_PIN_9|LL_GPIO_PIN_10
-                          |LL_GPIO_PIN_12|LL_GPIO_PIN_15;
+  LL_GPIO_ResetOutputPin(SPI1_NSS_GPIO_Port, SPI1_NSS_Pin);
+
+  /**/
+  GPIO_InitStruct.Pin = LL_GPIO_PIN_0|LL_GPIO_PIN_1|LL_GPIO_PIN_2|LL_GPIO_PIN_3
+                          |LL_GPIO_PIN_4|LL_GPIO_PIN_6|LL_GPIO_PIN_8|LL_GPIO_PIN_9
+                          |LL_GPIO_PIN_10|LL_GPIO_PIN_12|LL_GPIO_PIN_15;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
   LL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
   /**/
-  GPIO_InitStruct.Pin = LL_GPIO_PIN_0|LL_GPIO_PIN_3;
+  GPIO_InitStruct.Pin = LL_GPIO_PIN_0|LL_GPIO_PIN_1|LL_GPIO_PIN_3;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_ANALOG;
   GPIO_InitStruct.Pull = LL_GPIO_PULL_NO;
   LL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
   /**/
-  GPIO_InitStruct.Pin = LCD_LOAD_Pin|WA_CHIP_EN_Pin|SPI1_NSS_Pin;
+  GPIO_InitStruct.Pin = WA_CHIP_EN_Pin|SPI1_NSS_Pin;
   GPIO_InitStruct.Mode = LL_GPIO_MODE_OUTPUT;
   GPIO_InitStruct.Speed = LL_GPIO_SPEED_FREQ_LOW;
   GPIO_InitStruct.OutputType = LL_GPIO_OUTPUT_PUSHPULL;
@@ -195,63 +192,6 @@ void GPIO_Wa1470_WriteCs(uint8_t state)
 }
 #endif //USE_WA1470
 
-#if defined(MAX35101) || defined(MAX35103) || defined(MAX35104)
-/*!
- * \brief turn off or turn off chip select pin of max35103
- *
- * \param state true if we enable chip communication
- */
-void GPIO_MAX35103_WriteCs(uint8_t state)
-{
-  if (state)
-  {
-    LL_GPIO_SetOutputPin(MAX_NSEL_GPIO_Port, MAX_NSEL_Pin);
-  }
-  else
-  {
-    LL_GPIO_ResetOutputPin(MAX_NSEL_GPIO_Port, MAX_NSEL_Pin);
-  }
-}
-
-/*!
- * \brief reset max35103 chip
- *
- */
-void GPIO_MAX35103_Reset(void)
-{
-  LL_GPIO_ResetOutputPin(MAX_RST_GPIO_Port, MAX_RST_Pin);
-  LL_mDelay(1);
-  LL_GPIO_SetOutputPin(MAX_RST_GPIO_Port, MAX_RST_Pin);
-  LL_mDelay(1);
-}
-#endif //(MAX35101) || (MAX35103) || (MAX35104)
-
-/*!
- * \brief init gpio tic33 / made by by cubemx
- *
- */
-void GPIO_Tic33Init(void)
-{
-}
-
-/*!
- * \brief set load pin /like chip select on rise or fall
- *
- */
-void GPIO_Tic33SetLoad(void)
-{
-  LL_GPIO_SetOutputPin(LCD_LOAD_GPIO_Port, LCD_LOAD_Pin);
-}
-/*!
-
- * \brief clear load pin /like chip select on rise or fall
- *
- */
-void GPIO_Tic33ClearLoad(void)
-{
-  LL_GPIO_ResetOutputPin(LCD_LOAD_GPIO_Port, LCD_LOAD_Pin);
-}
-
 /*!
  * \brief check if button pressed
  *
@@ -263,103 +203,16 @@ bool GPIO_IsButtonPressed(void)
   return !LL_GPIO_IsInputPinSet(Button_GPIO_Port, Button_Pin);
 }
 
-bool GPIO_SetSpiState(enum spi_device_state NewSpiState, bool enable)
+bool GPIO_SetSpiState(bool enable)
 {
   /// \todo check this
   /// \todo check if enable that is choose only this
   GPIO_Wa1470_WriteCs(enable);
 
-  //  if (NewSpiState == SPI_DEVICE_WA1470) //priority for nb-fi
-  //  {
-  //    SpiDeviceState = NewSpiState;
-  //    GPIO_Wa1470_WriteCs(enable);
-  //    if (!enable)
-  //    {
-  //      //SpiDeviceState = SPI_DEVICE_NONE;
-  //
-  //        /// \todo check this
-  //    }
-  //  }
-  //  if (((SpiDeviceState == SPI_DEVICE_NONE) && (NewSpiState != SPI_DEVICE_NONE) ||
-  //       (SpiDeviceState == NewSpiState)))
-  //  {
-  //    SpiDeviceState = NewSpiState;
-  //    switch (NewSpiState)
-  //    {
-  //    case SPI_DEVICE_NONE:
-  //    {
-  //      GPIO_Tic33ClearLoad();
-  //#if defined(MAX35101) || defined(MAX35103) || defined(MAX35104)
-  //      GPIO_MAX35103_WriteCs(false);
-  //#endif //(MAX35101) || (MAX35103) || (MAX35104)
-  //      GPIO_Wa1470_WriteCs(false);
-  //      break;
-  //    }
-  //    case SPI_DEVICE_TIC33:
-  //    {
-  //      if (enable)
-  //      {
-  //        GPIO_Tic33ClearLoad();
-  //      }
-  //      else
-  //      {
-  //        GPIO_Tic33SetLoad();
-  //      }
-  //    }
-  //    break;
-  //#if defined(MAX35101) || defined(MAX35103) || defined(MAX35104)
-  //    case SPI_DEVICE_MAX:
-  //        {
-  //            GPIO_MAX35103_WriteCs(enable);
-  //        }
-  //        break;
-  //#endif //(MAX35101) || (MAX35103) || (MAX35104)
-  //    case SPI_DEVICE_WA1470:
-  //    {
-  //      GPIO_Wa1470_WriteCs(enable);
-  //    }
-  //    break;
-  //    default:
-  //    {
-  //      SpiDeviceState = SPI_DEVICE_NONE;
-  //      break;
-  //    }
-  //    }
-  //
-  //    if (!enable)
-  //    {
-  //      SpiDeviceState = SPI_DEVICE_NONE;
-  //    }
-  //    return true;
-  //  }
-  //  else
-  //  {
   return false;
-  //  }
 }
 
-enum spi_device_state GPIO_GetSpiState(void)
-{
-  return SpiDeviceState;
-}
 
-void GPIO_TurnOnGenPins(void)
-{
-  LL_GPIO_SetPinMode(GPIOA, LL_GPIO_PIN_15, LL_GPIO_MODE_ALTERNATE);
-  LL_GPIO_SetPinMode(GPIOB, LL_GPIO_PIN_3, LL_GPIO_MODE_ALTERNATE);
-
-  LL_GPIO_SetAFPin_8_15(GPIOA, LL_GPIO_PIN_15, LL_GPIO_AF_1);
-  LL_GPIO_SetAFPin_0_7(GPIOB, LL_GPIO_PIN_3, LL_GPIO_AF_1);
-}
-
-void GPIO_TurnOffGenPins(void)
-{
-  LL_GPIO_SetPinMode(GPIOA, LL_GPIO_PIN_15, LL_GPIO_MODE_ANALOG);
-  LL_GPIO_SetPinMode(GPIOB, LL_GPIO_PIN_3, LL_GPIO_MODE_ANALOG);
-
-  LL_GPIO_SetPinPull(GPIOA, LL_GPIO_PIN_15, LL_GPIO_PULL_NO);
-  LL_GPIO_SetPinPull(GPIOB, LL_GPIO_PIN_3, LL_GPIO_PULL_NO);
-}
 /*!
  * \brief IRQ from WA1470
  *
@@ -378,17 +231,6 @@ void GPIO_EXTI5_Callback(void)
 void GPIO_EXTI7_Callback(void)
 {
   ButtonHandler();
-}
-
-/*!
- * \brief IRQ from MAX35103 \ref stm32l4xx_it.c
- *
- */
-void GPIO_EXTI10_Callback(void)
-{
-#if defined(MAX35101) || defined(MAX35103) || defined(MAX35104)
-  WVT_MAX35103_Interrupt_Handler();
-#endif //(MAX35101) || (MAX35103) || (MAX35104)
 }
 
 /* USER CODE END 2 */

@@ -21,7 +21,6 @@
 #include "adc.h"
 
 /* USER CODE BEGIN 0 */
-#include <math.h>
 
 /* Init variable out of expected ADC conversion data range */
 #define VAR_CONVERTED_DATA_INIT_VALUE (__LL_ADC_DIGITAL_SCALE(LL_ADC_RESOLUTION_12B) + 1)
@@ -34,7 +33,6 @@
 
 #define ADC_TIMEOUT 100
 
-static uint32_t ADCBuffer[ADC_BUF_SIZE] = {0};
 /* Variables for ADC conversion data */
 __IO uint16_t uhADCxConvertedData = VAR_CONVERTED_DATA_INIT_VALUE;     /* ADC group regular conversion data */
 __IO uint16_t uhADCxConvertedDataTemp = VAR_CONVERTED_DATA_INIT_VALUE; /* ADC group regular conversion data */
@@ -51,10 +49,6 @@ void MX_ADC1_Init(void)
 
   /* Peripheral clock enable */
   LL_AHB2_GRP1_EnableClock(LL_AHB2_GRP1_PERIPH_ADC);
-
-  /* ADC1 interrupt Init */
-  NVIC_SetPriority(ADC1_2_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
-  NVIC_EnableIRQ(ADC1_2_IRQn);
 
   /** Common config
   */
@@ -250,119 +244,12 @@ int8_t ADC_GetVoltageAndTemp(uint32_t *voltage, int32_t *temp)
   /* using LL ADC driver helper macro.                                      */
   *temp = __LL_ADC_CALC_TEMPERATURE(3573, uhADCxConvertedDataTemp, LL_ADC_RESOLUTION_12B); //*voltage
 
-  ADC_StopMeas();
   LL_ADC_REG_SetContinuousMode(ADC1, LL_ADC_REG_CONV_CONTINUOUS);
   MX_ADC1_Init();
   return 0;
 }
 
-/**
- * @brief begin measurement of ultrasound wave
- *
- */
-void ADC_InitMeas(void)
-{
-  /* Run ADC self calibration */
-  LL_ADC_StartCalibration(ADC1, LL_ADC_SINGLE_ENDED);
-  /* Poll for ADC effectively calibrated */
-  while (LL_ADC_IsCalibrationOnGoing(ADC1) != 0)
-  {
-  }
-  /* Run ADC self calibration */
-  LL_ADC_StartCalibration(ADC2, LL_ADC_SINGLE_ENDED);
-  /* Poll for ADC effectively calibrated */
-  while (LL_ADC_IsCalibrationOnGoing(ADC2) != 0)
-  {
-  }
-  /* Set DMA transfer addresses of source and destination */
-  LL_DMA_ConfigAddresses(DMA1,
-                         LL_DMA_CHANNEL_1,
-                         LL_ADC_DMA_GetRegAddr(ADC1, LL_ADC_DMA_REG_REGULAR_DATA_MULTI), // LL_ADC_DMA_REG_REGULAR_DATA_MULTI), LL_ADC_DMA_REG_REGULAR_DATA
-                         (uint32_t)&ADCBuffer,
-                         LL_DMA_DIRECTION_PERIPH_TO_MEMORY);
-  /* Enable DMA transfer interruption: transfer complete */
-  LL_DMA_EnableIT_TC(DMA1,
-                     LL_DMA_CHANNEL_1);
 
-  /* Disable ADC deep power down (enabled by default after reset state) */
-  LL_ADC_DisableDeepPowerDown(ADC1);
-  LL_ADC_DisableDeepPowerDown(ADC2);
-  /* Enable ADC internal voltage regulator */
-  LL_ADC_EnableInternalRegulator(ADC1);
-  LL_ADC_EnableInternalRegulator(ADC2);
-
-  NVIC_SetPriority(DMA1_Channel1_IRQn, 0);
-  NVIC_EnableIRQ(DMA1_Channel1_IRQn);
-
-  LL_ADC_EnableIT_OVR(ADC1);
-  NVIC_SetPriority(ADC1_2_IRQn, 0);
-  NVIC_EnableIRQ(ADC1_2_IRQn);
-
-    LL_ADC_REG_SetTriggerSource(ADC1, LL_ADC_REG_TRIG_EXT_TIM15_TRGO);
-}
-
-/**
- * @brief begin measurement of ultrasound wave
- *
- */
-void ADC_BeginMeas(void)
-{
-
-  LL_ADC_Enable(ADC1);
-  LL_ADC_Enable(ADC2);
-
-  LL_ADC_EnableInternalRegulator(ADC1);
-  LL_ADC_EnableInternalRegulator(ADC2);
-
-  /* Set DMA transfer size */
-  LL_DMA_SetDataLength(DMA1,
-                       LL_DMA_CHANNEL_1,
-                       ADC_BUF_SIZE);
-
-  /*## Activation of DMA #####################################################*/
-  /* Enable the DMA transfer */
-  LL_DMA_EnableChannel(DMA1, LL_DMA_CHANNEL_1);
-
-  LL_ADC_EnableIT_OVR(ADC1);
-
-  LL_ADC_REG_StartConversion(ADC1);
-  //LL_ADC_REG_StartConversion(ADC2);
-}
-
-void ADC_StopMeas(void)
-{
-  //AdcDmaTransferComplete_Callback();
-  LL_ADC_REG_StopConversion(ADC1);
-  LL_ADC_REG_StopConversion(ADC2);
-//
-//  LL_ADC_DisableInternalRegulator(ADC1);
-//  LL_ADC_DisableInternalRegulator(ADC2);
-//
-//  LL_ADC_Disable(ADC1);
-//  LL_ADC_Disable(ADC2);
-
-  LL_ADC_ClearFlag_OVR(ADC1);
-  LL_ADC_ClearFlag_EOSMP(ADC1);
-  LL_ADC_ClearFlag_EOS(ADC1);
-  LL_ADC_ClearFlag_EOC(ADC1);
-
-  LL_DMA_DisableChannel(DMA1, LL_DMA_CHANNEL_1);
-}
-
-uint32_t *ADC_GetPtrBuffer(void)
-{
-  return (uint32_t *)ADCBuffer;
-}
-
-/**
-  * @brief  Conversion complete callback in non-blocking mode. \ref stm32l4xx_it.c
-  * @param hadc ADC handle
-  * @retval None
-  */
-void AdcDmaTransferComplete_Callback()
-{
-  ADC_StopMeas();
-}
 
 /* USER CODE END 1 */
 

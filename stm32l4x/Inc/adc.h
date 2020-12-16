@@ -38,15 +38,7 @@ extern "C" {
 void MX_ADC1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-void nbfi_HAL_ADC_init(void);
 int8_t ADC_GetVoltageAndTemp(uint32_t *voltage, int32_t *temp);
-
-void ADC_InitMeas(void);
-void ADC_BeginMeas(void);
-void ADC_StopMeas(void);
-uint32_t *ADC_GetPtrBuffer(void);
-
-void AdcDmaTransferComplete_Callback(void);
 
 /* USER CODE END Prototypes */
 

@@ -60,7 +60,7 @@ static inline uint8_t wa1470_HAL_get_irq_pin_state(void)
 
 static inline void wa1470_HAL_spi_write_cs(uint8_t state)
 {
-    GPIO_SetSpiState(SPI_DEVICE_WA1470, state);
+    GPIO_SetSpiState(state);
 }
 
 #define NOP_DELAY_MS_TICK 1600

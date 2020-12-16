@@ -76,15 +76,9 @@ void scheduler_HAL_init()
     scheduler_hal_struct.__cc_irq_disable = (void (*)(uint8_t))scheduler_HAL_cc_irq_disable;
     scheduler_hal_struct.__loop_irq_enable = (void (*)(void))scheduler_HAL_loop_irq_enable;
     scheduler_hal_struct.__loop_irq_disable = (void (*)(void))scheduler_HAL_loop_irq_disable;
-#ifdef USE_RTC_WATIMER
     scheduler_hal_struct.__cc_set = (void (*)(uint8_t, uint16_t))scheduler_HAL_cc_set;
     scheduler_hal_struct.__cc_get = (uint16_t(*)(uint8_t))scheduler_HAL_cc_get;
     scheduler_hal_struct.__cnt_get = (uint16_t(*)(uint8_t))scheduler_HAL_cnt_get;
-#else
-    scheduler_hal_struct.__cc_set = (void (*)(uint8_t, uint16_t))scheduler_HAL_cc_set;
-    scheduler_hal_struct.__cc_get = (uint16_t(*)(uint8_t))scheduler_HAL_cc_get;
-    scheduler_hal_struct.__cnt_get = (uint16_t(*)(uint8_t))scheduler_HAL_cnt_get;
-#endif //USE_RTC_WATIMER
     scheduler_hal_struct.__check_cc_irq = (uint8_t(*)(uint8_t))scheduler_HAL_check_cc_irq;
 
     _scheduler = scheduler_init(&scheduler_hal_struct);

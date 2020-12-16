@@ -1219,9 +1219,6 @@
         <name>$PROJ_DIR$\..\Src\spi.c</name>
       </file>
       <file>
-        <name>$PROJ_DIR$\..\Src\usart.c</name>
-      </file>
-      <file>
         <name>$PROJ_DIR$\..\Src\stm32l4xx_it.c</name>
       </file>
     </group>
@@ -1262,12 +1259,6 @@
       </file>
       <file>
         <name>$PROJ_DIR$\..\Drivers\STM32L4xx_HAL_Driver\Src\stm32l4xx_ll_pwr.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\Drivers\STM32L4xx_HAL_Driver\Src\stm32l4xx_ll_usart.c</name>
-      </file>
-      <file>
-        <name>$PROJ_DIR$\..\Drivers\STM32L4xx_HAL_Driver\Src\stm32l4xx_ll_rcc.c</name>
       </file>
     </group>
   </group>

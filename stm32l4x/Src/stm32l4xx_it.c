@@ -24,11 +24,9 @@
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
 #include "adc.h"
-#include "dma.h"
 #include "gpio.h"
 #include "rtc.h"
 #include "spi.h"
-#include "tim.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -219,20 +217,6 @@ void RTC_WKUP_IRQHandler(void)
   /* USER CODE BEGIN RTC_WKUP_IRQn 1 */
 
   /* USER CODE END RTC_WKUP_IRQn 1 */
-}
-
-/**
-  * @brief This function handles ADC1 and ADC2 interrupts.
-  */
-void ADC1_2_IRQHandler(void)
-{
-  /* USER CODE BEGIN ADC1_2_IRQn 0 */
-    AdcDmaTransferComplete_Callback();
-  /* USER CODE END ADC1_2_IRQn 0 */
-
-  /* USER CODE BEGIN ADC1_2_IRQn 1 */
-
-  /* USER CODE END ADC1_2_IRQn 1 */
 }
 
 /**

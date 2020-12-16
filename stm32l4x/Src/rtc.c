@@ -100,7 +100,7 @@ void MX_RTC_Init(void)
 }
 
 /* USER CODE BEGIN 1 */
-//  RTC_AlarmStruct.AlarmMask = LL_RTC_ALMA_MASK_DATEWEEKDAY;
+/// \code  RTC_AlarmStruct.AlarmMask = LL_RTC_ALMA_MASK_DATEWEEKDAY;
 
 /*!
  * \brief read backup register
@@ -441,7 +441,7 @@ uint8_t RTC_CheckCcIrq(uint8_t chan)
  * \brief setup periodic wakeup for ultrasound measurement
  *
  */
-void RTC_SartPeriodicMeas(void)
+void RTC_WakeUpPeriodic(void)
 {
 
     /* Disable RTC registers write protection */
@@ -465,9 +465,7 @@ void RTC_SartPeriodicMeas(void)
     If LL_RTC_WAKEUPCLOCK_CKSPRE is selected, the frequency is 2048Hz,
     this allows to get a wakeup time equal to RTC_WUT_TIME
     if the counter is RTC_WUT_TIME */
-    LL_RTC_WAKEUP_SetAutoReload(RTC, 1023);
-    //LL_RTC_WAKEUP_SetAutoClr(RTC, 1025);
-    //LL_RTC_WAKEUP_SetClock(RTC, LL_RTC_WAKEUPCLOCK_DIV_16);
+//    LL_RTC_WAKEUP_SetAutoReload(RTC, 1023);
     LL_RTC_WAKEUP_Enable(RTC);
     LL_RTC_EnableIT_WUT(RTC);
 

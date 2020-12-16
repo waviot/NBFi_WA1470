@@ -19,12 +19,12 @@ nbfi_device_id_and_key_st sr_server_modem_id_and_key @SR_SERVER_MODEM_ID_AND_KEY
 #define SR_SERVER_KEY_PTR  ((uint32_t *)(SR_SERVER_MODEM_ID_AND_KEY_ADD + 4))
 
 
-#define MANUFACTURER_ID         0x8888  //Waviot
-#define HARDWARE_TYPE_ID        58      //WRM1470RefBoard
-#define PROTOCOL_ID             0       //undefined
-#define TX_MAX_POWER            15
-#define TX_MIN_POWER            -13
-#define SEND_INFO_PERIOD	2592000         //one time per month
+#define MANUFACTURER_ID 0x8888 //Waviot
+#define HARDWARE_TYPE_ID 0x37   //Aqua3
+#define PROTOCOL_ID 11          //undefined
+#define TX_MAX_POWER 15
+#define TX_MIN_POWER -13
+#define SEND_INFO_PERIOD 2592000 //one time per month
 
 #define BAND         UL868800_DL869150          //RU
 

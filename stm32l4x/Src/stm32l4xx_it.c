@@ -221,7 +221,6 @@ void RTC_WKUP_IRQHandler(void)
   /* USER CODE END RTC_WKUP_IRQn 1 */
 }
 
-
 /**
   * @brief This function handles ADC1 and ADC2 interrupts.
   */
@@ -261,25 +260,6 @@ void EXTI9_5_IRQHandler(void)
   /* USER CODE BEGIN EXTI9_5_IRQn 1 */
 
   /* USER CODE END EXTI9_5_IRQn 1 */
-}
-
-/**
-  * @brief This function handles TIM1 update interrupt and TIM16 global interrupt.
-  */
-void TIM1_UP_TIM16_IRQHandler(void)
-{
-  /* USER CODE BEGIN TIM1_UP_TIM16_IRQn 0 */
-  if (LL_TIM_IsActiveFlag_UPDATE(TIM1) == 1)
-  {
-    TIM1_Callback();
-    /* Clear the update interrupt flag*/
-    LL_TIM_ClearFlag_UPDATE(TIM1);
-  }
-
-  /* USER CODE END TIM1_UP_TIM16_IRQn 0 */
-
-  /* USER CODE BEGIN TIM1_UP_TIM16_IRQn 1 */
-  /* USER CODE END TIM1_UP_TIM16_IRQn 1 */
 }
 
 /**

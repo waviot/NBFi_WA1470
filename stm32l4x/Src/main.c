@@ -21,11 +21,9 @@
 #include "main.h"
 #include "adc.h"
 #include "crc.h"
-#include "dma.h"
 #include "iwdg.h"
 #include "rtc.h"
 #include "spi.h"
-#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -223,15 +221,10 @@ int main(void)
 
   /* Initialize all configured peripherals */
   MX_GPIO_Init();
-  MX_DMA_Init();
   MX_ADC1_Init();
   MX_CRC_Init();
   MX_RTC_Init();
   MX_SPI1_Init();
-  MX_TIM2_Init();
-  MX_TIM1_Init();
-  MX_ADC2_Init();
-  MX_TIM15_Init();
   MX_IWDG_Init();
   MX_USART2_UART_Init();
   /* USER CODE BEGIN 2 */
@@ -304,13 +297,10 @@ void SystemClock_Config(void)
   {
 
   }
-  LL_RCC_MSI_EnablePLLMode();
   LL_RCC_MSI_EnableRangeSelection();
   LL_RCC_MSI_SetRange(LL_RCC_MSIRANGE_8);
   LL_RCC_MSI_SetCalibTrimming(0);
   LL_PWR_EnableBkUpAccess();
-  LL_RCC_ForceBackupDomainReset();
-  LL_RCC_ReleaseBackupDomainReset();
   LL_RCC_LSE_SetDriveCapability(LL_RCC_LSEDRIVE_LOW);
   LL_RCC_LSE_Enable();
 
@@ -319,7 +309,13 @@ void SystemClock_Config(void)
   {
 
   }
-  LL_RCC_SetRTCClockSource(LL_RCC_RTC_CLKSOURCE_LSE);
+  LL_RCC_MSI_EnablePLLMode();
+  if(LL_RCC_GetRTCClockSource() != LL_RCC_RTC_CLKSOURCE_LSE)
+  {
+    LL_RCC_ForceBackupDomainReset();
+    LL_RCC_ReleaseBackupDomainReset();
+    LL_RCC_SetRTCClockSource(LL_RCC_RTC_CLKSOURCE_LSE);
+  }
   LL_RCC_EnableRTC();
   LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_MSI, LL_RCC_PLLM_DIV_1, 10, LL_RCC_PLLR_DIV_2);
   LL_RCC_PLL_EnableDomain_SYS();

@@ -59,7 +59,7 @@ static inline void nbfi_HAL_write_flash_settings(nbfi_settings_t *settings)
   WVT_EEPROM_SaveAll((void *)settings, EEPROM_NBFI_SETTING);
 }
 
-static inline int32_t nbfi_HAL_measure_valtage_or_temperature(uint8_t val)
+static inline uint32_t nbfi_HAL_measure_valtage_or_temperature(uint8_t val)
 {
   uint32_t voltage = 0;
   int32_t temp = 0;

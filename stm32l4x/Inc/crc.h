@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * File Name          : CRC.h
-  * Description        : This file provides code for the configuration
-  *                      of the CRC instances.
+  * @file    crc.h
+  * @brief   This file contains all the function prototypes for
+  *          the crc.c file
   ******************************************************************************
   * @attention
   *
@@ -17,10 +17,11 @@
   ******************************************************************************
   */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __crc_H
-#define __crc_H
+#ifndef __CRC_H__
+#define __CRC_H__
+
 #ifdef __cplusplus
- extern "C" {
+extern "C" {
 #endif
 
 /* Includes ------------------------------------------------------------------*/
@@ -43,14 +44,7 @@ uint32_t CRC_Crc32 (uint32_t pBuffer[], uint32_t bufferLength, uint32_t initValu
 #ifdef __cplusplus
 }
 #endif
-#endif /*__ crc_H */
 
-/**
-  * @}
-  */
-
-/**
-  * @}
-  */
+#endif /* __CRC_H__ */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

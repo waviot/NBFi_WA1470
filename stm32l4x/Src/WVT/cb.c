@@ -6,9 +6,7 @@
 
 extern uint8_t mode;
 //extern uint32_t blinks, update_blinks,
-extern uint32_t update_display;
 extern struct wtimer_desc led_desc;
-extern main_par_t main_par;
 
 uint32_t water7_rfl_patch0(uint32_t data);
 uint32_t water7_rfl_patch1(uint32_t data);
@@ -18,14 +16,16 @@ errno_t water7set_data(int32_t *data)
 {
 	meter_set(&data[WATER7_USERDATA_OFFSET], METER_DATA);
 	meter_set(&data[WATER7_USERPARAMS_OFFSET], METER_PARAMS);
-	return memcpy_s((uint8_t *)&main_par, sizeof(main_par_t), (uint8_t *)&data[WATER7_USERPARAMS_OFFSET * 2], sizeof(main_par_t));
+    /// \todo fix this
+	return 0;//memcpy_s((uint8_t *)&main_par, sizeof(main_par_t), (uint8_t *)&data[WATER7_USERPARAMS_OFFSET * 2], sizeof(main_par_t));
 }
 
 errno_t water7get_data(int32_t *data)
 {
 	meter_get(&data[WATER7_USERDATA_OFFSET], METER_DATA);
 	meter_get(&data[WATER7_USERPARAMS_OFFSET], METER_PARAMS);
-	return memcpy_s((uint8_t *)&data[WATER7_USERPARAMS_OFFSET * 2], sizeof(main_par_t), (uint8_t *)&main_par, sizeof(main_par_t));
+    /// \todo fix this
+	return 0;//memcpy_s((uint8_t *)&data[WATER7_USERPARAMS_OFFSET * 2], sizeof(main_par_t), (uint8_t *)&main_par, sizeof(main_par_t));
 	//WVT_EEPROM_LoadAll(data, EEPROM_WATER7_PARAMS);
 }
 
@@ -166,29 +166,6 @@ int32_t water7_rfl(uint32_t addr, uint32_t len, uint32_t index, uint8_t *data, u
 
 void meter_inc_cb(void)
 {
-//	if (main_par.work_mode == MODE_TEST)
-//	{
-//		static uint32_t prev, mod;
-//		meter_data_str meter_data;
-//		meter_get(&meter_data, METER_DATA);
-//
-//		if (meter_data.microliter[METER_FLOW_FORWARD] >= prev)
-//			mod += meter_data.microliter[METER_FLOW_FORWARD] - prev;
-//		else
-//			mod += meter_data.microliter[METER_FLOW_FORWARD] + (1000000 - prev);
-//		prev = meter_data.microliter[METER_FLOW_FORWARD];
-//
-//		// if (mod > LED_BLINK_VOLUME)
-//		// {
-//		// 	mod -= LED_BLINK_VOLUME;
-//		// 	update_blinks = 1;
-//		// 	blinks++;
-//		// }
-//	}
-//	// if (update_display >= UPDATE_DISPLAY_TIMEOUT)
-//	// 	update_display = 0;
-//	// else
-//	// 	update_display = 1;
 }
 
 uint32_t water7_rfl_patch0(uint32_t data)

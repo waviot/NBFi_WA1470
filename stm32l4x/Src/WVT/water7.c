@@ -422,7 +422,7 @@ void Water7fastdl_off(struct scheduler_desc *desc)
         if (!desc)
             scheduler_remove_task(&water7fastdl_off_desc);
         /// \todo check this
-        radio_switch_to_from_short_range(false);
+        //radio_switch_to_from_short_range(false);
     }
 }
 
@@ -433,7 +433,7 @@ void Water7fastdl_on(void)
     if (nbfi_settings.mode == NRX || nbfi_settings.mode == DRX)
     {
         /// \todo check this
-        radio_switch_to_from_short_range(true);
+        //radio_switch_to_from_short_range(true);
         scheduler_add_task(&water7fastdl_off_desc, &Water7fastdl_off, RELATIVE, SECONDS(WATER7_FASTDL_TIMEOUT));
     }
 }
@@ -452,7 +452,8 @@ void Water7RXcallback(uint8_t *data, uint16_t length)
 
     _state.period_prev = _params->period;
 
-    if (scheduler_check(&water7fastdl_off_desc))
+    /// \todo check this
+//    if (scheduler_check(&water7fastdl_off_desc))
         scheduler_add_task(&water7fastdl_off_desc, &Water7fastdl_off, RELATIVE, SECONDS(WATER7_FASTDL_TIMEOUT));
 
     if (_get_data)

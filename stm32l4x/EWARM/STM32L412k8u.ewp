@@ -1148,6 +1148,9 @@
                     <name>$PROJ_DIR$\..\..\NBFiLib\gost_crypto\crypto\magma.c</name>
                 </file>
                 <file>
+                    <name>$PROJ_DIR$\..\..\NBFiLib\preambula\preambula\preambula.c</name>
+                </file>
+                <file>
                     <name>$PROJ_DIR$\..\..\NBFiLib\scheduler\scheduler\scheduler.c</name>
                 </file>
                 <file>

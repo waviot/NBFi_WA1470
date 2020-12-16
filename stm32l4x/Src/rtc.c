@@ -486,8 +486,6 @@ void HAL_RTCEx_WakeUpTimerEventCallback(void)
 {
     /* Alarm callback */
     SystemClock_Recover();
-    //WVT_UltraSound_StartGeneration();
-    WVT_UltraSound_StartCalibration();
 }
 
 /**

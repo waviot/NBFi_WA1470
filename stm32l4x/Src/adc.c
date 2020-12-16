@@ -345,8 +345,6 @@ int8_t ADC_GetVoltageAndTemp(uint32_t *voltage, int32_t *temp)
   ADC_StopMeas();
   LL_ADC_REG_SetContinuousMode(ADC1, LL_ADC_REG_CONV_CONTINUOUS);
   MX_ADC1_Init();
-  ADC_InitMeas();
-  WVT_UltraSound_StartGeneration();
   return 0;
 }
 

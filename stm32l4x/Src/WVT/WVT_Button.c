@@ -104,7 +104,6 @@ void ButtonHandler(void)
  */
 static void ButtonShortPressHandler(void)
 {
-	DisplaySwitchState();
 }
 
 /*!

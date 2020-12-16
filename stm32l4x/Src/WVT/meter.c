@@ -117,7 +117,7 @@ int64_t MeterGetReverseVolumeMkl(void)
 
 uint8_t MeterEverySecHandler(time_t timeNow)
 {
-	uint8_t errors = LeakAndBreakCheckTimeVolumeTemp(MeterGetTotalVolumeMkl(), meter_GetParams(), timeNow);
+	uint8_t errors = 0;/// \todo add check errors function
 	MeterErrorHandler(errors);
 	return errors;
 }

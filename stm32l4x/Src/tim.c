@@ -259,7 +259,6 @@ void TIM_SetGenAdcDelay(uint32_t delay)
 
 void TIM1_Callback(void)
 {
-  WVT_UltraSound_StopGen();
 }
 
 /* USER CODE END 1 */

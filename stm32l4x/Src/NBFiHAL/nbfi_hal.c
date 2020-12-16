@@ -48,10 +48,10 @@ static inline void nbfi_HAL_read_default_settings(nbfi_settings_t *settings)
   }
 }
 
-static inline uint32_t nbfi_HAL_read_flash_settings(nbfi_settings_t *settings)
+static inline void nbfi_HAL_read_flash_settings(nbfi_settings_t *settings)
 {
   /// \todo check this
-  return WVT_EEPROM_LoadAll((void *)settings, EEPROM_NBFI_SETTING);
+  WVT_EEPROM_LoadAll((void *)settings, EEPROM_NBFI_SETTING);
 }
 
 static inline void nbfi_HAL_write_flash_settings(nbfi_settings_t *settings)
@@ -84,11 +84,11 @@ static inline uint32_t nbfi_HAL_update_rtc()
   return (uint32_t)RTC_GetSeconds();
 }
 
-static inline void nbfi_HAL_rtc_synchronized(time_t time)
+static inline void nbfi_HAL_rtc_synchronized(uint32_t time)
 {
   //you should use this callback for RTC counter correction when external RTC used
   //rtc_counter = time;
-  RTC_SetSeconds(&time);
+  RTC_SetSeconds((time_t const*)&time);
 }
 #endif //USE_EXTERNAL_RTC
 __weak void nbfi_send_complete(nbfi_ul_sent_status_t ul)

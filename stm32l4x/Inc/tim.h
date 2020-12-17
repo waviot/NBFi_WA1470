@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * @file    rtc.h
+  * @file    tim.h
   * @brief   This file contains all the function prototypes for
-  *          the rtc.c file
+  *          the tim.c file
   ******************************************************************************
   * @attention
   *
@@ -17,8 +17,8 @@
   ******************************************************************************
   */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __RTC_H__
-#define __RTC_H__
+#ifndef __TIM_H__
+#define __TIM_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,25 +28,26 @@ extern "C" {
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
+
 /* USER CODE END Includes */
 
 /* USER CODE BEGIN Private defines */
+
 /* USER CODE END Private defines */
 
-void MX_RTC_Init(void);
+void MX_TIM6_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-uint32_t RTC_BackupRead(uint32_t registerIndex);
-void RTC_BackupWrite(uint32_t data, uint32_t registerIndex);
-void RTC_WakeUpPeriodic(void);
-void HAL_RTCEx_WakeUpTimerEventCallback(void);
-uint64_t RTC_GetAbsMilliseconds(void);
+void HAL_TIM6_Start(void);
+void HAL_TIM6_EnableIt(void);
+void HAL_TIM6_DisableIt(void);
+void HAL_TIM6_Callback(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __RTC_H__ */
+#endif /* __TIM_H__ */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

@@ -1,8 +1,8 @@
 /**
   ******************************************************************************
-  * @file    rtc.h
+  * @file    lptim.h
   * @brief   This file contains all the function prototypes for
-  *          the rtc.c file
+  *          the lptim.c file
   ******************************************************************************
   * @attention
   *
@@ -17,8 +17,8 @@
   ******************************************************************************
   */
 /* Define to prevent recursive inclusion -------------------------------------*/
-#ifndef __RTC_H__
-#define __RTC_H__
+#ifndef __LPTIM_H__
+#define __LPTIM_H__
 
 #ifdef __cplusplus
 extern "C" {
@@ -28,25 +28,30 @@ extern "C" {
 #include "main.h"
 
 /* USER CODE BEGIN Includes */
+
 /* USER CODE END Includes */
 
 /* USER CODE BEGIN Private defines */
+
 /* USER CODE END Private defines */
 
-void MX_RTC_Init(void);
+void MX_LPTIM1_Init(void);
 
 /* USER CODE BEGIN Prototypes */
-uint32_t RTC_BackupRead(uint32_t registerIndex);
-void RTC_BackupWrite(uint32_t data, uint32_t registerIndex);
-void RTC_WakeUpPeriodic(void);
-void HAL_RTCEx_WakeUpTimerEventCallback(void);
-uint64_t RTC_GetAbsMilliseconds(void);
+void HAL_LPTIM_Start(void);
+void HAL_LPTIM_EnableIt(void);
+void HAL_LPTIM_DisableIt(void);
+void HAL_LPTIM_SetCompare(uint16_t data);
+uint16_t HAL_LPTIM_GetCompare(void);
+uint16_t HAL_LPTIM_GetCounter(void);
+uint8_t HAL_LPTIM_CheckIrq(void);
+void HAL_LPTIM_Callback(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* __RTC_H__ */
+#endif /* __LPTIM_H__ */
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

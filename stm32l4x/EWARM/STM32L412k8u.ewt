@@ -1124,15 +1124,15 @@
                 </option>
                 <option>
                     <name>GenRtcCheckPtrsNonInstrMem</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>GenRtcTrackPointerBounds</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>GenRtcCheckAccesses</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
                 <option>
                     <name>GenRtcGenerateEntries</name>
@@ -1180,7 +1180,7 @@
                 </option>
                 <option>
                     <name>GenRtcCheckPtrsNonInstrFunc</name>
-                    <state>1</state>
+                    <state>0</state>
                 </option>
             </data>
         </settings>
@@ -1307,13 +1307,13 @@
                 <name>$PROJ_DIR$\..\Src\crc.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Src\dma.c</name>
-            </file>
-            <file>
                 <name>$PROJ_DIR$\..\Src\gpio.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Src\iwdg.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\Src\lptim.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Src\main.c</name>
@@ -1326,12 +1326,6 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Src\stm32l4xx_it.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\Src\tim.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\Src\usart.c</name>
             </file>
         </group>
     </group>
@@ -1361,22 +1355,16 @@
                 <name>$PROJ_DIR$\..\Drivers\STM32L4xx_HAL_Driver\Src\stm32l4xx_ll_gpio.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Drivers\STM32L4xx_HAL_Driver\Src\stm32l4xx_ll_pwr.c</name>
+                <name>$PROJ_DIR$\..\Drivers\STM32L4xx_HAL_Driver\Src\stm32l4xx_ll_lptim.c</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\Drivers\STM32L4xx_HAL_Driver\Src\stm32l4xx_ll_rcc.c</name>
+                <name>$PROJ_DIR$\..\Drivers\STM32L4xx_HAL_Driver\Src\stm32l4xx_ll_pwr.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Drivers\STM32L4xx_HAL_Driver\Src\stm32l4xx_ll_rtc.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Drivers\STM32L4xx_HAL_Driver\Src\stm32l4xx_ll_spi.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\Drivers\STM32L4xx_HAL_Driver\Src\stm32l4xx_ll_tim.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\Drivers\STM32L4xx_HAL_Driver\Src\stm32l4xx_ll_usart.c</name>
             </file>
             <file>
                 <name>$PROJ_DIR$\..\Drivers\STM32L4xx_HAL_Driver\Src\stm32l4xx_ll_utils.c</name>

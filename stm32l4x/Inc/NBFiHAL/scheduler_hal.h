@@ -2,6 +2,8 @@
 #define SCHEDULER_HAL_H
 #include "scheduler.h"
 
+#define WA_LOOPTIM_TIM_FREQ		2000
+
 extern ischeduler_st* _scheduler;
 
 void scheduler_HAL_init();

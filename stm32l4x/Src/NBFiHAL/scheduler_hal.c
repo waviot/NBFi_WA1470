@@ -1,68 +1,71 @@
 #include "scheduler_hal.h"
+#include "lptim.h"
 #include "rtc.h"
+#include "tim.h"
 
 ischeduler_st *_scheduler = 0;
 
 static inline void scheduler_HAL_LPRTC_Init(void)
 {
     //main init in cubeMX
-    RTC_Init();
+    RTC_WakeUpPeriodic();
+    HAL_LPTIM_Start();
 }
 
 static inline void scheduler_HAL_LOOPRTC_Init(void)
 {
     //main init in cubeMX
-    RTC_LooptimInit();
+    HAL_TIM6_Start();
 }
 
 static inline void scheduler_HAL_enable_global_irq(void)
 {
-    RTC_CcIrqEnable(0); //__enable_irq();
+    __enable_irq();
 }
 
 static inline void scheduler_HAL_disable_global_irq(void)
 {
-    RTC_CcIrqDisable(0); //__disable_irq();
+    __disable_irq();
 }
 
 static inline void scheduler_HAL_cc_irq_enable(uint8_t chan)
 {
-    RTC_CcIrqEnable(chan);
+    HAL_LPTIM_EnableIt();
 }
 
 static inline void scheduler_HAL_cc_irq_disable(uint8_t chan)
 {
-    RTC_CcIrqDisable(chan);
+    HAL_LPTIM_DisableIt();
 }
 
 static inline void scheduler_HAL_loop_irq_enable(uint8_t chan)
 {
-    RTC_LoopIrqEnable(chan);
+    HAL_TIM6_EnableIt();
 }
 
 static inline void scheduler_HAL_loop_irq_disable(uint8_t chan)
 {
-    RTC_LoopIrqDisable(chan);
+    HAL_TIM6_DisableIt();
 }
 
 static inline void scheduler_HAL_cc_set(uint8_t chan, uint16_t data)
 {
-    RTC_CcSet(chan, data);
+    HAL_LPTIM_SetCompare(data);
 }
 
 static inline time_t scheduler_HAL_cc_get(uint8_t chan)
 {
-    return RTC_CcGet(chan);
+    return HAL_LPTIM_GetCompare();
 }
 
 static inline time_t scheduler_HAL_cnt_get(uint8_t chan)
 {
-    return RTC_CntGet(chan);
+    return HAL_LPTIM_GetCounter();
 }
 
 static inline uint8_t scheduler_HAL_check_cc_irq(uint8_t chan)
 {
-    return RTC_CheckCcIrq(chan);
+    return HAL_LPTIM_CheckIrq();
 }
 
 scheduler_HAL_st scheduler_hal_struct = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};

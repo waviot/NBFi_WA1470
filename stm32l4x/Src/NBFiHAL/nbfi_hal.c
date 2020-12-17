@@ -8,6 +8,9 @@
 //#include "log.h"
 #endif //WA1470_LOG
 
+uint32_t Voltage = 0;
+int32_t Temp = 0;
+
 static inline void nbfi_HAL_GPIO_Init()
 {
 }
@@ -61,18 +64,16 @@ static inline void nbfi_HAL_write_flash_settings(nbfi_settings_t *settings)
 
 static inline uint32_t nbfi_HAL_measure_valtage_or_temperature(uint8_t val)
 {
-  uint32_t voltage = 0;
-  int32_t temp = 0;
-  ADC_GetVoltageAndTemp(&voltage, &temp);
+  ADC_GetVoltageAndTemp(&Voltage, &Temp);
   // voltage = 3300;
   // temp = 27;
   if (val == 1)
   {
-    return voltage / 10;
+    return Voltage / 10;
   }
   else
   {
-    return temp;
+    return Temp;
   }
 }
 
@@ -81,14 +82,14 @@ static inline uint32_t nbfi_HAL_update_rtc()
 {
   //you should use this callback when external RTC used
   //return rtc_counter;
-  return (uint32_t)RTC_GetSeconds();
+  return 0;//(uint32_t)RTC_GetSeconds();
 }
 
 static inline void nbfi_HAL_rtc_synchronized(uint32_t time)
 {
   //you should use this callback for RTC counter correction when external RTC used
   //rtc_counter = time;
-  RTC_SetSeconds((time_t const*)&time);
+  //RTC_SetSeconds((time_t const*)&time);
 }
 #endif //USE_EXTERNAL_RTC
 __weak void nbfi_send_complete(nbfi_ul_sent_status_t ul)

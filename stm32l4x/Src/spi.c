@@ -23,7 +23,7 @@
 /* USER CODE BEGIN 0 */
 #include <string.h>
 
-#define SPI_RX_BUFFER_SIZE 32
+#define SPI_RX_BUFFER_SIZE 32*4 + 4
 uint8_t aRxBuffer[SPI_RX_BUFFER_SIZE] = {0};
 __IO uint8_t ubReceiveIndex = 0;
 /* USER CODE END 0 */
@@ -58,7 +58,7 @@ void MX_SPI1_Init(void)
   SPI_InitStruct.ClockPolarity = LL_SPI_POLARITY_LOW;
   SPI_InitStruct.ClockPhase = LL_SPI_PHASE_1EDGE;
   SPI_InitStruct.NSS = LL_SPI_NSS_SOFT;
-  SPI_InitStruct.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV64;
+  SPI_InitStruct.BaudRate = LL_SPI_BAUDRATEPRESCALER_DIV32;
   SPI_InitStruct.BitOrder = LL_SPI_MSB_FIRST;
   SPI_InitStruct.CRCCalculation = LL_SPI_CRCCALCULATION_DISABLE;
   SPI_InitStruct.CRCPoly = 7;

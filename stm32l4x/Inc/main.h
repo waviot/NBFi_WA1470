@@ -31,6 +31,7 @@ extern "C" {
 #include "stm32l4xx_ll_adc.h"
 #include "stm32l4xx_ll_crc.h"
 #include "stm32l4xx_ll_iwdg.h"
+#include "stm32l4xx_ll_lptim.h"
 #include "stm32l4xx_ll_crs.h"
 #include "stm32l4xx_ll_rcc.h"
 #include "stm32l4xx_ll_bus.h"
@@ -42,6 +43,7 @@ extern "C" {
 #include "stm32l4xx_ll_dma.h"
 #include "stm32l4xx_ll_rtc.h"
 #include "stm32l4xx_ll_spi.h"
+#include "stm32l4xx_ll_tim.h"
 #include "stm32l4xx_ll_gpio.h"
 
 #if defined(USE_FULL_ASSERT)
@@ -130,9 +132,6 @@ void Error_Handler(void);
 
 /* Private defines -----------------------------------------------------------*/
 #define MAX_TIMEOUT 10000
-#define COUNTER_FOR_1MGHZ 80
-#define PWM_FOR_1MHZ 40
-#define ADC_GEN_DELAY 4600
 #define WA_CHIP_EN_Pin LL_GPIO_PIN_4
 #define WA_CHIP_EN_GPIO_Port GPIOB
 #define WA_IRQ_Pin LL_GPIO_PIN_5
@@ -157,7 +156,6 @@ void Error_Handler(void);
 #endif
 /* USER CODE BEGIN Private defines */
   void SendErrors(uint8_t errors);
-  void SystemClock_Recover(void);
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus

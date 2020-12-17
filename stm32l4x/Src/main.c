@@ -22,8 +22,10 @@
 #include "adc.h"
 #include "crc.h"
 #include "iwdg.h"
+#include "lptim.h"
 #include "rtc.h"
 #include "spi.h"
+#include "tim.h"
 #include "gpio.h"
 
 /* Private includes ----------------------------------------------------------*/
@@ -222,6 +224,8 @@ int main(void)
   MX_RTC_Init();
   MX_SPI1_Init();
   MX_IWDG_Init();
+  MX_LPTIM1_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
   IWDG_Init();
   /* Ensure that MSI is wake-up system clock */
@@ -230,11 +234,11 @@ int main(void)
   LL_PWR_SetPowerMode(LL_PWR_MODE_STOP2);
   LL_LPM_EnableDeepSleep();
 
+  SPI_Activate();
   radio_init();
   radio_load_id_and_key_of_sr_server(&sr_server_modem_id_and_key);
 //  waterAndMeterInit();
 //  scheduler_add_task(&everysec_desc, EverySec, RUN_CONTINUOSLY_RELATIVE, SECONDS(1));
-  RTC_WakeUpPeriodic();
 
   /* USER CODE END 2 */
 
@@ -246,6 +250,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
       IWDG_Refresh();
+      scheduler_run_callbacks();
       NBFI_Main_Level_Loop();
 
       if (NBFi_can_sleep() && scheduler_can_sleep())
@@ -255,7 +260,7 @@ int main(void)
       }
       else
       {
-          EnterRunMode_LowPower_DownTo2MHz();//HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+          //EnterRunMode_LowPower_DownTo2MHz();//HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
       }
   }
   /* USER CODE END 3 */
@@ -267,8 +272,8 @@ int main(void)
   */
 void SystemClock_Config(void)
 {
-  LL_FLASH_SetLatency(LL_FLASH_LATENCY_4);
-  while(LL_FLASH_GetLatency()!= LL_FLASH_LATENCY_4)
+  LL_FLASH_SetLatency(LL_FLASH_LATENCY_2);
+  while(LL_FLASH_GetLatency()!= LL_FLASH_LATENCY_2)
   {
   }
   LL_PWR_SetRegulVoltageScaling(LL_PWR_REGU_VOLTAGE_SCALE1);
@@ -287,7 +292,7 @@ void SystemClock_Config(void)
 
   }
   LL_RCC_MSI_EnableRangeSelection();
-  LL_RCC_MSI_SetRange(LL_RCC_MSIRANGE_8);
+  LL_RCC_MSI_SetRange(LL_RCC_MSIRANGE_11);
   LL_RCC_MSI_SetCalibTrimming(0);
   LL_PWR_EnableBkUpAccess();
   LL_RCC_LSE_SetDriveCapability(LL_RCC_LSEDRIVE_LOW);
@@ -306,19 +311,10 @@ void SystemClock_Config(void)
     LL_RCC_SetRTCClockSource(LL_RCC_RTC_CLKSOURCE_LSE);
   }
   LL_RCC_EnableRTC();
-  LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_MSI, LL_RCC_PLLM_DIV_1, 10, LL_RCC_PLLR_DIV_2);
-  LL_RCC_PLL_EnableDomain_SYS();
-  LL_RCC_PLL_Enable();
-
-   /* Wait till PLL is ready */
-  while(LL_RCC_PLL_IsReady() != 1)
-  {
-
-  }
-  LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
+  LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_MSI);
 
    /* Wait till System clock is ready */
-  while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
+  while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_MSI)
   {
 
   }
@@ -326,22 +322,13 @@ void SystemClock_Config(void)
   LL_RCC_SetAPB1Prescaler(LL_RCC_APB1_DIV_1);
   LL_RCC_SetAPB2Prescaler(LL_RCC_APB2_DIV_1);
 
-  LL_Init1msTick(80000000);
+  LL_Init1msTick(48000000);
 
-  LL_SetSystemCoreClock(80000000);
+  LL_SetSystemCoreClock(48000000);
+  LL_RCC_SetLPTIMClockSource(LL_RCC_LPTIM1_CLKSOURCE_LSE);
 }
 
 /* USER CODE BEGIN 4 */
-/**
-  * @brief System Clock recover from sleep. Enable PLL with out wait stabilazation
-  * @retval None
-  */
-void SystemClock_Recover(void)
-{
-  LL_RCC_MSI_EnablePLLMode();
-  LL_RCC_PLL_Enable();
-  LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
-}
 
 /**
   * @brief  Function to decrease Frequency at 2MHZ in Low Power Run Mode.

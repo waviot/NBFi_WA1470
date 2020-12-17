@@ -69,7 +69,7 @@ void MX_RTC_Init(void)
   */
   /** Enable the WakeUp
   */
-  LL_RTC_WAKEUP_SetClock(RTC, LL_RTC_WAKEUPCLOCK_DIV_2);
+  LL_RTC_WAKEUP_SetClock(RTC, LL_RTC_WAKEUPCLOCK_DIV_16);
 
 }
 
@@ -105,8 +105,6 @@ void RTC_WakeUpPeriodic(void)
     /* Disable RTC registers write protection */
     LL_RTC_DisableWriteProtection(RTC);
 
-    LL_RTC_CAL_LowPower_Enable(RTC);
-
     LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_20);
     LL_RTC_WAKEUP_Enable(RTC);
     LL_RTC_EnableIT_WUT(RTC);
@@ -124,6 +122,7 @@ void RTC_WakeUpPeriodic(void)
     this allows to get a wakeup time equal to RTC_WUT_TIME
     if the counter is RTC_WUT_TIME */
     LL_RTC_WAKEUP_SetAutoReload(RTC, 2047);
+    LL_RTC_WAKEUP_SetClock(RTC, LL_RTC_WAKEUPCLOCK_DIV_16);
     LL_RTC_WAKEUP_Enable(RTC);
     LL_RTC_EnableIT_WUT(RTC);
 
@@ -136,6 +135,16 @@ void RTC_WakeUpPeriodic(void)
 uint64_t RTC_GetAbsMilliseconds(void)
 {
     return rtc_counter +(uint32_t)HAL_LPTIM_GetCounter() * 1000 / 1024;
+}
+
+uint32_t RTC_GetSeconds(void)
+{
+    return rtc_counter;
+}
+
+void RTC_SetSeconds(uint32_t seconds)
+{
+    rtc_counter = seconds;
 }
 
 /**

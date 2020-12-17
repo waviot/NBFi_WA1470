@@ -82,14 +82,14 @@ static inline uint32_t nbfi_HAL_update_rtc()
 {
   //you should use this callback when external RTC used
   //return rtc_counter;
-  return 0;//(uint32_t)RTC_GetSeconds();
+  return RTC_GetSeconds();
 }
 
 static inline void nbfi_HAL_rtc_synchronized(uint32_t time)
 {
   //you should use this callback for RTC counter correction when external RTC used
   //rtc_counter = time;
-  //RTC_SetSeconds((time_t const*)&time);
+  RTC_SetSeconds(time);
 }
 #endif //USE_EXTERNAL_RTC
 __weak void nbfi_send_complete(nbfi_ul_sent_status_t ul)

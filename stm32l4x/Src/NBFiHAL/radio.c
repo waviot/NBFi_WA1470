@@ -88,7 +88,7 @@ const nbfi_settings_t nbfi_default_settings =
 {
     MODEM_ID,
     KEY,
-    CRX,                //mode;
+    DRX,                //mode;
     UL_DBPSK_50_PROT_E, // tx_phy_channel;
     DL_DBPSK_50_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,

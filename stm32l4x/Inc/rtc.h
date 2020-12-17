@@ -39,8 +39,10 @@ void MX_RTC_Init(void);
 uint32_t RTC_BackupRead(uint32_t registerIndex);
 void RTC_BackupWrite(uint32_t data, uint32_t registerIndex);
 void RTC_WakeUpPeriodic(void);
-void HAL_RTCEx_WakeUpTimerEventCallback(void);
 uint64_t RTC_GetAbsMilliseconds(void);
+uint32_t RTC_GetSeconds(void);
+void RTC_SetSeconds(uint32_t seconds);
+void HAL_RTCEx_WakeUpTimerEventCallback(void);
 /* USER CODE END Prototypes */
 
 #ifdef __cplusplus

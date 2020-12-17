@@ -191,7 +191,7 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 #ifdef DEBUG
-  LL_DBGMCU_EnableDBGStopMode();
+  //LL_DBGMCU_EnableDBGStopMode();
 #endif
   /* USER CODE END 1 */
 
@@ -250,17 +250,15 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
       IWDG_Refresh();
-      scheduler_run_callbacks();
       NBFI_Main_Level_Loop();
-
+      scheduler_run_callbacks();
       if (NBFi_can_sleep() && scheduler_can_sleep())
       {
           __WFI();//HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_SLEEPENTRY_WFI);
-          SystemClock_Config();
       }
       else
       {
-          //EnterRunMode_LowPower_DownTo2MHz();//HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
+          //HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
       }
   }
   /* USER CODE END 3 */
@@ -330,84 +328,6 @@ void SystemClock_Config(void)
 
 /* USER CODE BEGIN 4 */
 
-/**
-  * @brief  Function to decrease Frequency at 2MHZ in Low Power Run Mode.
-  * @param  None
-  * @retval None
-  */
-void EnterRunMode_LowPower_DownTo2MHz(void)
-{
-  /* 1 - Set Frequency to 24MHz (MSI) to set VOS to Range 2 */
-  LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_MSI);
-  /* Disable PLL to decrease power consumption */
-  //    LL_RCC_PLL_Disable();
-  //    LL_RCC_PLL_DisableDomain_SYS();
-  /* Enable MSI Range Selection. Not done in SystemClock_Config() */
-  //    LL_RCC_MSI_EnableRangeSelection();
-  /* 2 - Adjust Flash Wait state after decrease Clock Frequency */
-  //    LL_FLASH_SetLatency(LL_FLASH_LATENCY_3);
-
-  /* 3 - Set Voltage scaling to Range 2. Decrease VCore  */
-
-  /* 1 - Set Frequency to 2MHz to activate Low Power Run Mode: 2MHz */
-  /* Range Selection already enabled. Need to change Range only */
-  //    LL_RCC_MSI_SetRange(LL_RCC_MSIRANGE_5);
-  //    while(LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_MSI)
-  //    {
-  //    };
-
-  //    LL_PWR_SetRegulVoltageScaling(LL_PWR_REGU_VOLTAGE_SCALE2);
-  /* Set systick to 1ms in using frequency set to 2MHz */
-  LL_Init1msTick(8000000);
-  /* Update CMSIS variable */
-  SystemCoreClock = 8000000;
-
-  /* 2 - Adjust Flash Wait state after decrease Clock Frequency */
-  //    LL_FLASH_SetLatency(LL_FLASH_LATENCY_0);
-
-  /* Voltage Scaling already set to Range 2. VCore already decreased */
-
-  /* 3 - Activate Low Power Run Mode */
-  //    LL_PWR_EnableLowPowerRunMode();
-}
-
-/**
-  * @brief  Function to decrease Frequency at 80MHz in Run Mode.
-  * @param  None
-  * @retval None
-  */
-void EnterRunMode_UpTo80MHz(void)
-{
-  /* 1 - Set Voltage scaling to Range 1 before increase Clock Frequency */
-  LL_PWR_SetRegulVoltageScaling(LL_PWR_REGU_VOLTAGE_SCALE1);
-  /* 2 - Wait Voltage Scaling 1 before inscrease frequency */
-  while (LL_PWR_IsActiveFlag_VOSF() != 0)
-  {
-  };
-
-  /* 3 - Adjust Flash Wait state before increase Clock Frequency */
-  LL_FLASH_SetLatency(LL_FLASH_LATENCY_4);
-
-  /* 4 - Set Frequency to 80MHz (PLL) */
-  LL_RCC_MSI_EnableRangeSelection();
-  /* Set default MSI range used by SystemClock_Config */
-  LL_RCC_MSI_SetRange(LL_RCC_MSIRANGE_8);
-  /* Enable PLL*/
-  LL_RCC_PLL_Enable();
-  LL_RCC_PLL_EnableDomain_SYS();
-  while (LL_RCC_PLL_IsReady() != 1)
-  {
-  };
-  /* Switch on PLL. Previous configuration done by SystemClock_Config is used */
-  LL_RCC_SetSysClkSource(LL_RCC_SYS_CLKSOURCE_PLL);
-  while (LL_RCC_GetSysClkSource() != LL_RCC_SYS_CLKSOURCE_STATUS_PLL)
-  {
-  };
-  /* Set systick to 1ms in using frequency set to 80MHz */
-  LL_Init1msTick(80000000);
-  /* Update CMSIS variable */
-  SystemCoreClock = 80000000;
-}
 /* USER CODE END 4 */
 
 /**

@@ -64,17 +64,18 @@ static inline void nbfi_HAL_write_flash_settings(nbfi_settings_t *settings)
 
 static inline uint32_t nbfi_HAL_measure_valtage_or_temperature(uint8_t val)
 {
-  ADC_GetVoltageAndTemp(&Voltage, &Temp);
-  // voltage = 3300;
-  // temp = 27;
-  if (val == 1)
-  {
-    return Voltage / 10;
-  }
-  else
-  {
-    return Temp;
-  }
+    /// \todo fix this
+    ADC_GetVoltageAndTemp(&Voltage, &Temp);
+    // voltage = 3300;
+    // temp = 27;
+    if (val == 1)
+    {
+        return Voltage / 10;
+    }
+    else
+    {
+        return Temp;
+    }
 }
 
 #ifdef USE_EXTERNAL_RTC

@@ -1,5 +1,4 @@
 #include "scheduler_hal.h"
-#include "lptim.h"
 #include "rtc.h"
 #include "tim.h"
 
@@ -9,7 +8,7 @@ static inline void scheduler_HAL_LPRTC_Init(void)
 {
     //main init in cubeMX
     RTC_WakeUpPeriodic();
-    HAL_LPTIM_Start();
+    HAL_LPRTC_Start();
 }
 
 static inline void scheduler_HAL_LOOPRTC_Init(void)
@@ -30,12 +29,12 @@ static inline void scheduler_HAL_disable_global_irq(void)
 
 static inline void scheduler_HAL_cc_irq_enable(uint8_t chan)
 {
-    HAL_LPTIM_EnableIt();
+    HAL_LPRTC_EnableIt();
 }
 
 static inline void scheduler_HAL_cc_irq_disable(uint8_t chan)
 {
-    HAL_LPTIM_DisableIt();
+    HAL_LPRTC_DisableIt();
 }
 
 static inline void scheduler_HAL_loop_irq_enable(uint8_t chan)
@@ -50,22 +49,34 @@ static inline void scheduler_HAL_loop_irq_disable(uint8_t chan)
 
 static inline void scheduler_HAL_cc_set(uint8_t chan, uint16_t data)
 {
-    HAL_LPTIM_SetCompare(data);
+    data = HAL_LPRTC_GetPrescalerS() - (((uint32_t)data * HAL_LPRTC_GetPrescalerS() / SECONDS(1))  % HAL_LPRTC_GetPrescalerS());
+    HAL_LPRTC_SetCompare(data);
 }
 
 static inline time_t scheduler_HAL_cc_get(uint8_t chan)
 {
-    return HAL_LPTIM_GetCompare();
+    return (uint32_t)(HAL_LPRTC_GetPrescalerS() - HAL_LPRTC_GetCompare()) * SECONDS(1) / HAL_LPRTC_GetPrescalerS();
 }
 
 static inline time_t scheduler_HAL_cnt_get(uint8_t chan)
 {
-    return HAL_LPTIM_GetCounter();
+    static uint32_t oldTime = 0;
+    static uint32_t result = 0;
+    uint32_t newTime = (uint32_t)(HAL_LPRTC_GetPrescalerS() - HAL_LPRTC_GetCounter()) * SECONDS(1) / HAL_LPRTC_GetPrescalerS();
+    if(newTime >= oldTime)
+    {
+        result += newTime - oldTime;
+    }else
+    {
+        result += newTime + SECONDS(1) - oldTime;
+    }
+    oldTime = newTime;
+    return result & 0xffff;
 }
 
 static inline uint8_t scheduler_HAL_check_cc_irq(uint8_t chan)
 {
-    return HAL_LPTIM_CheckIrq();
+    return HAL_LPRTC_CheckIrq();
 }
 
 scheduler_HAL_st scheduler_hal_struct = {0, 0, 0, 0, 0, 0, 0, 0, 0, 0};

@@ -25,7 +25,6 @@
 /* USER CODE BEGIN Includes */
 #include "adc.h"
 #include "gpio.h"
-#include "lptim.h"
 #include "rtc.h"
 #include "spi.h"
 #include "tim.h"
@@ -249,6 +248,46 @@ void EXTI9_5_IRQHandler(void)
 }
 
 /**
+  * @brief This function handles RTC alarm interrupt through EXTI line 18.
+  */
+void RTC_Alarm_IRQHandler(void)
+{
+  /* USER CODE BEGIN RTC_Alarm_IRQn 0 */
+  /* Clear the EXTI's Flag for RTC Alarm */
+    LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_18);
+    /* Get the Alarm interrupt source enable status */
+    if (LL_RTC_IsEnabledIT_ALRA(RTC) != 0)
+    {
+        /* Get the pending status of the Alarm Interrupt */
+        if (LL_RTC_IsActiveFlag_ALRA(RTC) != 0)
+        {
+            /* Alarm callback */
+            Alarm_Callback();
+
+            /* Clear the Alarm interrupt pending bit */
+            LL_RTC_ClearFlag_ALRA(RTC);
+        }
+    }
+    if (LL_RTC_IsEnabledIT_ALRA(RTC) != 0)
+    {
+        /* Get the pending status of the Alarm Interrupt */
+        if (LL_RTC_IsActiveFlag_ALRA(RTC) != 0)
+        {
+            /* Alarm callback */
+            Alarm_Callback();
+
+            /* Clear the Alarm interrupt pending bit */
+            LL_RTC_ClearFlag_ALRA(RTC);
+        }
+    }
+
+  /* USER CODE END RTC_Alarm_IRQn 0 */
+  /* USER CODE BEGIN RTC_Alarm_IRQn 1 */
+
+  /* USER CODE END RTC_Alarm_IRQn 1 */
+}
+
+/**
   * @brief This function handles TIM6 global interrupt.
   */
 void TIM6_IRQHandler(void)
@@ -259,19 +298,6 @@ void TIM6_IRQHandler(void)
   /* USER CODE BEGIN TIM6_IRQn 1 */
 
   /* USER CODE END TIM6_IRQn 1 */
-}
-
-/**
-  * @brief This function handles LPTIM1 global interrupt.
-  */
-void LPTIM1_IRQHandler(void)
-{
-  /* USER CODE BEGIN LPTIM1_IRQn 0 */
-    HAL_LPTIM_Callback();
-  /* USER CODE END LPTIM1_IRQn 0 */
-  /* USER CODE BEGIN LPTIM1_IRQn 1 */
-
-  /* USER CODE END LPTIM1_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */

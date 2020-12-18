@@ -149,16 +149,13 @@ void SendErrors(uint8_t errors)
  */
 void EverySec(struct scheduler_desc *desc)
 {
-  //  scheduler_add_task(desc, EverySec, RELATIVE, SECONDS(1));
-  //IWDG_Refresh();
-
-  NBFI_Main_Level_Loop();
-//  time_t timeNow = RTC_GetSeconds();
-//  Water7OneSec(RTC_GetTime());
-//
-//  uint8_t isOk = MeterEverySecHandler(timeNow);
-//  test_link(timeNow - SecondsOld);
-//  SecondsOld = timeNow;
+    //  NBFI_Main_Level_Loop();
+    //  time_t timeNow = RTC_GetSeconds();
+    //  Water7OneSec(RTC_GetTime());
+    //
+    //  uint8_t isOk = MeterEverySecHandler(timeNow);
+    //  test_link(timeNow - SecondsOld);
+    //  SecondsOld = timeNow;
 }
 
 /*!
@@ -190,8 +187,8 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 #ifdef DEBUG
-  LL_DBGMCU_EnableDBGStopMode();
-  LL_DBGMCU_APB1_GRP1_FreezePeriph(LL_DBGMCU_APB1_GRP1_RTC_STOP);
+//  LL_DBGMCU_EnableDBGStopMode();
+//  LL_DBGMCU_APB1_GRP1_FreezePeriph(LL_DBGMCU_APB1_GRP1_RTC_STOP);
 #endif
   /* USER CODE END 1 */
 
@@ -249,8 +246,7 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
       IWDG_Refresh();
-      //NBFI_Main_Level_Loop();
-      //scheduler_run_callbacks();
+      NBFI_Main_Level_Loop();
       if (NBFi_can_sleep() && scheduler_can_sleep())
       {
           __WFI();//HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_SLEEPENTRY_WFI);

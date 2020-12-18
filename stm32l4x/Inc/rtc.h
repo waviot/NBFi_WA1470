@@ -51,6 +51,7 @@ void HAL_LPRTC_SetCompare(uint16_t data);
 uint16_t HAL_LPRTC_GetCompare(void);
 uint16_t HAL_LPRTC_GetCounter(void);
 uint8_t HAL_LPRTC_CheckIrq(void);
+uint16_t HAL_LPRTC_GetPrescalerS(void);
 void Alarm_Callback(void);
 /* USER CODE END Prototypes */
 

@@ -25,6 +25,7 @@
 
 volatile uint32_t rtc_counter = 0;
 
+uint16_t PrescalerS = 0;
 /*!
  * \brief backup register array
  *
@@ -67,7 +68,7 @@ void MX_RTC_Init(void)
   */
   RTC_InitStruct.HourFormat = LL_RTC_HOURFORMAT_24HOUR;
   RTC_InitStruct.AsynchPrescaler = 31;
-  RTC_InitStruct.SynchPrescaler = 1024;
+  RTC_InitStruct.SynchPrescaler = 1023;
   LL_RTC_Init(RTC, &RTC_InitStruct);
   RTC_TimeStruct.Hours = 0;
   RTC_TimeStruct.Minutes = 0;
@@ -156,7 +157,7 @@ void RTC_WakeUpPeriodic(void)
 
 uint64_t RTC_GetAbsMilliseconds(void)
 {
-    return rtc_counter +(uint32_t)HAL_LPRTC_GetCounter() * 1000 / 1024;
+    return rtc_counter +(uint32_t)HAL_LPRTC_GetCounter() * SECONDS(1) / PrescalerS;
 }
 
 uint32_t RTC_GetSeconds(void)
@@ -188,6 +189,7 @@ void HAL_LPRTC_Start(void)
     LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_18);
     LL_EXTI_EnableIT_0_31(LL_EXTI_LINE_18);
     LL_EXTI_EnableRisingTrig_0_31(LL_EXTI_LINE_18);
+    PrescalerS = LL_RTC_GetSynchPrescaler(RTC) + 1;
 
 }
 
@@ -203,22 +205,28 @@ void HAL_LPRTC_DisableIt(void)
 
 void HAL_LPRTC_SetCompare(uint16_t data)
 {
-   LL_RTC_ALMA_SetSubSecond(RTC, 32768 - (data / 2));
+   LL_RTC_ALMA_SetSubSecond(RTC, data);
 }
 
 uint16_t HAL_LPRTC_GetCompare(void)
 {
-   return 32768 - LL_RTC_ALMA_GetSubSecond(RTC) * 2;
+   return LL_RTC_ALMA_GetSubSecond(RTC);
 }
 
 uint16_t HAL_LPRTC_GetCounter(void)
 {
-    return 32768 - LL_RTC_TIME_GetSubSecond(RTC) * 2;
+    return LL_RTC_TIME_GetSubSecond(RTC);
 }
 
 uint8_t HAL_LPRTC_CheckIrq(void)
 {
     return LL_RTC_IsEnabledIT_ALRA(RTC) && LL_RTC_IsActiveFlag_ALRA(RTC);
+}
+
+
+uint16_t HAL_LPRTC_GetPrescalerS(void)
+{
+    return PrescalerS;
 }
 
 void Alarm_Callback(void)

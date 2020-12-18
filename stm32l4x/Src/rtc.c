@@ -21,7 +21,6 @@
 #include "rtc.h"
 
 /* USER CODE BEGIN 0 */
-#include "lptim.h"
 #include "scheduler.h"
 
 volatile uint32_t rtc_counter = 0;
@@ -51,6 +50,9 @@ bool WaitForSynchro_RTC(void);
 void MX_RTC_Init(void)
 {
   LL_RTC_InitTypeDef RTC_InitStruct = {0};
+  LL_RTC_TimeTypeDef RTC_TimeStruct = {0};
+  LL_RTC_DateTypeDef RTC_DateStruct = {0};
+  LL_RTC_AlarmTypeDef RTC_AlarmStruct = {0};
 
   /* Peripheral clock enable */
   LL_RCC_EnableRTC();
@@ -58,13 +60,33 @@ void MX_RTC_Init(void)
   /* RTC interrupt Init */
   NVIC_SetPriority(RTC_WKUP_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),7, 0));
   NVIC_EnableIRQ(RTC_WKUP_IRQn);
+  NVIC_SetPriority(RTC_Alarm_IRQn, NVIC_EncodePriority(NVIC_GetPriorityGrouping(),0, 0));
+  NVIC_EnableIRQ(RTC_Alarm_IRQn);
 
   /** Initialize RTC and set the Time and Date
   */
   RTC_InitStruct.HourFormat = LL_RTC_HOURFORMAT_24HOUR;
-  RTC_InitStruct.AsynchPrescaler = 127;
-  RTC_InitStruct.SynchPrescaler = 255;
+  RTC_InitStruct.AsynchPrescaler = 31;
+  RTC_InitStruct.SynchPrescaler = 1024;
   LL_RTC_Init(RTC, &RTC_InitStruct);
+  RTC_TimeStruct.Hours = 0;
+  RTC_TimeStruct.Minutes = 0;
+  RTC_TimeStruct.Seconds = 0;
+  LL_RTC_TIME_Init(RTC, LL_RTC_FORMAT_BCD, &RTC_TimeStruct);
+  RTC_DateStruct.WeekDay = LL_RTC_WEEKDAY_MONDAY;
+  RTC_DateStruct.Month = LL_RTC_MONTH_JANUARY;
+  RTC_DateStruct.Year = 0;
+  LL_RTC_DATE_Init(RTC, LL_RTC_FORMAT_BCD, &RTC_DateStruct);
+  /** Enable the Alarm A
+  */
+  RTC_AlarmStruct.AlarmTime.Hours = 0x0;
+  RTC_AlarmStruct.AlarmTime.Minutes = 0x0;
+  RTC_AlarmStruct.AlarmTime.Seconds = 0x0;
+  RTC_AlarmStruct.AlarmMask = LL_RTC_ALMA_MASK_ALL;
+  RTC_AlarmStruct.AlarmDateWeekDaySel = LL_RTC_ALMA_DATEWEEKDAYSEL_DATE;
+  RTC_AlarmStruct.AlarmDateWeekDay = 1;
+  LL_RTC_ALMA_Init(RTC, LL_RTC_FORMAT_BCD, &RTC_AlarmStruct);
+  LL_RTC_EnableIT_ALRA(RTC);
   /** Initialize RTC and set the Time and Date
   */
   /** Enable the WakeUp
@@ -134,7 +156,7 @@ void RTC_WakeUpPeriodic(void)
 
 uint64_t RTC_GetAbsMilliseconds(void)
 {
-    return rtc_counter +(uint32_t)HAL_LPTIM_GetCounter() * 1000 / 1024;
+    return rtc_counter +(uint32_t)HAL_LPRTC_GetCounter() * 1000 / 1024;
 }
 
 uint32_t RTC_GetSeconds(void)
@@ -156,6 +178,52 @@ void HAL_RTCEx_WakeUpTimerEventCallback(void)
 {
     /* Alarm callback */
     rtc_counter++;
+}
+
+void HAL_LPRTC_Start(void)
+{
+    HAL_LPRTC_EnableIt();
+    LL_RTC_ALMA_Enable(RTC);
+
+    LL_EXTI_ClearFlag_0_31(LL_EXTI_LINE_18);
+    LL_EXTI_EnableIT_0_31(LL_EXTI_LINE_18);
+    LL_EXTI_EnableRisingTrig_0_31(LL_EXTI_LINE_18);
+
+}
+
+void HAL_LPRTC_EnableIt(void)
+{
+   LL_RTC_EnableIT_ALRA(RTC);
+}
+
+void HAL_LPRTC_DisableIt(void)
+{
+   LL_RTC_DisableIT_ALRA(RTC);
+}
+
+void HAL_LPRTC_SetCompare(uint16_t data)
+{
+   LL_RTC_ALMA_SetSubSecond(RTC, 32768 - (data / 2));
+}
+
+uint16_t HAL_LPRTC_GetCompare(void)
+{
+   return 32768 - LL_RTC_ALMA_GetSubSecond(RTC) * 2;
+}
+
+uint16_t HAL_LPRTC_GetCounter(void)
+{
+    return 32768 - LL_RTC_TIME_GetSubSecond(RTC) * 2;
+}
+
+uint8_t HAL_LPRTC_CheckIrq(void)
+{
+    return LL_RTC_IsEnabledIT_ALRA(RTC) && LL_RTC_IsActiveFlag_ALRA(RTC);
+}
+
+void Alarm_Callback(void)
+{
+    scheduler_irq();
 }
 
 /* USER CODE END 1 */

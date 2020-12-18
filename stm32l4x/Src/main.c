@@ -22,7 +22,6 @@
 #include "adc.h"
 #include "crc.h"
 #include "iwdg.h"
-#include "lptim.h"
 #include "rtc.h"
 #include "spi.h"
 #include "tim.h"
@@ -153,7 +152,7 @@ void EverySec(struct scheduler_desc *desc)
   //  scheduler_add_task(desc, EverySec, RELATIVE, SECONDS(1));
   //IWDG_Refresh();
 
-//  NBFI_Main_Level_Loop();
+  NBFI_Main_Level_Loop();
 //  time_t timeNow = RTC_GetSeconds();
 //  Water7OneSec(RTC_GetTime());
 //
@@ -191,7 +190,8 @@ int main(void)
 {
   /* USER CODE BEGIN 1 */
 #ifdef DEBUG
-  //LL_DBGMCU_EnableDBGStopMode();
+  LL_DBGMCU_EnableDBGStopMode();
+  LL_DBGMCU_APB1_GRP1_FreezePeriph(LL_DBGMCU_APB1_GRP1_RTC_STOP);
 #endif
   /* USER CODE END 1 */
 
@@ -224,7 +224,6 @@ int main(void)
   MX_RTC_Init();
   MX_SPI1_Init();
   MX_IWDG_Init();
-  MX_LPTIM1_Init();
   MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
   IWDG_Init();
@@ -238,7 +237,7 @@ int main(void)
   radio_init();
   radio_load_id_and_key_of_sr_server(&sr_server_modem_id_and_key);
 //  waterAndMeterInit();
-//  scheduler_add_task(&everysec_desc, EverySec, RUN_CONTINUOSLY_RELATIVE, SECONDS(1));
+  scheduler_add_task(&everysec_desc, EverySec, RUN_CONTINUOSLY_RELATIVE, SECONDS(1));
 
   /* USER CODE END 2 */
 
@@ -250,8 +249,8 @@ int main(void)
 
     /* USER CODE BEGIN 3 */
       IWDG_Refresh();
-      NBFI_Main_Level_Loop();
-      scheduler_run_callbacks();
+      //NBFI_Main_Level_Loop();
+      //scheduler_run_callbacks();
       if (NBFi_can_sleep() && scheduler_can_sleep())
       {
           __WFI();//HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_SLEEPENTRY_WFI);
@@ -323,7 +322,6 @@ void SystemClock_Config(void)
   LL_Init1msTick(48000000);
 
   LL_SetSystemCoreClock(48000000);
-  LL_RCC_SetLPTIMClockSource(LL_RCC_LPTIM1_CLKSOURCE_LSE);
 }
 
 /* USER CODE BEGIN 4 */

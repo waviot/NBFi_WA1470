@@ -158,7 +158,7 @@ const nbfi_settings_t nbfi_short_range_settings_client =
     DL_DBPSK_25600_PROT_D, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
     MACK_1,             //mack_mode
-    2,                  //num_of_retries;
+    5,                  //num_of_retries;
     8,                  //max_payload_len;
     150,                //wait_ack_timeout
     0,                  //tx_freq;
@@ -179,6 +179,48 @@ const nbfi_settings_t nbfi_short_range_settings_client =
       NBFI_VOID_ALTERNATIVE
     }
 };
+
+
+
+#ifdef PHOBOS_HDLC_FORWARDER
+nbfi_settings_t nbfi_phobos_scan_settings =
+{      
+	SR_SERVER_MODEM_ID_PTR, 
+        0,//SR_SERVER_KEY_PTR,
+	CRX,//mode;
+	DL_DBPSK_25600_PROT_D, // tx_phy_channel;
+	DL_DBPSK_25600_PROT_D, // rx_phy_channel;
+	HANDSHAKE_NONE,
+	MACK_1,             //mack_mode
+	2,                  //num_of_retries;
+	8,                  //max_payload_len;
+	150,                //wait_ack_timeout
+	NBFI_UL_FREQ_BASE,                  //tx_freq;
+	NBFI_DL_FREQ_BASE,                  //rx_freq;
+	PCB,                //tx_antenna;
+	PCB,                //rx_antenna;
+	TX_MAX_POWER,       //tx_pwr;
+	0,         		//heartbeat_interval
+	0,                  //heartbeat_num
+	NBFI_FLG_SEND_IN_RESPONSE|NBFI_FLG_RX_DEFAULT_PREAMBLE|NBFI_FLG_FIXED_BAUD_RATE|NBFI_FLG_NO_RESET_TO_DEFAULTS|NBFI_FLG_NO_SENDINFO|NBFI_FLG_NO_REDUCE_TX_PWR,                  //additional_flags
+	NBFI_UL_FREQ_BASE,
+	NBFI_DL_FREQ_BASE,
+	NBFI_FREQ_PLAN_MINIMAL + NBFI_DL_FREQ_PLAN_819200_M2457600,
+	{
+		NBFI_VOID_ALTERNATIVE,
+		NBFI_VOID_ALTERNATIVE,
+		NBFI_VOID_ALTERNATIVE,
+		NBFI_VOID_ALTERNATIVE
+	}
+};
+
+void radio_switch_to_from_phobos_scan_mode(_Bool en)
+{
+    nbfi_crypto_iterator_t it = {0,0};
+    NBFi_switch_to_custom_settings(((nbfi_settings_t *)&nbfi_phobos_scan_settings), &it, en);
+}
+#endif
+
 
 
 

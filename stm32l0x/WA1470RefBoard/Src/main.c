@@ -73,6 +73,8 @@ int main(void)
   
   radio_load_id_and_key_of_sr_server(&sr_server_modem_id_and_key);
   
+  if(sr_server_modem_id_and_key.id == 0) sr_server_modem_id_and_key.id = DEFAULT_REMOTE_ID;
+  
 #ifdef NBFI_AT_SERVER
   nbfi_at_server_define_user_handler(user_defined_at_command_handler);
 #endif

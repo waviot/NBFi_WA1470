@@ -1,0 +1,15 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"settings": {
+		"stm32-for-vscode.openocdPath": "c:\\Program Files (x86)\\OpenOCD\\bin\\openocd.exe",
+		"cortex-debug.openocdPath": "c:\\Program Files (x86)\\OpenOCD\\bin\\openocd.exe",
+		"files.associations": {
+			"algorithm": "cpp",
+			"limits": "cpp"
+		}
+	}
+}

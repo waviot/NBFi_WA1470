@@ -10,6 +10,7 @@ ischeduler_st* nbfi_scheduler = 0;
 _Bool switched_to_custom_settings = 0;
 
 #ifdef NBFI_LOG
+#warning NBFI_LOG
 char nbfi_log_string[256];
 #endif
 

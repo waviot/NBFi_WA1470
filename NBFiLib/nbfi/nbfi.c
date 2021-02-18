@@ -220,7 +220,6 @@ void NBFi_set_Settings(nbfi_settings_t* settings, _Bool persistent)
     _Bool need_to_send_ul_freq_base = 0;
     _Bool need_to_send_dl_freq_base = 0;
 
-
     nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
 
     if(persistent)
@@ -294,6 +293,7 @@ void NBFi_switch_to_custom_settings(nbfi_settings_t* settings, nbfi_crypto_itera
       NBFi_Clear_TX_Buffer();
 
       memcpy(&nbfi, settings, sizeof(nbfi_settings_t));
+      //rf_state = STATE_CHANGED;
       nbfi_iter = *it;
 	  NBFi_Crypto_Save_Restore_All_KEYs(1);
 

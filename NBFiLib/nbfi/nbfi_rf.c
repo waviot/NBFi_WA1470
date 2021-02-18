@@ -59,20 +59,20 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
     static int8_t last_tx_prw;
     static uint32_t last_tx_freq;
     static uint32_t last_rx_freq;
-    
+
     static uint32_t _preambule = 0;
     static uint32_t last_dl_add = 0;
 
 	const uint32_t protD_preambula = 0x6f7a1597;//0x97157a6f;
-	
+
 	if(!_preambule || (last_dl_add != NBFi_DL_ID()))
-    {           
+    {
         last_dl_add = NBFi_DL_ID();
 		uint32_t preambule_tmp = preambula(NBFi_DL_ID(), (uint32_t *)0, (uint32_t *)0);
 		_memcpy((uint8_t *)&_preambule, (uint8_t *)&preambule_tmp, 4);
     }
-    
-	
+
+
     if(rf_busy) return ERR_RF_BUSY;
 
     rf_busy = 1;
@@ -85,15 +85,16 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
       last_tx_prw = 100;
       last_tx_freq = 0;
       last_rx_freq = 0;
+      last_phy = UNDEFINED;
     }
     last_additional_flags = nbfi.additional_flags;
     switch(phy_channel)
     {
-      
+
     case UL_DBPSK_50_PROT_D:
     case UL_DBPSK_400_PROT_D:
     case UL_DBPSK_3200_PROT_D:
-    case UL_DBPSK_25600_PROT_D: 
+    case UL_DBPSK_25600_PROT_D:
     case UL_DBPSK_50_PROT_E:
     case UL_DBPSK_400_PROT_E:
     case UL_DBPSK_3200_PROT_E:
@@ -101,7 +102,7 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
         if (nbfi_rf_iface.dem_rx_enable != NULL)
           nbfi_rf_iface.dem_rx_enable(0);
         nbfi_hal->__nbfi_before_tx(&nbfi);
-                        
+
         if(freq != last_tx_freq)
         {
           nbfi_state.last_tx_freq = last_tx_freq = freq;
@@ -109,7 +110,7 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
             nbfi_rf_iface.mod_set_freq(freq);
            
         }
-                
+
         if(power != last_tx_prw)
         {
           last_tx_prw = power;
@@ -124,7 +125,7 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
         rf_state = STATE_TX;
         last_phy = phy_channel;
         return OK;
-       
+
     case DL_DBPSK_50_PROT_D:
     case DL_DBPSK_400_PROT_D:
     case DL_DBPSK_3200_PROT_D:
@@ -184,9 +185,9 @@ nbfi_status_t NBFi_RF_Transmit(uint8_t* pkt, uint8_t len, nbfi_phy_channel_t  ph
       nbfi_rf_iface.mod_send(pkt, (mod_bitrate_s) phy_channel);
     
     rf_busy = 0;
-    
+
     transmit = 1;
-      
+
     if(blocking == BLOCKING)
     {
 
@@ -216,7 +217,7 @@ _Bool NBFi_RF_is_TX_in_Progress()
         return 0;
   }
   else return 0;
-}  
+}
 
 float NBFi_RF_get_noise()
 {

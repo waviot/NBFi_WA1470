@@ -947,12 +947,13 @@ static void NBFi_SendHeartBeats(struct scheduler_desc *desc)
         if(info_timer >= dev_info.send_info_interval)
         {
                 info_timer = 0;
-                NBFi_Config_Send_Mode(nbfi.handshake_mode, NBFI_PARAM_VERSION);
-                NBFi_Config_Send_Mode(nbfi.handshake_mode, NBFI_PARAM_TX_BRATES);
-                NBFi_Config_Send_Mode(nbfi.handshake_mode, NBFI_PARAM_RX_BRATES);
-                NBFi_Config_Send_Mode(nbfi.handshake_mode, NBFI_PARAM_APP_IDS);
-                NBFi_Config_Send_Mode(nbfi.handshake_mode, NBFI_PARAM_UL_BASE_FREQ);
-                NBFi_Config_Send_Mode(nbfi.handshake_mode, NBFI_PARAM_DL_BASE_FREQ);
+                NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_VERSION);
+                NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_TX_BRATES);
+                NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_RX_BRATES);
+                NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_APP_IDS);
+                NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_UL_BASE_FREQ);
+                NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_DL_BASE_FREQ);
+                NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_HANDSHAKE);
         }
     }
 }

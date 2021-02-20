@@ -96,6 +96,7 @@ void  NBFI_Main_Level_Loop()
         nbfi.nbfi_freq_plan = default_nbfi_settings.nbfi_freq_plan;
 
         nbfi_hal->__nbfi_write_flash_settings(&nbfi);
+
         nbfi.tx_phy_channel = tmp_tx_phy;
         nbfi.rx_phy_channel = tmp_rx_phy;
         nbfi_settings_need_to_save_to_flash = 0;
@@ -228,11 +229,10 @@ void NBFi_set_Settings(nbfi_settings_t* settings, _Bool persistent)
       if((nbfi.handshake_mode != settings->handshake_mode)||(nbfi.mack_mode != settings->mack_mode)) need_to_send_handshake_mode = 1;
       if(nbfi.ul_freq_base != settings->ul_freq_base) need_to_send_ul_freq_base = 1;
       if(nbfi.dl_freq_base != settings->dl_freq_base) need_to_send_dl_freq_base = 1;
-      if(nbfi.mode != settings->mode)
-      {
-        NBFi_Clear_TX_Buffer();
-        need_to_send_sync = 1;
-      }
+      if(nbfi.mode != settings->mode) need_to_send_sync = 1;
+
+      NBFi_Clear_TX_Buffer();
+
       memcpy(&nbfi, settings , sizeof(nbfi_settings_t));
       nbfi_settings_need_to_save_to_flash = 1;
       rf_state = STATE_CHANGED;

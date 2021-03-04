@@ -10,6 +10,7 @@ ischeduler_st* nbfi_scheduler = 0;
 _Bool switched_to_custom_settings = 0;
 
 #ifdef NBFI_LOG
+#warning NBFI_LOG
 char nbfi_log_string[256];
 #endif
 
@@ -95,6 +96,7 @@ void  NBFI_Main_Level_Loop()
         nbfi.nbfi_freq_plan = default_nbfi_settings.nbfi_freq_plan;
 
         nbfi_hal->__nbfi_write_flash_settings(&nbfi);
+
         nbfi.tx_phy_channel = tmp_tx_phy;
         nbfi.rx_phy_channel = tmp_rx_phy;
         nbfi_settings_need_to_save_to_flash = 0;
@@ -215,6 +217,7 @@ void NBFi_get_Settings(nbfi_settings_t* settings)
 void NBFi_set_Settings(nbfi_settings_t* settings, _Bool persistent)
 {
     _Bool need_to_send_sync = 0;
+    _Bool need_to_send_handshake_mode = 0;
     _Bool need_to_send_ul_freq_base = 0;
     _Bool need_to_send_dl_freq_base = 0;
 
@@ -223,17 +226,18 @@ void NBFi_set_Settings(nbfi_settings_t* settings, _Bool persistent)
     if(persistent)
     {
       if(nbfi.rx_phy_channel != settings->rx_phy_channel) need_to_send_sync = 1;
+      if((nbfi.handshake_mode != settings->handshake_mode)||(nbfi.mack_mode != settings->mack_mode)) need_to_send_handshake_mode = 1;
       if(nbfi.ul_freq_base != settings->ul_freq_base) need_to_send_ul_freq_base = 1;
       if(nbfi.dl_freq_base != settings->dl_freq_base) need_to_send_dl_freq_base = 1;
-      if(nbfi.mode != settings->mode)
-      {
-        NBFi_Clear_TX_Buffer();
-        need_to_send_sync = 1;
-      }
+      if(nbfi.mode != settings->mode) need_to_send_sync = 1;
+
+      NBFi_Clear_TX_Buffer();
+
       memcpy(&nbfi, settings , sizeof(nbfi_settings_t));
       nbfi_settings_need_to_save_to_flash = 1;
       rf_state = STATE_CHANGED;
       if(need_to_send_sync) {NBFi_Config_Send_Sync(0); NBFi_Force_process();}
+      if(need_to_send_handshake_mode) NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_HANDSHAKE);
       if(need_to_send_ul_freq_base)  NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_UL_BASE_FREQ);
       if(need_to_send_dl_freq_base)  NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_DL_BASE_FREQ);
 

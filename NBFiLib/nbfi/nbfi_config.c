@@ -305,9 +305,11 @@ uint8_t CompVersion()
 
 _Bool NBFi_Config_Parser(uint8_t* buf)
 {
+    uint8_t alternative_index = buf[1];
     switch(buf[0]>>6)
     {
         case READ_PARAM_CMD:
+
                 memset_xdata(&buf[1], 0xff, 6);
                 switch(buf[0]&0x3f)
                 {
@@ -402,11 +404,22 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         buf[1] = (nbfi.wait_ack_timeout >> 8);
                         buf[2] = nbfi.wait_ack_timeout&0xff;
                         break;
+                    case NBFI_PARAM_ALTERNATIVE:
+                        buf[1] = alternative_index;
+                        buf[2] = nbfi.try_alternative[alternative_index].try_interval;
+                        buf[3] = (uint8_t)nbfi.try_alternative[alternative_index].try_tx_phy_channel;
+                        buf[4] = (uint8_t)nbfi.try_alternative[alternative_index].try_rx_phy_channel;
+                        buf[5] = (uint8_t)(nbfi.try_alternative[alternative_index].try_nbfi_freq_plan.fp>>8);
+                        buf[6] = (uint8_t)(nbfi.try_alternative[alternative_index].try_nbfi_freq_plan.fp&0xff);
+                        break;
                     default:
                         return 0;
                         break;
                 }
             break;
+            case RESET_TO_FACTORY_SETTINGS:
+                if(nbfi_hal->__nbfi_read_default_settings) nbfi_hal->__nbfi_read_default_settings(&nbfi);
+                break;
 
             case WRITE_PARAM_AND_SAVE_CMD:
                 NBFi_Config_Set_Default();
@@ -476,13 +489,18 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         nbfi.wait_ack_timeout <<= 8;
                         nbfi.wait_ack_timeout += buf[2];
                         break;
+                    case NBFI_PARAM_ALTERNATIVE:
+                        nbfi.try_alternative[alternative_index].try_interval = buf[2];
+                        nbfi.try_alternative[alternative_index].try_tx_phy_channel = (nbfi_phy_channel_t)buf[3];
+                        nbfi.try_alternative[alternative_index].try_rx_phy_channel = (nbfi_phy_channel_t)buf[4];
+                        nbfi.try_alternative[alternative_index].try_nbfi_freq_plan.fp = (buf[5]*256 + buf[6]);
+                        break;
                     default:
                         return 0;
                         break;
                 }
-                if(buf[0]>>6 == WRITE_PARAM_AND_SAVE_CMD)
+                if((buf[0]>>6 >= RESET_TO_FACTORY_SETTINGS))
                 {
-                    //NBFi_WriteConfig();
                     nbfi_settings_need_to_save_to_flash = 1;
                     NBFi_Config_Send_Sync(0);
                     return 0;

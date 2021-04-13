@@ -3,7 +3,7 @@
 
 #define READ_PARAM_CMD              0x00
 #define WRITE_PARAM_CMD             0x01
-#define WRITE_PARAM_WITH_ACK_CMD    0x02
+#define RESET_TO_FACTORY_SETTINGS   0x02
 #define WRITE_PARAM_AND_SAVE_CMD    0x03
 
 #define NBFI_PARAM_MODE                 0x00
@@ -26,6 +26,8 @@
 #define NBFI_PARAM_BSANDSERVER_IDS      0x12
 #define NBFI_PARAM_FPLAN                0x13
 #define NBFI_PARAM_WAIT_ACK_TIMEOUT     0x14
+#define NBFI_PARAM_ALTERNATIVE          0x15
+
 
 
 

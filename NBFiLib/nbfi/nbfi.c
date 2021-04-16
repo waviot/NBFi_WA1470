@@ -91,9 +91,10 @@ void  NBFI_Main_Level_Loop()
         {
           nbfi.rx_phy_channel = default_nbfi_settings.rx_phy_channel;
           nbfi.tx_phy_channel = default_nbfi_settings.tx_phy_channel;
+          nbfi.nbfi_freq_plan = default_nbfi_settings.nbfi_freq_plan;
         }
 
-        nbfi.nbfi_freq_plan = default_nbfi_settings.nbfi_freq_plan;
+        //nbfi.nbfi_freq_plan = default_nbfi_settings.nbfi_freq_plan;
 
         nbfi_hal->__nbfi_write_flash_settings(&nbfi);
 

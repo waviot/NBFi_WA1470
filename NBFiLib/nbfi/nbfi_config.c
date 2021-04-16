@@ -418,7 +418,9 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                 }
             break;
             case RESET_TO_FACTORY_SETTINGS:
-                if(nbfi_hal->__nbfi_read_default_settings) nbfi_hal->__nbfi_read_default_settings(&nbfi);
+                NBFi_clear_Saved_Configuration();
+                NBFi_Config_Set_Default();
+                NBFi_Config_Send_Sync(0);
                 break;
 
             case WRITE_PARAM_AND_SAVE_CMD:
@@ -499,7 +501,7 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         return 0;
                         break;
                 }
-                if((buf[0]>>6 >= RESET_TO_FACTORY_SETTINGS))
+                if(((buf[0]>>6) == WRITE_PARAM_AND_SAVE_CMD))
                 {
                     nbfi_settings_need_to_save_to_flash = 1;
                     NBFi_Config_Send_Sync(0);

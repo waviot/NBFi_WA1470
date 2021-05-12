@@ -38,3 +38,5 @@ stm32l0x/WA1470RefBoard/Debug/Obj/
 stm32l0x/WA1470RefBoard/Debug/List/
 
 stm32l0x/WA1470RefBoard/Debug/Exe/
+
+*.tmp

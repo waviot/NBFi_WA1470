@@ -19,8 +19,8 @@ uint8_t hex2bin(const char* hexstr, char * binstr)
 
 
 uint16_t nbfi_at_server_list_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{ 
-  
+{
+
   uint8_t buf[1024];
   uint8_t *ptr = buf;
   switch(action)
@@ -48,9 +48,9 @@ uint16_t nbfi_at_server_list_handler(uint8_t *reply, nbfi_at_server_action_t act
 
 
 uint16_t nbfi_at_server_send_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{ 
-  
-  uint8_t buf[256]; 
+{
+
+  uint8_t buf[256];
   switch(action)
   {
     case AT_SET:
@@ -69,8 +69,8 @@ uint16_t nbfi_at_server_send_handler(uint8_t *reply, nbfi_at_server_action_t act
 
 
 uint16_t nbfi_at_server_send_status_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{ 
-  
+{
+
   switch(action)
   {
     case AT_GET:
@@ -91,8 +91,8 @@ uint16_t nbfi_at_server_send_status_handler(uint8_t *reply, nbfi_at_server_actio
 
 
 uint16_t nbfi_at_server_receive_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{ 
-  
+{
+
   switch(action)
   {
     case AT_GET:
@@ -110,14 +110,17 @@ uint16_t nbfi_at_server_receive_handler(uint8_t *reply, nbfi_at_server_action_t 
 }
 
 
+void NBFi_ReadConfig(nbfi_settings_t * settings);
 
 uint16_t nbfi_at_server_id_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
+  nbfi_settings_t settings;
   switch(action)
   {
     case AT_GET:
     case AT_CMD:
-      return  nbfi_at_server_return_uint(reply, *nbfi.modem_id, AT_OK);
+      NBFi_ReadConfig(&settings);
+      return  nbfi_at_server_return_uint(reply, *settings.modem_id, AT_OK);
     case AT_SET:
       return nbfi_at_server_return_str(reply, 0, AT_READONLY_ERROR);
     case AT_HELP:
@@ -130,7 +133,7 @@ uint16_t nbfi_at_server_id_handler(uint8_t *reply, nbfi_at_server_action_t actio
 
 
 uint16_t nbfi_at_server_key_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -147,7 +150,7 @@ uint16_t nbfi_at_server_key_handler(uint8_t *reply, nbfi_at_server_action_t acti
 }
 
 uint16_t nbfi_at_server_mode_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -174,7 +177,7 @@ uint16_t nbfi_at_server_mode_handler(uint8_t *reply, nbfi_at_server_action_t act
 
 
 uint16_t nbfi_at_server_tx_phy_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -199,7 +202,7 @@ uint16_t nbfi_at_server_tx_phy_handler(uint8_t *reply, nbfi_at_server_action_t a
 }
 
 uint16_t nbfi_at_server_rx_phy_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -224,7 +227,7 @@ uint16_t nbfi_at_server_rx_phy_handler(uint8_t *reply, nbfi_at_server_action_t a
 }
 
 uint16_t nbfi_at_server_handshake_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -249,7 +252,7 @@ uint16_t nbfi_at_server_handshake_handler(uint8_t *reply, nbfi_at_server_action_
 }
 
 uint16_t nbfi_at_server_mack_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -274,7 +277,7 @@ uint16_t nbfi_at_server_mack_handler(uint8_t *reply, nbfi_at_server_action_t act
 }
 
 uint16_t nbfi_at_server_retries_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -299,7 +302,7 @@ uint16_t nbfi_at_server_retries_handler(uint8_t *reply, nbfi_at_server_action_t 
 }
 
 uint16_t nbfi_at_server_max_pld_len_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -314,7 +317,7 @@ uint16_t nbfi_at_server_max_pld_len_handler(uint8_t *reply, nbfi_at_server_actio
 }
 
 uint16_t nbfi_at_server_wait_ack_timeout_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -327,7 +330,7 @@ uint16_t nbfi_at_server_wait_ack_timeout_handler(uint8_t *reply, nbfi_at_server_
         memset((void*)buf, 0xff, sizeof(buf));
         buf[0] = (WRITE_PARAM_AND_SAVE_CMD << 6) + NBFI_PARAM_WAIT_ACK_TIMEOUT;
         buf[1] = (timeout>>8);
-        buf[2] = timeout&0xff;        
+        buf[2] = timeout&0xff;
         NBFi_send_Packet_to_Config_Parser(buf);
         return nbfi_at_server_return_str(reply, 0, AT_OK);
       }
@@ -343,7 +346,7 @@ uint16_t nbfi_at_server_wait_ack_timeout_handler(uint8_t *reply, nbfi_at_server_
 void bigendian_cpy(uint8_t* from, uint8_t* to, uint8_t len);
 
 uint16_t nbfi_at_server_tx_freq_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -368,7 +371,7 @@ uint16_t nbfi_at_server_tx_freq_handler(uint8_t *reply, nbfi_at_server_action_t 
 }
 
 uint16_t nbfi_at_server_rx_freq_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -393,7 +396,7 @@ uint16_t nbfi_at_server_rx_freq_handler(uint8_t *reply, nbfi_at_server_action_t 
 }
 
 uint16_t nbfi_at_server_tx_ant_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -418,7 +421,7 @@ uint16_t nbfi_at_server_tx_ant_handler(uint8_t *reply, nbfi_at_server_action_t a
 }
 
 uint16_t nbfi_at_server_rx_ant_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -443,7 +446,7 @@ uint16_t nbfi_at_server_rx_ant_handler(uint8_t *reply, nbfi_at_server_action_t a
 }
 
 uint16_t nbfi_at_server_max_power_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -468,7 +471,7 @@ uint16_t nbfi_at_server_max_power_handler(uint8_t *reply, nbfi_at_server_action_
 }
 
 uint16_t nbfi_at_server_hb_interval_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -485,7 +488,7 @@ uint16_t nbfi_at_server_hb_interval_handler(uint8_t *reply, nbfi_at_server_actio
         else  buf[1] = 255;
         buf[2] = (interval >> 8);
         buf[3] = (interval&0xff);
-        NBFi_send_Packet_to_Config_Parser(buf);        
+        NBFi_send_Packet_to_Config_Parser(buf);
         return nbfi_at_server_return_str(reply, 0, AT_OK);
       }
     case AT_HELP:
@@ -497,7 +500,7 @@ uint16_t nbfi_at_server_hb_interval_handler(uint8_t *reply, nbfi_at_server_actio
 }
 
 uint16_t nbfi_at_server_hb_num_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -523,7 +526,7 @@ uint16_t nbfi_at_server_hb_num_handler(uint8_t *reply, nbfi_at_server_action_t a
 
 
 uint16_t nbfi_at_server_flags_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -549,7 +552,7 @@ uint16_t nbfi_at_server_flags_handler(uint8_t *reply, nbfi_at_server_action_t ac
 }
 
 uint16_t nbfi_at_server_ul_base_freq_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -574,7 +577,7 @@ uint16_t nbfi_at_server_ul_base_freq_handler(uint8_t *reply, nbfi_at_server_acti
 }
 
 uint16_t nbfi_at_server_dl_base_freq_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -599,7 +602,7 @@ uint16_t nbfi_at_server_dl_base_freq_handler(uint8_t *reply, nbfi_at_server_acti
 }
 
 uint16_t nbfi_at_server_fplan_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -625,7 +628,7 @@ uint16_t nbfi_at_server_fplan_handler(uint8_t *reply, nbfi_at_server_action_t ac
 }
 
 uint16_t nbfi_at_server_alt_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -637,10 +640,10 @@ uint16_t nbfi_at_server_alt_handler(uint8_t *reply, nbfi_at_server_action_t acti
       break;
   }
   return nbfi_at_server_return_str(reply, 0, AT_PARAM_ERROR);
-}      
- 
+}
+
 uint16_t nbfi_at_server_factory_settings_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_CMD:
@@ -655,7 +658,7 @@ uint16_t nbfi_at_server_factory_settings_handler(uint8_t *reply, nbfi_at_server_
 }
 
 uint16_t nbfi_at_server_reset_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_CMD:
@@ -670,7 +673,7 @@ uint16_t nbfi_at_server_reset_handler(uint8_t *reply, nbfi_at_server_action_t ac
 }
 
 uint16_t nbfi_at_server_nbfi_settings_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -692,7 +695,7 @@ uint16_t nbfi_at_server_nbfi_settings_handler(uint8_t *reply, nbfi_at_server_act
 }
 
 uint16_t nbfi_at_server_nbfi_rtc_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -713,7 +716,7 @@ uint16_t nbfi_at_server_nbfi_rtc_handler(uint8_t *reply, nbfi_at_server_action_t
 
 
 uint16_t nbfi_at_server_rssi_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -732,7 +735,7 @@ uint16_t nbfi_at_server_rssi_handler(uint8_t *reply, nbfi_at_server_action_t act
 }
 
 uint16_t nbfi_at_server_noise_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -751,7 +754,7 @@ uint16_t nbfi_at_server_noise_handler(uint8_t *reply, nbfi_at_server_action_t ac
 }
 
 uint16_t nbfi_at_server_last_snr_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -770,7 +773,7 @@ uint16_t nbfi_at_server_last_snr_handler(uint8_t *reply, nbfi_at_server_action_t
 }
 
 uint16_t nbfi_at_server_last_rssi_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -789,7 +792,7 @@ uint16_t nbfi_at_server_last_rssi_handler(uint8_t *reply, nbfi_at_server_action_
 }
 
 uint16_t nbfi_at_server_aver_ul_snr_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -808,7 +811,7 @@ uint16_t nbfi_at_server_aver_ul_snr_handler(uint8_t *reply, nbfi_at_server_actio
 }
 
 uint16_t nbfi_at_server_vcc_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -827,7 +830,7 @@ uint16_t nbfi_at_server_vcc_handler(uint8_t *reply, nbfi_at_server_action_t acti
 }
 
 uint16_t nbfi_at_server_temp_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -844,7 +847,7 @@ uint16_t nbfi_at_server_temp_handler(uint8_t *reply, nbfi_at_server_action_t act
 }
 
 uint16_t nbfi_at_server_aver_dl_snr_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -863,7 +866,7 @@ uint16_t nbfi_at_server_aver_dl_snr_handler(uint8_t *reply, nbfi_at_server_actio
 }
 
 uint16_t nbfi_at_server_sr_server_id_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   nbfi_device_id_and_key_st id_and_key;
   switch(action)
   {
@@ -886,7 +889,7 @@ uint16_t nbfi_at_server_sr_server_id_handler(uint8_t *reply, nbfi_at_server_acti
 
 
 uint16_t nbfi_at_server_sr_server_key_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   nbfi_device_id_and_key_st id_and_key;
   switch(action)
   {
@@ -908,7 +911,7 @@ uint16_t nbfi_at_server_sr_server_key_handler(uint8_t *reply, nbfi_at_server_act
 }
 
 uint16_t nbfi_at_server_sr_mode_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{  
+{
   switch(action)
   {
     case AT_GET:
@@ -933,7 +936,7 @@ uint16_t nbfi_at_server_sr_mode_handler(uint8_t *reply, nbfi_at_server_action_t 
 }
 
 uint16_t nbfi_at_server_user_handler(uint8_t *reply, nbfi_at_server_action_t action, uint8_t* sub_param, uint8_t* value[])
-{   
+{
   if(nbfi_at_server_user_defined_handler) return nbfi_at_server_user_defined_handler(reply, action, sub_param, value);
   return nbfi_at_server_return_str(reply, 0, AT_ERROR);
 }
@@ -962,71 +965,71 @@ uint16_t nbfi_at_server_common_handler(nbfi_at_server_tags_t tag, uint8_t *reply
   case RX_PHY:
     return nbfi_at_server_rx_phy_handler(reply, action, sub_param, value);
   case HANDSHAKE:
-    return nbfi_at_server_handshake_handler(reply, action, sub_param, value); 
+    return nbfi_at_server_handshake_handler(reply, action, sub_param, value);
   case MACK:
-    return nbfi_at_server_mack_handler(reply, action, sub_param, value); 
+    return nbfi_at_server_mack_handler(reply, action, sub_param, value);
   case RETRIES:
-    return nbfi_at_server_retries_handler(reply, action, sub_param, value); 
+    return nbfi_at_server_retries_handler(reply, action, sub_param, value);
   case MAX_PLD_LEN:
-    return nbfi_at_server_max_pld_len_handler(reply, action, sub_param, value); 
+    return nbfi_at_server_max_pld_len_handler(reply, action, sub_param, value);
   case WAIT_ACK_TIMEOUT:
-    return nbfi_at_server_wait_ack_timeout_handler(reply, action, sub_param, value); 
+    return nbfi_at_server_wait_ack_timeout_handler(reply, action, sub_param, value);
   case TX_FREQ:
-    return nbfi_at_server_tx_freq_handler(reply, action, sub_param, value); 
+    return nbfi_at_server_tx_freq_handler(reply, action, sub_param, value);
   case RX_FREQ:
-    return nbfi_at_server_rx_freq_handler(reply, action, sub_param, value); 
+    return nbfi_at_server_rx_freq_handler(reply, action, sub_param, value);
   case TX_ANT:
-    return nbfi_at_server_tx_ant_handler(reply, action, sub_param, value); 
+    return nbfi_at_server_tx_ant_handler(reply, action, sub_param, value);
   case RX_ANT:
-    return nbfi_at_server_rx_ant_handler(reply, action, sub_param, value); 
+    return nbfi_at_server_rx_ant_handler(reply, action, sub_param, value);
   case MAX_POWER:
-    return nbfi_at_server_max_power_handler(reply, action, sub_param, value); 
+    return nbfi_at_server_max_power_handler(reply, action, sub_param, value);
   case HB_INTERVAL:
-    return nbfi_at_server_hb_interval_handler(reply, action, sub_param, value); 
+    return nbfi_at_server_hb_interval_handler(reply, action, sub_param, value);
   case HB_NUM:
-    return nbfi_at_server_hb_num_handler(reply, action, sub_param, value); 
+    return nbfi_at_server_hb_num_handler(reply, action, sub_param, value);
   case FLAGS:
-    return nbfi_at_server_flags_handler(reply, action, sub_param, value);  
+    return nbfi_at_server_flags_handler(reply, action, sub_param, value);
   case UL_BASE_FREQ:
-    return nbfi_at_server_ul_base_freq_handler(reply, action, sub_param, value);  
+    return nbfi_at_server_ul_base_freq_handler(reply, action, sub_param, value);
   case DL_BASE_FREQ:
-    return nbfi_at_server_dl_base_freq_handler(reply, action, sub_param, value); 
+    return nbfi_at_server_dl_base_freq_handler(reply, action, sub_param, value);
   case FPLAN:
-    return nbfi_at_server_fplan_handler(reply, action, sub_param, value);   
+    return nbfi_at_server_fplan_handler(reply, action, sub_param, value);
   case ALT:
-    return nbfi_at_server_alt_handler(reply, action, sub_param, value);   
+    return nbfi_at_server_alt_handler(reply, action, sub_param, value);
   case FACTORY_SETTINGS:
-    return nbfi_at_server_factory_settings_handler(reply, action, sub_param, value);    
+    return nbfi_at_server_factory_settings_handler(reply, action, sub_param, value);
   case CPU_RESET:
-    return nbfi_at_server_reset_handler(reply, action, sub_param, value);  
+    return nbfi_at_server_reset_handler(reply, action, sub_param, value);
   case NBFI_SETTINGS:
-    return nbfi_at_server_nbfi_settings_handler(reply, action, sub_param, value); 
+    return nbfi_at_server_nbfi_settings_handler(reply, action, sub_param, value);
   case NBFI_RTC:
-    return nbfi_at_server_nbfi_rtc_handler(reply, action, sub_param, value);   
+    return nbfi_at_server_nbfi_rtc_handler(reply, action, sub_param, value);
   case RSSI:
-    return nbfi_at_server_rssi_handler(reply, action, sub_param, value); 
+    return nbfi_at_server_rssi_handler(reply, action, sub_param, value);
   case NOISE:
-    return nbfi_at_server_noise_handler(reply, action, sub_param, value); 
+    return nbfi_at_server_noise_handler(reply, action, sub_param, value);
   case LAST_SNR:
-    return nbfi_at_server_last_snr_handler(reply, action, sub_param, value); 
+    return nbfi_at_server_last_snr_handler(reply, action, sub_param, value);
   case LAST_RSSI:
-    return nbfi_at_server_last_rssi_handler(reply, action, sub_param, value); 
+    return nbfi_at_server_last_rssi_handler(reply, action, sub_param, value);
   case AVER_UL_SNR:
-    return nbfi_at_server_aver_ul_snr_handler(reply, action, sub_param, value);   
+    return nbfi_at_server_aver_ul_snr_handler(reply, action, sub_param, value);
   case AVER_DL_SNR:
-    return nbfi_at_server_aver_ul_snr_handler(reply, action, sub_param, value);   
+    return nbfi_at_server_aver_ul_snr_handler(reply, action, sub_param, value);
   case VCC:
-    return nbfi_at_server_vcc_handler(reply, action, sub_param, value);  
+    return nbfi_at_server_vcc_handler(reply, action, sub_param, value);
   case TEMP:
-    return nbfi_at_server_temp_handler(reply, action, sub_param, value);  
+    return nbfi_at_server_temp_handler(reply, action, sub_param, value);
   case SR_SERVER_ID:
-    return nbfi_at_server_sr_server_id_handler(reply, action, sub_param, value);  
+    return nbfi_at_server_sr_server_id_handler(reply, action, sub_param, value);
   case SR_SERVER_KEY:
-    return nbfi_at_server_sr_server_key_handler(reply, action, sub_param, value);  
+    return nbfi_at_server_sr_server_key_handler(reply, action, sub_param, value);
   case SR_MODE:
-    return nbfi_at_server_sr_mode_handler(reply, action, sub_param, value);  
+    return nbfi_at_server_sr_mode_handler(reply, action, sub_param, value);
   case USER:
-    return nbfi_at_server_user_handler(reply, action, sub_param, value);  
+    return nbfi_at_server_user_handler(reply, action, sub_param, value);
   default:
     break;
   }

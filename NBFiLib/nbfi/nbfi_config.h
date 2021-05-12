@@ -3,7 +3,7 @@
 
 #define READ_PARAM_CMD              0x00
 #define WRITE_PARAM_CMD             0x01
-#define WRITE_PARAM_WITH_ACK_CMD    0x02
+#define RESET_TO_FACTORY_SETTINGS   0x02
 #define WRITE_PARAM_AND_SAVE_CMD    0x03
 
 #define NBFI_PARAM_MODE                 0x00
@@ -26,6 +26,8 @@
 #define NBFI_PARAM_BSANDSERVER_IDS      0x12
 #define NBFI_PARAM_FPLAN                0x13
 #define NBFI_PARAM_WAIT_ACK_TIMEOUT     0x14
+#define NBFI_PARAM_ALTERNATIVE          0x15
+
 
 
 
@@ -69,6 +71,7 @@ extern _Bool nbfi_settings_need_to_save_to_flash;
 #define UL864000_DL864000            11 //KAZ
 #define UL868800_DL869150            12 //NEWRU
 #define UL866975_DL865000            13 //INDIA
+#define UL868500_DL869550            14  //new UKRAINE
 
 
 //FREQENCY PLANS

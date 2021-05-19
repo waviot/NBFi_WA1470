@@ -12,6 +12,7 @@
 #define RS485_RX_GPIO_Port 		GPIOA
 #define RS485_RX_Pin 			GPIO_PIN_3
 #define RS485_RX_AF			GPIO_AF4_USART2
+#define RS485_EXTI_IRQn		EXTI2_3_IRQn
 
 
 static UART_HandleTypeDef huart;
@@ -21,9 +22,15 @@ static UART_X_BUF RS485_UART_tx;
 
 uint32_t last_uart_rx_time = 0;
 
+uint32_t uart_can_sleep_timer = 0;
+
+#define UART_SLEEP_TIMEOUT  100
+
 #ifdef PHOBOS_HDLC_FORWARDER
 _Bool phobos_hdlc_mode = 0;
 #endif
+
+
 
 
 void RS485_UART_send(uint8_t data){
@@ -53,15 +60,19 @@ void RS485_UART_IRQ(void) {
 		if (!xbuf_is_empty(&RS485_UART_tx))
 			huart.Instance->TDR = xbuf_get(&RS485_UART_tx);
 		else
-			__HAL_UART_DISABLE_IT(&huart, UART_IT_TXE);		  
+			__HAL_UART_DISABLE_IT(&huart, UART_IT_TXE);
 	}
 	else
 		huart.Instance->ICR = 0xFFFFFFFF;
+
+    uart_can_sleep_timer = systimer;
 }
 
+
+
 void RS485_UART_init(void) {
-  	
-  GPIO_InitTypeDef GPIO_InitStruct;  
+
+  GPIO_InitTypeDef GPIO_InitStruct;
 
   RS485_RCC_ENABLE();
 
@@ -75,31 +86,31 @@ void RS485_UART_init(void) {
   huart.Init.OverSampling = UART_OVERSAMPLING_16;
   huart.Init.OneBitSampling = UART_ONE_BIT_SAMPLE_DISABLE;
   huart.AdvancedInit.AdvFeatureInit = UART_ADVFEATURE_NO_INIT;
-  HAL_UART_Init(&huart);	
-  
+  HAL_UART_Init(&huart);
+
   GPIO_InitStruct.Pin = RS485_TX_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
   GPIO_InitStruct.Alternate = RS485_TX_AF;
   HAL_GPIO_Init(RS485_TX_GPIO_Port, &GPIO_InitStruct);
-	
+
   GPIO_InitStruct.Pin = RS485_RX_Pin;
   GPIO_InitStruct.Alternate = RS485_RX_AF;
   HAL_GPIO_Init(RS485_RX_GPIO_Port, &GPIO_InitStruct);
-	
-  
+
+
   for(uint16_t i = 0; i != 100; i++) huart.Instance->RDR; //wait and clear first received char
-    
+
   __HAL_UART_ENABLE_IT(&huart, UART_IT_RXNE);
   __HAL_UART_ENABLE_IT(&huart, UART_IT_TXE);
-	
+
   HAL_NVIC_SetPriority(RS485_USART_IRQ, 0, 0);
   HAL_NVIC_EnableIRQ(RS485_USART_IRQ);
 }
 
 void RS485_UART_deinit(void) {
-  	GPIO_InitTypeDef GPIO_InitStruct;  
+  	GPIO_InitTypeDef GPIO_InitStruct;
 
     GPIO_InitStruct.Pin = RS485_TX_Pin;
     GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
@@ -107,18 +118,19 @@ void RS485_UART_deinit(void) {
     GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
     GPIO_InitStruct.Alternate = 0;
     HAL_GPIO_Init(RS485_TX_GPIO_Port, &GPIO_InitStruct);
-	
+
     GPIO_InitStruct.Pin = RS485_RX_Pin;
     HAL_GPIO_Init(RS485_RX_GPIO_Port, &GPIO_InitStruct);
-	
+
 	RS485_TX_GPIO_Port->BRR |= RS485_TX_Pin;
 	RS485_RX_GPIO_Port->BRR |= RS485_RX_Pin;
 
-	HAL_UART_DeInit(&huart);	
+	HAL_UART_DeInit(&huart);
   	RS485_RCC_DISABLE();
-	
+
     HAL_NVIC_DisableIRQ(RS485_USART_IRQ);
 }
+
 
 void RS485_UART_set_baud_parity(uint32_t baud){
 	while(!__HAL_UART_GET_FLAG(&huart, UART_FLAG_TC));
@@ -140,5 +152,55 @@ void RS485_UART_set_baud_no_parity(uint32_t baud){
 	HAL_UART_Init(&huart);
 	__HAL_UART_ENABLE_IT(&huart, UART_IT_RXNE);
 	__HAL_UART_ENABLE_IT(&huart, UART_IT_TXE);
+}
+
+
+
+void RS485_UART_Enable_RXPin_IRQ()
+{
+    GPIO_InitTypeDef GPIO_InitStruct;
+	GPIO_InitStruct.Pin = RS485_RX_Pin;
+    GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+	GPIO_InitStruct.Pull = GPIO_PULLUP;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStruct.Alternate = 0;
+	HAL_GPIO_Init(RS485_RX_GPIO_Port, &GPIO_InitStruct);
+    HAL_NVIC_SetPriority(RS485_EXTI_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(RS485_EXTI_IRQn);
+}
+
+
+void RS485_UART_Disable_RXPin_IRQ()
+{
+        GPIO_InitTypeDef GPIO_InitStruct;
+        GPIO_InitStruct.Pin = RS485_RX_Pin;
+        GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
+        GPIO_InitStruct.Pull = GPIO_NOPULL;
+        GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
+        GPIO_InitStruct.Alternate = RS485_RX_AF;
+        HAL_GPIO_Init(RS485_RX_GPIO_Port, &GPIO_InitStruct);
+        HAL_NVIC_DisableIRQ(RS485_EXTI_IRQn);
+}
+
+void RS485_RXPin_IRQ(void)
+{
+    if(__HAL_GPIO_EXTI_GET_IT(RS485_RX_Pin) != RESET)
+	{
+         RS485_UART_Disable_RXPin_IRQ();
+             uart_can_sleep_timer = systimer;
+		__HAL_GPIO_EXTI_CLEAR_IT(RS485_RX_Pin);
+	}
+}
+
+
+_Bool RS485_can_sleep()
+{
+    return (systimer - uart_can_sleep_timer > UART_SLEEP_TIMEOUT);
+}
+
+void RS485_go_to_sleep(_Bool en)
+{
+    if(en) RS485_UART_Enable_RXPin_IRQ();
+    else RS485_UART_Disable_RXPin_IRQ();
 }
 

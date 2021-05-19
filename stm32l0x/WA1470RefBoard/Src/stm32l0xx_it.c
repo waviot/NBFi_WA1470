@@ -34,7 +34,7 @@
 #include "stm32l0xx_hal.h"
 #include "stm32l0xx.h"
 #include "stm32l0xx_it.h"
-#include "rs485_uart.h"    
+#include "rs485_uart.h"
 #include "wa1470.h"
 #include "rtc.h"
 
@@ -42,7 +42,7 @@
 extern LPTIM_HandleTypeDef hlptim1;
 
 /******************************************************************************/
-/*            Cortex-M0+ Processor Interruption and Exception Handlers         */ 
+/*            Cortex-M0+ Processor Interruption and Exception Handlers         */
 /******************************************************************************/
 
 /**
@@ -104,10 +104,18 @@ void USART2_IRQHandler(void)
   RS485_UART_IRQ();
 }
 
+void EXTI2_3_IRQHandler(void)
+{
+  RS485_RXPin_IRQ();
+}
 
 void RTC_IRQHandler(void)
 {
   RTC_GPIO_RTC_IRQ();
 }
+
+
+
+
 
 /************************ (C) COPYRIGHT STMicroelectronics *****END OF FILE****/

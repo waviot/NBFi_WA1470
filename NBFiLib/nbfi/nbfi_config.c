@@ -431,7 +431,11 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                 switch(buf[0]&0x3f)
                 {
                     case NBFI_PARAM_MODE:
-                        if(buf[1] != 0xff) nbfi.mode = (nbfi_mode_t)buf[1];
+                        if((buf[1] != 0xff) && (buf[1] <= 4))
+                        {
+                            if(buf[1] == 3)  nbfi.mode = OFF;
+                            else nbfi.mode = (nbfi_mode_t)buf[1];
+                        }
                         if(buf[2] != 0xff) nbfi.mack_mode = (nbfi_mack_mode_t)buf[2];
                         if(buf[3] != 0xff) NBFi_Config_Set_TX_Chan((nbfi_phy_channel_t)buf[3]);
                         if(buf[4] != 0xff) {NBFi_Config_Set_RX_Chan((nbfi_phy_channel_t)buf[4]); rf_state = STATE_CHANGED;}
@@ -501,6 +505,7 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         return 0;
                         break;
                 }
+                NBFi_Force_process();
                 if(((buf[0]>>6) == WRITE_PARAM_AND_SAVE_CMD))
                 {
                     nbfi_settings_need_to_save_to_flash = 1;

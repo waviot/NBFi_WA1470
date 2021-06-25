@@ -72,6 +72,8 @@ extern _Bool nbfi_settings_need_to_save_to_flash;
 #define UL868800_DL869150            12 //NEWRU
 #define UL866975_DL865000            13 //INDIA
 #define UL868500_DL869550            14  //new UKRAINE
+#define UL864000_DL863500            15 //NEW KAZ
+
 
 
 //FREQENCY PLANS

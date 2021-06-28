@@ -5,7 +5,7 @@
 #define MODEM_ID_AND_KEY_ADD    0x0801ff80
 
 #define MODEM_ID  ((uint32_t *)MODEM_ID_AND_KEY_ADD)
-#define KEY  ((uint32_t *)(MODEM_ID_AND_KEY_ADD+4))       
+#define KEY  ((uint32_t *)(MODEM_ID_AND_KEY_ADD+4))
 
 #define SR_SERVER_MODEM_ID_AND_KEY_ADD    0x20001000
 
@@ -24,7 +24,7 @@ nbfi_device_id_and_key_st sr_server_modem_id_and_key @SR_SERVER_MODEM_ID_AND_KEY
 
 #define BAND         UL868800_DL869150          //RU
 
-#if BAND == UL868800_DL446000                   
+#if BAND == UL868800_DL446000
 #define NBFI_UL_FREQ_BASE       868800000
 #define NBFI_DL_FREQ_BASE       446000000
 #elif BAND == UL868800_DL864000
@@ -55,7 +55,7 @@ nbfi_device_id_and_key_st sr_server_modem_id_and_key @SR_SERVER_MODEM_ID_AND_KEY
 #define NBFI_UL_FREQ_BASE       868800000
 #define NBFI_DL_FREQ_BASE       868800000
 #elif BAND == UL868800_DL869150                 //RU
-#define NBFI_UL_FREQ_BASE       868800000    
+#define NBFI_UL_FREQ_BASE       868800000
 #define NBFI_DL_FREQ_BASE       869150000
 #elif BAND == UL868100_DL869500
 #define NBFI_UL_FREQ_BASE       868100000       //EU
@@ -72,20 +72,20 @@ nbfi_device_id_and_key_st sr_server_modem_id_and_key @SR_SERVER_MODEM_ID_AND_KEY
 #elif BAND == UL916500_DL903000
 #define NBFI_UL_FREQ_BASE       916500000       //ARG
 #define NBFI_DL_FREQ_BASE       903000000
-#endif 
+#endif
 
 
-#define TRY_LOW_PHY_ALTERNATIVE   {4, UL_DBPSK_50_PROT_E, DL_DBPSK_50_PROT_D, NBFI_UL_FREQ_PLAN_NO_CHANGE + NBFI_DL_FREQ_PLAN_NO_CHANGE} 
+#define TRY_LOW_PHY_ALTERNATIVE   {4, UL_DBPSK_50_PROT_E, DL_DBPSK_50_PROT_D, NBFI_UL_FREQ_PLAN_NO_CHANGE + NBFI_DL_FREQ_PLAN_NO_CHANGE}
 #define TRY_MINIMAL_UL_BAND_AND_LOW_PHY_ALTERNATIVE   {8, UL_DBPSK_50_PROT_E, DL_DBPSK_50_PROT_D, NBFI_FREQ_PLAN_MINIMAL + NBFI_DL_FREQ_PLAN_NO_CHANGE}
 
 const nbfi_settings_t nbfi_default_settings =
-{      
-    MODEM_ID, 
+{
+    MODEM_ID,
     KEY,
-    CRX,                //mode;
+    NRX,                //mode;
     UL_DBPSK_50_PROT_E, // tx_phy_channel;
     DL_DBPSK_50_PROT_D, // rx_phy_channel;
-    HANDSHAKE_SIMPLE,
+    HANDSHAKE_NONE,
     MACK_1,             //mack_mode
     0x82,               //num_of_retries;
     8,                  //max_payload_len;
@@ -96,7 +96,7 @@ const nbfi_settings_t nbfi_default_settings =
     PCB,                //rx_antenna;
     TX_MAX_POWER,       //tx_pwr;
     60*5,               //heartbeat_interval
-    255,                //heartbeat_num
+    0,                //heartbeat_num
     0,                  //additional_flags
     NBFI_UL_FREQ_BASE,
     NBFI_DL_FREQ_BASE,
@@ -113,8 +113,8 @@ const nbfi_dev_info_t nbfi_info = {TX_MIN_POWER, TX_MAX_POWER, MANUFACTURER_ID, 
 
 
 const nbfi_settings_t nbfi_short_range_settings_server =
-{      
-    MODEM_ID, 
+{
+    MODEM_ID,
     KEY,
     CRX,                   //mode;
     DL_DBPSK_25600_PROT_D, // tx_phy_channel;
@@ -145,8 +145,8 @@ const nbfi_settings_t nbfi_short_range_settings_server =
 
 
 const nbfi_settings_t nbfi_short_range_settings_client =
-{      
-    SR_SERVER_MODEM_ID_PTR, 
+{
+    SR_SERVER_MODEM_ID_PTR,
     SR_SERVER_KEY_PTR,
     CRX,                   //mode;
     DL_DBPSK_25600_PROT_D, // tx_phy_channel;
@@ -183,31 +183,31 @@ void radio_switch_to_from_short_range(_Bool en, _Bool client_or_server)
 
 
 #define EEPROM_INT_aux_modem_data (DATA_EEPROM_BASE + 1024*5 + 128)
- 
-void radio_load_id_and_key_of_sr_server(nbfi_device_id_and_key_st *data) 
+
+void radio_load_id_and_key_of_sr_server(nbfi_device_id_and_key_st *data)
 {
 	memcpy((void*)data, ((const void*)EEPROM_INT_aux_modem_data), sizeof(nbfi_device_id_and_key_st));
 }
 
 void radio_save_id_and_key_of_sr_server(nbfi_device_id_and_key_st *data)
-{	
+{
     if(HAL_FLASHEx_DATAEEPROM_Unlock() != HAL_OK) return;
     for(uint8_t i = 0; i != sizeof(nbfi_device_id_and_key_st); i++)
     {
 	if(HAL_FLASHEx_DATAEEPROM_Program(FLASH_TYPEPROGRAMDATA_BYTE, EEPROM_INT_aux_modem_data + i, ((uint8_t *)data)[i]) != HAL_OK) break;
     }
-    HAL_FLASHEx_DATAEEPROM_Lock(); 
+    HAL_FLASHEx_DATAEEPROM_Lock();
 }
 
 void radio_init(void)
 {
-  
+
         scheduler_HAL_init();
 
         wa1470_HAL_reg_data_received_callback((void*)NBFi_MAC_RX_ProtocolD);
-        wa1470_HAL_reg_tx_finished_callback((void*)NBFi_RF_TX_Finished);       
-        wa1470_HAL_init();        
-	nbfi_HAL_init(&nbfi_default_settings, (nbfi_dev_info_t*)&nbfi_info);  
+        wa1470_HAL_reg_tx_finished_callback((void*)NBFi_RF_TX_Finished);
+        wa1470_HAL_init();
+	nbfi_HAL_init(&nbfi_default_settings, (nbfi_dev_info_t*)&nbfi_info);
         scheduler_run_callbacks();
         //NBFi_clear_Saved_Configuration(); //if you need to clear previously saved nbfi configuration in EEPROM
 }

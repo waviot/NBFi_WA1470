@@ -10,11 +10,16 @@
 #include "gui.h"
 #include "at_user.h"
 
+#include "scheduler.h"
+
 
 #define POWER_LED_GPIO_Port 	GPIOA
 #define POWER_LED_Pin 		GPIO_PIN_12
 
 uint32_t volatile systimer = 0;
+
+
+struct scheduler_desc test_desc;
 
 void HAL_SYSTICK_Callback(void)
 {
@@ -69,6 +74,62 @@ void nbfi_receive_complete(uint8_t * data, uint16_t length)
 
 
 
+
+
+void send_data(struct scheduler_desc *desc) {
+
+
+    #include "nbfi.h"
+    #include "nbfi_config.h"
+    static uint32_t counter = 0;
+
+    uint8_t packet[8] = {0,0,0,0,0,0,0,0};
+
+    scheduler_add_task(&test_desc, send_data, RELATIVE, SECONDS(1));
+
+    if(NBFi_GetQueuedTXPkt()) return;
+
+    packet[0] = (counter/5)>>8;
+    packet[1] = (counter/5)&0xff;
+
+    if(counter > 2000) return;
+    if(counter == 0)
+    {
+        packet[2] = nbfi.tx_pwr;
+        NBFi_Send(packet, 8);
+        NBFi_Send(packet, 8);
+        counter = 1;
+    }
+
+    switch(counter++%5)
+    {
+         case 0:
+            if(--nbfi.tx_pwr < -9) nbfi.tx_pwr = 16;
+            nbfi.tx_phy_channel = UL_DBPSK_50_PROT_E;
+            break;
+        case 1:
+            nbfi.tx_phy_channel = UL_DBPSK_400_PROT_E;
+            break;
+        case 2:
+            nbfi.tx_phy_channel = UL_DBPSK_3200_PROT_E;
+            break;
+        case 3:
+            nbfi.tx_phy_channel = UL_DBPSK_25600_PROT_E;
+            break;
+        default:
+            //ScheduleTask(&test_desc, send_data, RELATIVE, SECONDS(3));
+            scheduler_add_task(&test_desc, send_data, RELATIVE, SECONDS(3));
+            return;
+            break;
+    }
+    packet[2] = nbfi.tx_pwr;
+    NBFi_Send(packet, 8);
+
+}
+
+
+
+
 int main(void)
 {
 
@@ -103,10 +164,14 @@ int main(void)
   nbfi_at_server_define_user_handler(user_defined_at_command_handler);
 #endif
 
+
+
+  scheduler_add_task(&test_desc, send_data, RELATIVE, SECONDS(1));
+
   while (1)
   {
 
-      if(!GUI_is_inited())  GUI_Init();
+      //if(!GUI_is_inited())  GUI_Init();
 
       #ifdef PLOT_SPECTRUM
       #include "plot_spectrum.h"
@@ -145,11 +210,11 @@ int main(void)
         }
         #endif
       }
-      GUI_Update();
+      //GUI_Update();
 
-      if (NBFi_can_sleep() && scheduler_can_sleep() && GUI_can_sleep()&& RS485_can_sleep())
+      if (NBFi_can_sleep() && scheduler_can_sleep() /*&& GUI_can_sleep()*/&& RS485_can_sleep())
       {
-        GUI_Deinit();
+        //GUI_Deinit();
         HAL_GPIO_WritePin(POWER_LED_GPIO_Port, POWER_LED_Pin,  GPIO_PIN_RESET);
         RS485_go_to_sleep(1);
         HAL_PWR_EnterSTOPMode(PWR_LOWPOWERREGULATOR_ON, PWR_SLEEPENTRY_WFI);

@@ -95,16 +95,13 @@ void send_data(struct scheduler_desc *desc) {
     if(counter > 2000) return;
     if(counter == 0)
     {
-        packet[2] = nbfi.tx_pwr;
-        NBFi_Send(packet, 8);
-        NBFi_Send(packet, 8);
-        counter = 1;
+       nbfi.tx_pwr = 1;
     }
 
     switch(counter++%5)
     {
-         case 0:
-            if(--nbfi.tx_pwr < -9) nbfi.tx_pwr = 16;
+        case 0:
+            if(--nbfi.tx_pwr < -13) nbfi.tx_pwr = 15;
             nbfi.tx_phy_channel = UL_DBPSK_50_PROT_E;
             break;
         case 1:
@@ -118,7 +115,7 @@ void send_data(struct scheduler_desc *desc) {
             break;
         default:
             //ScheduleTask(&test_desc, send_data, RELATIVE, SECONDS(3));
-            scheduler_add_task(&test_desc, send_data, RELATIVE, SECONDS(3));
+            scheduler_add_task(&test_desc, send_data, RELATIVE, SECONDS(2));
             return;
             break;
     }
@@ -166,7 +163,7 @@ int main(void)
 
 
 
-  scheduler_add_task(&test_desc, send_data, RELATIVE, SECONDS(1));
+  scheduler_add_task(&test_desc, send_data, RELATIVE, SECONDS(10));
 
   while (1)
   {

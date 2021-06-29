@@ -48,6 +48,7 @@ typedef struct
 	void (*dem_set_freq)(uint32_t freq);
 	float (*dem_get_rssi)();
 	float (*dem_get_noise)();
+    void (*transmit_carrier)();
 } nbfi_rf_iface_t;
 
 void NBFI_RF_iface(nbfi_rf_iface_t iface);

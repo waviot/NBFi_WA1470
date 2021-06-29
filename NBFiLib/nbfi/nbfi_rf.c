@@ -24,7 +24,7 @@ uint32_t NBFi_DL_ID()
 static nbfi_phy_channel_t last_phy = UNDEFINED;
 static uint16_t last_additional_flags = 0;
 
-static nbfi_rf_iface_t nbfi_rf_iface = 
+static nbfi_rf_iface_t nbfi_rf_iface =
 {
 	.init = wa1470_init,
 	.reinit = wa1470_reinit,
@@ -43,6 +43,7 @@ static nbfi_rf_iface_t nbfi_rf_iface =
 	.dem_set_freq = wa1470dem_set_freq,
 	.dem_get_rssi = wa1470dem_get_rssi,
 	.dem_get_noise = wa1470dem_get_noise,
+    .transmit_carrier = wa1470rfe_transmit_carrier,
 };
 
 void NBFI_RF_iface(nbfi_rf_iface_t iface)
@@ -108,7 +109,7 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
           nbfi_state.last_tx_freq = last_tx_freq = freq;
           if (nbfi_rf_iface.mod_set_freq != NULL)
             nbfi_rf_iface.mod_set_freq(freq);
-           
+
         }
 
         if(power != last_tx_prw)
@@ -117,15 +118,21 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
           if (nbfi_rf_iface.rfe_set_tx_power != NULL)
             nbfi_rf_iface.rfe_set_tx_power(power);
         }
-        
+
         if (nbfi_rf_iface.rfe_set_mode != NULL)
-          nbfi_rf_iface.rfe_set_mode(RFE_MODE_TX);           
-                     
+          nbfi_rf_iface.rfe_set_mode(RFE_MODE_TX);
+
         rf_busy = 0;
         rf_state = STATE_TX;
         last_phy = phy_channel;
         return OK;
-
+    case UL_CARRIER:
+        if (nbfi_rf_iface.dem_rx_enable != NULL)
+          nbfi_rf_iface.dem_rx_enable(0);
+        nbfi_rf_iface.rfe_set_tx_power(power);
+        nbfi_rf_iface.transmit_carrier(freq);
+        rf_busy = 0;
+        return OK;
     case DL_DBPSK_50_PROT_D:
     case DL_DBPSK_400_PROT_D:
     case DL_DBPSK_3200_PROT_D:
@@ -134,14 +141,14 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
         nbfi_hal->__nbfi_before_rx(&nbfi);
         if (nbfi_rf_iface.dem_rx_enable != NULL)
           nbfi_rf_iface.dem_rx_enable(1);
-        
+
         if(last_phy != phy_channel)
           if (nbfi_rf_iface.dem_set_bitrate != NULL)
             nbfi_rf_iface.dem_set_bitrate((dem_bitrate_s)phy_channel);
-        
+
         if (nbfi_rf_iface.rfe_set_mode != NULL)
           nbfi_rf_iface.rfe_set_mode(RFE_MODE_RX);
-        
+
         if(freq != last_rx_freq)
         {
           nbfi_state.last_rx_freq = last_rx_freq = freq;
@@ -162,7 +169,7 @@ nbfi_status_t NBFi_RF_Deinit()
     if(rf_busy) return ERR_RF_BUSY;
     if (nbfi_rf_iface.dem_rx_enable != NULL)
       nbfi_rf_iface.dem_rx_enable(0);
-    nbfi_hal->__nbfi_before_off(&nbfi);    
+    nbfi_hal->__nbfi_before_off(&nbfi);
     rf_busy = 1;
     //nbfi_rf_iface.rfe_set_mode(RFE_MODE_DEEP_SLEEP);
     if (nbfi_rf_iface.deinit != NULL)
@@ -183,7 +190,7 @@ nbfi_status_t NBFi_RF_Transmit(uint8_t* pkt, uint8_t len, nbfi_phy_channel_t  ph
 
     if (nbfi_rf_iface.mod_send != NULL)
       nbfi_rf_iface.mod_send(pkt, (mod_bitrate_s) phy_channel);
-    
+
     rf_busy = 0;
 
     transmit = 1;
@@ -239,7 +246,7 @@ float NBFi_RF_get_rssi()
   }
   else
     return 0;
-    
+
 }
 
 
@@ -249,5 +256,5 @@ _Bool NBFi_RF_can_Sleep()
     return nbfi_rf_iface.cansleep();
   else
     return 1;
-}  
+}
 

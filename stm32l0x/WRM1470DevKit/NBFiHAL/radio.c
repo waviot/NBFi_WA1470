@@ -83,14 +83,14 @@ const nbfi_settings_t nbfi_default_settings =
     MODEM_ID,
     KEY,
     NRX,                //mode;
-    UL_DBPSK_50_PROT_E, // tx_phy_channel;
+    UL_CARRIER, // tx_phy_channel;
     DL_DBPSK_50_PROT_D, // rx_phy_channel;
     HANDSHAKE_NONE,
     MACK_1,             //mack_mode
     0x82,               //num_of_retries;
     8,                  //max_payload_len;
     0,                  //wait_ack_timeout
-    0,                  //tx_freq;
+    NBFI_UL_FREQ_BASE + 1000,                  //tx_freq;
     0,                  //rx_freq;
     PCB,                //tx_antenna;
     PCB,                //rx_antenna;

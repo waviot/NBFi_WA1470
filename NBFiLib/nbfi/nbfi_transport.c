@@ -385,7 +385,7 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
                 {
                     nbfi_scheduler->__scheduler_remove_task(&dl_receive_desc);
                     wait_Receive = 0;
-
+                    try_counter = 0;
                     if(nbfi_active_pkt->mack_num == 0)
                     {
                         nbfi_state.success_total++;

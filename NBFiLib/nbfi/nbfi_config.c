@@ -549,16 +549,27 @@ void NBFi_Config_Set_Default()
 
 _Bool NBFi_Config_Try_Alternative()
 {
-  if(nbfi.try_alternative[try_counter%NBFI_ALTERNATIVES_NUMBER].try_interval == 0)
+  static uint16_t try_period = 0;
+
+  if((try_counter == NBFI_ALTERNATIVES_NUMBER) || (nbfi.try_alternative[try_counter].try_interval == 0))
   {
 	try_counter = 0;
+    try_period++;
   	return 0;
   }
-  NBFi_Config_Set_TX_Chan(nbfi.try_alternative[try_counter%NBFI_ALTERNATIVES_NUMBER].try_tx_phy_channel);
-  NBFi_Config_Set_RX_Chan(nbfi.try_alternative[try_counter%NBFI_ALTERNATIVES_NUMBER].try_rx_phy_channel);
-  nbfi.nbfi_freq_plan = nbfi.try_alternative[try_counter%NBFI_ALTERNATIVES_NUMBER].try_nbfi_freq_plan;
+  if((try_period%nbfi.try_alternative[try_counter].try_interval) == 0)
+  {
+    NBFi_Config_Set_TX_Chan(nbfi.try_alternative[try_counter].try_tx_phy_channel);
+    NBFi_Config_Set_RX_Chan(nbfi.try_alternative[try_counter].try_rx_phy_channel);
+    nbfi.nbfi_freq_plan = nbfi.try_alternative[try_counter].try_nbfi_freq_plan;
+    try_counter++;
+  }
+  else
+  {
+    try_counter++;
+    return NBFi_Config_Try_Alternative();
+  }
 
-  try_counter++;
   return 1;
 
   /*for(uint8_t i = 0; i != NBFI_ALTERNATIVES_NUMBER; i++)

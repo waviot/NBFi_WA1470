@@ -46,9 +46,9 @@ void GUI_systick()
   if(backlight_timer)
   {
     backlight_timer--;
-    LCD_BACKLIGHT_SWITCH_ON;
+    //LCD_BACKLIGHT_SWITCH_ON;
   }
-  else LCD_BACKLIGHT_SWITCH_OFF;
+  else ;//LCD_BACKLIGHT_SWITCH_OFF;
 
   if(gui_activity_timer) gui_activity_timer--;
 

@@ -69,6 +69,26 @@ void nbfi_receive_complete(uint8_t * data, uint16_t length)
 
 
 
+
+void init_ext_irq()
+{
+
+    GPIO_InitTypeDef GPIO_InitStruct;
+
+	// key up
+    GPIO_InitStruct.Pin = GPIO_PIN_1;
+    GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+	GPIO_InitStruct.Pull = GPIO_PULLUP;
+	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+	GPIO_InitStruct.Alternate = 0;
+	HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+
+    HAL_NVIC_SetPriority(EXTI0_1_IRQn, 0, 0);
+    HAL_NVIC_EnableIRQ(EXTI0_1_IRQn);
+
+}
+
+
 int main(void)
 {
 
@@ -86,6 +106,7 @@ int main(void)
 
   log_init();
 
+  init_ext_irq();
 
   //NBFi_Send5("Hello!", sizeof("Hello!"),0);
 

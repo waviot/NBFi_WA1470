@@ -115,6 +115,30 @@ void RTC_IRQHandler(void)
 }
 
 
+#define LCD_BACKLIGHT_Pin               GPIO_PIN_9
+#define LCD_BACKLIGHT_GPIO_Port         GPIOA
+
+#define LCD_BACKLIGHT_SWITCH_ON         HAL_GPIO_WritePin(LCD_BACKLIGHT_GPIO_Port, LCD_BACKLIGHT_Pin, GPIO_PIN_RESET)
+#define LCD_BACKLIGHT_SWITCH_OFF        HAL_GPIO_WritePin(LCD_BACKLIGHT_GPIO_Port, LCD_BACKLIGHT_Pin, GPIO_PIN_SET)
+
+void EXTI0_1_IRQHandler(void)
+{
+
+
+    static uint8_t state = 0;
+
+    if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_1) != RESET)
+	{
+        if(state++%2) LCD_BACKLIGHT_SWITCH_ON;
+        else LCD_BACKLIGHT_SWITCH_OFF;
+		__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_1);
+	}
+
+
+
+}
+
+
 
 
 

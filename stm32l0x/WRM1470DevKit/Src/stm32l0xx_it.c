@@ -129,8 +129,10 @@ void EXTI0_1_IRQHandler(void)
 
     if(__HAL_GPIO_EXTI_GET_IT(GPIO_PIN_1) != RESET)
 	{
-        if(state++%2) LCD_BACKLIGHT_SWITCH_ON;
-        else LCD_BACKLIGHT_SWITCH_OFF;
+       if(HAL_GPIO_ReadPin(GPIOB, GPIO_PIN_1)) LCD_BACKLIGHT_SWITCH_ON;
+       else LCD_BACKLIGHT_SWITCH_OFF;
+        // if(state++%2) LCD_BACKLIGHT_SWITCH_ON;
+       // else LCD_BACKLIGHT_SWITCH_OFF;
 		__HAL_GPIO_EXTI_CLEAR_IT(GPIO_PIN_1);
 	}
 

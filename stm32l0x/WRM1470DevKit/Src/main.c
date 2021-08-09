@@ -77,7 +77,7 @@ void init_ext_irq()
 
 	// key up
     GPIO_InitStruct.Pin = GPIO_PIN_1;
-    GPIO_InitStruct.Mode = GPIO_MODE_IT_FALLING;
+    GPIO_InitStruct.Mode = GPIO_MODE_IT_RISING_FALLING;
 	GPIO_InitStruct.Pull = GPIO_PULLUP;
 	GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
 	GPIO_InitStruct.Alternate = 0;

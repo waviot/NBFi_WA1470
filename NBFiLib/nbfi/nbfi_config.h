@@ -82,7 +82,11 @@ extern _Bool nbfi_settings_need_to_save_to_flash;
 #define NBFI_FREQ_PLAN_MINIMAL                  0
 #define NBFI_DL_FREQ_PLAN_FAULT                 7
 #define NBFI_UL_FREQ_PLAN_51200_0               (384<<6)
+#define NBFI_UL_FREQ_PLAN_204800_M2457600       (716<<6)
 #define NBFI_DL_FREQ_PLAN_819200_M2457600       59
+#define NBFI_DL_FREQ_PLAN_409600_M1638400       44
+
+
 
 #define NBFI_VOID_ALTERNATIVE   {0, UNDEFINED, UNDEFINED, NBFI_UL_FREQ_PLAN_NO_CHANGE + NBFI_DL_FREQ_PLAN_NO_CHANGE}
 

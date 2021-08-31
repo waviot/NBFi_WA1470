@@ -1027,7 +1027,7 @@ static uint32_t NBFI_PhyTo_Delay(nbfi_phy_channel_t chan)
 
 static uint32_t NBFI_PhyToDL_ListenTime(nbfi_phy_channel_t chan)
 {
-	const uint32_t NBFI_DL_LISTEN_TIME[4] = {60000, 30000, 6000, 6000};
+	const uint32_t NBFI_DL_LISTEN_TIME[4] = {60000, 30000, 2000, 2000};
 
 	if (chan > DL_DBPSK_25600_PROT_E)
 		return NBFI_DL_LISTEN_TIME[0];

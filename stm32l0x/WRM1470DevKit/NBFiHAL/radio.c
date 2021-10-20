@@ -17,7 +17,7 @@ nbfi_device_id_and_key_st sr_server_modem_id_and_key @SR_SERVER_MODEM_ID_AND_KEY
 
 #define MANUFACTURER_ID         0x8888  //Waviot
 #define HARDWARE_TYPE_ID        48      //WRM1470DevKit
-#define PROTOCOL_ID             0       //undefined
+#define PROTOCOL_ID             NBFI_MULTIPORT_PROTOCOL_ID //0       //undefined
 #define TX_MAX_POWER            15
 #define TX_MIN_POWER            -13
 #define SEND_INFO_PERIOD	2592000         //one time per month
@@ -90,6 +90,7 @@ const nbfi_settings_t nbfi_default_settings =
     0x82,               //num_of_retries;
     8,                  //max_payload_len;
     0,                  //wait_ack_timeout
+    //866342400 + 1000*4,
     NBFI_UL_FREQ_BASE + 1000,                  //tx_freq;
     0,                  //rx_freq;
     PCB,                //tx_antenna;
@@ -207,7 +208,7 @@ void radio_init(void)
         wa1470_HAL_reg_data_received_callback((void*)NBFi_MAC_RX_ProtocolD);
         wa1470_HAL_reg_tx_finished_callback((void*)NBFi_RF_TX_Finished);
         wa1470_HAL_init();
-	nbfi_HAL_init(&nbfi_default_settings, (nbfi_dev_info_t*)&nbfi_info);
+        nbfi_HAL_init(&nbfi_default_settings, (nbfi_dev_info_t*)&nbfi_info);
         scheduler_run_callbacks();
         //NBFi_clear_Saved_Configuration(); //if you need to clear previously saved nbfi configuration in EEPROM
 }

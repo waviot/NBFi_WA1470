@@ -16,14 +16,14 @@
 #include "nbfi_crypto.h"
 #include "ischeduler.h"
 
-typedef struct 
+typedef struct
 {
   void (* __nbfi_before_tx)(nbfi_settings_t*);
   void (* __nbfi_before_rx)(nbfi_settings_t*);
   void (* __nbfi_before_off)(nbfi_settings_t*);
   void (* __nbfi_lock_unlock_loop_irq)(uint8_t);
   void (*__nbfi_send_status_handler)(nbfi_ul_sent_status_t);
-  void (*__nbfi_rx_handler)(uint8_t*, uint16_t);
+  void (*__nbfi_rx_handler)(uint8_t*, uint16_t, uint8_t);
   void (* __nbfi_read_default_settings)(nbfi_settings_t*);
   void (* __nbfi_read_flash_settings)(nbfi_settings_t*);
   void (* __nbfi_write_flash_settings)(nbfi_settings_t*);
@@ -52,6 +52,9 @@ void                    NBFI_Main_Level_Loop();
 nbfi_status_t           NBFi_go_to_Sleep(_Bool sleep);
 nbfi_ul_sent_status_t   NBFi_Send5(uint8_t* payload, uint8_t length, uint8_t flags);
 nbfi_status_t           NBFi_Send(uint8_t* payload, uint8_t length);
+nbfi_ul_sent_status_t   NBFi_Send_to_Port(uint8_t* payload, uint8_t length, uint8_t flags, uint8_t port);
+
+
 nbfi_ul_sent_status_t   NBFi_get_UL_status(uint16_t id);
 uint8_t                 NBFi_get_Received_Packet(uint8_t * payload);
 

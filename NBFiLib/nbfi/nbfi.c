@@ -52,7 +52,14 @@ void  NBFI_Main_Level_Loop()
       while(1)
       {
         uint8_t length = NBFi_get_Received_Packet(payload);
-        if(length) nbfi_hal->__nbfi_rx_handler(payload, length);
+
+        if(length)
+        {
+            if(dev_info.protocol_id == NBFI_MULTIPORT_PROTOCOL_ID)
+                nbfi_hal->__nbfi_rx_handler(&payload[1], length - 1, payload[0]);
+            else
+                nbfi_hal->__nbfi_rx_handler(payload, length, 0);
+        }
         else break;
       }
 

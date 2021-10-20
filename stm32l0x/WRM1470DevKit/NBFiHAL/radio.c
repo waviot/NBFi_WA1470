@@ -17,7 +17,7 @@ nbfi_device_id_and_key_st sr_server_modem_id_and_key @SR_SERVER_MODEM_ID_AND_KEY
 
 #define MANUFACTURER_ID         0x8888  //Waviot
 #define HARDWARE_TYPE_ID        48      //WRM1470DevKit
-#define PROTOCOL_ID             0       //undefined
+#define PROTOCOL_ID             NBFI_MULTIPORT_PROTOCOL_ID //0       //undefined
 #define TX_MAX_POWER            15
 #define TX_MIN_POWER            -13
 #define SEND_INFO_PERIOD	2592000         //one time per month

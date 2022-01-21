@@ -106,6 +106,7 @@ _Bool   NBFi_Config_Parser(uint8_t* buf);
 void    NBFi_ReadConfig(nbfi_settings_t * settings);
 void    NBFi_Config_Set_TX_Chan(nbfi_phy_channel_t ch);
 void    NBFi_Config_Set_RX_Chan(nbfi_phy_channel_t ch);
+void    NBFi_Set_Fixed_Bitrate(_Bool fixed);
 _Bool   NBFi_Config_is_settings_default();
 _Bool   NBFi_Config_Try_Alternative();
 #endif // NBFI_CONFIG_H

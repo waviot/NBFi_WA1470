@@ -652,6 +652,12 @@ void NBFi_Config_Set_RX_Chan(nbfi_phy_channel_t ch)
     }
 }
 
+void NBFi_Set_Fixed_Bitrate(_Bool fixed)
+{
+    if(fixed) nbfi.additional_flags|=NBFI_FLG_FIXED_BAUD_RATE;
+    else nbfi.additional_flags&=~NBFI_FLG_FIXED_BAUD_RATE;
+}
+
 _Bool NBFi_Config_is_settings_default()
 {
   nbfi_settings_t settings;

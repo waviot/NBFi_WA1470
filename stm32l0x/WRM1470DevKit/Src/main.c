@@ -9,8 +9,8 @@
 #include "rs485_uart.h"
 #include "gui.h"
 #include "at_user.h"
-
-
+#include "multiport.h"
+#include "settings.h"
 #define POWER_LED_GPIO_Port 	GPIOA
 #define POWER_LED_Pin 		GPIO_PIN_12
 
@@ -28,25 +28,32 @@ void nbfi_send_complete(nbfi_ul_sent_status_t ul)
    //NBFi_Send5("Hello!", sizeof("Hello!"),0);
 }
 
-void nbfi_receive_complete(uint8_t * data, uint16_t length, uint8_t port)
+void nbfi_receive_complete(uint8_t * data, uint16_t length)
 {
 
-  #ifdef PHOBOS_HDLC_FORWARDER
-  if(phobos_hdlc_mode)
+  if(global_settings.uart_mode == UART_MODE_TRANSPARENT)
+  {
+    for(uint16_t i = 0; i != length; i++) RS485_UART_send(data[i]);
+    return;
+  }
+
+  if(global_settings.uart_mode == UART_MODE_APPENDD3)
   {
     if(data[0] == 0xD3)
-    {
-      for(uint16_t i = 1; i != length; i++) RS485_UART_send(data[i]);
-    }
+        for(uint16_t i = 1; i != length; i++) RS485_UART_send(data[i]);
+    return;
   }
-  else
-  #endif
-  {
-    GUI_receive_complete(data, length);
-    nbfi_at_server_receive_complete(data, length);
 
-    if((data[0] == 0x80)&&(data[1] == 0xEE)&&(length == 2+4+32))  //receive sr_server device id and master key
-    {
+  GUI_receive_complete(data, length);
+
+  nbfi_at_server_receive_complete(data, length);
+
+  #if(PROTOCOL_ID == NBFI_MULTIPORT_PROTOCOL_ID)
+    MULTIPORT_receive_complete(data, length);
+  #else
+
+  if((data[0] == 0x80)&&(data[1] == 0xEE)&&(length == 2+4+32))  //receive sr_server device id and master key
+  {
       sr_server_modem_id_and_key.id = 0;
       for(uint8_t i = 0; i != 4; i++ )
       {
@@ -61,13 +68,16 @@ void nbfi_receive_complete(uint8_t * data, uint16_t length, uint8_t port)
       }
 
       radio_save_id_and_key_of_sr_server(&sr_server_modem_id_and_key);
-    }
-
   }
-
+#endif
 }
 
 
+void electro5_receive_complete(uint8_t * data, uint16_t length)
+{
+      uint8_t packet[] = {0xEE,0x00,0x32,0x20,0x32,0x5B,0x00,0x78,0x86,0x46,0xC7,0x44,0x34,0xE0};
+      MULTIPORT_send_to_port(packet, sizeof(packet), 0, 2);
+}
 
 int main(void)
 {
@@ -84,10 +94,9 @@ int main(void)
 
   radio_init();
 
+  load_global_settings();
+
   log_init();
-
-
-  //NBFi_Send5("Hello!", sizeof("Hello!"),0);
 
 
   GPIO_InitTypeDef GPIO_InitStruct;
@@ -99,9 +108,12 @@ int main(void)
 
   radio_load_id_and_key_of_sr_server(&sr_server_modem_id_and_key);
 
-#ifdef NBFI_AT_SERVER
   nbfi_at_server_define_user_handler(user_defined_at_command_handler);
-#endif
+
+  MULTIPORT_register_protocol(2, &electro5_receive_complete);
+
+  electro5_receive_complete(0,0);
+
 
   while (1)
   {
@@ -115,36 +127,41 @@ int main(void)
 
       NBFI_Main_Level_Loop();
 
-      #ifdef PHOBOS_HDLC_FORWARDER
-      if(phobos_hdlc_mode)
+      switch(global_settings.uart_mode)
       {
-        if(((systimer - last_uart_rx_time) > 10) && !RS485_UART_is_empty())
-        {
-          uint8_t send_buf[240];
-          uint8_t size = 1;
-          send_buf[0] = 0xD3;
-          while(!RS485_UART_is_empty())
-          {
-            if(size < 240) send_buf[size++] = RS485_UART_get();
-            else RS485_UART_get();
-          }
-          NBFi_Send(send_buf, size);
-        }
+        case UART_MODE_ATCOMMANDS:
+            {
+                uint8_t *buf;
+                if(!RS485_UART_is_empty())
+                {
+                   uint8_t c = RS485_UART_get();
+                   if(nbfi_at_server_echo_mode) RS485_UART_send(c);
+                   uint16_t reply_len = nbfi_at_server_parse_char(c, &buf);
+                   for(uint16_t i = 0; i != reply_len; i++) RS485_UART_send(buf[i]);
+                }
+                break;
+            }
+        case UART_MODE_TRANSPARENT:
+        case UART_MODE_APPENDD3:
+            if(((systimer - last_uart_rx_time) > 10) && !RS485_UART_is_empty())
+            {
+              uint8_t send_buf[240];
+              uint8_t size = 0;
+              if(global_settings.uart_mode == UART_MODE_APPENDD3)
+              {
+                send_buf[0] = 0xD3;
+                size = 1;
+              }
+              while(!RS485_UART_is_empty())
+              {
+                if(size < 240) send_buf[size++] = RS485_UART_get();
+                else RS485_UART_get();
+              }
+              NBFi_Send(send_buf, size);
+            }
+          break;
       }
-      else
-      #endif
-      {
-        #ifdef NBFI_AT_SERVER
-        uint8_t *buf;
-        if(!RS485_UART_is_empty())
-        {
-           uint8_t c = RS485_UART_get();
-           if(nbfi_at_server_echo_mode) RS485_UART_send(c);
-           uint16_t reply_len = nbfi_at_server_parse_char(c, &buf);
-           for(uint16_t i = 0; i != reply_len; i++) RS485_UART_send(buf[i]);
-        }
-        #endif
-      }
+
       GUI_Update();
 
       if (NBFi_can_sleep() && scheduler_can_sleep() && GUI_can_sleep()&& RS485_can_sleep())

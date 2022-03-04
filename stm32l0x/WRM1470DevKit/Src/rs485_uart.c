@@ -1,6 +1,8 @@
 #include "rs485_uart.h"
 #include "xbuf.h"
 #include "main.h"
+#include "settings.h"
+
 //			STM defines
 #define RS485_USART	 		USART2
 #define RS485_USART_IRQ 		USART2_IRQn
@@ -51,19 +53,41 @@ uint8_t RS485_UART_get(void){
 }
 
 
+__weak void RS485_UART_check_placeholder(char c)
+{
+  /* NOTE : This function Should not be modified, when the callback is needed,
+            the RS485_UART_check_placeholder could be implemented in the user file
+   */
+}
+
+
 void RS485_UART_IRQ(void) {
 	if (__HAL_UART_GET_FLAG(&huart, UART_FLAG_RXNE)){
 		xbuf_send(&RS485_UART_rx, huart.Instance->RDR);
                 last_uart_rx_time = systimer;
+                RS485_UART_check_placeholder(huart.Instance->RDR);
 	}
 	else if (__HAL_UART_GET_FLAG(&huart, UART_FLAG_TXE) && (huart.Instance->CR1 & 1 << (UART_IT_TXE & 0x1F))) {
 		if (!xbuf_is_empty(&RS485_UART_tx))
+        {
+            #ifdef RS485_RX_TX_PIN
+            HAL_GPIO_WritePin(RS485_RX_TX_PORT, RS485_RX_TX_PIN,  GPIO_PIN_SET);
+            #endif
 			huart.Instance->TDR = xbuf_get(&RS485_UART_tx);
+        }
 		else
+        {
 			__HAL_UART_DISABLE_IT(&huart, UART_IT_TXE);
+        }
 	}
 	else
-		huart.Instance->ICR = 0xFFFFFFFF;
+    {
+            #ifdef RS485_RX_TX_PIN
+            if(__HAL_UART_GET_FLAG(&huart, UART_FLAG_TC))  HAL_GPIO_WritePin(RS485_RX_TX_PORT, RS485_RX_TX_PIN,  GPIO_PIN_RESET);
+            #endif
+    		huart.Instance->ICR = 0xFFFFFFFF;
+    }
+
 
     uart_can_sleep_timer = systimer;
 }
@@ -77,7 +101,7 @@ void RS485_UART_init(void) {
   RS485_RCC_ENABLE();
 
   huart.Instance = RS485_USART;
-  huart.Init.BaudRate = 115200;
+  huart.Init.BaudRate = global_settings.uart_bitrate;
   huart.Init.WordLength = UART_WORDLENGTH_8B;
   huart.Init.StopBits = UART_STOPBITS_1;
   huart.Init.Parity = UART_PARITY_NONE;
@@ -98,6 +122,15 @@ void RS485_UART_init(void) {
   GPIO_InitStruct.Pin = RS485_RX_Pin;
   GPIO_InitStruct.Alternate = RS485_RX_AF;
   HAL_GPIO_Init(RS485_RX_GPIO_Port, &GPIO_InitStruct);
+
+
+  #ifdef RS485_RX_TX_PIN
+  GPIO_InitStruct.Pin = RS485_RX_TX_PIN;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Alternate = 0;
+  HAL_GPIO_Init(RS485_RX_TX_PORT, &GPIO_InitStruct);
+  __HAL_UART_ENABLE_IT(&huart, UART_IT_TC);
+  #endif
 
 
   for(uint16_t i = 0; i != 100; i++) huart.Instance->RDR; //wait and clear first received char
@@ -121,6 +154,7 @@ void RS485_UART_deinit(void) {
 
     GPIO_InitStruct.Pin = RS485_RX_Pin;
     HAL_GPIO_Init(RS485_RX_GPIO_Port, &GPIO_InitStruct);
+
 
 	RS485_TX_GPIO_Port->BRR |= RS485_TX_Pin;
 	RS485_RX_GPIO_Port->BRR |= RS485_RX_Pin;

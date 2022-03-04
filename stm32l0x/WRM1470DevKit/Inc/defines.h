@@ -3,8 +3,7 @@
 
 //#define PLOT_SPECTRUM
 
-#define NBFI_AT_SERVER
-#define PHOBOS_HDLC_FORWARDER
-
+#define RS485_RX_TX_PORT  GPIOB
+#define RS485_RX_TX_PIN  GPIO_PIN_1
 
 #endif

@@ -241,13 +241,7 @@ nbfi_status_t  NBFi_Send(uint8_t* payload, uint8_t length)
   return (NBFi_Send5(payload, length, 0).status <= ERR_BUFFER_FULL)?OK:ERR_BUFFER_FULL_v4;
 }
 
-nbfi_ul_sent_status_t   NBFi_Send_to_Port(uint8_t* payload, uint8_t length, uint8_t flags, uint8_t port)
-{
-    uint8_t buf[256];
-    buf[0] = port;
-    memcpy((void*)(&buf[1]), (const void*)(payload), length);
-    return NBFi_Send5(buf, length + 1, flags);
-}
+
 
 void NBFi_ProcessRxPackets()
 {

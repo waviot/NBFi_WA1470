@@ -104,7 +104,7 @@ __weak void nbfi_send_complete(nbfi_ul_sent_status_t ul)
    */
 }
 
-__weak void nbfi_receive_complete(uint8_t * data, uint16_t length, uint8_t port)
+__weak void nbfi_receive_complete(uint8_t * data, uint16_t length)
 {
 
   /* NOTE : This function Should not be modified, when the callback is needed,

@@ -53,16 +53,9 @@ void  NBFI_Main_Level_Loop()
       {
         uint8_t length = NBFi_get_Received_Packet(payload);
 
-        if(length)
-        {
-            if(dev_info.protocol_id == NBFI_MULTIPORT_PROTOCOL_ID)
-                nbfi_hal->__nbfi_rx_handler(&payload[1], length - 1, payload[0]);
-            else
-                nbfi_hal->__nbfi_rx_handler(payload, length, 0);
-        }
+        if(length) nbfi_hal->__nbfi_rx_handler(payload, length);
         else break;
       }
-
     }
 
     if(nbfi_hal->__nbfi_send_status_handler)
@@ -242,6 +235,8 @@ void NBFi_set_Settings(nbfi_settings_t* settings, _Bool persistent)
       NBFi_Clear_TX_Buffer();
 
       memcpy(&nbfi, settings , sizeof(nbfi_settings_t));
+      NBFi_Config_Set_TX_Chan(settings->tx_phy_channel);
+      NBFi_Config_Set_RX_Chan(settings->rx_phy_channel);
       nbfi_settings_need_to_save_to_flash = 1;
       rf_state = STATE_CHANGED;
       if(need_to_send_sync) {NBFi_Config_Send_Sync(0); NBFi_Force_process();}

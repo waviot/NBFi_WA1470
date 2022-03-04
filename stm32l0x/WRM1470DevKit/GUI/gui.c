@@ -5,10 +5,9 @@
 #include "gui.h"
 #include "glcd.h"
 #include "fonts.h"
-//#include "adc.h"
-//#include "main.h"
 #include "nbfi_hal.h"
-
+#include "settings.h"
+#include "rs485_uart.h"
 
 
 #define LCD_BACKLIGHT_Pin               GPIO_PIN_9
@@ -388,7 +387,7 @@ void SettingsHandler()
   static int8_t state_s = 0;
   static uint8_t edit = 0;
 
-  #define TOTAL_NUMBER_OF_SETTINGS      6
+  #define TOTAL_NUMBER_OF_SETTINGS      8
 
   static uint8_t scroll = 0;
 
@@ -458,6 +457,30 @@ void SettingsHandler()
       else sprintf(textbuf, "UNKN");
       LCD_DrawString(127,((i-scroll)*9)+5, textbuf, COLOR_FILL, ALIGN_RIGHT);
       break;
+    case 6:
+      LCD_DrawString(10,((i-scroll)*9)+5, " UART Mode", COLOR_FILL, ALIGN_LEFT);
+      switch(global_settings.uart_mode)
+      {
+        case UART_MODE_ATCOMMANDS:
+          sprintf(textbuf, "%s", "ATCMD");
+          break;
+        case UART_MODE_TRANSPARENT:
+          sprintf(textbuf, "%s", "TRANSP");
+          break;
+        case UART_MODE_APPENDD3:
+          sprintf(textbuf, "%s", "D3");
+          break;
+        case UART_MODE_NBFI_UNUSED:
+          sprintf(textbuf, "%s", "UNUSED");
+          break;
+      }
+        LCD_DrawString(127,((i-scroll)*9)+5, textbuf, COLOR_FILL, ALIGN_RIGHT);
+        break;
+    case 7:
+      LCD_DrawString(10,((i-scroll)*9)+5, " UART Bitrate", COLOR_FILL, ALIGN_LEFT);
+      sprintf(textbuf, "%d", global_settings.uart_bitrate);
+      LCD_DrawString(127,((i-scroll)*9)+5, textbuf, COLOR_FILL, ALIGN_RIGHT);
+      break;
     }
   }
 
@@ -489,8 +512,11 @@ void SettingsHandler()
               _nbfi.rx_phy_channel = DL_DBPSK_25600_PROT_D;
               break;
             case UL_DBPSK_25600_PROT_E:
-              _nbfi.tx_phy_channel = UL_DBPSK_50_PROT_E;
-              _nbfi.rx_phy_channel = DL_DBPSK_50_PROT_D;
+              _nbfi.tx_phy_channel = UL_DBPSK_3200_PROT_E;
+              _nbfi.rx_phy_channel = DL_DBPSK_25600_PROT_D;
+              //NBFi_Config_Set_TX_Chan(UL_DBPSK_3200_PROT_E);
+              //NBFi_Config_Set_RX_Chan(DL_DBPSK_25600_PROT_D);
+
               _nbfi.additional_flags &= ~NBFI_FLG_FIXED_BAUD_RATE;
               break;
           }
@@ -559,6 +585,40 @@ void SettingsHandler()
               break;
           }
         break;
+      case 6:
+          switch(global_settings.uart_mode)
+          {
+          case UART_MODE_ATCOMMANDS:
+              global_settings.uart_mode = UART_MODE_TRANSPARENT;
+              break;
+          case UART_MODE_TRANSPARENT:
+              global_settings.uart_mode = UART_MODE_APPENDD3;
+              break;
+          case UART_MODE_APPENDD3:
+              global_settings.uart_mode = UART_MODE_NBFI_UNUSED;
+              break;
+          case UART_MODE_NBFI_UNUSED:
+              global_settings.uart_mode = UART_MODE_ATCOMMANDS;
+              break;
+          }
+          break;
+      case 7:
+          {
+              uint8_t i = 0;
+              while(available_bitrates[i] != global_settings.uart_bitrate)
+              {
+                if(available_bitrates[i] == 0)
+                {
+                    i--;
+                    global_settings.uart_bitrate = available_bitrates[i];
+                    break;
+                }
+                i++;
+              }
+              if(available_bitrates[i + 1]) set_uart_bitrate(available_bitrates[i + 1]);
+              else set_uart_bitrate(available_bitrates[0]);
+              break;
+          }
       }
 
     }
@@ -572,6 +632,7 @@ void SettingsHandler()
       GUI_DrawButtonR(label_back, 1);
       edit = 0;
       NBFi_set_Settings(&_nbfi, 1);
+      save_global_settings();
     }
     else
     {

@@ -6,7 +6,13 @@
 #include "scheduler_hal.h"
 #include "nbfi_hal.h"
 
-typedef struct 
+
+#define MANUFACTURER_ID         0x8888  //Waviot
+#define HARDWARE_TYPE_ID        48      //WRM1470DevKit
+#define PROTOCOL_ID             0//NBFI_MULTIPORT_PROTOCOL_ID //0       //undefined
+
+
+typedef struct
 {
   uint32_t id;
   uint8_t key[32];

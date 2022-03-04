@@ -21,8 +21,4 @@ void RS485_go_to_sleep(_Bool en);
 
 extern uint32_t last_uart_rx_time;
 
-#ifdef PHOBOS_HDLC_FORWARDER
-extern _Bool phobos_hdlc_mode;
-#endif
-
 #endif /* RS485_UART_H_ */

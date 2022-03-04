@@ -1017,7 +1017,7 @@
                 </option>
                 <option>
                     <name>IlinkTrustzoneImportLibraryOut</name>
-                    <state>###Unitialized###</state>
+                    <state>WRM1470DevKit_import_lib.o</state>
                 </option>
                 <option>
                     <name>OILinkExtraOption</name>
@@ -2445,6 +2445,9 @@
             <name>$PROJ_DIR$\Inc\main.h</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\Inc\multiport.h</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\Inc\plot_spectrum.h</name>
         </file>
         <file>
@@ -2452,6 +2455,9 @@
         </file>
         <file>
             <name>$PROJ_DIR$\Inc\rtc.h</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Inc\settings.h</name>
         </file>
         <file>
             <name>$PROJ_DIR$\Inc\stm32_init.h</name>
@@ -2694,6 +2700,9 @@
             <name>$PROJ_DIR$\Src\main.c</name>
         </file>
         <file>
+            <name>$PROJ_DIR$\Src\multiport.c</name>
+        </file>
+        <file>
             <name>$PROJ_DIR$\Src\plot_spectrum.c</name>
         </file>
         <file>
@@ -2701,6 +2710,9 @@
         </file>
         <file>
             <name>$PROJ_DIR$\Src\rtc.c</name>
+        </file>
+        <file>
+            <name>$PROJ_DIR$\Src\settings.c</name>
         </file>
         <file>
             <name>$PROJ_DIR$\Src\stm32_init.c</name>

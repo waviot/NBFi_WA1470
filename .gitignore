@@ -40,3 +40,15 @@ stm32l0x/WA1470RefBoard/Debug/List/
 stm32l0x/WA1470RefBoard/Debug/Exe/
 
 *.tmp
+
+v85xx/TestBoard/EWARM/Debug/Obj/
+
+v85xx/TestBoard/EWARM/Debug/List/
+
+v85xx/TestBoard/EWARM/Debug/Exe/
+
+v85xx/TestBoard/Debug/Obj/
+
+v85xx/TestBoard/Debug/Exe/
+
+v85xx/TestBoard/Debug/List/

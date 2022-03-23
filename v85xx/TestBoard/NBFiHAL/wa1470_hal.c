@@ -55,7 +55,7 @@ void wa1470_HAL_GPIO_Init()
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(WA_IRQ_GPIO_Port, &GPIO_InitStruct);*/
 
-  PMU_WakeUpPinConfig(WA_IRQ_Pin, IOA_FALLING);
+  PMU_WakeUpPinConfig(WA_IRQ_Pin, IOA_RISING);
   PMU_ClearIOAINTStatus(WA_IRQ_Pin);
   //PMU_INTConfig(PMU_INT_IOAEN, ENABLE);
   CORTEX_SetPriority_ClearPending_EnableIRQ(PMU_IRQn, 1);
@@ -271,7 +271,7 @@ void wa1470_HAL_spi_write_cs(uint8_t state)
 }
 
 
-#define NOP_DELAY_MS_TICK		1600
+#define NOP_DELAY_MS_TICK		3600
 void NOP_Delay(uint32_t i)
 {
 	while (i--)

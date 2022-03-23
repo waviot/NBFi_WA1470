@@ -3,9 +3,13 @@
 #include "radio.h"
 
 
-#define MODEM_ID_AND_KEY_ADD    0x0001ff80
+#define MODEM_ID_AND_KEY_ADD    0x0001ff80 //0x20001100
+
+//uint32_t modem_id_hardcoded @MODEM_ID_AND_KEY_ADD;
+//uint32_t key_hardcoded[8] @(MODEM_ID_AND_KEY_ADD+4);
 
 #define MODEM_ID  ((uint32_t *)MODEM_ID_AND_KEY_ADD)
+
 #define KEY  ((uint32_t *)(MODEM_ID_AND_KEY_ADD+4))
 
 
@@ -252,6 +256,15 @@ void radio_save_id_and_key_of_sr_server(nbfi_device_id_and_key_st *data)
 
 void radio_init(void)
 {
+       /* modem_id_hardcoded = 0x8cca1a;
+        key_hardcoded[0] = 0xD7E8BFD5;
+        key_hardcoded[1] = 0x4DE9372E;
+        key_hardcoded[2] = 0x2A5C5B35;
+        key_hardcoded[3] = 0x31D03C01;
+        key_hardcoded[4] = 0xFAE94976;
+        key_hardcoded[5] = 0x9B5E212B;
+        key_hardcoded[6] = 0xAE9A984F;
+        key_hardcoded[7] = 0x99AF0A5D;*/
         scheduler_HAL_init();
         wa1470_HAL_reg_data_received_callback((void*)NBFi_MAC_RX_ProtocolD);
         wa1470_HAL_reg_tx_finished_callback((void*)NBFi_RF_TX_Finished);

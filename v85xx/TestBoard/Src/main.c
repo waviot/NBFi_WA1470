@@ -93,7 +93,10 @@ uint8_t go_to_sleep()
 
 
 
-
+void nbfi_receive_complete(uint8_t * data, uint16_t length)
+{
+    NBFi_Send(data, length);
+}
 
 int main(void)
 {
@@ -112,6 +115,7 @@ int main(void)
   while (1)
   {
       /* Disable Watch Dog Timer */
+      NBFI_Main_Level_Loop();
       if(scheduler_HAL_can_sleep()&&0)
       {
           WDT_Disable();

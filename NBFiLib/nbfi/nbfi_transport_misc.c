@@ -328,7 +328,7 @@ uint8_t NBFi_Calc_Queued_Sys_Packets_With_Type(uint8_t type, _Bool clean)
         uint8_t ptr = i%NBFI_TX_PKTBUF_SIZE;
         pointer = NBFi_Get_TX_Packet_Ptr(ptr);
         if(pointer == 0) continue;
-        if(!pointer->phy_data.SYS) continue;
+        if(!pointer->phy_data.SYSTEM) continue;
         if(pointer->phy_data.payload[0] != type) continue;
 
         switch(pointer->state )
@@ -356,7 +356,7 @@ nbfi_transport_packet_t* NBFi_GetSentTXPkt_By_Iter(uint8_t iter)
         uint8_t ptr = i%NBFI_TX_PKTBUF_SIZE;
         pointer = NBFi_Get_TX_Packet_Ptr(ptr);
         if(pointer == 0) continue;
-        if(pointer->phy_data.SYS && (pointer->phy_data.payload[0] != SYSTEM_PACKET_GROUP_START_OLD)&&(pointer->phy_data.payload[0] != SYSTEM_PACKET_GROUP_START)&& !(pointer->phy_data.payload[0] & 0x80))
+        if(pointer->phy_data.SYSTEM && (pointer->phy_data.payload[0] != SYSTEM_PACKET_GROUP_START_OLD)&&(pointer->phy_data.payload[0] != SYSTEM_PACKET_GROUP_START)&& !(pointer->phy_data.payload[0] & 0x80))
         {
             continue;
         }
@@ -432,7 +432,7 @@ nbfi_transport_packet_t* NBFi_Get_QueuedRXPkt(uint8_t *groupe, uint16_t *total_l
             {
                 *groupe = 1;
 
-                if((pkt->phy_data.MULTI)&&(pkt->phy_data.SYS)&&((pkt->phy_data.payload[0] == SYSTEM_PACKET_GROUP_START_OLD)||(pkt->phy_data.payload[0] == SYSTEM_PACKET_GROUP_START))) //the start packet of the groupe
+                if((pkt->phy_data.MULTI)&&(pkt->phy_data.SYSTEM)&&((pkt->phy_data.payload[0] == SYSTEM_PACKET_GROUP_START_OLD)||(pkt->phy_data.payload[0] == SYSTEM_PACKET_GROUP_START))) //the start packet of the groupe
                 {
                     total_groupe_len = pkt->phy_data.payload[1];
                     *total_length = pkt->phy_data_length - 2;
@@ -440,7 +440,7 @@ nbfi_transport_packet_t* NBFi_Get_QueuedRXPkt(uint8_t *groupe, uint16_t *total_l
                 }
                 else
                 {
-                    if((pkt->phy_data.MULTI == 1)&&!(pkt->phy_data.SYS)) break;
+                    if((pkt->phy_data.MULTI == 1)&&!(pkt->phy_data.SYSTEM)) break;
                     //single packet
                     *total_length = pkt->phy_data_length;
                     pkt->state = PACKET_PROCESSING;

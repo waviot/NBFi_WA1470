@@ -34,7 +34,7 @@ typedef struct
             uint8_t ITER        : 5;//LSB
             uint8_t MULTI       : 1;
             uint8_t ACK         : 1;
-            uint8_t SYS         : 1;//MSB
+            uint8_t SYSTEM      : 1;//MSB
         };
         uint8_t header;
     };
@@ -78,7 +78,7 @@ typedef struct
 {
     nbfi_packet_state_t state;              //packet state
     uint8_t             id;		    //ulapp id
-    uint32_t		ts;		    //timestamp of packet		
+    uint32_t		ts;		    //timestamp of packet
     nbfi_handshake_t    handshake;          //packet handshake mode
     uint8_t             retry_num;          //retry counter
     uint8_t             mack_num;           //number of packets for multi ack mode
@@ -87,7 +87,7 @@ typedef struct
 }nbfi_transport_packet_t;
 
 typedef enum
-{   
+{
     NRX         =   0,
     DRX         =   1,
     CRX         =   2,
@@ -163,7 +163,7 @@ typedef struct
 }nbfi_state_t;
 
 
-typedef union 
+typedef union
 {
   uint16_t fp;
   struct
@@ -279,7 +279,7 @@ typedef enum
   DELIVERED = 3,
   LOST = 4,
   ERR_BUFFER_FULL = 5,
-  ERR_PACKET_IS_TOO_LONG = 6    
+  ERR_PACKET_IS_TOO_LONG = 6
 }nbfi_ul_status_t;
 
 //ULAPP flags:

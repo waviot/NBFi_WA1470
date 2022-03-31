@@ -142,7 +142,7 @@ nbfi_ul_sent_status_t NBFi_Send5(uint8_t* payload, uint8_t length, uint8_t flags
           return err_status;
         }
         packet->id = (ul_status->id&0xff);
-        packet->phy_data.SYS = 1;
+        packet->phy_data.SYSTEM = 1;
         packet->phy_data.payload[0] = 0x80 + (length & 0x7f);
         memcpy(&packet->phy_data.payload[1], (void const*)payload, length);
         packet->state = PACKET_QUEUED;
@@ -190,7 +190,7 @@ nbfi_ul_sent_status_t NBFi_Send5(uint8_t* payload, uint8_t length, uint8_t flags
             packet->phy_data.MULTI = 1;
             if(groupe == 0) //the start packet of the groupe must be system
             {
-                packet->phy_data.SYS = 1;
+                packet->phy_data.SYSTEM = 1;
                 packet->phy_data.payload[0] = SYSTEM_PACKET_GROUP_START;
                 packet->phy_data.payload[1] = len + 1;
                 packet->phy_data.payload[2] = CRC8(payload, len);
@@ -263,7 +263,7 @@ void NBFi_ProcessRxPackets()
         }
 
 
-        if((pkt->phy_data.SYS) && (pkt->phy_data.payload[0] & 0x80))
+        if((pkt->phy_data.SYSTEM) && (pkt->phy_data.payload[0] & 0x80))
         {
             total_length = pkt->phy_data.payload[0] & 0x7f;
             total_length = total_length%nbfi.max_payload_len;
@@ -273,7 +273,7 @@ void NBFi_ProcessRxPackets()
         else
         {
             uint8_t iter = pkt->phy_data.ITER;
-            group_with_crc = ((pkt->phy_data.SYS) && (NBFi_Get_RX_Packet_Ptr(iter&0x1f)->phy_data.payload[0] == SYSTEM_PACKET_GROUP_START));
+            group_with_crc = ((pkt->phy_data.SYSTEM) && (NBFi_Get_RX_Packet_Ptr(iter&0x1f)->phy_data.payload[0] == SYSTEM_PACKET_GROUP_START));
             uint16_t memcpy_len = total_length;
             for(uint8_t i = 0; i != groupe; i++)
             {
@@ -367,13 +367,13 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
     uint32_t rtc;
     #ifdef NBFI_LOG
                 sprintf(nbfi_log_string, "%05u: DL ", (uint16_t)(nbfi_scheduler->__scheduler_curr_time()&0xffff));
-                sprintf(nbfi_log_string + strlen(nbfi_log_string), " %c%c%c - %d - PLD:", phy_pkt->SYS?'S':' ', phy_pkt->ACK?'A':' ',phy_pkt->MULTI?'M':' ', phy_pkt->ITER&0x1f);
+                sprintf(nbfi_log_string + strlen(nbfi_log_string), " %c%c%c - %d - PLD:", phy_pkt->SYSTEM?'S':' ', phy_pkt->ACK?'A':' ',phy_pkt->MULTI?'M':' ', phy_pkt->ITER&0x1f);
                 for(uint8_t k = 0; k != 8; k++) sprintf(nbfi_log_string + strlen(nbfi_log_string), "%02X", phy_pkt->payload[k]);
                 sprintf(nbfi_log_string + strlen(nbfi_log_string), " -    - %dBPS", NBFi_Phy_To_Bitrate(nbfi.rx_phy_channel));
                 nbfi_hal->__nbfi_log_send_str(nbfi_log_string);
     #endif
 
-    if(phy_pkt->SYS)
+    if(phy_pkt->SYSTEM)
     {
             /* System messages */
             if(phy_pkt->payload[0] & 0x80) goto place_to_stack;
@@ -625,7 +625,7 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
                 else pkt->state = PACKET_SENT;
                 nbfi_active_pkt = pkt;
 
-                if(pkt->phy_data.SYS)
+                if(pkt->phy_data.SYSTEM)
                 {
                   switch(pkt->phy_data.payload[0])
                   {
@@ -637,7 +637,7 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
                     case SYSTEM_PACKET_CLEAR_EXT: //update current timestamp
                       {
                         uint32_t rtc = NBFi_get_RTC();
-                        pkt->phy_data.SYS = 1;
+                        pkt->phy_data.SYSTEM = 1;
                         memcpy(&pkt->phy_data.payload[1], &rtc, 4);
                       }
                       break;
@@ -652,7 +652,7 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
                   }
                 }
 
-                if(!pkt->phy_data.ACK && pkt->phy_data.SYS && NBFi_GetQueuedTXPkt()) pkt->phy_data.header |= MULTI_FLAG;
+                if(!pkt->phy_data.ACK && pkt->phy_data.SYSTEM && NBFi_GetQueuedTXPkt()) pkt->phy_data.header |= MULTI_FLAG;
 
 
                 if(wait_RxEnd) {wait_RxEnd = 0; nbfi_scheduler->__scheduler_remove_task(&dl_drx_desc);}
@@ -660,7 +660,7 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
 
 #ifdef NBFI_LOG
                 sprintf(nbfi_log_string, "%05u: UL ", (uint16_t)(nbfi_scheduler->__scheduler_curr_time()&0xffff));
-                sprintf(nbfi_log_string + strlen(nbfi_log_string), " %c%c%c - %d - PLD:", pkt->phy_data.SYS?'S':' ', pkt->phy_data.ACK?'A':' ',pkt->phy_data.MULTI?'M':' ', pkt->phy_data.ITER&0x1f);
+                sprintf(nbfi_log_string + strlen(nbfi_log_string), " %c%c%c - %d - PLD:", pkt->phy_data.SYSTEM?'S':' ', pkt->phy_data.ACK?'A':' ',pkt->phy_data.MULTI?'M':' ', pkt->phy_data.ITER&0x1f);
                 for(uint8_t k = 0; k != 8; k++) sprintf(nbfi_log_string + strlen(nbfi_log_string), "%02X", pkt->phy_data.payload[k]);
                 sprintf(nbfi_log_string + strlen(nbfi_log_string), " -    - %dBPS", NBFi_Phy_To_Bitrate(nbfi.tx_phy_channel));
                 nbfi_hal->__nbfi_log_send_str(nbfi_log_string);
@@ -801,7 +801,7 @@ static void NBFi_Receive_Timeout_cb(struct scheduler_desc *desc)
     {
        NBFi_Set_UL_Status(nbfi_active_pkt->id, LOST);
        NBFi_Close_Active_Packet();
-       if(nbfi_active_pkt->phy_data.SYS && (nbfi_active_pkt->phy_data.payload[0] == SYSTEM_PACKET_SYNC))
+       if(nbfi_active_pkt->phy_data.SYSTEM && (nbfi_active_pkt->phy_data.payload[0] == SYSTEM_PACKET_SYNC))
        {
              NBFi_Config_Return(); //return to previous work configuration
        }

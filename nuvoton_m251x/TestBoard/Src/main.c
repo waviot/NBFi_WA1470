@@ -40,78 +40,46 @@ void LXT_Enable(void)
 
 void SYS_Init(void)
 {
-    /* Unlock protected registers */
-    SYS_UnlockReg();
+	SYS_UnlockReg();
+	CLK_EnableXtalRC(CLK_PWRCTL_HIRCEN_Msk);
 
-#if (CLK_SOURCE == CLK_HIRC )
-    /* Enable HIRC clock (Internal RC 48MHz) */
-    CLK_EnableXtalRC(CLK_PWRCTL_HIRCEN_Msk);
-    /* Wait for HIRC clock ready */
-    CLK_WaitClockReady(CLK_STATUS_HIRCSTB_Msk);
+	/* Waiting for Internal RC clock ready */
+	CLK_WaitClockReady(CLK_STATUS_HIRCSTB_Msk);
 
-    /* Select HCLK clock source as HIRC and and HCLK source divider as 1 */
-    CLK_SetHCLK(CLK_CLKSEL0_HCLKSEL_HIRC, CLK_CLKDIV0_HCLK(1));
+	/* Switch HCLK clock source to Internal RC and HCLK source divide 1 */
+	CLK_SetHCLK(CLK_CLKSEL0_HCLKSEL_HIRC, CLK_CLKDIV0_HCLK(1));
 
-    /* Set PLL frequency */
-    CLK_EnablePLL(CLK_PLLCTL_PLLSRC_HIRC_DIV4, PLL_CLOCK);
+	LXT_Enable();
 
-    /* Waiting for clock ready */
-    CLK_WaitClockReady(CLK_STATUS_PLLSTB_Msk);
+	/* Enable GPIO clock */
+	CLK_EnableModuleClock(GPA_MODULE);
+	CLK_EnableModuleClock(GPB_MODULE);
+	CLK_EnableModuleClock(GPC_MODULE);
+	CLK_EnableModuleClock(GPD_MODULE);
+	CLK_EnableModuleClock(GPF_MODULE);
 
-    /* Switch HCLK clock source to PLL */
-    CLK_SetHCLK(CLK_CLKSEL0_HCLKSEL_PLL, CLK_CLKDIV0_HCLK(1));
+	SystemCoreClockUpdate();
 
-    /* Set both PCLK0 and PCLK1 as HCLK/2 */
-    CLK->PCLKDIV = CLK_PCLKDIV_APB0DIV_DIV2 | CLK_PCLKDIV_APB1DIV_DIV2;
+	CLK_EnableSysTick(CLK_CLKSEL0_STCLKSEL_HCLK, SystemCoreClock / 1000 - 1);
 
-#else
-
-    /* Set XT1_OUT(PF.2) and XT1_IN(PF.3) to input mode */
-    PF->MODE &= ~(GPIO_MODE_MODE2_Msk | GPIO_MODE_MODE3_Msk);
-    /* Enable external 12MHz XTAL */
-    CLK_EnableXtalRC(CLK_PWRCTL_HXTEN_Msk);
-
-    /* Waiting for clock ready */
-    CLK_WaitClockReady(CLK_STATUS_HXTSTB_Msk);
-
-    /* Select HCLK clock source as HXT and and HCLK source divider as 1 */
-    CLK_SetHCLK(CLK_CLKSEL0_HCLKSEL_HXT, CLK_CLKDIV0_HCLK(1));
-
-    /* Set PLL frequency */
-    CLK_EnablePLL(CLK_PLLCTL_PLLSRC_HXT, PLL_CLOCK);
-
-    /* Waiting for clock ready */
-    CLK_WaitClockReady(CLK_STATUS_PLLSTB_Msk);
-
-    /* Switch HCLK clock source to PLL */
-    CLK_SetHCLK(CLK_CLKSEL0_HCLKSEL_PLL, CLK_CLKDIV0_HCLK(1));
-
-    /* Set both PCLK0 and PCLK1 as HCLK */
-    CLK->PCLKDIV = CLK_PCLKDIV_APB0DIV_DIV1 | CLK_PCLKDIV_APB1DIV_DIV1;
-
-    /* Disable digital input path of analog pin XT1_OUT to prevent leakage */
-    GPIO_DISABLE_DIGITAL_PATH(PF, BIT2 | BIT3);
-#endif
-
-    /* Enable LXT */
-    LXT_Enable();
-
-    /* Enable LIRC clock (Internal RC 38.4KHz) */
-    CLK_EnableXtalRC(CLK_PWRCTL_LIRCEN_Msk);
-    /* Wait for LIRC clock ready */
-    CLK_WaitClockReady(CLK_STATUS_LIRCSTB_Msk);
-
-    CLK_EnableModuleClock(GPA_MODULE);
-    CLK_EnableModuleClock(GPB_MODULE);
-
-    /* Update System Core Clock */
-    /* User can use SystemCoreClockUpdate() to calculate SystemCoreClock and CycylesPerUs automatically. */
-    SystemCoreClockUpdate();
-
-    SYS_LockReg();
+	SYS_LockReg();
 }
 
 
+void GPIO_Init()
+{
+    //set all GPIOs to push-pull 0 level
+    PA->DOUT = 0;
+    PB->DOUT = 0;
+    PC->DOUT = 0;
+    PD->DOUT = 0;
+    PF->DOUT = 0;
+    PA->MODE = 0xAAAAAAAA;
+    PB->MODE = 0xAAAAAAAA;
+    PC->MODE = 0xAAAAAAAA;
+    PD->MODE = 0xAAAAAAAA;
+    PF->MODE = 0xAAAAAAAA;
+}
 
 
 void nbfi_receive_complete(uint8_t * data, uint16_t length)
@@ -140,6 +108,8 @@ int main(void)
 
   SYS_Init();
 
+  GPIO_Init();
+
   radio_init();
 
   GPIO_SetMode(PB, BIT2, GPIO_MODE_OUTPUT);
@@ -157,6 +127,12 @@ int main(void)
     {
         SYS_UnlockReg();
         CLK_PowerDown();
+        SYS_LockReg();
+    }
+    else
+    {
+        SYS_UnlockReg();
+        CLK_Idle();
         SYS_LockReg();
     }
 

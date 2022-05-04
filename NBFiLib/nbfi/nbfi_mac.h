@@ -24,4 +24,5 @@ nbfi_status_t   NBFi_MAC_RX();
 nbfi_status_t   NBFi_MAC_TX(nbfi_transport_packet_t* pkt);
 void            NBFi_MAC_Set_Iterator();
 void            NBFi_MAC_Get_Iterator();
+nbfi_prot_t     NBFi_MAC_get_protocol_type(nbfi_phy_channel_t phy);
 #endif

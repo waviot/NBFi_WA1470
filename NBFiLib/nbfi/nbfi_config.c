@@ -196,36 +196,16 @@ static _Bool NBFi_Config_Rate_Change(uint8_t rx_tx, nbfi_rate_direct_t dir )
         {
             if(++current_rx_rate > NUM_OF_RX_RATES - 1)  current_rx_rate = NUM_OF_RX_RATES - 1;
         }
-       /* if(dir == DOWN)
-        {
-            if(((int8_t)(--current_rx_rate)) < 0 ) current_rx_rate = 0;
-        }*/
     }
 
     if((rx_tx & TX_CONF))
     {
-        if((dir == UP)&& nbfi_station_info.info.UL_SPEED_NOT_MAX)
+        if((dir == UP)&& nbfi_station_info.info.UL_SPEED_NOT_MAX && (NBFi_MAC_get_protocol_type(nbfi.tx_phy_channel) == PROT_E))
         {
             if(++current_tx_rate > NUM_OF_TX_RATES - 1)  current_tx_rate = NUM_OF_TX_RATES - 1;
-            /*if(RxRateTable[current_rx_rate] == DL_PSK_200)
-              while(TxRateTable[current_tx_rate] != UL_DBPSK_50_PROT_D)
-              {
-                current_tx_rate--;
-                should_not_to_reduce_pwr = 1;
-              }
-            if(RxRateTable[current_rx_rate] == DL_PSK_500)
-              while(TxRateTable[current_tx_rate] != UL_DBPSK_400_PROT_D)
-              {
-                current_tx_rate--;
-                should_not_to_reduce_pwr = 1;
-              }*/
         }
-        /*if(dir == DOWN)
-        {
-            if(((int8_t)(--current_tx_rate)) < 0 ) current_tx_rate = 0;
-        }*/
     }
-    if((nbfi.tx_phy_channel == TxRateTable[current_tx_rate]) && (nbfi.rx_phy_channel == RxRateTable[current_rx_rate]) && !NBFi_Config_Check_If_FP_Need_To_Change(nbfi.nbfi_freq_plan, nbfi_station_info.fp, NBFI_UL_FP_MASK)&&!NBFi_Config_Check_If_FP_Need_To_Change(nbfi.nbfi_freq_plan, nbfi_station_info.fp, NBFI_DL_FP_MASK))
+    if(((nbfi.tx_phy_channel == TxRateTable[current_tx_rate]) || (NBFi_MAC_get_protocol_type(nbfi.tx_phy_channel) != PROT_E)) && (nbfi.rx_phy_channel == RxRateTable[current_rx_rate]) && !NBFi_Config_Check_If_FP_Need_To_Change(nbfi.nbfi_freq_plan, nbfi_station_info.fp, NBFI_UL_FP_MASK)&&!NBFi_Config_Check_If_FP_Need_To_Change(nbfi.nbfi_freq_plan, nbfi_station_info.fp, NBFI_DL_FP_MASK))
     {
         if(should_not_to_reduce_pwr) return 1;
         else return 0;
@@ -235,9 +215,9 @@ static _Bool NBFi_Config_Rate_Change(uint8_t rx_tx, nbfi_rate_direct_t dir )
     prev_rx_rate = rx;
     prev_tx_rate = tx;
 	prev_fplan = nbfi.nbfi_freq_plan;
-    nbfi.tx_phy_channel = TxRateTable[current_tx_rate];
 
-    //if((nbfi.rx_phy_channel == RxRateTable[current_rx_rate]) && (dir == DOWN)) return 1;
+    if(NBFi_MAC_get_protocol_type(nbfi.tx_phy_channel) == PROT_E)
+        nbfi.tx_phy_channel = TxRateTable[current_tx_rate];
 
     nbfi.rx_phy_channel = RxRateTable[current_rx_rate];
 

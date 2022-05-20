@@ -117,6 +117,7 @@ static uint32_t NBFi_MAC_get_UL_freq(uint16_t lastcrc, _Bool parity)
 static uint32_t NBFi_MAC_get_DL_freq()
 {
   uint32_t dl_freq;
+  if(nbfi.additional_flags&NBFI_FLG_GATEWAY_MODE) return nbfi.ul_freq_base;
   if(nbfi.rx_freq == 0)
   {
       uint32_t width = 102400 * (1 << nbfi.nbfi_freq_plan.dl_width);
@@ -211,9 +212,9 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
                 {
                   ul_buf[len++] = protD_preambula[i];
                 }
-		ul_buf[len++] = FULL_ID[2];
-		ul_buf[len++] = FULL_ID[1];
-		ul_buf[len++] = FULL_ID[0];
+                ul_buf[len++] = FULL_ID[2];
+                ul_buf[len++] = FULL_ID[1];
+                ul_buf[len++] = FULL_ID[0];
 
                 ul_buf[len++] = pkt->phy_data.header;
 
@@ -269,14 +270,14 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
           phy = UL_DBPSK_25600_PROT_D;
 
 
-	if((nbfi.tx_phy_channel < UL_DBPSK_3200_PROT_D) && !downlink)
-	{
-		ZCODE_Append(&ul_buf[4], &ul_buf[len], (tx_freq > (nbfi.ul_freq_base)));
-	}
-	else
-	{
+	//if((nbfi.tx_phy_channel < UL_DBPSK_3200_PROT_D) && !downlink)
+	//{
+	//	ZCODE_Append(&ul_buf[4], &ul_buf[len], (tx_freq > (nbfi.ul_freq_base)));
+	//}
+	//else
+	//{
 		ZCODE_Append(&ul_buf[4], &ul_buf[len], 1);
-	}
+	//}
 
 	if(!nbfi.tx_freq)
 		parity = !parity;

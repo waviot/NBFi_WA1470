@@ -15,6 +15,7 @@ typedef struct {
 	nbfi_phy_channel_t phy;
 	int16_t rssi;
 	uint8_t snr;
+    uint32_t freq;
 } nbfi_mac_info_packet_t;
 
 void            NBFi_MAC_RX_ProtocolD(nbfi_mac_protd_packet_t* pkt, nbfi_mac_info_packet_t* info);

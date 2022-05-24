@@ -34,7 +34,7 @@ typedef struct
             uint8_t ITER        : 5;//LSB
             uint8_t MULTI       : 1;
             uint8_t ACK         : 1;
-            uint8_t SYS         : 1;//MSB
+            uint8_t SYSTEM      : 1;//MSB
         };
         uint8_t header;
     };

@@ -77,7 +77,6 @@ extern _Bool nbfi_settings_need_to_save_to_flash;
 #define UL864000_DL863500            15 //NEW KAZ
 
 
-
 //FREQENCY PLANS
 #define NBFI_UL_FREQ_PLAN_NO_CHANGE             (64<<6)
 #define NBFI_DL_FREQ_PLAN_NO_CHANGE             8

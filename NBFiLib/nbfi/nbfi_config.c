@@ -115,7 +115,7 @@ void NBFI_Config_Check_State()
     {
         if(nbfi_state.aver_tx_snr) nbfi_state.UL_rating = (nbfi_state.aver_tx_snr + TxSNRDegradationTable[current_tx_rate]);
         else nbfi_state.UL_rating = 0;
-	if(nbfi_state.UL_rating > 40) nbfi_state.UL_rating = 40;
+        if(nbfi_state.UL_rating > 40) nbfi_state.UL_rating = 40;
         nbfi_state.UL_rating >>= 2;
 
         if(nbfi_state.aver_rx_snr) nbfi_state.DL_rating = (nbfi_state.aver_rx_snr + RxSNRDegradationTable[current_rx_rate]);
@@ -522,6 +522,7 @@ void NBFi_Config_Set_Default()
     NBFi_Config_Set_RX_Chan(nbfi.rx_phy_channel);
     wa1470rfe_set_zero_gain_mode(0);
     you_should_dl_power_step_down = 0;
+    nbfi_state.aver_tx_snr = nbfi_state.aver_rx_snr = 0;
 
     if(nbfi_active_pkt->state == PACKET_WAIT_ACK)
       NBFi_Close_Active_Packet();
@@ -609,7 +610,7 @@ void NBFi_Config_Set_TX_Chan(nbfi_phy_channel_t ch)
     uint8_t i;
     if(nbfi.additional_flags&NBFI_FLG_FIXED_BAUD_RATE) {nbfi.tx_phy_channel = ch; return;}
     for(i = 0; i != NUM_OF_TX_RATES; i++) if(TxRateTable[i] == ch) break;
-    if(i == NUM_OF_TX_RATES) return;
+    //if(i == NUM_OF_TX_RATES) return;
     nbfi.tx_phy_channel = ch;
     if(current_tx_rate != i)
     {
@@ -623,7 +624,7 @@ void NBFi_Config_Set_RX_Chan(nbfi_phy_channel_t ch)
     uint8_t i;
     if(nbfi.additional_flags&NBFI_FLG_FIXED_BAUD_RATE) {nbfi.rx_phy_channel = ch; return;}
     for(i = 0; i != NUM_OF_RX_RATES; i++) if(RxRateTable[i] == ch) break;
-    if(i == NUM_OF_RX_RATES) return;
+    //if(i == NUM_OF_RX_RATES) return;
     nbfi.rx_phy_channel = ch;
     if(current_rx_rate != i)
     {

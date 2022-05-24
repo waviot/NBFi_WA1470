@@ -22,7 +22,7 @@
 
 #define NBFI_PACKET_SIZE        8 //neccessary if no malloc used
 
-#define NBFI_ALTERNATIVES_NUMBER    4
+#define NBFI_ALTERNATIVES_NUMBER    8
 
 /*NBFi transport layer frame struct*/
 typedef struct

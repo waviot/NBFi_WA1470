@@ -115,7 +115,7 @@ void NBFI_Config_Check_State()
     {
         if(nbfi_state.aver_tx_snr) nbfi_state.UL_rating = (nbfi_state.aver_tx_snr + TxSNRDegradationTable[current_tx_rate]);
         else nbfi_state.UL_rating = 0;
-	if(nbfi_state.UL_rating > 40) nbfi_state.UL_rating = 40;
+        if(nbfi_state.UL_rating > 40) nbfi_state.UL_rating = 40;
         nbfi_state.UL_rating >>= 2;
 
         if(nbfi_state.aver_rx_snr) nbfi_state.DL_rating = (nbfi_state.aver_rx_snr + RxSNRDegradationTable[current_rx_rate]);
@@ -196,36 +196,16 @@ static _Bool NBFi_Config_Rate_Change(uint8_t rx_tx, nbfi_rate_direct_t dir )
         {
             if(++current_rx_rate > NUM_OF_RX_RATES - 1)  current_rx_rate = NUM_OF_RX_RATES - 1;
         }
-       /* if(dir == DOWN)
-        {
-            if(((int8_t)(--current_rx_rate)) < 0 ) current_rx_rate = 0;
-        }*/
     }
 
     if((rx_tx & TX_CONF))
     {
-        if((dir == UP)&& nbfi_station_info.info.UL_SPEED_NOT_MAX)
+        if((dir == UP)&& nbfi_station_info.info.UL_SPEED_NOT_MAX && (NBFi_MAC_get_protocol_type(nbfi.tx_phy_channel) == PROT_E))
         {
             if(++current_tx_rate > NUM_OF_TX_RATES - 1)  current_tx_rate = NUM_OF_TX_RATES - 1;
-            /*if(RxRateTable[current_rx_rate] == DL_PSK_200)
-              while(TxRateTable[current_tx_rate] != UL_DBPSK_50_PROT_D)
-              {
-                current_tx_rate--;
-                should_not_to_reduce_pwr = 1;
-              }
-            if(RxRateTable[current_rx_rate] == DL_PSK_500)
-              while(TxRateTable[current_tx_rate] != UL_DBPSK_400_PROT_D)
-              {
-                current_tx_rate--;
-                should_not_to_reduce_pwr = 1;
-              }*/
         }
-        /*if(dir == DOWN)
-        {
-            if(((int8_t)(--current_tx_rate)) < 0 ) current_tx_rate = 0;
-        }*/
     }
-    if((nbfi.tx_phy_channel == TxRateTable[current_tx_rate]) && (nbfi.rx_phy_channel == RxRateTable[current_rx_rate]) && !NBFi_Config_Check_If_FP_Need_To_Change(nbfi.nbfi_freq_plan, nbfi_station_info.fp, NBFI_UL_FP_MASK)&&!NBFi_Config_Check_If_FP_Need_To_Change(nbfi.nbfi_freq_plan, nbfi_station_info.fp, NBFI_DL_FP_MASK))
+    if(((nbfi.tx_phy_channel == TxRateTable[current_tx_rate]) || (NBFi_MAC_get_protocol_type(nbfi.tx_phy_channel) != PROT_E)) && (nbfi.rx_phy_channel == RxRateTable[current_rx_rate]) && !NBFi_Config_Check_If_FP_Need_To_Change(nbfi.nbfi_freq_plan, nbfi_station_info.fp, NBFI_UL_FP_MASK)&&!NBFi_Config_Check_If_FP_Need_To_Change(nbfi.nbfi_freq_plan, nbfi_station_info.fp, NBFI_DL_FP_MASK))
     {
         if(should_not_to_reduce_pwr) return 1;
         else return 0;
@@ -235,9 +215,9 @@ static _Bool NBFi_Config_Rate_Change(uint8_t rx_tx, nbfi_rate_direct_t dir )
     prev_rx_rate = rx;
     prev_tx_rate = tx;
 	prev_fplan = nbfi.nbfi_freq_plan;
-    nbfi.tx_phy_channel = TxRateTable[current_tx_rate];
 
-    //if((nbfi.rx_phy_channel == RxRateTable[current_rx_rate]) && (dir == DOWN)) return 1;
+    if(NBFi_MAC_get_protocol_type(nbfi.tx_phy_channel) == PROT_E)
+        nbfi.tx_phy_channel = TxRateTable[current_tx_rate];
 
     nbfi.rx_phy_channel = RxRateTable[current_rx_rate];
 
@@ -542,6 +522,7 @@ void NBFi_Config_Set_Default()
     NBFi_Config_Set_RX_Chan(nbfi.rx_phy_channel);
     wa1470rfe_set_zero_gain_mode(0);
     you_should_dl_power_step_down = 0;
+    nbfi_state.aver_tx_snr = nbfi_state.aver_rx_snr = 0;
 
     if(nbfi_active_pkt->state == PACKET_WAIT_ACK)
       NBFi_Close_Active_Packet();
@@ -629,7 +610,7 @@ void NBFi_Config_Set_TX_Chan(nbfi_phy_channel_t ch)
     uint8_t i;
     if(nbfi.additional_flags&NBFI_FLG_FIXED_BAUD_RATE) {nbfi.tx_phy_channel = ch; return;}
     for(i = 0; i != NUM_OF_TX_RATES; i++) if(TxRateTable[i] == ch) break;
-    if(i == NUM_OF_TX_RATES) return;
+    //if(i == NUM_OF_TX_RATES) return;
     nbfi.tx_phy_channel = ch;
     if(current_tx_rate != i)
     {
@@ -643,7 +624,7 @@ void NBFi_Config_Set_RX_Chan(nbfi_phy_channel_t ch)
     uint8_t i;
     if(nbfi.additional_flags&NBFI_FLG_FIXED_BAUD_RATE) {nbfi.rx_phy_channel = ch; return;}
     for(i = 0; i != NUM_OF_RX_RATES; i++) if(RxRateTable[i] == ch) break;
-    if(i == NUM_OF_RX_RATES) return;
+    //if(i == NUM_OF_RX_RATES) return;
     nbfi.rx_phy_channel = ch;
     if(current_rx_rate != i)
     {

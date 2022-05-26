@@ -53,6 +53,8 @@ extern _Bool nbfi_settings_need_to_save_to_flash;
 #define NBFI_FLG_DO_NOT_SEND_PKTS_ON_START      0x80
 #define NBFI_FLG_SHORT_RANGE_CRYPTO           0x0100
 #define NBFI_FLG_RX_DEFAULT_PREAMBLE		  0x0200
+#define NBFI_FLG_GATEWAY_MODE       		  0x0400
+
 
 
 
@@ -75,7 +77,6 @@ extern _Bool nbfi_settings_need_to_save_to_flash;
 #define UL864000_DL863500            15 //NEW KAZ
 
 
-
 //FREQENCY PLANS
 #define NBFI_UL_FREQ_PLAN_NO_CHANGE             (64<<6)
 #define NBFI_DL_FREQ_PLAN_NO_CHANGE             8
@@ -86,6 +87,7 @@ extern _Bool nbfi_settings_need_to_save_to_flash;
 #define NBFI_DL_FREQ_PLAN_819200_M2457600       59
 #define NBFI_DL_FREQ_PLAN_409600_M1638400       44
 
+#define NBFI_UL_PROTD_FREQ_PLAN_0               0
 
 
 #define NBFI_VOID_ALTERNATIVE   {0, UNDEFINED, UNDEFINED, NBFI_UL_FREQ_PLAN_NO_CHANGE + NBFI_DL_FREQ_PLAN_NO_CHANGE}

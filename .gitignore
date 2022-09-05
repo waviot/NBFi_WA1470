@@ -40,3 +40,11 @@ stm32l0x/WA1470RefBoard/Debug/List/
 stm32l0x/WA1470RefBoard/Debug/Exe/
 
 *.tmp
+
+v85xx/TestBoard/Debug/Obj/
+
+nuvoton_m251x/TestBoard/Debug/Obj/
+
+nuvoton_m251x/TestBoard/Debug/List/
+
+nuvoton_m251x/TestBoard/Debug/Exe/

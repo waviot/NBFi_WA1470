@@ -70,7 +70,7 @@ uint8_t rx_delta = 10;
 uint8_t tx_delta = 10;
 
 uint8_t try_counter = 0;
-
+uint16_t try_period = 0;
 
 static _Bool NBFI_Config_is_high_SNR_for_UP(uint8_t rx_tx)
 {
@@ -528,9 +528,10 @@ void NBFi_Config_Set_Default()
       NBFi_Close_Active_Packet();
 }
 
+
+
 _Bool NBFi_Config_Try_Alternative()
 {
-  static uint16_t try_period = 0;
 
   if((try_counter == NBFI_ALTERNATIVES_NUMBER) || (nbfi.try_alternative[try_counter].try_interval == 0))
   {
@@ -553,22 +554,6 @@ _Bool NBFi_Config_Try_Alternative()
 
   return 1;
 
-  /*for(uint8_t i = 0; i != NBFI_ALTERNATIVES_NUMBER; i++)
-  {
-    if(nbfi.try_alternative[i].try_interval == 0)
-	{
-	  try_counter = 0;
-	  return 0;
-	}
-    if((try_counter++%nbfi.try_alternative[i].try_interval) == 0)
-    {
-        NBFi_Config_Set_TX_Chan(nbfi.try_alternative[i].try_tx_phy_channel);
-        NBFi_Config_Set_RX_Chan(nbfi.try_alternative[i].try_rx_phy_channel);
-        nbfi.nbfi_freq_plan = nbfi.try_alternative[i].try_nbfi_freq_plan;
-        return 1;
-    }
-  }
-  return 0;*/
 }
 
 

@@ -35,17 +35,17 @@ void scheduler_HAL_LPTIM_Init(void)
     hlptim.Init.UpdateMode = LPTIM_UPDATE_IMMEDIATE;
     hlptim.Init.CounterSource = LPTIM_COUNTERSOURCE_INTERNAL;
     HAL_LPTIM_Init(&hlptim);
-    
+
     HAL_NVIC_SetPriority(WA_LPTIM_IRQn, 2, 0);
     HAL_NVIC_EnableIRQ(WA_LPTIM_IRQn);
 }
 
 void WA_LPTIM_IRQHandler(void)
 {
-  
+
   if (__HAL_LPTIM_GET_FLAG(&hlptim, LPTIM_FLAG_CMPM) != RESET) {
-                __HAL_LPTIM_CLEAR_FLAG(&hlptim, LPTIM_FLAG_CMPM);  
-                
+                __HAL_LPTIM_CLEAR_FLAG(&hlptim, LPTIM_FLAG_CMPM);
+
                 scheduler_irq();
   }
 }
@@ -60,10 +60,10 @@ void scheduler_HAL_LOOPTIM_Init(void)
     hlooptim.Init.Period = 1;
     hlooptim.Init.ClockDivision = 0;
     hlooptim.Init.CounterMode = TIM_COUNTERMODE_UP;
-   
+
     HAL_TIM_Base_Init(&hlooptim);
     HAL_TIM_Base_Start_IT(&hlooptim);
-        
+
     WA_LOOPTIM_RCC_ENABLE();
     HAL_NVIC_SetPriority(WA_LOOPTIM_IRQn, 2, 0);
     HAL_NVIC_EnableIRQ(WA_LOOPTIM_IRQn);
@@ -75,14 +75,14 @@ void WA_LOOPTIM_IRQHandler(void)
  	if(__HAL_TIM_GET_FLAG(&hlooptim, TIM_FLAG_UPDATE) != RESET){
 		if(__HAL_TIM_GET_IT_SOURCE(&hlooptim, TIM_IT_UPDATE) != RESET){
 			__HAL_TIM_CLEAR_IT(&hlooptim, TIM_IT_UPDATE);
-                     
+
                      scheduler_run_callbacks();
-                   
+
 		}
 	}
 }
 
-    
+
 
 
 void scheduler_HAL_enable_global_irq(void)
@@ -130,15 +130,15 @@ uint16_t scheduler_HAL_cc_get(uint8_t chan)
 
 uint16_t scheduler_HAL_cnt_get(uint8_t chan)
 {
-  //static uint16_t prev = 0; 
+  //static uint16_t prev = 0;
   uint16_t timer = (uint16_t) hlptim.Instance->CNT;
-    
+
   //if((timer < prev) && ((prev - timer) < 10000))
   //{
   //  return prev;
   //}
   //prev = timer;
-  return timer; 
+  return timer;
 }
 
 uint8_t scheduler_HAL_check_cc_irq(uint8_t chan)
@@ -150,7 +150,7 @@ scheduler_HAL_st scheduler_hal_struct = {0,0,0,0,0,0,0,0,0,0};
 
 void scheduler_HAL_init()
 {
-    
+
   scheduler_hal_struct.__global_irq_enable = (void(*)(void))scheduler_HAL_enable_global_irq;
   scheduler_hal_struct.__global_irq_disable = (void(*)(void))scheduler_HAL_disable_global_irq;
   scheduler_hal_struct.__cc_irq_enable = (void(*)(uint8_t))scheduler_HAL_cc_irq_enable;
@@ -161,12 +161,12 @@ void scheduler_HAL_init()
   scheduler_hal_struct.__cc_get = (uint16_t(*)(uint8_t))scheduler_HAL_cc_get;
   scheduler_hal_struct.__cnt_get = (uint16_t(*)(uint8_t))scheduler_HAL_cnt_get;
   scheduler_hal_struct.__check_cc_irq = (uint8_t(*)(uint8_t))scheduler_HAL_check_cc_irq;
-   
-  _scheduler = scheduler_init(&scheduler_hal_struct);
- 
-  scheduler_HAL_LPTIM_Init(); 
+
+  _scheduler = scheduler_init(&scheduler_hal_struct, 1);
+
+  scheduler_HAL_LPTIM_Init();
   HAL_LPTIM_Counter_Start(&hlptim, 0xffff);
-  scheduler_HAL_LOOPTIM_Init();    
+  scheduler_HAL_LOOPTIM_Init();
 }
 
 

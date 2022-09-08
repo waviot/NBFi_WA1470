@@ -54,6 +54,7 @@ extern _Bool nbfi_settings_need_to_save_to_flash;
 #define NBFI_FLG_SHORT_RANGE_CRYPTO           0x0100
 #define NBFI_FLG_RX_DEFAULT_PREAMBLE		  0x0200
 #define NBFI_FLG_GATEWAY_MODE       		  0x0400
+#define NBFI_FLG_RESET_TO_LOWEST_RATES        0x0800
 
 
 
@@ -100,7 +101,7 @@ extern NBFi_station_info_s nbfi_station_info;
 
 extern uint8_t try_counter;
 extern uint16_t try_period;
-
+extern _Bool switched_to_lowest_rates;
 
 void    NBFI_Config_Check_State();
 _Bool   NBFi_Config_Tx_Power_Change(nbfi_rate_direct_t dir);
@@ -113,4 +114,5 @@ void    NBFi_Config_Set_RX_Chan(nbfi_phy_channel_t ch);
 void    NBFi_Set_Fixed_Bitrate(_Bool fixed);
 _Bool   NBFi_Config_is_settings_default();
 _Bool   NBFi_Config_Try_Alternative();
+void    NBFi_Config_set_lowest_rates();
 #endif // NBFI_CONFIG_H

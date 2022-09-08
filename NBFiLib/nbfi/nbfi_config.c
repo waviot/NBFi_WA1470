@@ -33,6 +33,7 @@ nbfi_settings_t nbfi_prev;
 
 _Bool nbfi_settings_need_to_save_to_flash = 0;
 
+_Bool switched_to_lowest_rates = 0;
 
 #define NUM_OF_TX_RATES    4
 #define NUM_OF_RX_RATES    4
@@ -514,6 +515,8 @@ void NBFi_Config_Return()
 
 void NBFi_Config_Set_Default()
 {
+    switched_to_lowest_rates = 0;
+
     NBFi_ReadConfig(0);
 
     srand(FULL_ID[0] ^ FULL_ID[1] ^ FULL_ID[2] ^ FULL_ID[3]);
@@ -632,4 +635,11 @@ _Bool NBFi_Config_is_settings_default()
   if((nbfi.tx_phy_channel != settings.tx_phy_channel)) return 0;
   if((nbfi.nbfi_freq_plan.fp != settings.nbfi_freq_plan.fp)) return 0;
   return 1;
+}
+
+void NBFi_Config_set_lowest_rates()
+{
+    NBFi_Config_Set_TX_Chan(TxRateTable[0]);
+    NBFi_Config_Set_RX_Chan(RxRateTable[0]);
+    switched_to_lowest_rates = 1;
 }

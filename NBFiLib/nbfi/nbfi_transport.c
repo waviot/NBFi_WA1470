@@ -1,6 +1,6 @@
 #include "nbfi.h"
 
-nbfi_state_t nbfi_state = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+nbfi_state_t nbfi_state = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 
 
@@ -26,6 +26,7 @@ _Bool wait_RxEnd = 0;
 _Bool rx_complete = 0;
 _Bool was_not_cleared_after_groupe = 0;
 _Bool uplink_received_after_send = 0;
+
 
 uint32_t info_timer;
 
@@ -114,8 +115,15 @@ nbfi_ul_sent_status_t NBFi_Send5(uint8_t* payload, uint8_t length, uint8_t flags
       return err_status;
     }
 
+    if((nbfi.additional_flags&NBFI_FLG_RESET_TO_LOWEST_RATES) && switched_to_lowest_rates)
+    {
+        NBFi_Config_Set_Default();
+        NBFi_Config_Send_Sync(0);
+    }
+
     nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
     uint8_t free = NBFI_TX_PKTBUF_SIZE - NBFi_Packets_To_Send();
+
 
     if((length <= nbfi.max_payload_len) && (free < nbfi.mack_mode + 3 ) )
     {
@@ -349,6 +357,13 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
     nbfi_transport_packet_t* pkt = 0;
 
 
+
+    if((nbfi.additional_flags&NBFI_FLG_RESET_TO_LOWEST_RATES))
+    {
+        switched_to_lowest_rates = 0;
+    }
+
+
     if(wait_Extra)
     {
       nbfi_scheduler->__scheduler_remove_task(&wait_for_extra_desc);
@@ -385,8 +400,11 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
                 {
                     nbfi_scheduler->__scheduler_remove_task(&dl_receive_desc);
                     wait_Receive = 0;
-                    try_counter = 0;
-                    try_period = 0;
+                    if(!nbfi.additional_flags&NBFI_FLG_SHORT_RANGE_CRYPTO) // not for short-range mode
+                    {
+                        try_counter = 0;
+                        try_period = 0;
+                    }
                     if(nbfi_active_pkt->mack_num == 0)
                     {
                         nbfi_state.success_total++;
@@ -643,13 +661,16 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
                       }
                       break;
                     case SYSTEM_PACKET_SYNC:
-		   	pkt->phy_data.payload[2] = nbfi.tx_phy_channel;
-    			pkt->phy_data.payload[3] = nbfi.rx_phy_channel;
-    			pkt->phy_data.payload[4] = (nbfi.nbfi_freq_plan.fp>>8);
-    			pkt->phy_data.payload[5] = (nbfi.nbfi_freq_plan.fp&0xff);
+                        pkt->phy_data.payload[2] = nbfi.tx_phy_channel;
+                        pkt->phy_data.payload[3] = nbfi.rx_phy_channel;
+                        pkt->phy_data.payload[4] = (nbfi.nbfi_freq_plan.fp>>8);
+                        pkt->phy_data.payload[5] = (nbfi.nbfi_freq_plan.fp&0xff);
                       	pkt->phy_data.payload[6] = (nbfi_iter.dl >> 16);
                       	pkt->phy_data.payload[7] = (nbfi_iter.dl >> 8);
                     	break;
+                  case SYSTEM_PACKET_HERTBEAT:
+                        pkt->phy_data.payload[6] = (uint8_t)(NBFi_RF_get_noise() + 150); // rx noise
+                        break;
                   }
                 }
 
@@ -819,6 +840,10 @@ static void NBFi_Receive_Timeout_cb(struct scheduler_desc *desc)
 						nbfi_active_pkt->retry_num = 0;
                     	nbfi_active_pkt->state = PACKET_QUEUED;
 					}
+                    else if((nbfi.additional_flags&NBFI_FLG_RESET_TO_LOWEST_RATES) && !NBFi_GetQueuedTXPkt())
+                    {
+                        NBFi_Config_set_lowest_rates();
+                    }
                 }
                 else
                 {

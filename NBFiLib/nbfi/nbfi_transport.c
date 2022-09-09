@@ -589,8 +589,9 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
         case PACKET_WAIT_ACK:
             if(!wait_Receive)
             {
-                nbfi_scheduler->__scheduler_add_task(&dl_receive_desc, NBFi_Receive_Timeout_cb, RELATIVE, NBFi_UL_Delivery_Time(nbfi.tx_phy_channel) + NBFi_DL_Delivery_Time(nbfi.rx_phy_channel));
-                wait_Receive = 1;
+                NBFi_run_Receive_Timeout_cb(NBFi_UL_Delivery_Time(nbfi.tx_phy_channel) + NBFi_DL_Delivery_Time(nbfi.rx_phy_channel));
+                //nbfi_scheduler->__scheduler_add_task(&dl_receive_desc, NBFi_Receive_Timeout_cb, RELATIVE, NBFi_UL_Delivery_Time(nbfi.tx_phy_channel) + NBFi_DL_Delivery_Time(nbfi.rx_phy_channel));
+                //wait_Receive = 1;
             }
             break;
         case PACKET_WAIT_FOR_EXTRA_PACKETS:
@@ -619,8 +620,9 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
                         case DRX:
                         case CRX:
                             pkt->state = PACKET_WAIT_ACK;
-                            nbfi_scheduler->__scheduler_add_task(&dl_receive_desc, NBFi_Receive_Timeout_cb, RELATIVE, NBFi_UL_Delivery_Time(nbfi.tx_phy_channel)+NBFi_DL_Delivery_Time(nbfi.rx_phy_channel));
-                            wait_Receive = 1;
+                            NBFi_run_Receive_Timeout_cb(NBFi_UL_Delivery_Time(nbfi.tx_phy_channel)+NBFi_DL_Delivery_Time(nbfi.rx_phy_channel));
+                            //nbfi_scheduler->__scheduler_add_task(&dl_receive_desc, NBFi_Receive_Timeout_cb, RELATIVE, NBFi_UL_Delivery_Time(nbfi.tx_phy_channel)+NBFi_DL_Delivery_Time(nbfi.rx_phy_channel));
+                            //wait_Receive = 1;
                             break;
                         case NRX:
                             pkt->state = PACKET_SENT;
@@ -796,6 +798,8 @@ static void NBFi_RX_DL_EndHandler(struct scheduler_desc *desc)
     wait_RxEnd = 0;
     NBFi_RX_Controller();
 }
+
+
 
 
 static void NBFi_Receive_Timeout_cb(struct scheduler_desc *desc)
@@ -1092,3 +1096,8 @@ static uint32_t NBFi_DL_Delivery_Time(nbfi_phy_channel_t chan)
   else return NBFI_PhyToDL_ListenTime(chan) + rand()%NBFI_PhyToDL_AddRndListenTime(chan);
 }
 
+void NBFi_run_Receive_Timeout_cb(uint32_t timeout)
+{
+    nbfi_scheduler->__scheduler_add_task(&dl_receive_desc, NBFi_Receive_Timeout_cb, RELATIVE, timeout);
+    wait_Receive = 1;
+}

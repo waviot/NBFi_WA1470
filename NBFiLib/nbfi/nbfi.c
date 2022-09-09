@@ -272,11 +272,89 @@ void NBFi_reset_to_default_settings()
 	nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_UNLOCK);
 }
 
-void NBFi_switch_to_custom_settings(nbfi_settings_t* settings, nbfi_crypto_iterator_t* it, _Bool to_or_from)
+
+
+void NBFi_save_restore_protocol_context(_Bool save_or_restore)
 {
+
     static nbfi_settings_t old_settings;
     static nbfi_crypto_iterator_t old_iter;
     static nbfi_state_t state;
+
+    #ifdef NBFI_SAVE_BUFFERS
+    static nbfi_transport_packet_t  old_nbfi_TX_pktBuf[NBFI_TX_PKTBUF_SIZE];
+    static nbfi_transport_packet_t  old_nbfi_RX_pktBuf[NBFI_RX_PKTBUF_SIZE];
+
+    static uint8_t     old_nbfi_TXbuf_head;
+    static uint8_t     old_nbfi_sent_buf_head;
+    static uint8_t     old_nbfi_receive_buf_head;
+    static nbfi_transport_packet_t* old_nbfi_active_pkt;
+
+    extern nbfi_transport_packet_t  nbfi_TX_pktBuf[NBFI_TX_PKTBUF_SIZE];
+    extern nbfi_transport_packet_t nbfi_RX_pktBuf[NBFI_RX_PKTBUF_SIZE];
+
+    extern uint8_t     nbfi_TXbuf_head;
+    extern uint8_t     nbfi_sent_buf_head;
+    extern uint8_t     nbfi_receive_buf_head;
+    extern nbfi_transport_packet_t* nbfi_active_pkt;
+    #endif
+
+
+    if(save_or_restore)
+    {
+
+        memcpy(&old_settings, &nbfi, sizeof(nbfi_settings_t));
+        memcpy(&state, &nbfi_state, sizeof(nbfi_state_t));
+        old_iter = nbfi_iter;
+        NBFi_Crypto_Save_Restore_All_KEYs(1);
+        #ifdef NBFI_SAVE_BUFFERS
+        memcpy(&old_nbfi_TX_pktBuf, &nbfi_TX_pktBuf, sizeof(nbfi_TX_pktBuf));
+        memcpy(&old_nbfi_RX_pktBuf, &nbfi_RX_pktBuf, sizeof(nbfi_RX_pktBuf));
+        old_nbfi_TXbuf_head = nbfi_TXbuf_head;
+        old_nbfi_sent_buf_head = nbfi_sent_buf_head;
+        old_nbfi_receive_buf_head = nbfi_receive_buf_head;
+        old_nbfi_active_pkt = nbfi_active_pkt;
+        #endif
+
+
+    }
+    else
+    {
+        #ifdef NBFI_SAVE_BUFFERS
+        memcpy(&nbfi_TX_pktBuf, &old_nbfi_TX_pktBuf, sizeof(nbfi_TX_pktBuf));
+        memcpy(&nbfi_RX_pktBuf, &old_nbfi_RX_pktBuf, sizeof(nbfi_RX_pktBuf));
+        nbfi_TXbuf_head = old_nbfi_TXbuf_head;
+        nbfi_sent_buf_head = old_nbfi_sent_buf_head;
+        nbfi_receive_buf_head = old_nbfi_receive_buf_head;
+        nbfi_active_pkt = old_nbfi_active_pkt;
+        if(nbfi_active_pkt->state == PACKET_WAIT_ACK)
+        {
+            NBFi_run_Receive_Timeout_cb(2);
+        }
+        #endif
+
+        memcpy(&nbfi_state, &state, sizeof(nbfi_state_t));
+        nbfi_iter = old_iter;
+        memcpy(&nbfi, &old_settings, sizeof(nbfi_settings_t));
+        NBFi_Config_Set_TX_Chan(old_settings.tx_phy_channel);
+        NBFi_Config_Set_RX_Chan(old_settings.rx_phy_channel);
+        rf_state = STATE_CHANGED;
+		NBFi_Crypto_Save_Restore_All_KEYs(0);
+
+
+
+
+    }
+
+}
+
+
+
+
+void NBFi_switch_to_custom_settings(nbfi_settings_t* settings, nbfi_crypto_iterator_t* it, _Bool to_or_from)
+{
+
+
     nbfi_hal->__nbfi_lock_unlock_loop_irq(NBFI_LOCK);
 
     if(to_or_from)
@@ -288,15 +366,13 @@ void NBFi_switch_to_custom_settings(nbfi_settings_t* settings, nbfi_crypto_itera
 		return ;
 	  }
 
-      memcpy(&old_settings, &nbfi, sizeof(nbfi_settings_t));
-      memcpy(&state, &nbfi_state, sizeof(nbfi_state_t));
-      old_iter = nbfi_iter;
+      NBFi_save_restore_protocol_context(1);
+
       NBFi_Clear_TX_Buffer();
 
       memcpy(&nbfi, settings, sizeof(nbfi_settings_t));
-      //rf_state = STATE_CHANGED;
+
       nbfi_iter = *it;
-	  NBFi_Crypto_Save_Restore_All_KEYs(1);
 
 	  if(nbfi.master_key != 0)
       {
@@ -306,13 +382,9 @@ void NBFi_switch_to_custom_settings(nbfi_settings_t* settings, nbfi_crypto_itera
     else if(switched_to_custom_settings)
     {
         NBFi_Clear_TX_Buffer();
-        memcpy(&nbfi_state, &state, sizeof(nbfi_state_t));
-        nbfi_iter = old_iter;
-        memcpy(&nbfi, &old_settings, sizeof(nbfi_settings_t));
-        NBFi_Config_Set_TX_Chan(old_settings.tx_phy_channel);
-        NBFi_Config_Set_RX_Chan(old_settings.rx_phy_channel);
-        rf_state = STATE_CHANGED;
-		NBFi_Crypto_Save_Restore_All_KEYs(0);
+
+        NBFi_save_restore_protocol_context(0);
+
     }
 	else
 	{

@@ -23,4 +23,5 @@ void            NBFi_ProcessRxPackets();
 void            NBFi_update_RTC();
 void            NBFi_set_RTC_irq(uint32_t time);
 void            NBFi_TX_Finished();
+void            NBFi_run_Receive_Timeout_cb(uint32_t timeout);
 #endif // NBFI_TRANSPORT_H

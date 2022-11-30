@@ -231,6 +231,7 @@ void NBFi_set_Settings(nbfi_settings_t* settings, _Bool persistent)
       if(nbfi.ul_freq_base != settings->ul_freq_base) need_to_send_ul_freq_base = 1;
       if(nbfi.dl_freq_base != settings->dl_freq_base) need_to_send_dl_freq_base = 1;
       if(nbfi.mode != settings->mode) need_to_send_sync = 1;
+      if(nbfi.nbfi_freq_plan.fp != settings->nbfi_freq_plan.fp) need_to_send_sync = 1;
 
       NBFi_Clear_TX_Buffer();
 

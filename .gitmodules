@@ -10,3 +10,6 @@
 [submodule "NBFiLib/scheduler"]
 	path = NBFiLib/scheduler
 	url = https://github.com/waviot/scheduler
+[submodule "stm32-ssd1306"]
+	path = stm32-ssd1306
+	url = https://github.com/afiskon/stm32-ssd1306

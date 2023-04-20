@@ -10,6 +10,11 @@
 #include "gui.h"
 #include "at_user.h"
 
+#include "ssd1306.h"
+#include "ssd1306_tests.h"
+
+I2C_HandleTypeDef hi2c1;
+SPI_HandleTypeDef hspi1;
 
 #define POWER_LED_GPIO_Port 	GPIOA
 #define POWER_LED_Pin 		GPIO_PIN_12
@@ -68,6 +73,66 @@ void nbfi_receive_complete(uint8_t * data, uint16_t length)
 }
 
 
+static void MX_I2C1_Init(void)
+{
+
+  hi2c1.Instance = I2C1;
+  hi2c1.Init.Timing = 0x00303D5B;
+  hi2c1.Init.OwnAddress1 = 0;
+  hi2c1.Init.AddressingMode = I2C_ADDRESSINGMODE_7BIT;
+  hi2c1.Init.DualAddressMode = I2C_DUALADDRESS_DISABLE;
+  hi2c1.Init.OwnAddress2 = 0;
+  hi2c1.Init.OwnAddress2Masks = I2C_OA2_NOMASK;
+  hi2c1.Init.GeneralCallMode = I2C_GENERALCALL_DISABLE;
+  hi2c1.Init.NoStretchMode = I2C_NOSTRETCH_DISABLE;
+  if (HAL_I2C_Init(&hi2c1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+  /** Configure Analogue filter
+  */
+ /* if (HAL_I2CEx_ConfigAnalogFilter(&hi2c1, I2C_ANALOGFILTER_ENABLE) != HAL_OK)
+  {
+    Error_Handler();
+  }*/
+  /** Configure Digital filter
+  */
+  /*if (HAL_I2CEx_ConfigDigitalFilter(&hi2c1, 0) != HAL_OK)
+  {
+    Error_Handler();
+  }*/
+  /* USER CODE BEGIN I2C1_Init 2 */
+
+  /* USER CODE END I2C1_Init 2 */
+
+}
+
+
+static void MX_SPI1_Init(void)
+{
+
+  hspi1.Instance = SPI1;
+  hspi1.Init.Mode = SPI_MODE_MASTER;
+  hspi1.Init.Direction = SPI_DIRECTION_1LINE;//SPI_DIRECTION_1LINE;
+  
+  hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
+  hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
+  hspi1.Init.CLKPhase = SPI_PHASE_1EDGE;
+  hspi1.Init.NSS = SPI_NSS_SOFT;
+  hspi1.Init.BaudRatePrescaler = SPI_BAUDRATEPRESCALER_2;
+  hspi1.Init.FirstBit = SPI_FIRSTBIT_MSB;
+  hspi1.Init.TIMode = SPI_TIMODE_DISABLE;
+  hspi1.Init.CRCCalculation = SPI_CRCCALCULATION_DISABLE;
+  hspi1.Init.CRCPolynomial = 7;
+  if (HAL_SPI_Init(&hspi1) != HAL_OK)
+  {
+    Error_Handler();
+  }
+
+
+}
+
+
 
 int main(void)
 {
@@ -76,15 +141,22 @@ int main(void)
 
   SystemClock_Config();
 
+ 
   MX_GPIO_Init();
 
+    MX_SPI1_Init();
+
+  //HAL_GPIO_WritePin(SSD1306_CS_Port, SSD1306_CS_Pin, GPIO_PIN_SET);
+  //MX_I2C1_Init();
+  
+ 
   RTC_init();
 
-  ADC_init();
+  //ADC_init();
 
-  radio_init();
+  //radio_init();
 
-  log_init();
+  //log_init();
 
 
   //NBFi_Send5("Hello!", sizeof("Hello!"),0);
@@ -106,7 +178,10 @@ int main(void)
   while (1)
   {
 
-      if(!GUI_is_inited())  GUI_Init();
+    ssd1306_TestAll();
+    
+//    HAL_GPIO_WritePin(OLED_SCK_GPIO_Port, OLED_SCK_Pin, GPIO_PIN_SET);
+    /*  if(!GUI_is_inited())  GUI_Init();
 
       #ifdef PLOT_SPECTRUM
       #include "plot_spectrum.h"
@@ -160,5 +235,6 @@ int main(void)
         HAL_GPIO_WritePin(POWER_LED_GPIO_Port, POWER_LED_Pin,  GPIO_PIN_SET);
         HAL_PWR_EnterSLEEPMode(PWR_MAINREGULATOR_ON, PWR_SLEEPENTRY_WFI);
       }
+*/
   }
 }

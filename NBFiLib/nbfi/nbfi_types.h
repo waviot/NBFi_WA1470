@@ -135,8 +135,9 @@ typedef enum
     UL_DBPSK_3200_PROT_E    = 32,
     UL_DBPSK_25600_PROT_E   = 33,
     UL_DBPSK_100H_PROT_D    = 34,
-    UL_DBPSK_100H_PROT_E    = 35,
+    UL_DBPSK_100H_PROT_E    = 35, 
     UL_CARRIER              = 50,
+    DL_RS485_PROT_D         = 60,
     UNDEFINED               = 100
 }nbfi_phy_channel_t;
 

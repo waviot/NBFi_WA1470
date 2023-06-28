@@ -28,6 +28,7 @@ extern nbfi_rf_state_s rf_state;
 extern nbfi_phy_channel_t nbfi_phy_channel;
 extern _Bool rf_busy;
 extern _Bool transmit;
+extern uint32_t protd_rx_preambule;
 
 typedef struct
 {

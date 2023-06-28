@@ -538,7 +538,7 @@ void NBFi_Config_Set_Default()
 _Bool NBFi_Config_Try_Alternative()
 {
 
-  if((try_counter == NBFI_ALTERNATIVES_NUMBER) || (nbfi.try_alternative[try_counter].try_interval == 0))
+  if((try_counter == NBFI_ALTERNATIVES_NUMBER) || (nbfi.try_alternative[try_counter].try_interval == 0) || (nbfi.additional_flags & NBFI_FLG_FIXED_BAUD_RATE))
   {
 	try_counter = 0;
     try_period++;

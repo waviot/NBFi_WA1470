@@ -455,6 +455,7 @@ void SettingsHandler()
       else if(_nbfi.ul_freq_base == 864000000) sprintf(textbuf, "KZ");
       else if(_nbfi.ul_freq_base == 458550000) sprintf(textbuf, "UZ");
       else if(_nbfi.ul_freq_base == 916500000) sprintf(textbuf, "ARG");
+      else if(_nbfi.ul_freq_base == 499950000) sprintf(textbuf, "CN");
       else sprintf(textbuf, "UNKN");
       LCD_DrawString(127,((i-scroll)*9)+5, textbuf, COLOR_FILL, ALIGN_RIGHT);
       break;
@@ -554,6 +555,10 @@ void SettingsHandler()
               _nbfi.dl_freq_base = 903000000;
               break;
             case 916500000:
+              _nbfi.ul_freq_base = 499950000;
+              _nbfi.dl_freq_base = 498000000;
+              break;
+            case 499950000:
               _nbfi.ul_freq_base = 868800000;
               _nbfi.dl_freq_base = 869150000;
               break;

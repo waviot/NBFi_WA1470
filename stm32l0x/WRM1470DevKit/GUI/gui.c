@@ -556,7 +556,7 @@ void SettingsHandler()
               break;
             case 916500000:
               _nbfi.ul_freq_base = 499950000;
-              _nbfi.dl_freq_base = 498000000;
+              _nbfi.dl_freq_base = 470100000;
               break;
             case 499950000:
               _nbfi.ul_freq_base = 868800000;

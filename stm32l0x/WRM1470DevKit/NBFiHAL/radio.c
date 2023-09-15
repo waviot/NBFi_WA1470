@@ -72,9 +72,9 @@ nbfi_device_id_and_key_st sr_server_modem_id_and_key @SR_SERVER_MODEM_ID_AND_KEY
 #elif BAND == UL916500_DL903000
 #define NBFI_UL_FREQ_BASE       916500000       //ARG
 #define NBFI_DL_FREQ_BASE       903000000
-#elif BAND == DL499950_UL498000
+#elif BAND == UL499950_DL470100
 #define NBFI_UL_FREQ_BASE       499950000       //CN
-#define NBFI_DL_FREQ_BASE       498000000
+#define NBFI_DL_FREQ_BASE       470100000
 #endif 
 
 

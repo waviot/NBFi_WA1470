@@ -79,6 +79,8 @@ extern nbfi_settings_t nbfi_prev;
 #define UL868500_DL869550            14  //new UKRAINE
 #define UL864000_DL863500            15 //NEW KAZ
 #define UL916500_DL903000            37 //US
+#define UL499950_DL470100            37 //CN
+
 
 
 

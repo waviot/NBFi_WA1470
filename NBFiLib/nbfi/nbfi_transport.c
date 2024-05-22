@@ -862,7 +862,7 @@ static void NBFi_Receive_Timeout_cb(struct scheduler_desc *desc)
     {
        NBFi_Set_UL_Status(nbfi_active_pkt->id, LOST);
        NBFi_Close_Active_Packet();
-       if(nbfi_active_pkt->phy_data.SYSTEM && (nbfi_active_pkt->phy_data.payload[0] == SYSTEM_PACKET_SYNC))
+       if((nbfi_prev.tx_phy_channel != UNDEFINED) && nbfi_active_pkt->phy_data.SYSTEM && (nbfi_active_pkt->phy_data.payload[0] == SYSTEM_PACKET_SYNC))
        {
              NBFi_Config_Return(); //return to previous work configuration
        }

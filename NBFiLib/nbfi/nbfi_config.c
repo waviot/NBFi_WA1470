@@ -508,9 +508,10 @@ void NBFi_Config_Return()
     memcpy_xdata(&nbfi, &nbfi_prev, sizeof(nbfi));
     current_tx_rate = prev_tx_rate;
     current_rx_rate = prev_rx_rate;
-	nbfi.nbfi_freq_plan = prev_fplan;
+    nbfi.nbfi_freq_plan = prev_fplan;
    // nbfi_station_info.fp.fp = 0;
    // if(nbfi.mode == NRX) nbfi.handshake_mode = HANDSHAKE_NONE;
+    nbfi_prev.tx_phy_channel = UNDEFINED; // clear previously saved configuration
     NBFi_Config_Send_Sync(0);
 }
 

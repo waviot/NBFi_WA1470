@@ -41,6 +41,8 @@ extern uint8_t current_tx_rate;
 extern uint8_t current_rx_rate;
 
 extern _Bool nbfi_settings_need_to_save_to_flash;
+extern nbfi_settings_t nbfi_prev;
+
 
 //NBFi flags:
 #define NBFI_FLG_FIXED_BAUD_RATE                0x01

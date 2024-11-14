@@ -111,9 +111,14 @@ static void MX_I2C1_Init(void)
 static void MX_SPI1_Init(void)
 {
 
+  __HAL_RCC_SPI1_CLK_ENABLE();
+  
+  
+  
+  
   hspi1.Instance = SPI1;
   hspi1.Init.Mode = SPI_MODE_MASTER;
-  hspi1.Init.Direction = SPI_DIRECTION_1LINE;//SPI_DIRECTION_1LINE;
+  hspi1.Init.Direction = SPI_DIRECTION_2LINES;//SPI_DIRECTION_1LINE;//SPI_DIRECTION_1LINE;
   
   hspi1.Init.DataSize = SPI_DATASIZE_8BIT;
   hspi1.Init.CLKPolarity = SPI_POLARITY_LOW;
@@ -128,6 +133,8 @@ static void MX_SPI1_Init(void)
   {
     Error_Handler();
   }
+  __HAL_SPI_ENABLE(&hspi1);	
+  
 
 
 }

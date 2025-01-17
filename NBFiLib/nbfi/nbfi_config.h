@@ -27,6 +27,8 @@
 #define NBFI_PARAM_FPLAN                0x13
 #define NBFI_PARAM_WAIT_ACK_TIMEOUT     0x14
 #define NBFI_PARAM_ALTERNATIVE          0x15
+#define NBFI_PARAM_MKAHOURSCONSUMED     0x16
+
 
 
 

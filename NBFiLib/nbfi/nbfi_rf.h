@@ -5,6 +5,14 @@
 #define PA_SINGLE_ENDED (0x2)
 #define PA_SHAPING      (0x4)
 
+
+#define RXCURRENT_MODE   0
+#define TXCURRENT_MODE   1
+#define TXCURRENT_MKA   50000
+#define RXCURRENT_MKA   23000
+#define TXCURRENT_MKA   50000
+
+
 typedef enum
 {
     STATE_OFF,
@@ -67,5 +75,7 @@ uint32_t        NBFi_DL_ID();
 
 float NBFi_RF_get_noise();
 float NBFi_RF_get_rssi();
+
+void NBFI_RF_Calculate_mkA_Consumed(uint8_t);
 
 #endif // NBFI_RF_H

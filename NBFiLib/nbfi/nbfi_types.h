@@ -170,6 +170,7 @@ typedef struct
     uint32_t DL_last_time;
     uint32_t bs_id;
     uint32_t server_id;
+    uint32_t mkA_hours_consumed;
 }nbfi_state_t;
 
 

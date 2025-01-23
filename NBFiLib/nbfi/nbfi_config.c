@@ -396,7 +396,9 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         buf[6] = (uint8_t)(nbfi.try_alternative[alternative_index].try_nbfi_freq_plan.fp&0xff);
                         break;
                      case NBFI_PARAM_MKAHOURSCONSUMED:
-                        bigendian_cpy((uint8_t*)&nbfi_state.mkA_hours_consumed, &buf[1], 4);
+                        bigendian_cpy(((uint8_t*)&nbfi_state.mkA_hours_consumed_tx), &buf[1], 3);
+                        bigendian_cpy(((uint8_t*)&nbfi_state.mkA_hours_consumed_rx), &buf[4], 3);
+                        break;
                     default:
                         return 0;
                         break;

@@ -1,6 +1,6 @@
 #include "nbfi.h"
 
-nbfi_state_t nbfi_state = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+nbfi_state_t nbfi_state = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 
 
@@ -702,7 +702,7 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
                     if(NBFi_GetQueuedTXPkt()) pkt->phy_data.header |= MULTI_FLAG;
                     else
                     {
-                        if(pkt->phy_data.payload[0] == SYSTEM_PACKET_ACK)
+                        if((pkt->phy_data.payload[0] == SYSTEM_PACKET_ACK) && !(nbfi.additional_flags&NBFI_FLG_NO_WAITCLEAR))
                         {
                             wait_clear = 1;
                             nbfi_scheduler->__scheduler_add_task(&wait_clear_desc, NBFi_Wait_Clear_cb, RELATIVE, NBFI_PhyToWaitClearTime());
@@ -786,7 +786,7 @@ void NBFi_TX_Finished()
         if(!nbfi_active_pkt->phy_data.ACK && (nbfi.mode == DRX))
         {
             wait_RxEnd = 1;
-            nbfi_scheduler->__scheduler_add_task(&dl_drx_desc, NBFi_RX_DL_EndHandler, RELATIVE, SECONDS(NBFI_PhyTo_DRXLISTENAFTERSEND(nbfi.rx_phy_channel)));
+            nbfi_scheduler->__scheduler_add_task(&dl_drx_desc, NBFi_RX_DL_EndHandler, RELATIVE, MILLISECONDS(NBFI_PhyTo_DRXLISTENAFTERSEND(nbfi.rx_phy_channel)));
         }
         else NBFI_Config_Check_State();
         NBFi_RX_Controller();

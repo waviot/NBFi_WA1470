@@ -1,6 +1,7 @@
 #include "nbfi.h"
 #include "preambula.h"
 
+
 _Bool rf_busy = 0;
 _Bool transmit = 0;
 
@@ -177,7 +178,7 @@ void NBFI_RF_Calculate_mkA_Consumed(uint8_t mode)
     if(current_measure_rx_timer != 0) {
       uint32_t tnow = nbfi_scheduler->__scheduler_curr_time();
       if (tnow > current_measure_rx_timer) {
-        nbfi_state.mkA_hours_consumed  += (tnow - current_measure_rx_timer)* RXCURRENT_MKA/1000/3600;
+        nbfi_state.mkA_hours_consumed_rx  += (tnow - current_measure_rx_timer)* RXCURRENT_MKA/1000/3600;
       }
       current_measure_rx_timer = 0;
     }
@@ -185,7 +186,7 @@ void NBFI_RF_Calculate_mkA_Consumed(uint8_t mode)
      if(current_measure_tx_timer != 0) {
       uint32_t tnow = nbfi_scheduler->__scheduler_curr_time();
       if (tnow > current_measure_tx_timer) {
-        nbfi_state.mkA_hours_consumed  += (tnow - current_measure_tx_timer)* TXCURRENT_MKA/1000/3600;
+        nbfi_state.mkA_hours_consumed_tx  += (tnow - current_measure_tx_timer)* TXCURRENT_MKA/1000/3600;
       }
       current_measure_tx_timer = 0;
     }  

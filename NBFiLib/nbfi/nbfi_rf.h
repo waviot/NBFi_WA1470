@@ -9,8 +9,7 @@
 #define RXCURRENT_MODE   0
 #define TXCURRENT_MODE   1
 #define TXCURRENT_MKA   50000
-#define RXCURRENT_MKA   23000
-#define TXCURRENT_MKA   50000
+#define RXCURRENT_MKA   26000
 
 
 typedef enum

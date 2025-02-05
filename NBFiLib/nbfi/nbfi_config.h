@@ -59,7 +59,7 @@ extern nbfi_settings_t nbfi_prev;
 #define NBFI_FLG_RX_DEFAULT_PREAMBLE		  0x0200
 #define NBFI_FLG_GATEWAY_MODE       		  0x0400
 #define NBFI_FLG_RESET_TO_LOWEST_RATES          0x0800
-#define NBFI_FLG_NO_WAITCLEAR                   0x1000
+#define NBFI_FLG_DO_NOT_SLOWDOWN_CLEAR          0x1000
 
 
 

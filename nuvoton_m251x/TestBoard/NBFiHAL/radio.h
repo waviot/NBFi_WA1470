@@ -2,7 +2,7 @@
 #ifndef RADIO_H_
 #define RADIO_H_
 
-#include "wa1470_hal.h"
+#include "wa147x_hal.h"
 #include "scheduler_hal.h"
 #include "nbfi_hal.h"
 

@@ -525,7 +525,8 @@ void NBFi_Config_Set_Default()
 
     NBFi_Config_Set_TX_Chan(nbfi.tx_phy_channel);
     NBFi_Config_Set_RX_Chan(nbfi.rx_phy_channel);
-    wa1470rfe_set_zero_gain_mode(0);
+    NBFi_RF_set_zero_gain(0);
+     
     you_should_dl_power_step_down = 0;
     nbfi_state.aver_tx_snr = nbfi_state.aver_rx_snr = 0;
 

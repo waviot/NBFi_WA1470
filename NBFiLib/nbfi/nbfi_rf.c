@@ -24,8 +24,33 @@ uint32_t NBFi_DL_ID()
 static nbfi_phy_channel_t last_phy = UNDEFINED;
 static uint16_t last_additional_flags = 0;
 
+
+#ifdef WA1471
 static nbfi_rf_iface_t nbfi_rf_iface =
 {
+	.init = wa1471_init,
+	.reinit = wa1471_reinit,
+	.deinit = wa1471_deinit,
+	.cansleep = wa1471_cansleep,
+
+	.rfe_set_mode = wa1471rfe_set_mode,
+	.rfe_set_tx_power = wa1471rfe_set_tx_power,
+
+	.mod_set_freq = wa1471mod_set_freq,
+	.mod_send = wa1471mod_send,
+	.mod_is_tx_in_progress = wa1471mod_is_tx_in_progress,
+
+	.dem_rx_enable = wa1471dem_rx_enable,
+	.dem_set_bitrate = wa1471dem_set_bitrate,
+	.dem_set_freq = wa1471dem_set_freq,
+	.dem_get_rssi = wa1471dem_get_rssi,
+	.dem_get_noise = wa1471dem_get_noise,
+        .dem_get_noise_calc_duration= wa1471dem_get_noise_calc_duration,
+        .set_zero_gain_mode = wa1471rfe_set_zero_gain_mode,
+};
+#else
+static nbfi_rf_iface_t nbfi_rf_iface =
+  {
 	.init = wa1470_init,
 	.reinit = wa1470_reinit,
 	.deinit = wa1470_deinit,
@@ -43,7 +68,10 @@ static nbfi_rf_iface_t nbfi_rf_iface =
 	.dem_set_freq = wa1470dem_set_freq,
 	.dem_get_rssi = wa1470dem_get_rssi,
 	.dem_get_noise = wa1470dem_get_noise,
+        .dem_get_noise_calc_duration= wa1470dem_get_noise_calc_duration,
+        .set_zero_gain_mode = wa1470rfe_set_zero_gain_mode,
 };
+#endif
 
 void NBFI_RF_iface(nbfi_rf_iface_t iface)
 {
@@ -250,3 +278,12 @@ _Bool NBFi_RF_can_Sleep()
     return 1;
 }
 
+uint32_t NBFi_RF_get_noise_calc_duration()
+{
+  return nbfi_rf_iface.dem_get_noise_calc_duration()*DEM_NOISE_TICK*DEM_NOISE_AVER;
+}
+
+void NBFi_RF_set_zero_gain(_Bool en)
+{
+  nbfi_rf_iface.set_zero_gain_mode(en);
+}

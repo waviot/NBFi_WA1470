@@ -2,7 +2,11 @@
 #define NBFI_H
 
 #include "nbfi_defines.h"
-#include "wa1470.h"
+#ifdef WA1471
+  #include "wa1471.h"
+#else
+  #include "wa1470.h"
+#endif
 #include <string.h>
 #include <stdlib.h>
 #include <stdio.h>

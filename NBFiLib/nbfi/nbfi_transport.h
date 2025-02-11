@@ -3,7 +3,8 @@
 
 
 #define DRXLISTENAFTERSEND  20
-#define WAITALITTLEBIT  (wa1470dem_get_noise_calc_duration()*DEM_NOISE_TICK*DEM_NOISE_AVER + 2000) //3000
+
+#define WAITALITTLEBIT  (NBFi_RF_get_noise_calc_duration() + 2000) //3000
 
 extern nbfi_state_t nbfi_state;
 extern nbfi_transport_packet_t* nbfi_active_pkt;

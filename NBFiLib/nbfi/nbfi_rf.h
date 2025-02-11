@@ -31,7 +31,11 @@ extern _Bool transmit;
 
 typedef struct
 {
-	void (*init)(_Bool send_by_bpsk_pin, uint32_t modem_id, wa1470_HAL_st*, ischeduler_st*);
+        #ifdef WA1471
+          void (*init)(_Bool send_by_bpsk_pin, uint32_t modem_id, wa1471_HAL_st*, ischeduler_st*);
+        #else
+          void (*init)(_Bool send_by_bpsk_pin, uint32_t modem_id, wa1470_HAL_st*, ischeduler_st*);
+        #endif	
 	void (*reinit)(uint32_t preambule);
 	void (*deinit)();
 	_Bool (*cansleep)();
@@ -48,6 +52,9 @@ typedef struct
 	void (*dem_set_freq)(uint32_t freq);
 	float (*dem_get_rssi)();
 	float (*dem_get_noise)();
+        uint8_t (*dem_get_noise_calc_duration)();
+        void (*set_zero_gain_mode)(_Bool mode);
+        
 } nbfi_rf_iface_t;
 
 void NBFI_RF_iface(nbfi_rf_iface_t iface);
@@ -65,6 +72,9 @@ uint32_t        NBFi_DL_ID();
 
 
 float NBFi_RF_get_noise();
+uint32_t NBFi_RF_get_noise_calc_duration();
 float NBFi_RF_get_rssi();
+void NBFi_RF_set_zero_gain(_Bool en);
+
 
 #endif // NBFI_RF_H

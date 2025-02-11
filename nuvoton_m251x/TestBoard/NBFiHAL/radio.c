@@ -266,9 +266,9 @@ void radio_init(void)
         key_hardcoded[6] = 0xAE9A984F;
         key_hardcoded[7] = 0x99AF0A5D;*/
         scheduler_HAL_init();
-        wa1470_HAL_reg_data_received_callback((void*)NBFi_MAC_RX_ProtocolD);
-        wa1470_HAL_reg_tx_finished_callback((void*)NBFi_RF_TX_Finished);
-        wa1470_HAL_init();
+        wa147x_HAL_reg_data_received_callback((void*)NBFi_MAC_RX_ProtocolD);
+        wa147x_HAL_reg_tx_finished_callback((void*)NBFi_RF_TX_Finished);
+        wa147x_HAL_init();
         nbfi_HAL_init(&nbfi_default_settings, (nbfi_dev_info_t*)&nbfi_info);
         scheduler_run_callbacks();
 

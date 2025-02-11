@@ -220,7 +220,7 @@
                 <debug>1</debug>
                 <option>
                     <name>CCDefines</name>
-                    <state></state>
+                    <state>WA1471</state>
                 </option>
                 <option>
                     <name>CCPreprocFile</name>
@@ -356,6 +356,7 @@
                     <state>$PROJ_DIR$\Library\StdDriver\inc</state>
                     <state>$PROJ_DIR$\Library\Device\Nuvoton\M251\Include</state>
                     <state>$PROJ_DIR$\Library\CMSIS\Include</state>
+                    <state>$PROJ_DIR$\..\..\NBFiLib\wa1471</state>
                 </option>
                 <option>
                     <name>CCStdIncCheck</name>
@@ -2191,10 +2192,10 @@
             <name>$PROJ_DIR$\NBFiHAL\scheduler_hal.h</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\NBFiHAL\wa1470_hal.c</name>
+            <name>$PROJ_DIR$\NBFiHAL\wa147x_hal.c</name>
         </file>
         <file>
-            <name>$PROJ_DIR$\NBFiHAL\wa1470_hal.h</name>
+            <name>$PROJ_DIR$\NBFiHAL\wa147x_hal.h</name>
         </file>
     </group>
     <group>
@@ -2915,6 +2916,39 @@
             </file>
             <file>
                 <name>$PROJ_DIR$\..\..\NBFiLib\wa1470\wa1470\wa1470rfe.h</name>
+            </file>
+        </group>
+        <group>
+            <name>wa1471</name>
+            <file>
+                <name>$PROJ_DIR$\..\..\NBFiLib\wa1471\wa1471.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\NBFiLib\wa1471\wa1471.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\NBFiLib\wa1471\wa1471_defines.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\NBFiLib\wa1471\wa1471dem.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\NBFiLib\wa1471\wa1471dem.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\NBFiLib\wa1471\wa1471mod.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\NBFiLib\wa1471\wa1471mod.h</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\NBFiLib\wa1471\wa1471mod_bpsk_pin.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\NBFiLib\wa1471\wa1471rfe.c</name>
+            </file>
+            <file>
+                <name>$PROJ_DIR$\..\..\NBFiLib\wa1471\wa1471rfe.h</name>
             </file>
         </group>
     </group>

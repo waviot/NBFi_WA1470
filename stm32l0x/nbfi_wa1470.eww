@@ -1,13 +1,13 @@
-<?xml version="1.0" encoding="iso-8859-1"?>
-
+<?xml version="1.0" encoding="UTF-8"?>
 <workspace>
-  <project>
-    <path>$WS_DIR$\WA1470RefBoard\WA1470RefBoard.ewp</path>
-  </project>
-  <project>
-    <path>$WS_DIR$\WRM1470DevKit\WRM1470DevKit.ewp</path>
-  </project>
-  <batchBuild/>
+    <project>
+        <path>$WS_DIR$\STMFORASIC\STMFORASIC.ewp</path>
+    </project>
+    <project>
+        <path>$WS_DIR$\WA1470RefBoard\WA1470RefBoard.ewp</path>
+    </project>
+    <project>
+        <path>$WS_DIR$\WRM1470DevKit\WRM1470DevKit.ewp</path>
+    </project>
+    <batchBuild />
 </workspace>
-
-

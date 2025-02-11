@@ -27,6 +27,8 @@
 #define NBFI_PARAM_FPLAN                0x13
 #define NBFI_PARAM_WAIT_ACK_TIMEOUT     0x14
 #define NBFI_PARAM_ALTERNATIVE          0x15
+#define NBFI_PARAM_MKAHOURSCONSUMED     0x16
+
 
 
 
@@ -41,6 +43,8 @@ extern uint8_t current_tx_rate;
 extern uint8_t current_rx_rate;
 
 extern _Bool nbfi_settings_need_to_save_to_flash;
+extern nbfi_settings_t nbfi_prev;
+
 
 //NBFi flags:
 #define NBFI_FLG_FIXED_BAUD_RATE                0x01
@@ -54,7 +58,9 @@ extern _Bool nbfi_settings_need_to_save_to_flash;
 #define NBFI_FLG_SHORT_RANGE_CRYPTO           0x0100
 #define NBFI_FLG_RX_DEFAULT_PREAMBLE		  0x0200
 #define NBFI_FLG_GATEWAY_MODE       		  0x0400
-#define NBFI_FLG_RESET_TO_LOWEST_RATES        0x0800
+#define NBFI_FLG_RESET_TO_LOWEST_RATES          0x0800
+#define NBFI_FLG_DO_NOT_SLOWDOWN_CLEAR          0x1000
+
 
 
 
@@ -76,6 +82,10 @@ extern _Bool nbfi_settings_need_to_save_to_flash;
 #define UL866975_DL865000            13 //INDIA
 #define UL868500_DL869550            14  //new UKRAINE
 #define UL864000_DL863500            15 //NEW KAZ
+#define UL916500_DL903000            37 //US
+#define UL499950_DL470100            37 //CN
+
+
 
 
 //FREQENCY PLANS

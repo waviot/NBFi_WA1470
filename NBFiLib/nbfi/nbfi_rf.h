@@ -5,6 +5,13 @@
 #define PA_SINGLE_ENDED (0x2)
 #define PA_SHAPING      (0x4)
 
+
+#define RXCURRENT_MODE   0
+#define TXCURRENT_MODE   1
+#define TXCURRENT_MKA   50000
+#define RXCURRENT_MKA   26000
+
+
 typedef enum
 {
     STATE_OFF,
@@ -28,6 +35,7 @@ extern nbfi_rf_state_s rf_state;
 extern nbfi_phy_channel_t nbfi_phy_channel;
 extern _Bool rf_busy;
 extern _Bool transmit;
+extern uint32_t protd_rx_preambule;
 
 typedef struct
 {
@@ -76,5 +84,7 @@ uint32_t NBFi_RF_get_noise_calc_duration();
 float NBFi_RF_get_rssi();
 void NBFi_RF_set_zero_gain(_Bool en);
 
+
+void NBFI_RF_Calculate_mkA_Consumed(uint8_t);
 
 #endif // NBFI_RF_H

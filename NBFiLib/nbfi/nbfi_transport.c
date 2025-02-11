@@ -1,6 +1,6 @@
 #include "nbfi.h"
 
-nbfi_state_t nbfi_state = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+nbfi_state_t nbfi_state = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 
 
@@ -51,6 +51,7 @@ static nbfi_status_t NBFi_RX_Controller();
 static uint32_t NBFI_PhyTo_Delay(nbfi_phy_channel_t chan);
 static uint32_t NBFi_UL_Delivery_Time(nbfi_phy_channel_t chan);
 static uint32_t NBFi_DL_Delivery_Time(nbfi_phy_channel_t chan);
+//static uint32_t NBFI_PhyTo_DRXLISTENAFTERSEND(nbfi_phy_channel_t chan);
 static uint32_t NBFI_PhyToWaitClearTime();
 
 void NBFI_Transport_Init()
@@ -162,7 +163,7 @@ nbfi_ul_sent_status_t NBFi_Send5(uint8_t* payload, uint8_t length, uint8_t flags
         packet->phy_data.ITER = nbfi_state.UL_iter++ & 0x1f;
         if((packet->handshake != HANDSHAKE_NONE) && (nbfi.mode >= DRX))
         {
-            if(((nbfi_state.UL_iter) % nbfi.mack_mode) == 0)
+            if(((nbfi_state.UL_iter - 1) % nbfi.mack_mode) == 0)
             {
                 packet->phy_data.ACK = 1;
                 packet->mack_num = not_acked + 1;
@@ -214,7 +215,7 @@ nbfi_ul_sent_status_t NBFi_Send5(uint8_t* payload, uint8_t length, uint8_t flags
         {
             if((packet->handshake != HANDSHAKE_NONE)&&(nbfi.mode >= DRX))
             {
-                if(((nbfi_state.UL_iter) % nbfi.mack_mode) == 0)
+                if(((nbfi_state.UL_iter - 1) % nbfi.mack_mode) == 0)
                 {
                     packet->phy_data.ACK = 1;
                     packet->mack_num = not_acked + 1;
@@ -340,10 +341,10 @@ void NBFi_ProcessRxPackets()
 }
 
 
-
 void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_packet_t* info)
 {
 
+    
     int16_t rtc_offset;
 
     rx_complete = 1;
@@ -441,6 +442,7 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
                       }   while (++i < 5);
 
                       NBFi_Resend_Pkt(nbfi_active_pkt, mask);
+                                      
                     }
                     else if(!NBFi_is_Switched_to_Custom_Settings())
                     {
@@ -505,6 +507,7 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
                         ack_pkt->phy_data.header |= SYS_FLAG;
                         ack_pkt->handshake = HANDSHAKE_NONE;
                         ack_pkt->state = PACKET_NEED_TO_SEND_RIGHT_NOW;
+
                     }
             }
 
@@ -570,14 +573,15 @@ place_to_stack:
     nbfi_transport_packet_t* queued;
     if(queued = NBFi_GetQueuedTXPkt())
     {
-      if((queued->phy_data.header&SYS_FLAG) && (queued->phy_data.payload[0] == SYSTEM_PACKET_CLEAR_EXT)&&(NBFi_Packets_To_Send() == 1))
-        NBFi_SlowDown_Process(100);
-      else NBFi_Force_process();
+      if(!(nbfi.additional_flags&NBFI_FLG_DO_NOT_SLOWDOWN_CLEAR)&&(queued->phy_data.header&SYS_FLAG) && (queued->phy_data.payload[0] == SYSTEM_PACKET_CLEAR_EXT)&&(NBFi_Packets_To_Send() == 1))
+       NBFi_SlowDown_Process(100);
+      else 
+        NBFi_Force_process();
 
     }
     else
     {
-        if(nbfi.mode == DRX)
+        if(nbfi.mode == DRX && !(nbfi.additional_flags&NBFI_FLG_FIXED_BAUD_RATE))
         {
             wait_RxEnd = 1;
             nbfi_scheduler->__scheduler_add_task(&dl_drx_desc, NBFi_RX_DL_EndHandler, RELATIVE, MILLISECONDS(WAITALITTLEBIT));
@@ -586,11 +590,13 @@ place_to_stack:
         NBFi_RX_Controller();
     }
 
+    
 }
 
 void NBFi_ProcessTasks(struct scheduler_desc *desc)
 {
    nbfi_transport_packet_t* pkt;
+ 
    if(nbfi.mode == OFF)
    {
         NBFi_RX_Controller();
@@ -701,7 +707,7 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
                     if(NBFi_GetQueuedTXPkt()) pkt->phy_data.header |= MULTI_FLAG;
                     else
                     {
-                        if(pkt->phy_data.payload[0] == 0x00)
+                        if(((pkt->phy_data.payload[0] == SYSTEM_PACKET_ACK)||(pkt->phy_data.payload[0] == SYSTEM_PACKET_ACK_ON_SYS)))
                         {
                             wait_clear = 1;
                             nbfi_scheduler->__scheduler_add_task(&wait_clear_desc, NBFi_Wait_Clear_cb, RELATIVE, NBFI_PhyToWaitClearTime());
@@ -772,6 +778,8 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
 
 void NBFi_TX_Finished()
 {
+    NBFI_RF_Calculate_mkA_Consumed(TXCURRENT_MODE);
+    
     if(transmit == 0) return;
     transmit = 0;
     if(!nbfi_active_pkt->phy_data.ACK && NBFi_GetQueuedTXPkt() && !wait_clear)
@@ -780,12 +788,13 @@ void NBFi_TX_Finished()
     }
     else
     {
-        if(!nbfi_active_pkt->phy_data.ACK && (nbfi.mode == DRX))
+       /*if(!nbfi_active_pkt->phy_data.ACK && (nbfi.mode == DRX) )
         {
             wait_RxEnd = 1;
-            nbfi_scheduler->__scheduler_add_task(&dl_drx_desc, NBFi_RX_DL_EndHandler, RELATIVE, SECONDS(DRXLISTENAFTERSEND));
+            nbfi_scheduler->__scheduler_add_task(&dl_drx_desc, NBFi_RX_DL_EndHandler, RELATIVE, MILLISECONDS(NBFI_PhyTo_DRXLISTENAFTERSEND(nbfi.rx_phy_channel)));
         }
-        else NBFI_Config_Check_State();
+        else*/
+        NBFI_Config_Check_State();
         NBFi_RX_Controller();
     }
 }
@@ -796,7 +805,7 @@ static nbfi_status_t NBFi_RX_Controller()
     switch(nbfi.mode)
     {
     case  DRX:
-        if(wait_RxEnd )
+        if(wait_RxEnd || wait_clear)
         {
           if(rf_state != STATE_RX) return NBFi_MAC_RX();
           else break;
@@ -824,11 +833,10 @@ static nbfi_status_t NBFi_RX_Controller()
     return OK;
 }
 
-
-static void NBFi_RX_DL_EndHandler(struct scheduler_desc *desc)
-{
-    wait_RxEnd = 0;
-    NBFi_RX_Controller();
+static void NBFi_RX_DL_EndHandler(struct scheduler_desc *desc) 
+{ 
+    wait_RxEnd = 0; 
+    NBFi_RX_Controller(); 
 }
 
 static void NBFi_Wait_Clear_cb(struct scheduler_desc *desc)
@@ -862,7 +870,7 @@ static void NBFi_Receive_Timeout_cb(struct scheduler_desc *desc)
     {
        NBFi_Set_UL_Status(nbfi_active_pkt->id, LOST);
        NBFi_Close_Active_Packet();
-       if(nbfi_active_pkt->phy_data.SYSTEM && (nbfi_active_pkt->phy_data.payload[0] == SYSTEM_PACKET_SYNC))
+       if((nbfi_prev.tx_phy_channel != UNDEFINED) && nbfi_active_pkt->phy_data.SYSTEM && (nbfi_active_pkt->phy_data.payload[0] == SYSTEM_PACKET_SYNC))
        {
              NBFi_Config_Return(); //return to previous work configuration
        }
@@ -1011,6 +1019,7 @@ static void NBFi_SendHeartBeats(struct scheduler_desc *desc)
         else info_timer++;
         if(info_timer >= dev_info.send_info_interval)
         {
+                NBFi_Config_Set_Default();
                 info_timer = 0;
                 NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_VERSION);
                 NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_TX_BRATES);
@@ -1092,7 +1101,7 @@ static uint32_t NBFI_PhyTo_Delay(nbfi_phy_channel_t chan)
 
 static uint32_t NBFI_PhyToDL_ListenTime(nbfi_phy_channel_t chan)
 {
-	const uint32_t NBFI_DL_LISTEN_TIME[4] = {60000, 30000, 2000, 2000};
+	const uint32_t NBFI_DL_LISTEN_TIME[4] = {20000, 10000, 2000, 2000};
 
 	if (chan > DL_DBPSK_25600_PROT_E)
 		return NBFI_DL_LISTEN_TIME[0];
@@ -1116,6 +1125,16 @@ static uint32_t NBFI_PhyToDL_AddRndListenTime(nbfi_phy_channel_t chan)
 	return NBFI_DL_ADD_RND_LISTEN_TIME[0];
 }
 
+/*
+static uint32_t NBFI_PhyTo_DRXLISTENAFTERSEND(nbfi_phy_channel_t chan)
+{
+	const uint32_t NBFI_DL_LISTEN_TIME[4] = {7000, 1000, 300, 300};
+        
+	if (chan >= DL_DBPSK_50_PROT_D)
+		return NBFI_DL_LISTEN_TIME[chan - DL_DBPSK_50_PROT_D];
+	else return DRXLISTENAFTERSEND;
+}*/
+
 
 static uint32_t NBFi_UL_Delivery_Time(nbfi_phy_channel_t chan)
 {
@@ -1135,10 +1154,13 @@ static uint32_t NBFI_PhyToWaitClearTime()
 {
 	uint32_t NBFI_MAX_WAIT_CLEAR_TIME = SECONDS(13);
 
+        if(nbfi.wait_ack_timeout) return nbfi.wait_ack_timeout;
+        
 	uint32_t wait_time = NBFi_UL_Delivery_Time(nbfi.tx_phy_channel) + NBFI_PhyToDL_ListenTime(nbfi.rx_phy_channel);
 
 	if (wait_time > NBFI_MAX_WAIT_CLEAR_TIME) return NBFI_MAX_WAIT_CLEAR_TIME;
-	else return wait_time;
+	else 
+          return wait_time;
 }
 
 void NBFi_run_Receive_Timeout_cb(uint32_t timeout)

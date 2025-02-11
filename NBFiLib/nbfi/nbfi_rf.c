@@ -1,14 +1,19 @@
 #include "nbfi.h"
 #include "preambula.h"
 
+
 _Bool rf_busy = 0;
 _Bool transmit = 0;
+
+uint32_t current_measure_rx_timer = 0;
+uint32_t current_measure_tx_timer  = 0;
 
 
 nbfi_rf_state_s rf_state = STATE_UNDEFINED;
 
 nbfi_phy_channel_t nbfi_phy_channel;
 
+uint32_t protd_rx_preambule = 0;
 
 static void _memcpy(uint8_t *dst, const uint8_t *src, uint8_t len)
 {
@@ -88,16 +93,16 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
     static uint32_t last_tx_freq;
     static uint32_t last_rx_freq;
 
-    static uint32_t _preambule = 0;
+    
     static uint32_t last_dl_add = 0;
 
 	const uint32_t protD_preambula = 0x6f7a1597;//0x97157a6f;
 
-	if(!_preambule || (last_dl_add != NBFi_DL_ID()))
+	if(!protd_rx_preambule || (last_dl_add != NBFi_DL_ID()))
     {
         last_dl_add = NBFi_DL_ID();
 		uint32_t preambule_tmp = preambula(NBFi_DL_ID(), (uint32_t *)0, (uint32_t *)0);
-		_memcpy((uint8_t *)&_preambule, (uint8_t *)&preambule_tmp, 4);
+		_memcpy((uint8_t *)&protd_rx_preambule, (uint8_t *)&preambule_tmp, 4);
     }
 
 
@@ -108,8 +113,9 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
     if((last_phy != phy_channel) || ((nbfi.additional_flags&NBFI_FLG_RX_DEFAULT_PREAMBLE)!=(last_additional_flags&NBFI_FLG_RX_DEFAULT_PREAMBLE)))
     {
 
+      
       if (nbfi_rf_iface.reinit != NULL)
-        nbfi_rf_iface.reinit((nbfi.additional_flags&NBFI_FLG_RX_DEFAULT_PREAMBLE)?protD_preambula:_preambule);
+        nbfi_rf_iface.reinit((nbfi.additional_flags&NBFI_FLG_RX_DEFAULT_PREAMBLE)?protD_preambula:protd_rx_preambule);
       last_tx_prw = 100;
       last_tx_freq = 0;
       last_rx_freq = 0;
@@ -127,6 +133,9 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
     case UL_DBPSK_400_PROT_E:
     case UL_DBPSK_3200_PROT_E:
     case UL_DBPSK_25600_PROT_E:
+      
+      NBFI_RF_Calculate_mkA_Consumed(RXCURRENT_MODE);
+      
         if (nbfi_rf_iface.dem_rx_enable != NULL)
           nbfi_rf_iface.dem_rx_enable(0);
         nbfi_hal->__nbfi_before_tx(&nbfi);
@@ -152,6 +161,7 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
         rf_busy = 0;
         rf_state = STATE_TX;
         last_phy = phy_channel;
+        
         return OK;
 
     case DL_DBPSK_50_PROT_D:
@@ -179,9 +189,37 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
         rf_busy = 0;
         rf_state = STATE_RX;
         last_phy = phy_channel;
+        current_measure_rx_timer = nbfi_scheduler->__scheduler_curr_time();
+        
+        return OK;
+
     }
+    NBFI_RF_Calculate_mkA_Consumed(RXCURRENT_MODE);
+    NBFI_RF_Calculate_mkA_Consumed(TXCURRENT_MODE);
     rf_busy = 0;
     return ERR;
+}
+
+void NBFI_RF_Calculate_mkA_Consumed(uint8_t mode)
+{
+  if (mode == RXCURRENT_MODE) {       
+    if(current_measure_rx_timer != 0) {
+      uint32_t tnow = nbfi_scheduler->__scheduler_curr_time();
+      if (tnow > current_measure_rx_timer) {
+        nbfi_state.mkA_hours_consumed_rx  += (tnow - current_measure_rx_timer)* RXCURRENT_MKA/1000/3600;
+      }
+      current_measure_rx_timer = 0;
+    }
+  } else { 
+     if(current_measure_tx_timer != 0) {
+      uint32_t tnow = nbfi_scheduler->__scheduler_curr_time();
+      if (tnow > current_measure_tx_timer) {
+        nbfi_state.mkA_hours_consumed_tx  += (tnow - current_measure_tx_timer)* TXCURRENT_MKA/1000/3600;
+      }
+      current_measure_tx_timer = 0;
+    }  
+  }
+
 }
 
 nbfi_status_t NBFi_RF_Deinit()
@@ -198,6 +236,10 @@ nbfi_status_t NBFi_RF_Deinit()
     transmit = 0;
     rf_state = STATE_OFF;
     last_phy = UNDEFINED;
+    
+    NBFI_RF_Calculate_mkA_Consumed(RXCURRENT_MODE);
+    NBFI_RF_Calculate_mkA_Consumed(TXCURRENT_MODE);
+      
     return OK;
 }
 
@@ -215,6 +257,8 @@ nbfi_status_t NBFi_RF_Transmit(uint8_t* pkt, uint8_t len, nbfi_phy_channel_t  ph
 
     transmit = 1;
 
+    current_measure_tx_timer = nbfi_scheduler->__scheduler_curr_time();
+    
     if(blocking == BLOCKING)
     {
 
@@ -223,6 +267,8 @@ nbfi_status_t NBFi_RF_Transmit(uint8_t* pkt, uint8_t len, nbfi_phy_channel_t  ph
             if(!transmit) break;
             nbfi_scheduler->__scheduler_run_callbacks();
         }
+        
+        NBFI_RF_Calculate_mkA_Consumed(TXCURRENT_MODE);
 
     }
 
@@ -231,7 +277,7 @@ nbfi_status_t NBFi_RF_Transmit(uint8_t* pkt, uint8_t len, nbfi_phy_channel_t  ph
 
 void NBFi_RF_TX_Finished()
 {
-  NBFi_TX_Finished();
+   NBFi_TX_Finished();
 }
 
 _Bool NBFi_RF_is_TX_in_Progress()

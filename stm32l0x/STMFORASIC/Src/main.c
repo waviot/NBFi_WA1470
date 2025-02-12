@@ -76,9 +76,18 @@ int main(void)
   if(sr_server_modem_id_and_key.id == 0) sr_server_modem_id_and_key.id = DEFAULT_REMOTE_ID;
 
 #ifdef NBFI_AT_SERVER
-  nbfi_at_server_define_user_handler(user_defined_at_command_handler);
+  //nbfi_at_server_define_user_handler(user_defined_at_command_handler);
 #endif
 
+  
+      GPIO_InitTypeDef GPIO_InitStruct;
+
+    
+    GPIO_InitStruct.Pin = GPIO_PIN_0;
+    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+
+  
   while (1)
   {
 

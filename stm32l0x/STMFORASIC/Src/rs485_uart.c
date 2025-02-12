@@ -15,7 +15,7 @@
 #define RS485_EXTI_IRQn		EXTI2_3_IRQn
 
 
-static UART_HandleTypeDef huart;
+UART_HandleTypeDef huart;
 
 static UART_X_BUF RS485_UART_rx;
 static UART_X_BUF RS485_UART_tx;
@@ -77,7 +77,7 @@ void RS485_UART_init(void) {
   RS485_RCC_ENABLE();
 
   huart.Instance = RS485_USART;
-  huart.Init.BaudRate = 115200;
+  huart.Init.BaudRate = 921600;
   huart.Init.WordLength = UART_WORDLENGTH_8B;
   huart.Init.StopBits = UART_STOPBITS_1;
   huart.Init.Parity = UART_PARITY_NONE;

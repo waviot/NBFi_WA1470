@@ -13,11 +13,13 @@ struct scheduler_desc spectrum_desc;
 #define    wa147xdem_set_bitrate         wa1470dem_set_bitrate
 #endif   
 
+_Bool update_chart = 0;
 
 void plot_spectrum_task(struct scheduler_desc *desc) {
 
-  log_print_spectrum(); 
-  scheduler_add_task(desc, 0, RELATIVE, MILLISECONDS(500));
+  //log_print_spectrum(); 
+  update_chart = 1;
+  scheduler_add_task(desc, 0, RELATIVE, MILLISECONDS(250));
 }
 
 void plot_spectrum()
@@ -65,5 +67,12 @@ void plot_spectrum()
           //wa147xdem_set_bitrate(DBPSK_100H_PROT_D);
           break;
         }
+      }
+      
+      if(update_chart){
+        update_chart = 0;
+        //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_SET);
+        log_print_spectrum();
+        //HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_RESET);
       }
 }

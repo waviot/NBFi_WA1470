@@ -26,6 +26,8 @@ void log_send_str(const char *str)
 	RS485_UART_send(0x0D); 
 }
 
+
+
 void log_send_str_len(const char *str, uint16_t len)
 {
 	uint16_t ptr = 0;
@@ -42,17 +44,17 @@ void log_print_spectrum()
   char log_string[256];
   RS485_UART_send(0x1B);
   RS485_UART_send(0x5B);
-  RS485_UART_send(0x32);
-  RS485_UART_send(0x4A);
+  //RS485_UART_send(0x32);
+  //RS485_UART_send(0x4A);
   
-  //RS485_UART_send('3');
-  //RS485_UART_send('3');
-  //RS485_UART_send('F');
-  //RS485_UART_send(0x1B);
-  //RS485_UART_send(0x5B);
-  //RS485_UART_send('J');
+  RS485_UART_send('6');
+  RS485_UART_send('5');
+  RS485_UART_send('F');
+  RS485_UART_send(0x1B);
+  RS485_UART_send(0x5B);
+  RS485_UART_send('J');
   
-  uint16_t offset = 170;
+  uint16_t offset = 200;//175;
   float max = -200;
   uint32_t freq;
   uint8_t len;
@@ -73,27 +75,45 @@ void log_print_spectrum()
   
     wa1471dem_get_spectrum(len, spectrum);
 
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_SET);
+  extern UART_HandleTypeDef huart;
+  void scheduler_HAL_lock_unlock(uint8_t lock);
+  scheduler_HAL_lock_unlock(1);
   
   for(int i=0; i != len; i++)
   {
-     while(!RS485_UART_TX_is_empty());
+     //while(!RS485_UART_TX_is_empty());
      //summ += aver_rssi_mas[i];
+     
+    
      float val = spectrum[i];
      if(val>max) {max=val; freq=i;}
-     sprintf(log_string, "%4f ", val);
+     
+     /*sprintf(log_string, "%4f ", val);
+     
+     
+     log_send_str_len(log_string, strlen(log_string));*/
+     
      int l;
+     while(!RS485_UART_TX_is_empty());
      for(l = 0; l <= (int16_t)val + offset; l++)
      {
-        sprintf(log_string + strlen(log_string), "%c", 0xdb); 
+       huart.Instance->TDR = 0xdb;
+      while( !__HAL_UART_GET_FLAG(&huart, UART_FLAG_TXE));
+       //RS485_UART_send(0xdb); 
      }
-
-     log_send_str(log_string);   
+     huart.Instance->TDR = 0x0A;
+     while( !__HAL_UART_GET_FLAG(&huart, UART_FLAG_TXE));
+     huart.Instance->TDR = 0x0D;
+     while( !__HAL_UART_GET_FLAG(&huart, UART_FLAG_TXE)); 
   }
-  
+  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_RESET);
+   
      float snr = max - wa1471dem_get_noise();
     sprintf(log_string, "noise=%4f, rssi=%4f, snr=%f, max=%4f, freq=%2d, gain=%d", wa1471dem_get_noise(), wa1471dem_get_rssi(), snr, max, freq, rfe_rx_total_vga_gain);
-
+   
     log_send_str(log_string); 
+    scheduler_HAL_lock_unlock(0);
 }
 #else
 

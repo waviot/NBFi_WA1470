@@ -1156,7 +1156,7 @@ static uint32_t NBFI_PhyToWaitClearTime()
 
         if(nbfi.wait_ack_timeout) return nbfi.wait_ack_timeout;
         
-	uint32_t wait_time = NBFi_UL_Delivery_Time(nbfi.tx_phy_channel) + NBFI_PhyToDL_ListenTime(nbfi.rx_phy_channel);
+	uint32_t wait_time = NBFi_UL_Delivery_Time(nbfi.tx_phy_channel) + NBFI_PhyToDL_ListenTime(nbfi.rx_phy_channel) - 1900;
 
 	if (wait_time > NBFI_MAX_WAIT_CLEAR_TIME) return NBFI_MAX_WAIT_CLEAR_TIME;
 	else 

@@ -1,5 +1,5 @@
 #include "stm32_init.h"
-#include "ssd1306_conf.h"
+
 void SystemClock_Config(void)
 {
 	RCC_OscInitTypeDef RCC_OscInitStruct;
@@ -51,49 +51,11 @@ void SystemClock_Config(void)
 	HAL_SYSTICK_CLKSourceConfig(SYSTICK_CLKSOURCE_HCLK);
 }
 
-
-
 void MX_GPIO_Init(void)
 {
-         GPIO_InitTypeDef GPIO_InitStruct;
-        
 	__HAL_RCC_GPIOC_CLK_ENABLE();
 	__HAL_RCC_GPIOA_CLK_ENABLE();
 	__HAL_RCC_GPIOB_CLK_ENABLE(); 
-        
-        
-    GPIO_InitStruct.Pin = OLED_MOSI_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_VERY_HIGH;
-    GPIO_InitStruct.Alternate = GPIO_AF0_SPI1;
-    HAL_GPIO_Init(OLED_MOSI_GPIO_Port, &GPIO_InitStruct);
-
-    
-    
-    
-    GPIO_InitStruct.Pin = OLED_SCK_Pin;
-    GPIO_InitStruct.Mode = GPIO_MODE_AF_PP;
-    GPIO_InitStruct.Alternate = GPIO_AF0_SPI1;
-    HAL_GPIO_Init(OLED_SCK_GPIO_Port, &GPIO_InitStruct);     
-        
-    //HAL_GPIO_WritePin(OLED_SCK_GPIO_Port, OLED_SCK_Pin, GPIO_PIN_SET);
-    
-           
-  /*Configure GPIO pins : OLED_CS_Pin OLED_DC_Pin */
-  GPIO_InitStruct.Pin = OLED_CS_Pin|OLED_DC_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(OLED_CS_GPIO_Port, &GPIO_InitStruct);
-
-  /*Configure GPIO pin : OLED_Res_Pin */
-  GPIO_InitStruct.Pin = OLED_Res_Pin;
-  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
-  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-  HAL_GPIO_Init(OLED_Res_GPIO_Port, &GPIO_InitStruct); 
-        
 }
 
 void _Error_Handler(char *file, int line)

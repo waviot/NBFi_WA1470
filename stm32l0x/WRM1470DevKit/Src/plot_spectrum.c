@@ -4,10 +4,12 @@
 
 struct scheduler_desc spectrum_desc;
 
+_Bool update_chart = 0;
+
 void plot_spectrum_task(struct scheduler_desc *desc) {
 
-  log_print_spectrum(32); 
-  scheduler_add_task(desc, 0, RELATIVE, MILLISECONDS(500));
+  update_chart = 1;
+  scheduler_add_task(desc, 0, RELATIVE, MILLISECONDS(250));
 }
 
 void plot_spectrum()
@@ -54,5 +56,10 @@ void plot_spectrum()
           wa1470dem_set_bitrate(DBPSK_100H_PROT_D);
           break;
         }
+      }
+      if(update_chart)
+      {
+        update_chart = 0;
+        log_print_spectrum();
       }
 }

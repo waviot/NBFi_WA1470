@@ -99,7 +99,7 @@ const nbfi_settings_t nbfi_default_settings =
     PCB,                //tx_antenna;
     PCB,                //rx_antenna;
     TX_MAX_POWER,       //tx_pwr;
-    60*5,               //heartbeat_interval
+    10,               //heartbeat_interval
     255,                //heartbeat_num
     0,                  //additional_flags
     NBFI_UL_FREQ_BASE,

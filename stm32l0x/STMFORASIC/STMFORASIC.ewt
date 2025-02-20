@@ -3300,9 +3300,6 @@
                 <name>$PROJ_DIR$\..\..\NBFiLib\wa1471\wa1471mod.h</name>
             </file>
             <file>
-                <name>$PROJ_DIR$\..\..\NBFiLib\wa1471\wa1471mod_bpsk_pin.c</name>
-            </file>
-            <file>
                 <name>$PROJ_DIR$\..\..\NBFiLib\wa1471\wa1471rfe.c</name>
             </file>
             <file>
@@ -3312,6 +3309,9 @@
     </group>
     <group>
         <name>src</name>
+        <file>
+            <name>$PROJ_DIR$\Src\adf4350.c</name>
+        </file>
         <file>
             <name>$PROJ_DIR$\Src\at_user.c</name>
         </file>

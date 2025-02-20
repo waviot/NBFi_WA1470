@@ -241,7 +241,7 @@ void wa147x_HAL_bpsk_pin_send(uint8_t* data, uint16_t len, uint16_t bitrate)
 
 
 #ifdef WA1471
-  wa1471_HAL_st wa1471_hal_struct = {0,0,0,0,0,0,0,0,0,0,0,0,0};
+  wa1471_HAL_st wa1471_hal_struct = {0,0,0,0,0,0,0,0,0,0,0,0};
 #else
   wa1470_HAL_st wa1470_hal_struct = {0,0,0,0,0,0,0,0,0,0,0,0,0};
 #endif
@@ -284,9 +284,8 @@ void wa147x_HAL_init()
   wa1471_hal_struct.__spi_tx = &wa147x_HAL_spi_tx;
   wa1471_hal_struct.__spi_cs_set = &wa147x_HAL_spi_write_cs;
   wa1471_hal_struct.__wa1471_nop_dalay_ms = &NOP_Delay_ms;
-  wa1471_hal_struct.__wa1471_send_to_bpsk_pin = &wa147x_HAL_bpsk_pin_send;
   wa1471_hal_struct.__wa1471_log_send_str = &log_send_str; 
-  wa1471_init(WA1471_SEND_BY_I_Q_MODULATOR, 0, &wa1471_hal_struct, _scheduler);
+  wa1471_init(0, &wa1471_hal_struct, _scheduler);
   #else
   wa1470_hal_struct.__wa1470_enable_pin_irq = &wa147x_HAL_enable_pin_irq;
   wa1470_hal_struct.__wa1470_disable_pin_irq = &wa147x_HAL_disable_pin_irq;

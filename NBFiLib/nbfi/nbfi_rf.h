@@ -40,7 +40,7 @@ extern uint32_t protd_rx_preambule;
 typedef struct
 {
         #ifdef WA1471
-          void (*init)(_Bool send_by_bpsk_pin, uint32_t modem_id, wa1471_HAL_st*, ischeduler_st*);
+          void (*init)(uint32_t modem_id, wa1471_HAL_st*, ischeduler_st*);
         #else
           void (*init)(_Bool send_by_bpsk_pin, uint32_t modem_id, wa1470_HAL_st*, ischeduler_st*);
         #endif	

@@ -6,12 +6,20 @@
 #include "defines.h"
 #include "rs485_uart.h"
 #include "at_user.h"
+#include "adf4350.h"
+
 
 uint32_t volatile systimer = 0;
 
+void setTxFreq(uint64_t freq);
+void setRxFreq(uint64_t freq);
+
 void HAL_SYSTICK_Callback(void)
 {
-  systimer++;
+  if((++systimer%10000) == 0) {
+    //setTxFreq(868860000);
+  }
+  
  }
 
 void nbfi_send_complete(nbfi_ul_sent_status_t ul)
@@ -58,6 +66,29 @@ void nbfi_receive_complete(uint8_t * data, uint16_t length)
 }
 
 
+  adf4350_state rx_st, tx_st;
+  adf4350_platform_data pdata_rx, pdata_tx;
+
+  
+void wa1471_spi_write(uint16_t address, uint8_t *data, uint8_t length);  
+  
+void setRxFreq(uint64_t freq)
+{
+  adf4350_set_freq(&rx_st, 147500000 + freq);
+  wa1471_spi_write(0x2000 + 32, (uint8_t*)(&rx_st.regs[0]), 4*6 + 1);
+  wa1471_spi_write(0x2000 + 32, (uint8_t*)(&rx_st.regs[0]), 4*6 + 1);
+}
+
+void setTxFreq(uint64_t freq)
+{
+  
+  adf4350_set_freq(&tx_st, freq);
+  wa1471_spi_write(0x2000 + 64, (uint8_t*)(&tx_st.regs[0]), 4*6 + 1);
+  wa1471_spi_write(0x2000 + 64, (uint8_t*)(&tx_st.regs[0]), 4*6 + 1);
+  
+}
+  
+
 int main(void)
 {
 
@@ -67,6 +98,10 @@ int main(void)
 
   MX_GPIO_Init();
 
+  
+  init_config(&rx_st, &pdata_rx);
+  init_config(&tx_st, &pdata_tx);
+  
   radio_init();
 
   log_init();
@@ -80,13 +115,13 @@ int main(void)
 #endif
 
   
-      GPIO_InitTypeDef GPIO_InitStruct;
-
-    
-    GPIO_InitStruct.Pin = GPIO_PIN_0;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-
+  GPIO_InitTypeDef GPIO_InitStruct;
+  
+  GPIO_InitStruct.Pin = GPIO_PIN_0;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  
+  
   
   while (1)
   {

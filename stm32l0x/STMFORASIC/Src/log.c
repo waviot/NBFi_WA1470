@@ -75,7 +75,7 @@ void log_print_spectrum()
   
     wa1471dem_get_spectrum(len, spectrum);
 
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_SET);
+
   extern UART_HandleTypeDef huart;
   void scheduler_HAL_lock_unlock(uint8_t lock);
   scheduler_HAL_lock_unlock(1);
@@ -107,7 +107,7 @@ void log_print_spectrum()
      huart.Instance->TDR = 0x0D;
      while( !__HAL_UART_GET_FLAG(&huart, UART_FLAG_TXE)); 
   }
-  HAL_GPIO_WritePin(GPIOA, GPIO_PIN_0, GPIO_PIN_RESET);
+
    
      float snr = max - wa1471dem_get_noise();
     sprintf(log_string, "noise=%4f, rssi=%4f, snr=%f, max=%4f, freq=%2d, gain=%d", wa1471dem_get_noise(), wa1471dem_get_rssi(), snr, max, freq, rfe_rx_total_vga_gain);

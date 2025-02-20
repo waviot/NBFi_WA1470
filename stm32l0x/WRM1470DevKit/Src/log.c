@@ -64,22 +64,29 @@ void log_print_spectrum()
   
   wa1470dem_get_spectrum(len, spectrum);
   
+  extern UART_HandleTypeDef huart;
+  void scheduler_HAL_lock_unlock(uint8_t lock);
+  scheduler_HAL_lock_unlock(1);
+  
   for(int i=0; i != len; i++)
   {
-     while(!RS485_UART_TX_is_empty());
-     //summ += aver_rssi_mas[i];
      float val = spectrum[i];
      if(val>max) {max=val; freq=i;}
      sprintf(log_string, "%4f ", val);
      int l;
+     while(!RS485_UART_TX_is_empty());
      for(l = 0; l <= (int16_t)val + offset; l++)
      {
-        sprintf(log_string + strlen(log_string), "%c", 0xdb); 
+       huart.Instance->TDR = 0xdb;
+       while( !__HAL_UART_GET_FLAG(&huart, UART_FLAG_TXE));
      }
-
-     log_send_str(log_string);   
+     huart.Instance->TDR = 0x0A;
+     while( !__HAL_UART_GET_FLAG(&huart, UART_FLAG_TXE));
+     huart.Instance->TDR = 0x0D;
+     while( !__HAL_UART_GET_FLAG(&huart, UART_FLAG_TXE)); 
   }
   float snr = max - wa1470dem_get_noise();
   sprintf(log_string, "noise=%4f, rssi=%4f, snr=%f, max=%4f, freq=%2d, gain=%d", wa1470dem_get_noise(), wa1470dem_get_rssi(), snr, max, freq, rfe_rx_total_vga_gain);
   log_send_str(log_string); 
+  scheduler_HAL_lock_unlock(0);
 }

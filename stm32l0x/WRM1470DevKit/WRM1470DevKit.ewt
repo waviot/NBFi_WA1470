@@ -3030,33 +3030,6 @@
     </group>
     <group>
         <name>GUI</name>
-        <group>
-            <name>ssd1306</name>
-            <file>
-                <name>$PROJ_DIR$\..\..\stm32-ssd1306\ssd1306\ssd1306.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\stm32-ssd1306\ssd1306\ssd1306.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\stm32-ssd1306\examples\oled-tester\firmware\i2c\ssd1306\ssd1306_conf.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\stm32-ssd1306\ssd1306\ssd1306_conf_template.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\stm32-ssd1306\ssd1306\ssd1306_fonts.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\stm32-ssd1306\ssd1306\ssd1306_fonts.h</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\stm32-ssd1306\ssd1306\ssd1306_tests.c</name>
-            </file>
-            <file>
-                <name>$PROJ_DIR$\..\..\stm32-ssd1306\ssd1306\ssd1306_tests.h</name>
-            </file>
-        </group>
         <file>
             <name>$PROJ_DIR$\GUI\buttons.c</name>
         </file>

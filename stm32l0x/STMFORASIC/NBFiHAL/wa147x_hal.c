@@ -51,7 +51,6 @@ void wa147x_HAL_GPIO_Init()
 }
 
 
-
 void wa147x_HAL_SPI_Init(void)
 {
     GPIO_InitTypeDef GPIO_InitStruct;

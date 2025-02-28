@@ -344,7 +344,11 @@ void NBFi_ProcessRxPackets()
 void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_packet_t* info)
 {
 
-    
+    #ifdef NBFI_LOG
+                sprintf(nbfi_log_string, "%05u: NBFi_ParseReceivedPacket ", (uint16_t)(nbfi_scheduler->__scheduler_curr_time()&0xffff));    
+                nbfi_hal->__nbfi_log_send_str(nbfi_log_string);
+    #endif
+                
     int16_t rtc_offset;
 
     rx_complete = 1;

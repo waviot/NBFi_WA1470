@@ -10,7 +10,12 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
 
 void NBFi_MAC_RX_ProtocolD(nbfi_mac_protd_packet_t* packet, nbfi_mac_info_packet_t* info)
 {
-	if(NBFi_Crypto_Available())
+    #ifdef NBFI_LOG
+                sprintf(nbfi_log_string, "%05u: NBFi_MAC_RX_ProtocolD ", (uint16_t)(nbfi_scheduler->__scheduler_curr_time()&0xffff));    
+                nbfi_hal->__nbfi_log_send_str(nbfi_log_string);
+    #endif
+                
+        if(NBFi_Crypto_Available())
 	{
 		if (!NBFI_Crypto_mic_check(&packet->flags, 9, packet->mic, &nbfi_iter.dl, packet->iter))
 			return;

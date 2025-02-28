@@ -98,6 +98,11 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
 
 	const uint32_t protD_preambula = 0x6f7a1597;//0x97157a6f;
 
+    #ifdef NBFI_LOG
+                sprintf(nbfi_log_string, "%05u: NBFi_RF_Init ", (uint16_t)(nbfi_scheduler->__scheduler_curr_time()&0xffff));    
+                nbfi_hal->__nbfi_log_send_str(nbfi_log_string);
+    #endif
+        
 	if(!protd_rx_preambule || (last_dl_add != NBFi_DL_ID()))
     {
         last_dl_add = NBFi_DL_ID();
@@ -168,6 +173,10 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
     case DL_DBPSK_400_PROT_D:
     case DL_DBPSK_3200_PROT_D:
     case DL_DBPSK_25600_PROT_D:
+    case DL_DBPSK_50_PROT_E:
+    case DL_DBPSK_400_PROT_E:
+    case DL_DBPSK_3200_PROT_E:
+    case DL_DBPSK_25600_PROT_E:  
     case DL_DBPSK_100H_PROT_D:
         nbfi_hal->__nbfi_before_rx(&nbfi);
         if (nbfi_rf_iface.dem_rx_enable != NULL)

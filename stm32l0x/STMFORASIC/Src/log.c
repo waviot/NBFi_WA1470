@@ -41,6 +41,9 @@ extern dem_bitrate_s current_rx_phy;
 #ifdef WA1471
 void log_print_spectrum()
 {
+  
+  static float max_aver = -200;
+    
   char log_string[256];
   RS485_UART_send(0x1B);
   RS485_UART_send(0x5B);
@@ -56,6 +59,8 @@ void log_print_spectrum()
   
   uint16_t offset = 200;//175;
   float max = -200;
+
+  
   uint32_t freq;
   uint8_t len;
   float spectrum[64];
@@ -110,7 +115,9 @@ void log_print_spectrum()
 
    
      float snr = max - wa1471dem_get_noise();
-    sprintf(log_string, "noise=%4f, rssi=%4f, snr=%f, max=%4f, freq=%2d, gain=%d", wa1471dem_get_noise(), wa1471dem_get_rssi(), snr, max, freq, rfe_rx_total_vga_gain);
+  
+    max_aver = 0.8*max_aver + 0.2*max;
+    sprintf(log_string, "noise=%4f, rssi=%4f, snr=%f, max=%4f, max_aver=%4f, freq=%2d, gain=%d", wa1471dem_get_noise(), wa1471dem_get_rssi(), snr, max, max_aver, freq, rfe_rx_total_vga_gain);
    
     log_send_str(log_string); 
     scheduler_HAL_lock_unlock(0);

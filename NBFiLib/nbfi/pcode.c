@@ -16,6 +16,9 @@ const uint8_t PCODE_indexes[160] = {
 		240, 241, 242, 243, 244, 245, 246, 247, 248, 249, 250, 251, 252, 253, 254, 255
 };
 
+
+
+
 void PCODE_encode(uint8_t power, uint8_t* in, uint8_t* out){
 
     uint8_t data_20_i = 0;

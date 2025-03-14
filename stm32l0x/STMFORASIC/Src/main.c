@@ -80,20 +80,25 @@ void setRxFreq(uint64_t freq)
   {
     adf4350_set_freq(&rx_st, 147500000 + freq);
     wa1471_spi_write(0x2000 + 32, (uint8_t*)(&rx_st.regs[0]), 4*6 + 1);
-    wa1471_spi_write(0x2000 + 32 + 24, 0, 1);
+    wa1471_spi_write(0x2000 + 32, (uint8_t*)(&rx_st.regs[0]), 4*6 + 1);
     last_freq = freq;
   }
+  setTxFreq(700000000);
+  
 }
 
 void setTxFreq(uint64_t freq)
 {
-  //static uint64_t last_freq = 0;
-  //if(freq != last_freq) 
+  static uint64_t last_freq = 0;
+  if(freq != last_freq) 
   {
       adf4350_set_freq(&tx_st, freq);
       wa1471_spi_write(0x2000 + 64, (uint8_t*)(&tx_st.regs[0]), 4*6 + 1);
-      wa1471_spi_write(0x2000 + 64 + 24, 0, 1);
-    //  last_freq = freq;
+      wa1471_spi_write(0x2000 + 64, (uint8_t*)(&tx_st.regs[0]), 4*6 + 1);
+      
+      //wa1471_spi_write(0x2000 + 64 + 24, 0, 1);
+    
+      last_freq = freq;
   }
 
   

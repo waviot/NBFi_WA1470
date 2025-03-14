@@ -40,7 +40,10 @@ _Bool switched_to_lowest_rates = 0;
 
 nbfi_phy_channel_t TxRateTable[NUM_OF_TX_RATES] = {UL_DBPSK_50_PROT_E, UL_DBPSK_400_PROT_E, UL_DBPSK_3200_PROT_E, UL_DBPSK_25600_PROT_E};
 const uint8_t TxSNRDegradationTable[NUM_OF_TX_RATES] = {0, 9, 18, 27};
-nbfi_phy_channel_t RxRateTable[NUM_OF_RX_RATES] = {DL_DBPSK_50_PROT_D, DL_DBPSK_400_PROT_D, DL_DBPSK_3200_PROT_D, DL_DBPSK_25600_PROT_D};
+
+nbfi_phy_channel_t RxRateTableD[NUM_OF_RX_RATES] = {DL_DBPSK_50_PROT_D, DL_DBPSK_400_PROT_D, DL_DBPSK_3200_PROT_D, DL_DBPSK_25600_PROT_D};
+nbfi_phy_channel_t RxRateTableE[NUM_OF_RX_RATES] = {DL_DBPSK_50_PROT_E, DL_DBPSK_400_PROT_E, DL_DBPSK_3200_PROT_E, DL_DBPSK_25600_PROT_E};
+
 const uint8_t RxSNRDegradationTable[NUM_OF_RX_RATES] = {0, 9, 18, 30};
 
 #define TX_SNRLEVEL_FOR_UP          15
@@ -206,11 +209,19 @@ static _Bool NBFi_Config_Rate_Change(uint8_t rx_tx, nbfi_rate_direct_t dir )
             if(++current_tx_rate > NUM_OF_TX_RATES - 1)  current_tx_rate = NUM_OF_TX_RATES - 1;
         }
     }
-    if(((nbfi.tx_phy_channel == TxRateTable[current_tx_rate]) || (NBFi_MAC_get_protocol_type(nbfi.tx_phy_channel) != PROT_E)) && (nbfi.rx_phy_channel == RxRateTable[current_rx_rate]) && !NBFi_Config_Check_If_FP_Need_To_Change(nbfi.nbfi_freq_plan, nbfi_station_info.fp, NBFI_UL_FP_MASK)&&!NBFi_Config_Check_If_FP_Need_To_Change(nbfi.nbfi_freq_plan, nbfi_station_info.fp, NBFI_DL_FP_MASK))
+   
+    nbfi_phy_channel_t* RxRateTable;
+    
+    if(NBFi_MAC_get_protocol_type(nbfi.rx_phy_channel) == PROT_E)  RxRateTable = &RxRateTableE[0]; 
+    else RxRateTable = &RxRateTableD[0];
+    
+    if(((nbfi.tx_phy_channel == TxRateTable[current_tx_rate])) && (nbfi.rx_phy_channel == RxRateTable[current_rx_rate]) && !NBFi_Config_Check_If_FP_Need_To_Change(nbfi.nbfi_freq_plan, nbfi_station_info.fp, NBFI_UL_FP_MASK)&&!NBFi_Config_Check_If_FP_Need_To_Change(nbfi.nbfi_freq_plan, nbfi_station_info.fp, NBFI_DL_FP_MASK))
     {
-        if(should_not_to_reduce_pwr) return 1;
-        else return 0;
+       if(should_not_to_reduce_pwr) return 1;
+       else return 0;
     }
+               
+          
 
     memcpy_xdata(&nbfi_prev, &nbfi, sizeof(nbfi));
     prev_rx_rate = rx;
@@ -335,11 +346,16 @@ _Bool NBFi_Config_Parser(uint8_t* buf)
                         }
                         break;
                     case NBFI_PARAM_RX_BRATES:
+                      {
+                        nbfi_phy_channel_t* RxRateTable;
+                        if(NBFi_MAC_get_protocol_type(nbfi.rx_phy_channel) == PROT_E)  RxRateTable = &RxRateTableE[0];
+                        else RxRateTable = &RxRateTableD[0];
                         for(uint8_t i = 0; i != NUM_OF_RX_RATES; i++)
                         {
                             if(i > 5) break;
                             buf[i + 1] = RxRateTable[i];
                         }
+                      }
                         break;
                     case NBFI_PARAM_VERSION:
                         buf[1] = NBFI_REV;
@@ -619,6 +635,11 @@ void NBFi_Config_Set_RX_Chan(nbfi_phy_channel_t ch)
 {
     uint8_t i;
     if(nbfi.additional_flags&NBFI_FLG_FIXED_BAUD_RATE) {nbfi.rx_phy_channel = ch; return;}
+    
+    nbfi_phy_channel_t* RxRateTable;   
+    if(NBFi_MAC_get_protocol_type(nbfi.rx_phy_channel) == PROT_E)  RxRateTable = &RxRateTableE[0];
+    else RxRateTable = &RxRateTableD[0];
+    
     for(i = 0; i != NUM_OF_RX_RATES; i++) if(RxRateTable[i] == ch) break;
     //if(i == NUM_OF_RX_RATES) return;
     nbfi.rx_phy_channel = ch;
@@ -648,6 +669,11 @@ _Bool NBFi_Config_is_settings_default()
 void NBFi_Config_set_lowest_rates()
 {
     NBFi_Config_Set_TX_Chan(TxRateTable[0]);
+    
+    nbfi_phy_channel_t* RxRateTable;
+    if(NBFi_MAC_get_protocol_type(nbfi.rx_phy_channel) == PROT_E)  RxRateTable = &RxRateTableE[0];
+    else RxRateTable = &RxRateTableD[0];
+    
     NBFi_Config_Set_RX_Chan(RxRateTable[0]);
     switched_to_lowest_rates = 1;
 }

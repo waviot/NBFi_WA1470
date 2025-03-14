@@ -87,8 +87,8 @@ const nbfi_settings_t nbfi_default_settings =
     MODEM_ID, 
     KEY,
     CRX,                //mode;
-    UL_DBPSK_25600_PROT_E, // tx_phy_channel;
-    DL_DBPSK_25600_PROT_E, // rx_phy_channel;
+    UL_DBPSK_50_PROT_E, // tx_phy_channel;
+    DL_DBPSK_50_PROT_E, // rx_phy_channel;
     HANDSHAKE_SIMPLE,
     MACK_1,             //mack_mode
     0x82,               //num_of_retries;
@@ -99,9 +99,9 @@ const nbfi_settings_t nbfi_default_settings =
     PCB,                //tx_antenna;
     PCB,                //rx_antenna;
     TX_MAX_POWER,       //tx_pwr;
-    1,               //heartbeat_interval
+    10,               //heartbeat_interval
     255,                //heartbeat_num
-    NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
+    0,//NBFI_FLG_FIXED_BAUD_RATE,                  //additional_flags
     NBFI_UL_FREQ_BASE,
     NBFI_DL_FREQ_BASE,
     NBFI_UL_FREQ_PLAN_51200_0 + NBFI_FREQ_PLAN_MINIMAL,

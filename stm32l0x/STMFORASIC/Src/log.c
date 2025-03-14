@@ -67,13 +67,17 @@ void log_print_spectrum()
   switch(current_rx_phy)
   {
     case DBPSK_50_PROT_D:
+    case DBPSK_50_PROT_E:
       len = 64;
       break;
     case DBPSK_400_PROT_D:
     case DBPSK_3200_PROT_D:
+    case DBPSK_400_PROT_E:
+    case DBPSK_3200_PROT_E:  
       len = 8;
       break;    
     case DBPSK_25600_PROT_D:
+    case DBPSK_25600_PROT_E:  
       len = 4;
       break;  
   }

@@ -301,6 +301,8 @@ typedef enum
 #define NBFI_UL_FLAG_DEFAULT_PREAMBLE           0x04
 #define NBFI_UL_FLAG_SEND_ON_CENTRAL_FREQ       0x08
 #define NBFI_UL_FLAG_NO_RETRIES			0x10
+#define NBFI_UL_FLAG_SAME_TX_ITER			0x20
+
 
 typedef struct
 {

@@ -18,6 +18,7 @@ extern nbfi_transport_packet_t  nbfi_RX_pktBuf[NBFI_RX_PKTBUF_SIZE];
 extern nbfi_ul_sent_status_t NBFi_sent_UL_stat_Buf[NBFI_SENT_STATUSES_BUF_SIZE];
 extern nbfi_dl_received_t NBFi_received_DL_Buf[NBFI_RECEIVED_BUF_SIZE];
 
+
 nbfi_transport_packet_t*            NBFi_Get_TX_Packet_Ptr(uint8_t index);
 nbfi_transport_packet_t*            NBFi_Get_RX_Packet_Ptr(uint8_t index);
 nbfi_transport_packet_t*            NBFi_AllocateTxPkt(uint8_t payload_length);

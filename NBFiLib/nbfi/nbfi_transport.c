@@ -112,6 +112,9 @@ nbfi_ul_sent_status_t NBFi_Send5(uint8_t* payload, uint8_t length, uint8_t flags
 
     nbfi_ul_sent_status_t* ul_status;
 
+    static uint32_t last_ul_iter; 
+    
+
 
     if(length/nbfi.max_payload_len > 30)
     {
@@ -146,6 +149,7 @@ nbfi_ul_sent_status_t NBFi_Send5(uint8_t* payload, uint8_t length, uint8_t flags
 
     if(length < nbfi.max_payload_len)
     {
+
         packet =  NBFi_AllocateTxPkt(length + 1);
         if(!packet)
         {
@@ -160,6 +164,12 @@ nbfi_ul_sent_status_t NBFi_Send5(uint8_t* payload, uint8_t length, uint8_t flags
         packet->state = PACKET_QUEUED;
         if(!(flags&NBFI_UL_FLAG_NOACK)) packet->handshake = nbfi.handshake_mode;
 	if(flags&NBFI_UL_FLAG_NO_RETRIES) packet->retry_num = 0xf0;
+        
+        if(flags&NBFI_UL_FLAG_SAME_TX_ITER) 
+        {
+          nbfi_state.UL_iter  = last_ul_iter;
+        }
+        last_ul_iter = nbfi_state.UL_iter;
         packet->phy_data.ITER = nbfi_state.UL_iter++ & 0x1f;
         if((packet->handshake != HANDSHAKE_NONE) && (nbfi.mode >= DRX))
         {
@@ -196,6 +206,11 @@ nbfi_ul_sent_status_t NBFi_Send5(uint8_t* payload, uint8_t length, uint8_t flags
         packet->state = PACKET_QUEUED;
         if(!(flags&NBFI_UL_FLAG_NOACK)) packet->handshake = nbfi.handshake_mode;
 	if(flags&NBFI_UL_FLAG_NO_RETRIES) packet->retry_num = 0xf0;
+        if(flags&NBFI_UL_FLAG_SAME_TX_ITER && groupe == 0) 
+        {
+          nbfi_state.UL_iter  = last_ul_iter;
+        }
+        last_ul_iter = nbfi_state.UL_iter;
         packet->phy_data.ITER = nbfi_state.UL_iter++ & 0x1f;
         if(l < length)
         {

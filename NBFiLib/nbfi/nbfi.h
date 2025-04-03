@@ -76,5 +76,6 @@ void                    NBFi_CPU_Reset();
 
 float                   NBFi_get_rssi();
 void					NBFi_watchdog();
+void                    NBFi_SendHB();
 
 #endif // NBFI_H

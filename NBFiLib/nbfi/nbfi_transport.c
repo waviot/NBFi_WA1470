@@ -971,6 +971,35 @@ void NBFi_set_RTC_irq(uint32_t time)
 }
 
 
+void NBFi_SendHB()
+{
+        nbfi_transport_packet_t* ack_pkt =  NBFi_AllocateTxPkt(8);
+        if(!ack_pkt)   return;
+        ack_pkt->phy_data.payload[0] = SYSTEM_PACKET_HERTBEAT;
+        ack_pkt->phy_data.payload[1] = 0;                      //heart beat type
+        if(MinVoltage == 0) MinVoltage = nbfi_hal->__nbfi_measure_voltage_or_temperature(1);
+        ack_pkt->phy_data.payload[2] = (MinVoltage >= 300 ? 0x80 : 0) + MinVoltage % 100;         //min supply voltage since last heartbeat
+        MinVoltage = 0; //reset min voltage detection
+        ack_pkt->phy_data.payload[3] = nbfi_hal->__nbfi_measure_voltage_or_temperature(0);    //temperature
+        ack_pkt->phy_data.payload[4] = nbfi_state.aver_rx_snr; // DL average snr
+        ack_pkt->phy_data.payload[5] = nbfi_state.aver_tx_snr; // UL average snr
+        ack_pkt->phy_data.payload[6] = (uint8_t)(NBFi_RF_get_noise() + 150); // rx noice
+        ack_pkt->phy_data.payload[7] = nbfi.tx_pwr;            // output power
+        ack_pkt->phy_data.ITER = nbfi_state.UL_iter++ & 0x1f;
+        ack_pkt->phy_data.header |= SYS_FLAG;
+        if(nbfi.mode >= DRX)
+        {
+          if(nbfi.handshake_mode != HANDSHAKE_NONE)
+          {
+            ack_pkt->handshake = HANDSHAKE_SIMPLE;
+            ack_pkt->phy_data.header |= ACK_FLAG;
+          }
+        }
+        ack_pkt->state = PACKET_QUEUED;
+        NBFi_Force_process();
+}
+
+
 static void NBFi_SendHeartBeats(struct scheduler_desc *desc)
 {
 
@@ -1002,30 +1031,7 @@ static void NBFi_SendHeartBeats(struct scheduler_desc *desc)
         {
           return;
         }
-        nbfi_transport_packet_t* ack_pkt =  NBFi_AllocateTxPkt(8);
-        if(!ack_pkt)   return;
-        ack_pkt->phy_data.payload[0] = SYSTEM_PACKET_HERTBEAT;
-        ack_pkt->phy_data.payload[1] = 0;                      //heart beat type
-        if(MinVoltage == 0) MinVoltage = nbfi_hal->__nbfi_measure_voltage_or_temperature(1);
-        ack_pkt->phy_data.payload[2] = (MinVoltage >= 300 ? 0x80 : 0) + MinVoltage % 100;         //min supply voltage since last heartbeat
-        MinVoltage = 0; //reset min voltage detection
-        ack_pkt->phy_data.payload[3] = nbfi_hal->__nbfi_measure_voltage_or_temperature(0);    //temperature
-        ack_pkt->phy_data.payload[4] = nbfi_state.aver_rx_snr; // DL average snr
-        ack_pkt->phy_data.payload[5] = nbfi_state.aver_tx_snr; // UL average snr
-        ack_pkt->phy_data.payload[6] = (uint8_t)(NBFi_RF_get_noise() + 150); // rx noice
-        ack_pkt->phy_data.payload[7] = nbfi.tx_pwr;            // output power
-        ack_pkt->phy_data.ITER = nbfi_state.UL_iter++ & 0x1f;
-        ack_pkt->phy_data.header |= SYS_FLAG;
-        if(nbfi.mode >= DRX)
-        {
-          if(nbfi.handshake_mode != HANDSHAKE_NONE)
-          {
-            ack_pkt->handshake = HANDSHAKE_SIMPLE;
-            ack_pkt->phy_data.header |= ACK_FLAG;
-          }
-        }
-        ack_pkt->state = PACKET_QUEUED;
-        NBFi_Force_process();
+        NBFi_SendHB();
     }
 
     if(!(nbfi.additional_flags&NBFI_FLG_NO_SENDINFO))

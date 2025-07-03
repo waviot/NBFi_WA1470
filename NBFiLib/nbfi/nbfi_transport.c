@@ -548,7 +548,7 @@ place_to_stack:
             nbfi_transport_packet_t* ack_pkt =  NBFi_AllocateTxPkt(8);
             if(ack_pkt)
             {
-                uint32_t mask = NBFi_Get_RX_ACK_Mask();
+                uint32_t mask = NBFi_Get_RX_ACK_Mask();              
                 ack_pkt->phy_data.payload[0] = SYSTEM_PACKET_ACK;
                 ack_pkt->phy_data.payload[1] = (mask >> 24)&0xff;
                 ack_pkt->phy_data.payload[2] = (mask >> 16)&0xff;
@@ -559,6 +559,7 @@ place_to_stack:
                 ack_pkt->phy_data.payload[7] = you_should_dl_power_step_down + you_should_dl_power_step_up + (nbfi.tx_pwr & 0x3f);
                 ack_pkt->phy_data.ITER = nbfi_state.DL_iter&0x1f;
                 ack_pkt->phy_data.header |= SYS_FLAG;
+                if(phy_pkt->MULTI) ack_pkt->phy_data.header |= MULTI_FLAG; //mark that ack on groupe packet
                 ack_pkt->handshake = HANDSHAKE_NONE;
                 ack_pkt->state = PACKET_NEED_TO_SEND_RIGHT_NOW;
                 NBFi_Force_process();
@@ -722,11 +723,12 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
                     if(NBFi_GetQueuedTXPkt()) pkt->phy_data.header |= MULTI_FLAG;
                     else
                     {
-                        if(((pkt->phy_data.payload[0] == SYSTEM_PACKET_ACK)||(pkt->phy_data.payload[0] == SYSTEM_PACKET_ACK_ON_SYS)))
+                        if((pkt->phy_data.payload[0] == SYSTEM_PACKET_ACK) && (pkt->phy_data.header&MULTI_FLAG) )
                         {
                             wait_clear = 1;
                             nbfi_scheduler->__scheduler_add_task(&wait_clear_desc, NBFi_Wait_Clear_cb, RELATIVE, NBFI_PhyToWaitClearTime());
-                        }
+                        } 
+                        pkt->phy_data.header &= ~MULTI_FLAG;
                     }
                 }
 

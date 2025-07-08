@@ -115,6 +115,11 @@ nbfi_ul_sent_status_t NBFi_Send5(uint8_t* payload, uint8_t length, uint8_t flags
     static uint32_t last_ul_iter; 
     
 
+     #ifdef NBFI_LOG
+    sprintf(nbfi_log_string, "%05u: NBFi_Send5: %02u bytes ", (uint16_t)(nbfi_scheduler->__scheduler_curr_time()&0xffff), length);
+                nbfi_hal->__nbfi_log_send_str(nbfi_log_string);
+     #endif
+                
 
     if(length/nbfi.max_payload_len > 30)
     {
@@ -466,6 +471,7 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
                        if(nbfi_station_info.fp.fp == (NBFI_UL_FREQ_PLAN_NO_CHANGE + NBFI_DL_FREQ_PLAN_NO_CHANGE) ) nbfi_state.bs_id = (((uint16_t)phy_pkt->payload[3]) << 8) + phy_pkt->payload[4];
                        else nbfi_state.server_id = (((uint16_t)phy_pkt->payload[3]) << 8) + phy_pkt->payload[4];
                     }
+                    
                 }
                 break;
             case SYSTEM_PACKET_CLEAR:  //clear RX buffer message received
@@ -1067,16 +1073,8 @@ void NBFi_SlowDown_Process(uint16_t msec)
 
 static uint32_t NBFI_PhyTo_Delay(nbfi_phy_channel_t chan)
 {
-	/*const uint32_t NBFI_DL_DELAY_C_D[10] = {30000, 30000, 30000, 5000, 5000, 5000, 1000, 1000, 500, 500};
-	const uint32_t NBFI_DL_DELAY_E[10] = {6000, 1000, 500, 500};
 
-	if (chan > UL_DBPSK_25600_PROT_E)
-		return NBFI_DL_DELAY_E[0];
-	else if (chan >= UL_DBPSK_50_PROT_E)
-		return NBFI_DL_DELAY_E[chan - UL_DBPSK_50_PROT_E];
-	else if (chan >= UL_DBPSK_50_PROT_C)
-		return NBFI_DL_DELAY_C_D[chan - UL_DBPSK_50_PROT_C];
-	return NBFI_DL_DELAY_E[0];*/
+  if(nbfi_hal->__nbfi_phy_to_delay != 0) return nbfi_hal->__nbfi_phy_to_delay(chan);
 
 	switch(chan)
 	{
@@ -1124,6 +1122,9 @@ static uint32_t NBFI_PhyTo_Delay(nbfi_phy_channel_t chan)
 
 static uint32_t NBFI_PhyToDL_ListenTime(nbfi_phy_channel_t chan)
 {
+  
+    if(nbfi_hal->__nbfi_phy_to_dl_listen_time != 0) return nbfi_hal->__nbfi_phy_to_dl_listen_time(chan);
+  
 	const uint32_t NBFI_DL_LISTEN_TIME[4] = {20000, 10000, 2000, 2000};
 
 	if (chan > DL_DBPSK_25600_PROT_E)
@@ -1137,6 +1138,9 @@ static uint32_t NBFI_PhyToDL_ListenTime(nbfi_phy_channel_t chan)
 
 static uint32_t NBFI_PhyToDL_AddRndListenTime(nbfi_phy_channel_t chan)
 {
+  
+        if(nbfi_hal->__nbfi_phy_to_dl_add_rnd_listen_time != 0) return nbfi_hal->__nbfi_phy_to_dl_add_rnd_listen_time(chan);
+      
 	const uint32_t NBFI_DL_ADD_RND_LISTEN_TIME[4] = {5000, 1000, 100, 100};
 
 	if (chan > DL_DBPSK_25600_PROT_E)
@@ -1147,16 +1151,6 @@ static uint32_t NBFI_PhyToDL_AddRndListenTime(nbfi_phy_channel_t chan)
 		return NBFI_DL_ADD_RND_LISTEN_TIME[chan - DL_DBPSK_50_PROT_D];
 	return NBFI_DL_ADD_RND_LISTEN_TIME[0];
 }
-
-/*
-static uint32_t NBFI_PhyTo_DRXLISTENAFTERSEND(nbfi_phy_channel_t chan)
-{
-	const uint32_t NBFI_DL_LISTEN_TIME[4] = {7000, 1000, 300, 300};
-        
-	if (chan >= DL_DBPSK_50_PROT_D)
-		return NBFI_DL_LISTEN_TIME[chan - DL_DBPSK_50_PROT_D];
-	else return DRXLISTENAFTERSEND;
-}*/
 
 
 static uint32_t NBFi_UL_Delivery_Time(nbfi_phy_channel_t chan)

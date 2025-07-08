@@ -34,6 +34,11 @@ typedef struct
   void (* __nbfi_get_iterator)(nbfi_crypto_iterator_t*);
   void (* __nbfi_set_iterator)(nbfi_crypto_iterator_t*);
   void (*__nbfi_log_send_str)(const char *str);
+  uint32_t (*__nbfi_phy_to_delay)(nbfi_phy_channel_t chan);
+  uint32_t (*__nbfi_phy_to_dl_listen_time)(nbfi_phy_channel_t chan);
+  uint32_t (*__nbfi_phy_to_dl_add_rnd_listen_time)(nbfi_phy_channel_t chan);
+
+  
 }nbfi_HAL_st;
 
 extern nbfi_HAL_st* nbfi_hal;

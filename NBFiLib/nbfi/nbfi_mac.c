@@ -61,6 +61,7 @@ nbfi_prot_t  NBFi_MAC_get_protocol_type(nbfi_phy_channel_t phy)
 	case UL_PSK_500:
 	case UL_PSK_5000:
         return PROT_AXSEM;
+	default: return PROT_VOID; break;
 	}
 	return PROT_VOID;
 }
@@ -85,6 +86,7 @@ static uint32_t NBFi_MAC_get_UL_freq(uint16_t lastcrc, _Bool parity)
             case  UL_DBPSK_25600_PROT_D:
                   width = 25600;
                   break;
+			default: width = 25600; break;
         }
         int32_t band_offset = width * nbfi.nbfi_freq_plan.ul_offset;
         if(nbfi.nbfi_freq_plan.ul_sign) band_offset = -band_offset;

@@ -705,7 +705,7 @@ uint16_t NBFi_Phy_To_Bitrate(nbfi_phy_channel_t ch)
     case UL_DBPSK_25600_PROT_E:
     case DL_DBPSK_25600_PROT_D:
         return 25600;
-    default: return 0; break;
+    default:  break;
     }
 
     return 0;

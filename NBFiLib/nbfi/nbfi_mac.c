@@ -61,7 +61,7 @@ nbfi_prot_t  NBFi_MAC_get_protocol_type(nbfi_phy_channel_t phy)
 	case UL_PSK_500:
 	case UL_PSK_5000:
         return PROT_AXSEM;
-	default: return PROT_VOID; break;
+	default:  break;
 	}
 	return PROT_VOID;
 }

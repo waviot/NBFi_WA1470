@@ -1050,7 +1050,7 @@ static void NBFi_SendHeartBeats(struct scheduler_desc *desc)
         else info_timer++;
         if(info_timer >= dev_info.send_info_interval)
         {
-                NBFi_Config_Set_Default();
+                //NBFi_Config_Set_Default();
                 info_timer = 0;
                 NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_VERSION);
                 NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_TX_BRATES);

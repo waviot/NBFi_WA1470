@@ -164,7 +164,7 @@ nbfi_status_t NBFi_RF_Init(  nbfi_phy_channel_t  phy_channel,
         current_measure_rx_timer = nbfi_scheduler->__scheduler_curr_time();
         
         return OK;
-
+      default: break;
     }
     NBFI_RF_Calculate_mkA_Consumed(RXCURRENT_MODE);
     NBFI_RF_Calculate_mkA_Consumed(TXCURRENT_MODE);

@@ -54,6 +54,7 @@ nbfi_transport_packet_t* NBFi_AllocateTxPkt(uint8_t payload_length)
         case PACKET_NEED_TO_SEND_RIGHT_NOW:
         case PACKET_SENT_NOACKED:
             return 0;   // tx buffer is full
+        default:  break;
         }
 
         #ifdef NBFI_USE_MALLOC
@@ -113,6 +114,7 @@ nbfi_transport_packet_t* NBFi_AllocateRxPkt(uint8_t header, uint8_t payload_leng
         case PACKET_WAIT_ACK:
             nbfi_active_pkt = &idle_pkt;
             break;
+        default: break;
 
     }
 
@@ -169,6 +171,7 @@ nbfi_transport_packet_t* NBFi_GetQueuedTXPkt()
         {
         case PACKET_NEED_TO_SEND_RIGHT_NOW:
             return pointer;
+        default: break;
         }
     }
 
@@ -181,6 +184,7 @@ nbfi_transport_packet_t* NBFi_GetQueuedTXPkt()
         {
         case PACKET_QUEUED_AGAIN:
             goto end;
+        default: break;
         }
     }
 
@@ -196,6 +200,7 @@ nbfi_transport_packet_t* NBFi_GetQueuedTXPkt()
              pointer->state = PACKET_QUEUED_AGAIN;
         case PACKET_QUEUED:
             goto end;
+        default: break;
         }
     }
     return 0;
@@ -341,6 +346,7 @@ uint8_t NBFi_Calc_Queued_Sys_Packets_With_Type(uint8_t type, _Bool clean)
             num++;
             if(clean) NBFi_TxPacket_Free(pointer);
             break;
+        default: break;
         }
     }
     return num;
@@ -372,6 +378,7 @@ nbfi_transport_packet_t* NBFi_GetSentTXPkt_By_Iter(uint8_t iter)
                 return pointer;
             }
             break;
+        default: break;
         }
 
     }
@@ -404,9 +411,9 @@ uint32_t NBFi_Get_RX_ACK_Mask()
 
 _Bool NBFi_Check_RX_Packet_Duplicate(nbfi_transport_frame_t * pkt, uint8_t len)
 {
-    nbfi_transport_frame_t *rec_pkt = &(NBFi_Get_RX_Packet_Ptr(nbfi_state.DL_iter&0x1f)->phy_data);
-
-
+    nbfi_transport_packet_t *p = NBFi_Get_RX_Packet_Ptr(nbfi_state.DL_iter&0x1f);
+    if(p == 0) return 0;
+    nbfi_transport_frame_t *rec_pkt = &(p->phy_data);
     for(uint8_t i = 0; i != len; i++)
     {
         if(((uint8_t*)rec_pkt)[i] != ((uint8_t*)pkt)[i]) return 0;
@@ -698,7 +705,9 @@ uint16_t NBFi_Phy_To_Bitrate(nbfi_phy_channel_t ch)
     case UL_DBPSK_25600_PROT_E:
     case DL_DBPSK_25600_PROT_D:
         return 25600;
+    default:  break;
     }
+
     return 0;
 }
 

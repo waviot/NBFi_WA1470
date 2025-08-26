@@ -270,7 +270,7 @@ nbfi_ul_sent_status_t NBFi_Send5(uint8_t* payload, uint8_t length, uint8_t flags
 
 nbfi_status_t  NBFi_Send(uint8_t* payload, uint8_t length)
 {
-  return (NBFi_Send5(payload, length, 0).status <= ERR_BUFFER_FULL)?OK:ERR_BUFFER_FULL_v4;
+  return (NBFi_Send5(payload, length, 0).status < ERR_BUFFER_FULL)?OK:ERR_BUFFER_FULL_v4;
 }
 
 void NBFi_ProcessRxPackets()
@@ -436,7 +436,7 @@ void NBFi_ParseReceivedPacket(nbfi_transport_frame_t *phy_pkt, nbfi_mac_info_pac
                 {
                     nbfi_scheduler->__scheduler_remove_task(&dl_receive_desc);
                     wait_Receive = 0;
-                    if(!nbfi.additional_flags&NBFI_FLG_SHORT_RANGE_CRYPTO) // not for short-range mode
+                    if(!(nbfi.additional_flags&NBFI_FLG_SHORT_RANGE_CRYPTO)) // not for short-range mode
                     {
                         try_counter = 0;
                         try_period = 0;
@@ -592,8 +592,8 @@ place_to_stack:
 
     }
     if(!phy_pkt->ACK) NBFI_Config_Check_State();
-    nbfi_transport_packet_t* queued;
-    if(queued = NBFi_GetQueuedTXPkt())
+    nbfi_transport_packet_t* queued = NBFi_GetQueuedTXPkt();
+    if(queued)
     {
       if(!(nbfi.additional_flags&NBFI_FLG_DO_NOT_SLOWDOWN_CLEAR)&&(queued->phy_data.header&SYS_FLAG) && (queued->phy_data.payload[0] == SYSTEM_PACKET_CLEAR_EXT)&&(NBFi_Packets_To_Send() == 1))
        NBFi_SlowDown_Process(100);
@@ -674,6 +674,7 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
                         case NRX:
                             pkt->state = PACKET_SENT;
                             break;
+                        default: break;
                         }
                     }
                     else
@@ -687,6 +688,7 @@ void NBFi_ProcessTasks(struct scheduler_desc *desc)
                         case NRX:
                           pkt->state = PACKET_SENT;
                           break;
+                        default: break;
                       }
                     }
                 }
@@ -1048,7 +1050,7 @@ static void NBFi_SendHeartBeats(struct scheduler_desc *desc)
         else info_timer++;
         if(info_timer >= dev_info.send_info_interval)
         {
-                NBFi_Config_Set_Default();
+                //NBFi_Config_Set_Default();
                 info_timer = 0;
                 NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_VERSION);
                 NBFi_Config_Send_Mode(HANDSHAKE_NONE, NBFI_PARAM_TX_BRATES);

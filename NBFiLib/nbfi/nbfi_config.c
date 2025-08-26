@@ -135,6 +135,7 @@ void NBFI_Config_Check_State()
         case PACKET_WAIT_FOR_EXTRA_PACKETS:
         case PACKET_QUEUED_AGAIN:
           return;
+        default: break;
     }
 
 

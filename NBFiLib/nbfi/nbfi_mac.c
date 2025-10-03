@@ -158,11 +158,15 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 
 	memset(ul_buf,0,sizeof(ul_buf));
 
-
-        nbfi_ul_sent_status_t *pkt_status = NBFi_Get_UL_status(pkt->id, 1);
         uint8_t pkt_flags;
-        if(pkt_status) pkt_flags = pkt_status->flags;
-        else pkt_flags = 0;
+             
+        if(pkt->id == 0) pkt_flags = pkt->mack_num; // used as flags on MAC - level sending 
+        else
+        {
+          nbfi_ul_sent_status_t *pkt_status = NBFi_Get_UL_status(pkt->id, 1);
+          if(pkt_status) pkt_flags = pkt_status->flags;
+          else pkt_flags = 0;
+        }
 
 	switch(nbfi.tx_phy_channel)
 	{
@@ -298,7 +302,8 @@ nbfi_status_t NBFi_MAC_TX_ProtocolD(nbfi_transport_packet_t* pkt)
 
 	NBFi_RF_Init(phy, (nbfi_rf_antenna_t)nbfi.tx_antenna, nbfi.tx_pwr, tx_freq);
 
-	NBFi_RF_Transmit(ul_buf, len + ZCODE_LEN, phy, NONBLOCKING);
+        
+	NBFi_RF_Transmit(ul_buf, len + ZCODE_LEN, phy, (pkt_flags&NBFI_UL_FLAG_BLOCKING)?BLOCKING:NONBLOCKING);
 
 	nbfi_state.UL_total++;
 

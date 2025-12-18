@@ -1157,29 +1157,30 @@ static uint32_t NBFI_PhyToDL_AddRndListenTime(nbfi_phy_channel_t chan)
 
 static uint32_t NBFi_UL_Delivery_Time(nbfi_phy_channel_t chan)
 {
-
-  if(nbfi.wait_ack_timeout) return nbfi.wait_ack_timeout/2;
-  else return NBFI_PhyTo_Delay(chan);
-
+  uint32_t delay = NBFI_PhyTo_Delay(chan);
+  if((nbfi.wait_ack_timeout == 0)||(delay < nbfi.wait_ack_timeout/2)) return delay;
+  else return nbfi.wait_ack_timeout/2;
 }
 
 static uint32_t NBFi_DL_Delivery_Time(nbfi_phy_channel_t chan)
 {
-  if(nbfi.wait_ack_timeout) return nbfi.wait_ack_timeout/2;
-  else return NBFI_PhyToDL_ListenTime(chan) + rand()%NBFI_PhyToDL_AddRndListenTime(chan);
+  
+  uint32_t delay  = NBFI_PhyToDL_ListenTime(chan) + rand()%NBFI_PhyToDL_AddRndListenTime(chan);
+  if((nbfi.wait_ack_timeout == 0)||(delay < nbfi.wait_ack_timeout/2)) return delay;
+  else return nbfi.wait_ack_timeout/2;
 }
 
 static uint32_t NBFI_PhyToWaitClearTime()
 {
 	uint32_t NBFI_MAX_WAIT_CLEAR_TIME = SECONDS(13);
 
-        if(nbfi.wait_ack_timeout) return nbfi.wait_ack_timeout;
-        
 	uint32_t wait_time = NBFi_UL_Delivery_Time(nbfi.tx_phy_channel) + NBFI_PhyToDL_ListenTime(nbfi.rx_phy_channel);
 
-	if (wait_time > NBFI_MAX_WAIT_CLEAR_TIME) return NBFI_MAX_WAIT_CLEAR_TIME;
-	else 
-          return wait_time;
+	if (wait_time > NBFI_MAX_WAIT_CLEAR_TIME) wait_time = NBFI_MAX_WAIT_CLEAR_TIME;
+	
+        if(nbfi.wait_ack_timeout && (nbfi.wait_ack_timeout < wait_time)) return nbfi.wait_ack_timeout;
+        
+        return wait_time;
 }
 
 void NBFi_run_Receive_Timeout_cb(uint32_t timeout)

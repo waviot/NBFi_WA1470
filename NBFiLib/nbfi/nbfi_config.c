@@ -184,6 +184,7 @@ void NBFI_Config_Check_State()
 
 static _Bool NBFi_Config_Check_If_FP_Need_To_Change(nbfi_freq_plan_t current, nbfi_freq_plan_t new_one, uint16_t mask)
 {
+  if(nbfi.additional_flags&NBFI_FLG_DO_NOT_CHANGE_FP) return 0;
   return ((current.fp&mask)!=(new_one.fp&mask))&&((new_one.fp&mask) != ((mask==NBFI_UL_FP_MASK)?NBFI_UL_FREQ_PLAN_NO_CHANGE:NBFI_DL_FREQ_PLAN_NO_CHANGE));
 }
 

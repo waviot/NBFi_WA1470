@@ -119,10 +119,13 @@ void NBFI_Config_Check_State()
         if(nbfi_state.UL_rating > 40) nbfi_state.UL_rating = 40;
         nbfi_state.UL_rating >>= 2;
 
-        if(nbfi_state.aver_rx_snr) nbfi_state.DL_rating = (nbfi_state.aver_rx_snr + RxSNRDegradationTable[current_rx_rate]);
+        if(nbfi_state.aver_rx_snr) {
+          nbfi_state.DL_rating = (nbfi_state.aver_rx_snr + RxSNRDegradationTable[current_rx_rate]);
+          if(nbfi_state.DL_rating > 40) nbfi_state.DL_rating = 40;
+          nbfi_state.DL_rating >>= 2;
+          if(nbfi_state.DL_rating == 0) nbfi_state.DL_rating = 1;
+        }
         else nbfi_state.DL_rating = 0;
-	if(nbfi_state.DL_rating > 40) nbfi_state.DL_rating = 40;
-        nbfi_state.DL_rating >>= 2;
     }
 
 
@@ -545,7 +548,7 @@ void NBFi_Config_Set_Default()
 _Bool NBFi_Config_Try_Alternative()
 {
 
-  if((try_counter == NBFI_ALTERNATIVES_NUMBER) || (nbfi.try_alternative[try_counter].try_interval == 0) || (nbfi.additional_flags & NBFI_FLG_FIXED_BAUD_RATE))
+  if((try_counter == NBFI_ALTERNATIVES_NUMBER) || (nbfi.try_alternative[try_counter].try_interval == 0) || (nbfi.additional_flags & NBFI_FLG_DO_NOT_TRY_ALTERNATIVE))
   {
 	try_counter = 0;
     try_period++;

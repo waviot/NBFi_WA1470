@@ -50,7 +50,7 @@ extern nbfi_settings_t nbfi_prev;
 #define NBFI_FLG_FIXED_BAUD_RATE                0x01
 #define NBFI_FLG_NO_RESET_TO_DEFAULTS           0x02
 #define NBFI_FLG_NO_SENDINFO                    0x04
-#define NBFI_FLG_SEND_ALOHA                     0x08
+#define NBFI_FLG_SEND_ALOHA                       0x08
 #define NBFI_FLG_SEND_IN_RESPONSE               0x10
 #define NBFI_FLG_NO_REDUCE_TX_PWR               0x20
 #define NBFI_OFF_MODE_ON_INIT                   0x40
@@ -61,6 +61,8 @@ extern nbfi_settings_t nbfi_prev;
 #define NBFI_FLG_RESET_TO_LOWEST_RATES          0x0800
 #define NBFI_FLG_DO_NOT_SLOWDOWN_CLEAR          0x1000
 #define NBFI_FLG_DO_NOT_CHANGE_FP                0x2000
+#define NBFI_FLG_DO_NOT_TRY_ALTERNATIVE          0x4000
+
 
 
 

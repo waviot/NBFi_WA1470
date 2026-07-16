@@ -87,7 +87,7 @@ void  NBFI_Main_Level_Loop()
         nbfi_settings_t default_nbfi_settings;
         nbfi_hal->__nbfi_read_default_settings(&default_nbfi_settings);
 
-        if(!nbfi.additional_flags&NBFI_FLG_FIXED_BAUD_RATE) //if auto bitrates
+        if(!(nbfi.additional_flags&NBFI_FLG_FIXED_BAUD_RATE)) //if auto bitrates
         {
           nbfi.rx_phy_channel = default_nbfi_settings.rx_phy_channel;
           nbfi.tx_phy_channel = default_nbfi_settings.tx_phy_channel;

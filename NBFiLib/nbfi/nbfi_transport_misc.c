@@ -638,6 +638,18 @@ void NBFi_Resend_Pkt(nbfi_transport_packet_t* act_pkt, uint32_t mask)
             NBFi_Set_UL_Status(pkt->id, LOST);
             NBFi_Close_Active_Packet();
             //pkt->state = PACKET_LOST;
+            if(!(nbfi.additional_flags&NBFI_FLG_NO_RESET_TO_DEFAULTS))
+            {
+                if(NBFi_Config_is_settings_default()||try_counter)
+                {
+                    NBFi_Config_Set_Default();
+                    if(!NBFi_Config_Try_Alternative() && (nbfi.additional_flags&NBFI_FLG_RESET_TO_LOWEST_RATES) && !NBFi_GetQueuedTXPkt())
+                        NBFi_Config_set_lowest_rates();
+                }
+                else NBFi_Config_Set_Default();
+                NBFi_Config_Send_Sync(0);
+            }
+            break;
           }
           else
           {

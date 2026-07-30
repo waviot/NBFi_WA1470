@@ -24,7 +24,9 @@
 #define WA_CS_GPIO_Port 	GPIOB
 #define WA_CS_Pin 		GPIO_PIN_1
 #define WA_CHIP_EN_GPIO_Port 	GPIOB
-#define WA_CHIP_EN_Pin 	GPIO_PIN_6
+#define WA_CHIP_EN_Pin 	GPIO_PIN_13
+#define WA_TCXO_EN_GPIO_Port    GPIOA
+#define WA_TCXO_EN_Pin          GPIO_PIN_8
 
 
 static SPI_HandleTypeDef hspi;
@@ -133,14 +135,12 @@ void wa147x_HAL_disable_pin_irq(void)
 
 void wa147x_HAL_chip_enable(void)
 {
-
-  HAL_GPIO_WritePin(WA_CHIP_EN_GPIO_Port, WA_CHIP_EN_Pin,  GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(WA_CHIP_EN_GPIO_Port, WA_CHIP_EN_Pin, GPIO_PIN_SET);
 }
 
 void wa147x_HAL_chip_disable(void)
 {
-  HAL_GPIO_WritePin(WA_CHIP_EN_GPIO_Port, WA_CHIP_EN_Pin,  GPIO_PIN_SET);
-
+  HAL_GPIO_WritePin(WA_CHIP_EN_GPIO_Port, WA_CHIP_EN_Pin, GPIO_PIN_RESET);
 }
 
 uint8_t wa147x_HAL_get_irq_pin_state(void)
@@ -268,10 +268,18 @@ void wa147x_HAL_reg_tx_finished_callback(void* fn)
 
 void wa147x_HAL_init()
 {
+  GPIO_InitTypeDef GPIO_InitStruct;
   
   wa147x_HAL_GPIO_Init();
   
   wa147x_HAL_SPI_Init();
+
+  GPIO_InitStruct.Pin = WA_TCXO_EN_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(WA_TCXO_EN_GPIO_Port, &GPIO_InitStruct);
+  HAL_GPIO_WritePin(WA_TCXO_EN_GPIO_Port, WA_TCXO_EN_Pin, GPIO_PIN_SET);
    
   #ifdef WA1471
   wa1471_hal_struct.__wa1471_enable_pin_irq = &wa147x_HAL_enable_pin_irq;

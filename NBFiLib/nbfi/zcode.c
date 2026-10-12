@@ -32,7 +32,7 @@ void ZCODE_Append(uint8_t * src_buf, uint8_t * dst_buf, _Bool parity)
         {
             b0      = (src_buf[ n[j][ i ]  /8] << ( n[j][ i ]  %8)) & 0x80;
             b1      = (src_buf[ n[j][64+i] /8] << ( n[j][64+i] %8)) & 0x80;
-            bprev   = (code[j][   (i-1)    /8] << (   (i-1)    %8)) & 0x80;
+            bprev   = (i==0)?0:((code[j][   (i-1)    /8] << (   (i-1)    %8)) & 0x80);
             res     =  b0 ^ b1 ^ bprev;
             code[j][i/8] |= res >> (i%8);
         }
